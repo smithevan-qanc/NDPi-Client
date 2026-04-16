@@ -61,3 +61,5 @@ set-res.sh
 updateGit.sh
 GitHubRepoUrl.txt
 zzTest.sh
+VERSION-NOTES.md
+MANUAL-COMMANDS.md

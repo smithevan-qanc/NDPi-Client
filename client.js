@@ -11,56 +11,10 @@ const execAsync = promisify(exec);
 
 /**
  *  VERSION CONTROL
- *  All version numbers associated with this build originate from 
  */
-const pgm = {
-    ver: {
-        maj: 3,
-        min: 1,
-        ptch: 0
-    },
-    build: [
-        { ver: '3.0.0', rel: '03-05-26' },
-        { ver: '3.1.0', rel: '03-22-26' }
-    ]
-};
-const version = `${pgm.ver.maj}.${pgm.ver.min}.${pgm.ver.ptch}`;
-
-/** Version NOTES
- * v3.0.0
- *      - Added dynamic library selection when launching ndi_receiver.
- *      - Re-designed console logging to:
- *          console.log('⸻   ⸻   ⸻...
- *          console.log(`⫷ ${ipAddr} ⫸  ╮`);
- *          console.log(`                  ╰⸺  ▶ ${message.toUpperCase()}`);
- *          if (data) {
- *              console.log(data);
- *          }
- *          console.log(' ');
- *          - Added
- *              Overhead line 
- *              IP Address (for possible future all-in-one log dashboards)
- *              Arrow pointing to the main message
- *              Data only if included
- * v3.1.0
- *      - Cleaned up launching overlay display. 
- *          Switched to one Chromium instance for the duration of the process. 
- *          This was made possible by using full screen mode instead of kiosk as kiosk remained on top.
- *          When Chromium is in full screen and the ndi_receiver is spawned, the ndi_receiver opens on top
- *          Added new elements to the overlay display
- *              Ping animation: (top left side) signaling the device is attempting to reach the server.
- *              Loading spinner: (top right side) displays when attempting to connect to a source.
- *          Added commands to display server websocket to utilize the 'always open' Chromium instance, and to activate added elements.
- *              ndi-init: Shows the loading spinner element.
- *              ndi-started: Clears all elements from the display. Sends after successful connection to NDI source.
- *      - Switch the Raspberry Pi display backend to X11
- *          This gives FULL control of the desktop environment.
- *          Added startup actions including moving the cursor to different points on the screen to ensure the taskbar hides automatically
- *              (Might switch to no task bar in future releases, as it's not really needed)
- *          The startup process is contained in one function called 'displayStartup()'
- *      - New function, killNdiReceiver(), used to terminate ndi_receiver. There were numerous commands scattered everywhere. 
- */
-
+const versionCurrent  = path.join(__dirname, 'version-current.txt');
+const versionStable   = path.join(__dirname, 'version-stable.txt');
+const versionIsStable = versionCurrent === versionStable;
 /** END of - VERSION CONTROL **/
 
 function startupConsoleLog() {
@@ -71,8 +25,7 @@ function startupConsoleLog() {
   ⏐ ⌈∖  ⏐ ⌊_| ⏐  __/⏐ ⏐▔▔▔⏐ ⏐  ⏐ ⏐ (-) ⏐ ⌈▔⏐ ⏐ ⏐▏ ⎡▏(-) ⏐ ⌈▔▔             
   ⌊_| ∖_⌊____/⌊_|   ⌊_|▔▔▔⌊_|  ⌊_|∖___/⌊_| ⌊_⌊_|∖__∖___/⌊_|              𓀡
                            
-                                     𝘝𝘦𝕣𝕤𝕚𝕠𝕟   ⸻      ${version}
-  N D P i - M O N I T O R            𝔹𝕦𝕚𝕝𝕕     ⸻      ${pgm.build.find(v => v.ver === version).rel || 'WIP'}
+  N D P i - M O N I T O R            𝘝𝘦𝕣𝕤𝕚𝕠𝕟   ⸻      ${versionCurrent}${versionIsStable ? ' (Stable)' : ''}
 ════════════════════════════════════════════════════════════════
 `);
 }
@@ -196,11 +149,10 @@ class NDPiClient {
         this.serverAddress = null;
         
         this.configPath = path.join(__dirname, 'client-state.json');
-
         this.loadState();
 
         consoleLog('starting up...', {
-            Service: `NDPi Monitor Client v${pgm.ver.maj}.${pgm.ver.min}`,
+            Service: `NDPi Monitor Client v${versionCurrent}`,
             DeviceId: this.deviceId,
             DeviceName: this.deviceName,
             LocalIp: this.localIP
@@ -248,12 +200,10 @@ class NDPiClient {
             return defaultDeviceName;
         }
     }
-
     writeDeviceName(name) {
         fs.writeFileSync(this.pathDeviceName, name, 'utf8');
         consoleLog('[UPDATED] client-device-name.txt', { DeviceName: name });
     }
-
     saveDeviceName(name) {
         this.deviceName = name;
         writeDeviceName(name);
@@ -283,7 +233,6 @@ class NDPiClient {
             
         }
     }
-
     saveState(commandInfo = {}) {
         const state = {
             sourceName: this.targetSource || 'None',
@@ -303,6 +252,7 @@ class NDPiClient {
             consoleLog('[error] updating device state', null, error);
         }
     }
+
 
     connectToServer(serverAddress) {
         if (!serverAddress || serverAddress === 'localhost') return;
@@ -1011,11 +961,18 @@ class NDPiClient {
                 commandPort: this.commandPort.toString(),
                 type: 'Certified NDPi Monitor',
                 status: 'online',
-                version: String(version)
+                version: String(versionCurrent)
             }
         };
     }
 
+    /**
+     * Look Into making this interval set to monitor IP address for change.
+     * Rebroadcast on change of IP
+     */
+    /**
+     * Also Look into making repeat intervals constructor(){} variables.
+     */
     startMDNSBroadcast() {
         this.updateMDNSBroadcast();
 
