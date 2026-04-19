@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NDPi Monitor Display</title>
+    <title>NDPi Monitor Overlay</title>
     <style>
         * {
             margin: 0;
@@ -73,6 +73,21 @@
             align-items: flex-start;
             justify-content: flex-end;
         }
+
+        #sys-details {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: none;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: end;
+            margin: 0.3vh;
+            color: rgb(35,35,35);
+            font-family: monospace;
+            font-size: 1.1vh;
+        }
     </style>
     <style>
         .spinner_V8m1 {
@@ -112,27 +127,44 @@
 </head>
 
 <body>
-    <!--div class="status-indicator"-->
-        <div id="waiting-for-server-svg" style="opacity: 1;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-                <circle fill="none" stroke-opacity="1" stroke="#81C127" stroke-width=".5" cx="100" cy="100" r="0">
-                    <animate attributeName="r" calcMode="spline" dur="1.5" values="1;80" keyTimes="0;1"
-                        keySplines="0 .2 .5 1" repeatCount="indefinite"></animate>
-                    <animate attributeName="stroke-width" calcMode="spline" dur="1.5" values="0;25" keyTimes="0;1"
-                        keySplines="0 .2 .5 1" repeatCount="indefinite"></animate>
-                    <animate attributeName="stroke-opacity" calcMode="spline" dur="1.5" values="1;0" keyTimes="0;1"
-                        keySplines="0 .2 .5 1" repeatCount="indefinite"></animate>
-                </circle>
-            </svg>
+    <!-- SYSTEM DETAILS -->
+    <div id="sys-details">
+        <div>
+            <span id="devId" style="text-transform: uppercase; font-size:90%; letter-spacing: 0.07vh;"></span>
+            <br>
+            <span id="devName" style="font-weight: 600; font-size: 110%"></span>
         </div>
-        <div id="attempting-ndi-connection-svg" style="opacity: 0;">
-            <svg stroke="#81c127" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <g class="spinner_V8m1">
-                    <circle cx="12" cy="12" r="9.5" fill="none" stroke-width="2.5"></circle>
-                </g>
-            </svg>
+        
+        <div>IP:<span id="devIp" style="font-weight: 600"></span></div>
+        <div>SERVER:<span id="servIp" style="font-weight: 600"></span></div>
+
+        <div style="font-size: 90%; display: flex;">
+            <span id="programName"></span>
+            <div>&nbsp;|&nbsp;v<span id="programVer"></span></div>
         </div>
-    <!--/div-->
+    </div>
+    <!-- WAITING FOR SERVER CONNECTION -->
+    <div id="waiting-for-server-svg" style="opacity: 1;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+            <circle fill="none" stroke-opacity="1" stroke="#81C127" stroke-width=".5" cx="100" cy="100" r="0">
+                <animate attributeName="r" calcMode="spline" dur="1.5" values="1;80" keyTimes="0;1"
+                    keySplines="0 .2 .5 1" repeatCount="indefinite"></animate>
+                <animate attributeName="stroke-width" calcMode="spline" dur="1.5" values="0;25" keyTimes="0;1"
+                    keySplines="0 .2 .5 1" repeatCount="indefinite"></animate>
+                <animate attributeName="stroke-opacity" calcMode="spline" dur="1.5" values="1;0" keyTimes="0;1"
+                    keySplines="0 .2 .5 1" repeatCount="indefinite"></animate>
+            </circle>
+        </svg>
+    </div>
+    <!-- CONNECTING TO SOURCE -->
+    <div id="attempting-ndi-connection-svg" style="opacity: 0;">
+        <svg stroke="#81c127" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <g class="spinner_V8m1">
+                <circle cx="12" cy="12" r="9.5" fill="none" stroke-width="2.5"></circle>
+            </g>
+        </svg>
+    </div>
+    <!-- OVERLAY CONTAINER -->
     <div id="display-container">
         <div id="overlay-container">
             <img id="overlay-svg" src="" alt="NDPi Monitor">
@@ -140,40 +172,64 @@
     </div>
 
     <script>
-        const svgContainer = document.getElementById('overlay-svg');
-        const defaultSvgSrc = '/assets/NLC_Logo_Overlay.svg';
+        class ConnectWebsocket {
+            constructor() {
+                this._ws = null;
+                this.protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                this.host = window.location.host
 
-        const loader_FindingSource = document.getElementById('attempting-ndi-connection-svg');
+                this.reconnectTimer = null;
+                this.connect();
+            }
 
-        let ws;
+            disconnect() {
+                if (this._ws && this._ws.readyState === WebSocket.OPEN) {
+                    this._ws.close();
+                }
+                this._ws = null;
+            }
+
+            connect() {
+                this.disconnect();
+                this._ws = new WebSocket(`${this.protocol}//${this.host}`);
+                this._ws.onopen = () => {
+                    console.log('Connected to display server');
+                    if (this.reconnectTimer) {
+                        clearInterval(this.reconnectTimer);
+                        this.reconnectTimer = null;
+                    }
+                };
+                this._ws.onmessage = (message) => {
+                    try {
+                        const msg = JSON.parse(message.data);
+                        handleDisplayCommand(msg);
+                    } catch (e) {
+                        console.error('Invalid message:', e);
+                    }
+                };
+                this._ws.onclose = () => {
+                    console.log('Disconnected from display server');
+                    if (!this.reconnectTimer) {
+                        this.reconnectTimer = setInterval(this.connect, 5000);
+                    }
+                }
+                this._ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                };
+            }
+            
+        }
+        
+        
+        let ws = null;
         let reconnectInterval;
-
-        /*
-        setTimeout(() => {
-            if (window.name !== 'test') {
-                window.open(`${window.location.protocol}//${window.location.host}`, "test", "popup");
-            }
-        }, 1500);
-        */
-
-        function waitingForServer(show) {
-            if (show) {
-                document.getElementById('waiting-for-server-svg').style.opacity = 1;
-            } else {
-                document.getElementById('waiting-for-server-svg').style.opacity = 0;
-            }
-        }
-
-        function connectingToSource(show) {
-            if (show) {
-                document.getElementById('attempting-ndi-connection-svg').style.opacity = 1;
-            } else {
-                document.getElementById('attempting-ndi-connection-svg').style.opacity = 0;
-            }
-        }
-
         function connect() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+            if (ws) {
+                ws.src
+            }
+
             ws = new WebSocket(`${protocol}//${window.location.host}`);
 
             ws.onopen = () => {
@@ -208,7 +264,8 @@
         function handleDisplayCommand(msg) {
             switch (msg.type) {
                 case 'ndpi-server-connected':
-                    waitingForServer(false);
+                    pingFromNDPiServer();
+                    updateDetails(msg);
                     break;
                 case 'ndi-init':
                     connectingToSource(true);
@@ -233,6 +290,31 @@
             }
         }
 
+        let ndpiServerHeartbeatTimeout = null;
+        function pingFromNDPiServer() {
+            waitingForServer(false);
+            if (ndpiServerHeartbeatTimeout) {
+                clearTimeout(ndpiServerHeartbeatTimeout);
+                ndpiServerHeartbeatTimeout = null;
+            }
+            ndpiServerHeartbeatTimeout = setTimeout(() => {
+                waitingForServer(true);
+            }, 10000);
+        }
+
+        function updateDetails(msg) {
+            document.getElementById('sys-details').style.display = 'flex';
+            document.getElementById('devName').textContent = msg.thisDevice.name || '';
+            document.getElementById('devId').textContent = msg.thisDevice.id || '';
+            document.getElementById('devIp').textContent = msg.thisDevice.address || '';
+            document.getElementById('servIp').textContent = msg.serverIp || '';
+            document.getElementById('programName').textContent = msg.service.name || '';
+            document.getElementById('programVer').textContent = msg.service.version || '';
+        }
+
+        const svgContainer = document.getElementById('overlay-svg');
+        const defaultSvgSrc = '/assets/NLC_Logo_Overlay.svg';
+
         function showOverlay(source = defaultSvgSrc) {
             svgContainer.src = source;
             setTimeout(() => {
@@ -250,11 +332,29 @@
             waitingForServer(false);
         }
 
+        function waitingForServer(show) {
+            if (show) {
+                document.getElementById('sys-details').style.display = 'none';
+                document.getElementById('waiting-for-server-svg').style.opacity = 1;
+            } else {
+                document.getElementById('waiting-for-server-svg').style.opacity = 0;
+            }
+        }
+
+        function connectingToSource(show) {
+            if (show) {
+                document.getElementById('attempting-ndi-connection-svg').style.opacity = 1;
+            } else {
+                document.getElementById('attempting-ndi-connection-svg').style.opacity = 0;
+            }
+        }
+
         // Start with overlay visible
         // Connect to display server
         setTimeout(() => {
             showOverlay();
-            connect();
+            //connect();
+            const server = new ConnectWebsocket();
         }, 500);
 
         // Prevent screen from sleeping
