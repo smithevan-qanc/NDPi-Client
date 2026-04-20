@@ -1,0 +1,9 @@
+# RealVNC Custom Settings NDPi Monitor - CLIENT 
+# Revised:
+#       Evan Smith
+#       2026-04-20
+
+# Move To /etc/vnc/config.d/common.custom
+
+RecordNotifyDuration=0
+ConnNotifyTimeout=0
