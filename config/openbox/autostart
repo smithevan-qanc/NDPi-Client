@@ -6,6 +6,8 @@
 # Set display
 export DISPLAY=:0
 
+sleep 5
+
 # Disable screen blanking and power management
 xset s off &
 xset -dpms &
