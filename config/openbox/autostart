@@ -9,9 +9,9 @@ export DISPLAY=:0
 sleep 5
 
 # Disable screen blanking and power management
-xset s off &
-xset -dpms &
-xset s noblank &
+xset s off
+xset -dpms
+xset s noblank
 
 # Hide mouse cursor after 0.2 seconds of inactivity
 unclutter -idle 0.2 &

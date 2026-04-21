@@ -54,6 +54,8 @@ coverage/
 tmp/
 temp/
 
+*00path
+
 complete-deploy-client.sh
 GitHub-Deploy-Client.sh
 initiateGit.sh
