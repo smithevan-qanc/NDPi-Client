@@ -8,7 +8,7 @@ Global {
   widthtype=percent
   width=100
   height=34
-  transparent=0
+  transparent=1
   tintcolor=#000000
   alpha=0
   autohide=1
@@ -18,7 +18,7 @@ Global {
   setpartialstrut=1
   usefontcolor=0
   fontsize=12
-  fontcolor=#ffffff
+  fontcolor=#333333
   usefontsize=0
   background=0
   backgroundfile=/usr/share/lxpanel/images/background.png
