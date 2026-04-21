@@ -1,12 +1,15 @@
 #!/bin/bash
 set -e
 
-# Update Installation Script
+# This script is executed on the remote machine automatically after the update from GitHub is downloaded.
+# Write the script (if any is required) inside the install() function below.
+
+# NOTE:
+#   The contents of this file will RESET automatically after running 'updateGit.sh'.
 
 install() {
-    # Write Update Code Here
-    echo "Running script..."
+    ##
 }
-
 install
+
 echo "INSTALLATION COMPLETE"
