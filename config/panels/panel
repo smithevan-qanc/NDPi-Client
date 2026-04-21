@@ -10,7 +10,7 @@ Global {
   height=34
   transparent=1
   tintcolor=#000000
-  alpha=0
+  alpha=1
   autohide=1
   heightwhenhidden=0
   autohidedelay=2000
@@ -33,11 +33,6 @@ Plugin {
   }
 }
 Plugin {
-  type=separator
-  Config {
-  }
-}
-Plugin {
   type=space
   Config {
     Size=4
@@ -49,11 +44,6 @@ Plugin {
     Button {
       id=x-terminal-emulator.desktop
     }
-  }
-}
-Plugin {
-  type=space
-  Config {
   }
 }
 Plugin {
@@ -69,97 +59,5 @@ Plugin {
     MaxTaskWidth=200
     spacing=1
     GroupedTasks=0
-  }
-}
-Plugin {
-  type=space
-  Config {
-    Size=2
-  }
-}
-Plugin {
-  type=tray
-  Config {
-  }
-}
-Plugin {
-  type=power
-  Config {
-  }
-}
-Plugin {
-  type=ejecter
-  Config {
-  }
-}
-Plugin {
-  type=updater
-  Config {
-  }
-}
-Plugin {
-  type=space
-  Config {
-    Size=2
-  }
-}
-Plugin {
-  type=bluetooth
-  Config {
-  }
-}
-Plugin {
-  type=space
-  Config {
-    Size=2
-  }
-}
-Plugin {
-  type=netman
-  Config {
-  }
-}
-Plugin {
-  type=space
-  Config {
-    Size=2
-  }
-}
-Plugin {
-  type=volumepulse
-  Config {
-  }
-}
-Plugin {
-  type=space
-  Config {
-    Size=2
-  }
-}
-Plugin {
-  type=clock
-  Config {
-  }
-}
-Plugin {
-  type=space
-  Config {
-    Size=2
-  }
-}
-Plugin {
-  type=batt
-  Config {
-  }
-}
-Plugin {
-  type=space
-  Config {
-    Size=2
-  }
-}
-Plugin {
-  type=magnifier
-  Config {
   }
 }
