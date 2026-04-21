@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+cd "$(dirname "$0")"
+
 BRANCH="$(head -n 1 version-git.txt)"
 
-cd "$(dirname "$0")"
 git fetch origin $BRANCH
 
 LOCAL=$(git rev-parse HEAD)
