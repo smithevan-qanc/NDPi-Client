@@ -47,29 +47,13 @@ Plugin {
   type=launchbar
   Config {
     Button {
-      id=code.desktop
-    }
-    Button {
-      id=lxtask.desktop
-    }
-    Button {
-      id=pcmanfm.desktop
-    }
-    Button {
       id=x-terminal-emulator.desktop
-    }
-    Button {
-      id=x-www-browser.desktop
-    }
-    Button {
-      id=rpcc.desktop
     }
   }
 }
 Plugin {
   type=space
   Config {
-    Size=8
   }
 }
 Plugin {
