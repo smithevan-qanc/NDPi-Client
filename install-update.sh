@@ -8,7 +8,8 @@ set -e
 #   The contents of this file will RESET automatically after running 'updateGit.sh'.
 
 install() {
-    ##
+    # Write Update Script Here
+    echo "INSTALLING UPDATE"
 }
 install
 
