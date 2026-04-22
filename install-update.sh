@@ -15,6 +15,8 @@ install() {
     echo $CopyOf
     echo $CopyToDir
     sudo cp $CopyOf $CopyToDir/unclutter
+    sudo systemctl disable wayvnc.service
+    sudo reboot
 }
 install
 
