@@ -6,5 +6,8 @@
 # Set display
 export DISPLAY=:0
 
+tint2 &
+nm-applet &
+
 # Hide mouse cursor after 0.2 seconds of inactivity
 unclutter -idle 0.2 &
