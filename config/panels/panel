@@ -33,12 +33,6 @@ Plugin {
   }
 }
 Plugin {
-  type=space
-  Config {
-    Size=4
-  }
-}
-Plugin {
   type=launchbar
   Config {
     Button {
@@ -50,14 +44,14 @@ Plugin {
   type=taskbar
   expand=1
   Config {
-    tooltips=1
-    IconsOnly=0
+    tooltips=0
+    IconsOnly=1
     ShowAllDesks=0
     UseMouseWheel=1
     UseUrgencyHint=0
     FlatButton=0
     MaxTaskWidth=200
-    spacing=1
+    spacing=0
     GroupedTasks=0
   }
 }

@@ -1,17 +1,10 @@
 # Openbox autostart script for NDPi Monitor - CLIENT 
 # Revised:
 #       Evan Smith
-#       2026-04-20
+#       2026-04-21
 
 # Set display
 export DISPLAY=:0
-
-sleep 5
-
-# Disable screen blanking and power management
-xset s off
-xset -dpms
-xset s noblank
 
 # Hide mouse cursor after 0.2 seconds of inactivity
 unclutter -idle 0.2 &

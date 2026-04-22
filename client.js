@@ -665,7 +665,7 @@ class NDPiClient {
         const displayServer = http.createServer((req, res) => {
 
             let filePath;
-            const assetsDir = path.join(__dirname, 'Assets');
+            const assetsDir = path.join(__dirname, 'assets');
             
             if (req.url === '/' || req.url === '/display.html') {
                 filePath = path.join(__dirname, 'display.html');
