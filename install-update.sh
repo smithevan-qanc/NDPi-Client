@@ -10,6 +10,11 @@ set -e
 install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
+    local CopyOf="config/default/unclutter"
+    local CopyToDir="/etc/default"
+    echo $CopyOf
+    echo $CopyToDir
+    sudo cp $CopyOf $CopyToDir/unclutter
 }
 install
 
