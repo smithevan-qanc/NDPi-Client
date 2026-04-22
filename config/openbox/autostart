@@ -6,8 +6,13 @@
 # Set display
 export DISPLAY=:0
 
-tint2 &
-nm-applet &
+# tint2 &
+# nm-applet &
+
+# Disable screen blanking and power management
+xset s off
+xset -dpms
+xset s noblank
 
 # Hide mouse cursor after 0.2 seconds of inactivity
 unclutter -idle 0.2 &
