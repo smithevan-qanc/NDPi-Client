@@ -1521,7 +1521,7 @@ process.on('SIGTERM', () => {
 });
 process.on('exit', (code) => {
     console.log(`Exit Code: ${code}`);
-    console.log('---------- END OF NDPi MONITOR PROCESS ----------');
+    console.log('------------------------- END OF NDPi MONITOR PROCESS -----');
 });
 process.on('uncaughtException', (err) => {
     console.log(' ');
