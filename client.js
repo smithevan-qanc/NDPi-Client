@@ -36,15 +36,16 @@ const versionIsStable = versionCurrent === versionStable;
 function startupConsoleLog() {
     console.log(`
 ════════════════════════════════════════════════════════════════
-  ⌈▔∖ ⌈▔⌈▔▔▔▔∖⌈▔▔▔▔∖(-)   ⌈▔▔∖/▔▔|           (-) ▔▏           
+  ⌈▔∖ ⌈▔⌈▔▔▔▔∖⌈▔▔▔▔∖(-)   ⌈▔▔∖/▔▔|           (-)ʃ▔▏           
   ⏐  ∖⏐ ⏐ ⌈▔| ⏐ ⌈-) ⌈▔|   ⏐ ⌈∖/| ⏐/▔▔▔∖⌈▔'▔▔∖⌈▔|▏ ▔/▔▔▔∖⌈▔'▔▔|
   ⏐ ⌈∖  ⏐ ⌊_| ⏐  __/⏐ ⏐▔▔▔⏐ ⏐  ⏐ ⏐ (-) ⏐ ⌈▔⏐ ⏐ ⏐▏ ⎡▏(-) ⏐ ⌈▔▔             
   ⌊_| ∖_⌊____/⌊_|   ⌊_|▔▔▔⌊_|  ⌊_|∖___/⌊_| ⌊_⌊_|∖__∖___/⌊_|              𓀡
-
-  N D P i - M O N I T O R            𝘝𝘦𝕣𝕤𝕚𝕠𝕟   ⸻      ${versionCurrent}${versionIsStable ? ' (Stable)' : ''}
+ 
+  𝘝𝘦𝕣𝕤𝕚𝕠𝕟   ⸻      ${versionCurrent}${versionIsStable ? ' (Stable)' : ''}
 ════════════════════════════════════════════════════════════════
 `);
 }
+// N D P i - M O N I T O R
 function consoleLog(message = 'SYSTEM UPDATE', data, error) {
     const ipAddr = getLocalIP();
 
@@ -62,7 +63,7 @@ function consoleLog(message = 'SYSTEM UPDATE', data, error) {
         console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
         //console.log(`⫷ ${ipAddr} ⫸  ╮`);
         //console.log(`                  ╰⸺  ▶ ${message.toUpperCase()}`);
-        console.log(`[${ipAddr}]  ⸺  ▶ ${message.toUpperCase()}`);
+        console.log(`  [${ipAddr}] ⸺  ▶ ${message.toUpperCase()}`);
         if (data) {
             console.log(JSON.stringify(data, null, 2));
         }
