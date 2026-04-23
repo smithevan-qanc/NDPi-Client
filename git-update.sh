@@ -16,6 +16,6 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     chmod +x install-update.sh
     echo ""
     echo "PREPARING TO UPDATE"
-    sleep 4
+    sleep 1
     sudo ./install-update.sh
 fi

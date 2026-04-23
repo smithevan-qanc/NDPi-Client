@@ -52,16 +52,17 @@ function consoleLog(message = 'SYSTEM UPDATE', data, error) {
         console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
         console.log(`⫷ ${ipAddr} ⫸ 🔴 ERROR`);
         console.log(`${message.toUpperCase()}`);
-        console.log(error);
+        console.log(JSON.stringify(error, null, 2));
         if (data) {
             console.log(`DATA:`);
-            console.log(data);
+            console.log(JSON.stringify(data, null, 2));
         }
         console.log(' ');
     } else {
         console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-        console.log(`⫷ ${ipAddr} ⫸  ╮`);
-        console.log(`                  ╰⸺  ▶ ${message.toUpperCase()}`);
+        //console.log(`⫷ ${ipAddr} ⫸  ╮`);
+        //console.log(`                  ╰⸺  ▶ ${message.toUpperCase()}`);
+        console.log(`[${ipAddr}]  ⸺  ▶ ${message.toUpperCase()}`);
         if (data) {
             console.log(JSON.stringify(data, null, 2));
         }
