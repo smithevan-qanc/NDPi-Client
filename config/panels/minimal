@@ -27,3 +27,31 @@ Global {
   point_at_menu=0
   notifications=0
 }
+Plugin {
+  type=smenu
+  Config {
+  }
+}
+Plugin {
+  type=launchbar
+  Config {
+    Button {
+      id=x-terminal-emulator.desktop
+    }
+  }
+}
+Plugin {
+  type=taskbar
+  expand=1
+  Config {
+    tooltips=0
+    IconsOnly=1
+    ShowAllDesks=0
+    UseMouseWheel=1
+    UseUrgencyHint=0
+    FlatButton=0
+    MaxTaskWidth=200
+    spacing=0
+    GroupedTasks=0
+  }
+}

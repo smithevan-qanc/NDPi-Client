@@ -7,7 +7,6 @@
  *  -   Communicating with NDPi - Monitor v3 (SERVER)
  *  -   Launching NDI video streams and displaying them to HDMI out.
  */
-
 const WebSocket = require('ws');
 const http = require('http');
 const bonjour = require('bonjour')();
@@ -21,13 +20,10 @@ const CRLFArray = string => string.split(/\r?\n/);
 
 const PATH_VERSION_CURRENT  = path.join(__dirname, 'version-current.txt');
 const PATH_VERSION_STABLE   = path.join(__dirname, 'version-stable.txt');
-const PATH_DEVICE_NAME      = path.join(__dirname, 'client-device-name.txt');
 const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
 const PATH_CONFIG           = path.join(__dirname, 'client-state.json');
 
-/**
- *  VERSION CONTROL
- */
+/** VERSION CONTROL **/
 const versionCurrent  = readFile(PATH_VERSION_CURRENT) || '';
 const versionStable   = readFile(PATH_VERSION_STABLE)  || '';
 const versionIsStable = versionCurrent === versionStable;
@@ -48,26 +44,18 @@ function startupConsoleLog() {
 // N D P i - M O N I T O R
 function consoleLog(message = 'SYSTEM UPDATE', data, error) {
     const ipAddr = getLocalIP();
-
     if (error) {
         console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-        console.log(`⫷ ${ipAddr} ⫸ 🔴 ERROR`);
-        console.log(`${message.toUpperCase()}`);
+        console.log(`  [${ipAddr}] ⸺  ▶ 🔴 ERROR: ${message.toUpperCase()}`);
         console.log(JSON.stringify(error, null, 2));
         if (data) {
             console.log(`DATA:`);
             console.log(JSON.stringify(data, null, 2));
         }
-        console.log(' ');
     } else {
         console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-        //console.log(`⫷ ${ipAddr} ⫸  ╮`);
-        //console.log(`                  ╰⸺  ▶ ${message.toUpperCase()}`);
         console.log(`  [${ipAddr}] ⸺  ▶ ${message.toUpperCase()}`);
-        if (data) {
-            console.log(JSON.stringify(data, null, 2));
-        }
-        //console.log(' ');
+        if (data) console.log(JSON.stringify(data, null, 2));
     }
 }
 function getDeviceId() {
@@ -183,17 +171,6 @@ async function cecPowerOff(commandInfo = {}) {
 class NDPiClient {
     constructor() {
         startupConsoleLog();
-        /*
-        this.deviceId           = getDeviceId();
-        this.deviceName         = this.loadDeviceName();
-        this.localIP            = getLocalIP();
-        this.commandPort        = 3001;
-        this.displayPort        = 8080;
-        this.mdnsPort           = 3002;
-        this.currentSource      = null;
-        this.targetSource       = null;  // The source to connected to
-        this.displayMode        = 'overlay'; // can either be 'blank' or 'overlay'
-        */
         this.defaultDeviceName  = 'NDPi Client';
         this.displayClients     = new Set();
         this.ndiReconnectTimer  = null;
@@ -353,6 +330,7 @@ class NDPiClient {
             consoleLog('[ERROR] Loading State', 'Attempted at Initial Load State', error);
         }
     }
+
     saveState(commandInfo = {}) {
 
         if (commandInfo.serverAddress) this.__client.link.ip = commandInfo.serverAddress;
@@ -408,7 +386,6 @@ class NDPiClient {
             consoleLog('[error] updating device state', null, error);
         }
     }
-
 
     connectToServer(serverAddress) {
         if (!serverAddress || serverAddress.includes('localhost')) return;
@@ -1477,7 +1454,7 @@ network={
     }
 }
 
-// Start the client
+// Initiate client
 const client = new NDPiClient();
 
 async function deviceShutdown() {
@@ -1523,6 +1500,7 @@ process.on('exit', (code) => {
     console.log(`Exit Code: ${code}`);
     console.log('---------------------------------- END OF NDPi MONITOR PROCESS -----');
 });
+
 process.on('uncaughtException', (err) => {
     console.log(' ');
     console.log(' ');
