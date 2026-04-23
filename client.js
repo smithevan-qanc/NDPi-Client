@@ -725,7 +725,7 @@ class NDPiClient {
 
             ws.send(JSON.stringify({ 
                 type: `show-${this.__client.config.displayMode}`,
-                serverIp: serverAddress.split(':')[0] || '',
+                serverIp: this.__client.link.ip,
                 thisDevice: {
                     id: this.__client.id,
                     address: this.__client.config.ip,
