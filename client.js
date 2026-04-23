@@ -722,7 +722,7 @@ class NDPiClient {
             
             // Send current state
             consoleLog('(↑↓) Display Server: ws', { type: `show-${this.__client.config.displayMode}` });
-            
+
             ws.send(JSON.stringify({ 
                 type: `show-${this.__client.config.displayMode}`,
                 serverIp: serverAddress.split(':')[0] || '',
@@ -1518,11 +1518,9 @@ async function killProcess() {
 
 process.on('SIGINT', async () => {
     await killProcess();
-    process.exit(1);
 });
 process.on('SIGTERM', async () => { 
     await killProcess();
-    process.exit(1);
 });
 process.on('exit', (code) => {
     console.log(`Exit Code: ${code}`);
