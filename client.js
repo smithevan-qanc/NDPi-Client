@@ -722,7 +722,20 @@ class NDPiClient {
             
             // Send current state
             consoleLog('(↑↓) Display Server: ws', { type: `show-${this.__client.config.displayMode}` });
-            ws.send(JSON.stringify({ type: `show-${this.__client.config.displayMode}` }));
+            
+            ws.send(JSON.stringify({ 
+                type: `show-${this.__client.config.displayMode}`,
+                serverIp: serverAddress.split(':')[0] || '',
+                thisDevice: {
+                    id: this.__client.id,
+                    address: this.__client.config.ip,
+                    name: this.__client.name,
+                },
+                service: {
+                    name: this.__client.type,
+                    version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
+                }
+            }));
             
             ws.on('close', () => {
                 this.displayClients.delete(ws);
