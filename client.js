@@ -704,7 +704,7 @@ class NDPiClient {
 
             ws.send(JSON.stringify({ 
                 type: `show-${this.__client.config.displayMode}`,
-                serverIp: this.__client.link.ip,
+                serverIp: this.__client.link.ip.split(':')[0] || '',
                 thisDevice: {
                     id: this.__client.id,
                     address: this.__client.config.ip,
@@ -1178,7 +1178,7 @@ class NDPiClient {
         consoleLog('[Establishing connection] NDI');
         this.broadcastToDisplay({
             type: `ndi-init`,
-            serverIp: this.__client.link.ip,
+            serverIp: this.__client.link.ip.split(':')[0] || '',
             thisDevice: {
                 id: this.__client.id,
                 address: this.__client.config.ip,
@@ -1203,7 +1203,7 @@ class NDPiClient {
             this.scheduleReconnect();
             this.broadcastToDisplay({
                 type: `show-${this.__client.config.displayMode}`,
-                serverIp: this.__client.link.ip,
+                serverIp: this.__client.link.ip.split(':')[0] || '',
                 thisDevice: {
                     id: this.__client.id,
                     address: this.__client.config.ip,
@@ -1238,7 +1238,7 @@ class NDPiClient {
             if (output.includes('Connected to:')) { // When Connection to NDI is Successful
                 this.broadcastToDisplay({
                     type: `ndi-started`,
-                    serverIp: this.__client.link.ip,
+                    serverIp: this.__client.link.ip.split(':')[0] || '',
                     thisDevice: {
                         id: this.__client.id,
                         address: this.__client.config.ip,
@@ -1296,7 +1296,7 @@ class NDPiClient {
 
         this.broadcastToDisplay({
             type: `ndi-init`,
-            serverIp: this.__client.link.ip,
+            serverIp: this.__client.link.ip.split(':')[0] || '',
             thisDevice: {
                 id: this.__client.id,
                 address: this.__client.config.ip,
@@ -1332,7 +1332,7 @@ class NDPiClient {
         setTimeout(() => {
             this.broadcastToDisplay({
                 type: `show-blank`,
-                serverIp: this.__client.link.ip,
+                serverIp: this.__client.link.ip.split(':')[0] || '',
                 thisDevice: {
                     id: this.__client.id,
                     address: this.__client.config.ip,
@@ -1353,7 +1353,7 @@ class NDPiClient {
             setTimeout(() => {
                 this.broadcastToDisplay({
                     type: `show-${this.__client.config.displayMode}`,
-                    serverIp: this.__client.link.ip,
+                    serverIp: this.__client.link.ip.split(':')[0] || '',
                     thisDevice: {
                         id: this.__client.id,
                         address: this.__client.config.ip,
@@ -1382,7 +1382,7 @@ class NDPiClient {
         setTimeout(() => {
             this.broadcastToDisplay({
                 type: `show-${this.__client.config.displayMode}`,
-                serverIp: this.__client.link.ip,
+                serverIp: this.__client.link.ip.split(':')[0] || '',
                 thisDevice: {
                     id: this.__client.id,
                     address: this.__client.config.ip,
