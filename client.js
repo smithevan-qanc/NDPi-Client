@@ -1499,28 +1499,25 @@ async function killProcess() {
         consoleLog('Terminating mdns');
         client.mdnsService.stop();
     }
-    // Wait 500ms to allow mDNS to broadcast 'browser.down'
-    await new Promise((resolve, reject) => {
-        setTimeout(async () => {
-            if (client.ndiProcess) {
-                consoleLog('Terminating Service Connections');
-                await client.killNdiReceiver();
-            }
-            consoleLog('Terminating Application');
-            console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ')
-            console.log('⸻    GOOD BYE 👋');
-            console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-            console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-            resolve;
-        }, 500);
-    });
+    setTimeout(async () => {
+        if (client.ndiProcess) {
+            consoleLog('Terminating Service Connections');
+            await client.killNdiReceiver();
+        }
+        consoleLog('Terminating Application');
+        console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ')
+        console.log('⸻    GOOD BYE 👋');
+        console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
+        console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
+        resolve;
+    }, 500);
 }
 
-process.on('SIGINT', async () => {
-    await killProcess();
+process.on('SIGINT', () => {
+    killProcess();
 });
-process.on('SIGTERM', async () => { 
-    await killProcess();
+process.on('SIGTERM', () => { 
+    killProcess();
 });
 process.on('exit', (code) => {
     console.log(`Exit Code: ${code}`);
