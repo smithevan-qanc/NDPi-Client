@@ -11,6 +11,7 @@ install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
     sudo systemctl restart ndpi-monitor-client.service
+    # sudo reboot
 }
 install
 
