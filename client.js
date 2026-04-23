@@ -36,7 +36,6 @@ function startupConsoleLog() {
   ⏐  ∖⏐ ⏐ ⌈▔| ⏐ ⌈-) ⌈▔|   ⏐ ⌈∖/| ⏐/▔▔▔∖⌈▔'▔▔∖⌈▔|▏ ▔/▔▔▔∖⌈▔'▔▔|
   ⏐ ⌈∖  ⏐ ⌊_| ⏐  __/⏐ ⏐▔▔▔⏐ ⏐  ⏐ ⏐ (-) ⏐ ⌈▔⏐ ⏐ ⏐▏ ⎡▏(-) ⏐ ⌈▔▔             
   ⌊_| ∖_⌊____/⌊_|   ⌊_|▔▔▔⌊_|  ⌊_|∖___/⌊_| ⌊_⌊_|∖__∖___/⌊_|              𓀡
- 
   𝘝𝘦𝕣𝕤𝕚𝕠𝕟   ⸻      ${versionCurrent}${versionIsStable ? ' (Stable)' : ''}
 ════════════════════════════════════════════════════════════════
 `);
@@ -313,9 +312,6 @@ class NDPiClient {
         try {
             if (fs.existsSync(PATH_CONFIG)) {
                 const data = JSON.parse(fs.readFileSync(PATH_CONFIG, 'utf8'));
-                
-                consoleLog('loading Previous State', data);
-
                 this.__client.name                  = data.name;
                 this.__client.type                  = data.type;
                 this.__client.ndi.source.target     = data.ndi.source.target || null;
@@ -323,8 +319,8 @@ class NDPiClient {
                 this.__client.lastCommand.source    = data.lastCommand.source;
                 this.__client.lastCommand.timestamp = data.lastCommand.timestamp;
                 this.__client.lastCommand.command   = data.lastCommand.command;
-                
                 if (this.__client.link.ip) setTimeout(() => this.connectToServer(this.__client.link.ip), 1000);
+                consoleLog('loading Previous State', this.__client);
             }
         } catch (error) {
             consoleLog('[ERROR] Loading State', 'Attempted at Initial Load State', error);
@@ -1496,9 +1492,10 @@ process.on('SIGINT', () => {
 process.on('SIGTERM', () => { 
     killProcess();
 });
+
 process.on('exit', (code) => {
     console.log(`Exit Code: ${code}`);
-    console.log('---------------------------------- END OF NDPi MONITOR PROCESS -----');
+    console.log('══════════════════════════════ END OF NDPi MONITOR PROCESS ═════');
 });
 
 process.on('uncaughtException', (err) => {
