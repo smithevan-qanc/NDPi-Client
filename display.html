@@ -247,10 +247,10 @@
         }
 
         function handleDisplayCommand(msg) {
+            updateDetails(msg);
             switch (msg.type) {
                 case 'ndpi-server-connected':
                     pingFromNDPiServer();
-                    updateDetails(msg);
                     break;
                 case 'ndi-init':
                     connectingToSource(true);
@@ -288,10 +288,11 @@
         }
 
         function updateDetails(msg) {
+            const thisDeviceAddr = msg.thisDevice.address === 'localhost' ? 'Obtaining...' : msg.thisDevice.address;
             document.getElementById('sys-details').style.display = 'flex';
             document.getElementById('devName').textContent = msg.thisDevice.name || '';
             document.getElementById('devId').textContent = msg.thisDevice.id || '';
-            document.getElementById('devIp').textContent = msg.thisDevice.address || '';
+            document.getElementById('devIp').textContent = thisDeviceAddr || '';
             document.getElementById('servIp').textContent = msg.serverIp || '';
             document.getElementById('programName').textContent = msg.service.name || '';
             document.getElementById('programVer').textContent = msg.service.version || '';

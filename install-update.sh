@@ -10,13 +10,7 @@ set -e
 install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
-    local CopyOf="config/default/unclutter"
-    local CopyToDir="/etc/default"
-    echo $CopyOf
-    echo $CopyToDir
-    sudo cp $CopyOf $CopyToDir/unclutter
-    sudo systemctl disable wayvnc.service
-    sudo reboot
+    sudo systemctl restart ndpi-monitor-client.service
 }
 install
 

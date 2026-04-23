@@ -1186,7 +1186,19 @@ class NDPiClient {
     
     startNDIReceiver(sourceName) {
         consoleLog('[Establishing connection] NDI');
-        this.broadcastToDisplay({ type: 'ndi-init' });
+        this.broadcastToDisplay({
+            type: `ndi-init`,
+            serverIp: this.__client.link.ip,
+            thisDevice: {
+                id: this.__client.id,
+                address: this.__client.config.ip,
+                name: this.__client.name,
+            },
+            service: {
+                name: this.__client.type,
+                version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
+            }
+        });
         setTimeout(() => {
             this._startNDIReceiverInternal(sourceName);
         }, 200);
@@ -1199,7 +1211,19 @@ class NDPiClient {
         if (!fs.existsSync(PATH_NDI_RECEIVER)) {
             consoleLog('[ERROR] ndi', { Path: PATH_NDI_RECEIVER }, { error: 'Receiver path not found.' });
             this.scheduleReconnect();
-            this.broadcastToDisplay({ type: `show-${this.__client.config.displayMode}` });
+            this.broadcastToDisplay({
+                type: `show-${this.__client.config.displayMode}`,
+                serverIp: this.__client.link.ip,
+                thisDevice: {
+                    id: this.__client.id,
+                    address: this.__client.config.ip,
+                    name: this.__client.name,
+                },
+                service: {
+                    name: this.__client.type,
+                    version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
+                }
+            });
             return;
         }
         
@@ -1222,7 +1246,19 @@ class NDPiClient {
             this.parseNDIInfo(output);
 
             if (output.includes('Connected to:')) { // When Connection to NDI is Successful
-                this.broadcastToDisplay({ type: 'ndi-started' });
+                this.broadcastToDisplay({
+                    type: `ndi-started`,
+                    serverIp: this.__client.link.ip,
+                    thisDevice: {
+                        id: this.__client.id,
+                        address: this.__client.config.ip,
+                        name: this.__client.name,
+                    },
+                    service: {
+                        name: this.__client.type,
+                        version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
+                    }
+                });
                 this.__client.ndi.source.current = sourceName;
                 this.__client.ndi.connectedAt = new Date().toISOString();
             }
@@ -1268,7 +1304,19 @@ class NDPiClient {
             this.ndiReconnectTimer
         ) return;
 
-        this.broadcastToDisplay({ type: 'ndi-init' });
+        this.broadcastToDisplay({
+            type: `ndi-init`,
+            serverIp: this.__client.link.ip,
+            thisDevice: {
+                id: this.__client.id,
+                address: this.__client.config.ip,
+                name: this.__client.name,
+            },
+            service: {
+                name: this.__client.type,
+                version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
+            }
+        });
 
         this.ndiReconnectTimer = setTimeout(() => {
             this.ndiReconnectTimer = null;
@@ -1292,7 +1340,19 @@ class NDPiClient {
         this.launchDisplayKiosk();
 
         setTimeout(() => {
-            this.broadcastToDisplay({ type: `show-blank` });
+            this.broadcastToDisplay({
+                type: `show-blank`,
+                serverIp: this.__client.link.ip,
+                thisDevice: {
+                    id: this.__client.id,
+                    address: this.__client.config.ip,
+                    name: this.__client.name,
+                },
+                service: {
+                    name: this.__client.type,
+                    version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
+                }
+            });
 
             const killPr = this.killNdiReceiver();
             if (!killPr) console.log('************ NDI RECEIVER process NOT terminated!');
@@ -1301,7 +1361,19 @@ class NDPiClient {
 
             // wait 5 seconds to ensure display is launched, to ensure a smooth fade in of the overlay
             setTimeout(() => {
-                this.broadcastToDisplay({ type: `show-${this.__client.config.displayMode}` });
+                this.broadcastToDisplay({
+                    type: `show-${this.__client.config.displayMode}`,
+                    serverIp: this.__client.link.ip,
+                    thisDevice: {
+                        id: this.__client.id,
+                        address: this.__client.config.ip,
+                        name: this.__client.name,
+                    },
+                    service: {
+                        name: this.__client.type,
+                        version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
+                    }
+                });
             }, 5000);
         }, 1000);
     }
@@ -1318,7 +1390,19 @@ class NDPiClient {
         this.launchDisplayKiosk();
 
         setTimeout(() => {
-            this.broadcastToDisplay({ type: `show-${this.__client.config.displayMode}` });
+            this.broadcastToDisplay({
+                type: `show-${this.__client.config.displayMode}`,
+                serverIp: this.__client.link.ip,
+                thisDevice: {
+                    id: this.__client.id,
+                    address: this.__client.config.ip,
+                    name: this.__client.name,
+                },
+                service: {
+                    name: this.__client.type,
+                    version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
+                }
+            });
             const killPr = this.killNdiReceiver();
             if (!killPr) console.log('************ NDI RECEIVER process NOT terminated!');
             this.sendStatusToServer();
