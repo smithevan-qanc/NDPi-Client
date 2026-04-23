@@ -226,7 +226,7 @@ class NDPiClient {
                 mfr: null,
             },
             link: {
-                ip: 'this.serverAddress',
+                ip: 'localhost',
                 lastSeen: null,
             },
             lastCommand: {

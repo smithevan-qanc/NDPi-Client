@@ -10,7 +10,7 @@ set -e
 install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
-    sudo systemctl restart ndpi-monitor-client.service
+    sudo systemctl stop ndpi-monitor-client.service
 }
 install
 
