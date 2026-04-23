@@ -63,7 +63,7 @@ function consoleLog(message = 'SYSTEM UPDATE', data, error) {
         console.log(`⫷ ${ipAddr} ⫸  ╮`);
         console.log(`                  ╰⸺  ▶ ${message.toUpperCase()}`);
         if (data) {
-            console.log(data);
+            console.log(JSON.stringify(data));
         }
         console.log(' ');
     }
