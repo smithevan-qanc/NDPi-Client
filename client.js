@@ -697,7 +697,7 @@ class NDPiClient {
                     req: {
                         url: `${req.url}`,
                         method: `${req.method}`,
-                        headers: req.headers ?? {},
+                        //headers: req.headers ?? {},
                         body: req.body ?? {}
                     },
                     res: { status: code }
@@ -816,7 +816,7 @@ class NDPiClient {
                     req: {
                         url: `${req.url}`,
                         method: `${req.method}`,
-                        headers: req.headers ?? {},
+                        //headers: req.headers ?? {},
                         body: req.body ?? {}
                     },
                     res: { status: 200 }
@@ -838,7 +838,7 @@ class NDPiClient {
                         req: {
                             url: `${req.url}`,
                             method: `${req.method}`,
-                            headers: req.headers ?? {},
+                            //headers: req.headers ?? {},
                             body: JSON.parse(body) ?? {}
                         },
                         res: { status: 200 }
