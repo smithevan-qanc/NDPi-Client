@@ -63,9 +63,9 @@ function consoleLog(message = 'SYSTEM UPDATE', data, error) {
         console.log(`⫷ ${ipAddr} ⫸  ╮`);
         console.log(`                  ╰⸺  ▶ ${message.toUpperCase()}`);
         if (data) {
-            console.log(JSON.stringify(data));
+            console.log(JSON.stringify(data, null, 2));
         }
-        console.log(' ');
+        //console.log(' ');
     }
 }
 function getDeviceId() {
@@ -786,8 +786,6 @@ class NDPiClient {
 
         exec(instanceCheck, (err, stdout, stderr) => {
             const stdArry = CRLFArray(stdout);
-            console.log(stdArry);
-            console.log(stdArry.length);
             if (stdArry.length < 3) {
                 consoleLog('launching new overlay instance');
                 exec(newInstance, (error, stdout, stderr) => {
