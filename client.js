@@ -753,7 +753,7 @@ class NDPiClient {
         this.displayClients.forEach((val) => {
             console.log(val.readyState);
         });
-        console.log('Display Clients Length', this.displayClients.values.length);
+        console.log('Display Clients Length', this.displayClients.values().length);
 
         //const instanceCheck = `pgrep -f "chromium.*localhost:${this.__client.config.displayPort}" 2`;
         const instanceCheck = 'pgrep -f "chromium" 2>/dev/null';
