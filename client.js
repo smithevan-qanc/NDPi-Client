@@ -778,16 +778,14 @@ class NDPiClient {
 
         console.log('timeout to send', delay);
 
-        setTimeout(() => {
-            consoleLog('(↑↑) Display Server: ws', { type: displayMode });
-            const data = JSON.stringify(updateData);
-    
-            this.displayClients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(data);
-                }
-            });
-        }, delay);
+        consoleLog('(↑↑) Display Server: ws', { type: displayMode });
+        const data = JSON.stringify(updateData);
+
+        this.displayClients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(data);
+            }
+        });
     }
 
     launchDisplayKiosk() {
