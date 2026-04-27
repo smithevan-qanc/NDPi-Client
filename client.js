@@ -722,7 +722,7 @@ class NDPiClient {
             
             // Send current state
             setTimeout(() => {
-                this.broadcastToDisplay();
+                this.broadcastToDisplay(ws);
             }, 1500);
             
             ws.on('close', () => {
@@ -740,11 +740,11 @@ class NDPiClient {
         });
     }
 
-    broadcastToDisplay(message = {}, ws) {
+    broadcastToDisplay(message, ws = null) {
         console.log(`( ⚡ ) Func: broadcastToDisplay`);
 
         const currentConfig = this.__client;
-        const displayMode = message.type || this.ndiProcess ? 'show-blank' : `show-${this.__client.config.displayMode}`;
+        const displayMode = message.type || `show-${this.__client.config.displayMode}`;
 
         const updateData = {
             type: displayMode,
@@ -1338,7 +1338,7 @@ class NDPiClient {
             this.ndiReconnectTimer
         ) return;
 
-        this.broadcastToDisplay({ type: `ndi-init` });
+        this.broadcastToDisplay({type: `ndi-init`});
 
         this.ndiReconnectTimer = setTimeout(() => {
             this.ndiReconnectTimer = null;
@@ -1347,7 +1347,7 @@ class NDPiClient {
                 this.__client.ndi.source.target !== 'None' && 
                 !this.ndiProcess
             ) this.startNDIReceiver(this.__client.ndi.source.target);
-        }, 5000);
+        }, 15000);
     }
 
     showOverlay(commandInfo = {}) {
