@@ -31,13 +31,17 @@ const versionIsStable = versionCurrent === versionStable;
 
 function startupConsoleLog() {
     console.log(`
-════════════════════════════════════════════════════════════════
-  ⌈▔∖ ⌈▔⌈▔▔▔▔∖⌈▔▔▔▔∖(-)   ⌈▔▔∖/▔▔|           (-)ʃ▔▏           
-  ⏐  ∖⏐ ⏐ ⌈▔| ⏐ ⌈-) ⌈▔|   ⏐ ⌈∖/| ⏐/▔▔▔∖⌈▔'▔▔∖⌈▔|▏ ▔/▔▔▔∖⌈▔'▔▔|
-  ⏐ ⌈∖  ⏐ ⌊_| ⏐  __/⏐ ⏐▔▔▔⏐ ⏐  ⏐ ⏐ (-) ⏐ ⌈▔⏐ ⏐ ⏐▏ ⎡▏(-) ⏐ ⌈▔▔             
-  ⌊_| ∖_⌊____/⌊_|   ⌊_|▔▔▔⌊_|  ⌊_|∖___/⌊_| ⌊_⌊_|∖__∖___/⌊_|              𓀡
-  𝘝𝘦𝕣𝕤𝕚𝕠𝕟   ⸻      ${versionCurrent}${versionIsStable ? ' (Stable)' : ''}
-════════════════════════════════════════════════════════════════
+
+
+════════════════════════════════════════════════════════════════════════
+      ⌈▔∖ ⌈▔⌈▔▔▔▔∖⌈▔▔▔▔∖(-)   ⌈▔▔∖/▔▔|           (-)ʃ▔▏           
+      ⏐  ∖⏐ ⏐ ⌈▔| ⏐ ⌈-) ⌈▔|   ⏐ ⌈∖/| ⏐/▔▔▔∖⌈▔'▔▔∖⌈▔|▏ ▔/▔▔▔∖⌈▔'▔▔|
+      ⏐ ⌈∖  ⏐ ⌊_| ⏐  __/⏐ ⏐▔▔▔⏐ ⏐  ⏐ ⏐ (-) ⏐ ⌈▔⏐ ⏐ ⏐▏ ⎡▏(-) ⏐ ⌈▔▔             
+      ⌊_| ∖_⌊____/⌊_|   ⌊_|▔▔▔⌊_|  ⌊_|∖___/⌊_| ⌊_⌊_|∖__∖___/⌊_|              𓀡
+      𝘝𝘦𝕣𝕤𝕚𝕠𝕟   ⸻      ${versionCurrent}${versionIsStable ? ' (Stable)' : ''}
+════════════════════════════════════════════════════════════════════════
+ 
+ 
 `);
 }
 // N D P i - M O N I T O R
@@ -293,9 +297,13 @@ class NDPiClient {
 
     displayStartup() {
         setTimeout(() => {
-            exec('xdotool mousemove 3840 2160');
+            exec('xdotool mousemove 3840 2160', (error, stdout, stderr) => {
+                if (error) consoleLog('xdotool error', null, stderr);
+            });
             setTimeout(() => {
-                exec('xdotool mousemove 3840 0');
+                exec('xdotool mousemove 3840 0', (error, stdout, stderr) => {
+                    if (error) consoleLog('xdotool error', null, stderr);
+                });
                 setTimeout(() => {
                     if (this.__client.ndi.source.target) {
                         this.startNDIReceiver(this.__client.ndi.source.target);
@@ -741,8 +749,12 @@ class NDPiClient {
 
     launchDisplayKiosk() {
 
+        console.log('Display Clients');
+        console.log(this.displayClients);
+
         //const instanceCheck = `pgrep -f "chromium.*localhost:${this.__client.config.displayPort}" 2`;
         const instanceCheck = 'pgrep -f "chromium" 2>/dev/null';
+        // exec('pkill -f "chromium" 2>/dev/null')
         const newInstance = `/usr/bin/chromium \
             --disable-popup-blocking \
             --hide-crash-restore-bubble \
@@ -1362,7 +1374,7 @@ class NDPiClient {
                         version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
                     }
                 });
-            }, 5000);
+            }, 500);
         }, 1000);
     }
 
