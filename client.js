@@ -64,6 +64,7 @@ function consoleLog(message = 'SYSTEM UPDATE', data, error) {
     }
 }
 function getDeviceId() {
+    console.log(`( ⚡ ) Func: getDeviceId`);
     try {
         //const cpuinfo = fs.readFileSync('/proc/cpuinfo', 'utf8');
         const serial = readFile('/proc/cpuinfo').match(/Serial\s*:\s*([0-9a-f]+)/i);
@@ -76,6 +77,7 @@ function getDeviceId() {
     }
 }
 function getDeviceModel() {
+    console.log(`( ⚡ ) Func: getDeviceModel`);
     try {
         const model = readFile('/proc/cpuinfo').match(/Model\s*:\s*([0-9a-f]+)/i);
         if (model) {
@@ -87,6 +89,7 @@ function getDeviceModel() {
     }
 }
 function getLocalIP() {
+    console.log(`( ⚡ ) Func: getLocalIP`);
     const interfaces = os.networkInterfaces();
     for (const name of Object.keys(interfaces)) {
         for (const iface of interfaces[name]) {
@@ -99,6 +102,7 @@ function getLocalIP() {
     return 'localhost';
 }
 function getHdmiResolution() {
+    console.log(`( ⚡ ) Func: getHdmiResolution`);
     let res = '';
     exec('DISPLAY=:0 xrandr', (error, stdout, stderr) => {
         if (error) {
@@ -115,6 +119,7 @@ function getHdmiResolution() {
     return res;
 }
 function listHdmiResolutions() {
+    console.log(`( ⚡ ) Func: listHdmiResolutions`);
     let resolutionOptions = [];
     exec('DISPLAY=:0 xrandr', (error, stdout, stderr) => {
         if (error) {
@@ -139,6 +144,7 @@ function listHdmiResolutions() {
     return resolutionOptions;
 }
 async function cecPowerOn(commandInfo = {}) {
+    console.log(`( ⚡ ) Func: cecPowerOn`);
     let success = false;
     consoleLog(`(↑↓) cec command out: 'on 0' && 'as'`);
     exec('echo "on 0" | cec-client -s -d 1 && echo "as" | cec-client -s -d 1', (e,o,err) => {
@@ -156,6 +162,7 @@ async function cecPowerOn(commandInfo = {}) {
     });
 }
 async function cecPowerOff(commandInfo = {}) {
+    console.log(`( ⚡ ) Func: cecPowerOff`);
     let success = false;
     consoleLog(`(↑↓) cec command out: 'standby 0'`);
     exec('echo "standby 0" | cec-client -s -d 1', (e,o,err) => {
@@ -175,6 +182,7 @@ async function cecPowerOff(commandInfo = {}) {
 
 class NDPiClient {
     constructor() {
+        console.log(`( ⚡ ) Func: new Class NDPiCLient()`);
         startupConsoleLog();
         this.defaultDeviceName  = 'NDPi Client';
         this.displayClients     = new Set();
@@ -288,7 +296,7 @@ class NDPiClient {
 
         this.startDisplayServer();
         this.startCommandServer();
-        this.startMDNSBroadcast();
+        this.start_mdnsBroadcast();
 
         setTimeout(() => {
             this.displayStartup();
@@ -296,6 +304,7 @@ class NDPiClient {
     }
 
     displayStartup() {
+        console.log(`( ⚡ ) Func: displayStartup`);
         setTimeout(() => {
             exec('xdotool mousemove 3840 2160', (error, stdout, stderr) => {
                 if (error) consoleLog('xdotool error', null, stderr);
@@ -308,10 +317,10 @@ class NDPiClient {
                     if (this.__client.ndi.source.target) {
                         this.startNDIReceiver(this.__client.ndi.source.target);
                         setTimeout(() => {
-                            this.launchDisplayKiosk();
+                            this.broadcastToDisplay();
                         }, 8000);
                     } else {
-                        this.launchDisplayKiosk();
+                        this.broadcastToDisplay();
                     }
                 }, 2000);   // 3rd.     If source is set, start NDI Receiver - wait 8s - launch display, else launch display.
             }, 500);            // 2nd.     Move cursor to top right (activate autohide taskbar) Then ^^
@@ -319,6 +328,7 @@ class NDPiClient {
     }
 
     loadState() {
+        console.log(`( ⚡ ) Func: loadState`);
         try {
             if (fs.existsSync(PATH_CONFIG)) {
                 const data = JSON.parse(fs.readFileSync(PATH_CONFIG, 'utf8'));
@@ -338,6 +348,7 @@ class NDPiClient {
     }
 
     saveState(commandInfo = {}) {
+        console.log(`( ⚡ ) Func: saveState`);
 
         if (commandInfo.serverAddress) this.__client.link.ip = commandInfo.serverAddress;
 
@@ -393,7 +404,18 @@ class NDPiClient {
         }
     }
 
+    getConfig() {
+        console.log(`( ⚡ ) Func: getConfig`);
+        try {
+            if (fs.existsSync(PATH_CONFIG)) return JSON.parse(fs.readFileSync(PATH_CONFIG, 'utf8'));
+        } catch (e) {} finally {
+            return null;
+        }
+    }
+
     connectToServer(serverAddress) {
+        console.log(`( ⚡ ) Func: connectToServer`);
+
         if (!serverAddress || serverAddress.includes('localhost')) return;
         
         this.__client.link.ip = serverAddress;
@@ -427,19 +449,7 @@ class NDPiClient {
                 this.sendStatusToServer();
                 this.statusInterval = setInterval(() => {
                     this.sendStatusToServer();
-                    this.broadcastToDisplay({
-                        type: 'ndpi-server-connected',
-                        serverIp: serverAddress.split(':')[0] || '',
-                        thisDevice: {
-                            id: this.__client.id,
-                            address: this.__client.config.ip,
-                            name: this.__client.name,
-                        },
-                        service: {
-                            name: this.__client.type,
-                            version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
-                        }
-                    });
+                    this.broadcastToDisplay({ type: 'ndpi-server-connected' });
                 }, sendStatusInterval);
                 
             });
@@ -480,6 +490,8 @@ class NDPiClient {
     }
 
     getSystemStats() {
+        console.log(`( ⚡ ) Func: getSystemStats`);
+
         const stats = {
             cpu: 0,
             memory: { used: 0, total: 0, percent: 0 },
@@ -526,6 +538,8 @@ class NDPiClient {
     }
 
     sendStatusToServer() {
+        console.log(`( ⚡ ) Func: sendStatusToServer`);
+
         if (!this.serverWs || this.serverWs.readyState !== WebSocket.OPEN) return;
         
         const systemStats = this.getSystemStats();
@@ -557,6 +571,7 @@ class NDPiClient {
     }
 
     handleServerMessage(message) {
+        console.log(`( ⚡ ) Func: handleServerMessage`);
 
         const handled = () => consoleLog(`[handled] ${message.type}`);
         
@@ -647,6 +662,8 @@ class NDPiClient {
     }
 
     startDisplayServer() {
+        console.log(`( ⚡ ) Func: startDisplayServer`);
+
         const displayServer = http.createServer((req, res) => {
 
             let filePath;
@@ -706,21 +723,7 @@ class NDPiClient {
             this.displayClients.add(ws);
             
             // Send current state
-            consoleLog('(↑↓) Display Server: ws', { type: `show-${this.__client.config.displayMode}` });
-
-            ws.send(JSON.stringify({ 
-                type: `show-${this.__client.config.displayMode}`,
-                serverIp: this.__client.link.ip.split(':')[0] || '',
-                thisDevice: {
-                    id: this.__client.id,
-                    address: this.__client.config.ip,
-                    name: this.__client.name,
-                },
-                service: {
-                    name: this.__client.type,
-                    version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
-                }
-            }));
+            this.broadcastToDisplay();
             
             ws.on('close', () => {
                 this.displayClients.delete(ws);
@@ -738,35 +741,72 @@ class NDPiClient {
     }
 
     broadcastToDisplay(message) {
-        const data = JSON.stringify(message);
+        console.log(`( ⚡ ) Func: broadcastToDisplay`);
 
-        this.displayClients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(data);
+        const currentConfig = this.getConfig();
+        const displayMode = message.type || this.ndiProcess ? 'show-blank' : `show-${currentConfig.config.displayMode}`;
+        const updateData = {
+            type: displayMode,
+            serverIp: currentConfig.link.ip.split(':')[0] || '',
+            thisDevice: {
+                id: currentConfig.id,
+                address: currentConfig.config.ip,
+                name: currentConfig.name,
+            },
+            service: {
+                name: currentConfig.type,
+                version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
             }
-        });
+        };
+
+        let kioskResult = this.launchDisplayKiosk();
+        let delay;
+
+        if (kioskResult === 'open') {
+            delay = 100;
+        } else if (kioskResult === 'new') {
+            delay = 1000;
+        } else if (kioskResult === 'error') {
+            setTimeout(() => this.broadcastToDisplay(message), 5000);
+            return;
+        }
+
+        setTimeout(() => {
+            consoleLog('(↑↑) Display Server: ws', { type: displayMode });
+            const data = JSON.stringify(updateData);
+    
+            this.displayClients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(data);
+                }
+            });
+        }, delay);
     }
 
     launchDisplayKiosk() {
+        console.log(`( ⚡ ) Func: launchDisplayKiosk`);
+
+        /**
+         * This Function Returns:
+         *      'open'  for Chromium instance already started.
+         *      'new'   for a new instance of Chromium started.
+         *      'error' indicating logic to retry starting Chromium.
+         */
 
         let connectedDisplayClients = [];
+
         this.displayClients.forEach((val) => {
             connectedDisplayClients.push({ state: val.readyState });
         });
 
-        console.log(connectedDisplayClients);
         if (connectedDisplayClients.length === 1) {
-            console.log('Abording Display Launch');
-            return;
-        } else if (connectedDisplayClients >= 2) {
-            console.log('Killing Display Instances');
-            exec('pkill -f "chromium" 2>/dev/null')
+            return 'open';
+        } else if (connectedDisplayClients.length >= 2) {
+            exec('pkill -f "chromium" 2>/dev/null');
         }
-        console.log('Opening Chromium Display');
 
-        //const instanceCheck = `pgrep -f "chromium.*localhost:${this.__client.config.displayPort}" 2`;
         const instanceCheck = 'pgrep -f "chromium" 2>/dev/null';
-        // exec('pkill -f "chromium" 2>/dev/null')
+        
         const newInstance = `/usr/bin/chromium \
             --disable-popup-blocking \
             --hide-crash-restore-bubble \
@@ -785,22 +825,29 @@ class NDPiClient {
             --start-fullscreen \
             http://localhost:${this.__client.config.displayPort}/ &`;
 
-        exec(instanceCheck, (err, stdout, stderr) => {
-            const stdArry = CRLFArray(stdout);
-            if (stdArry.length < 3) {
-                //consoleLog('launching new overlay instance');
-                exec(newInstance, (error, stdout, stderr) => {
-                    if (error) {
-                        consoleLog('[failed] launching overlay instance', stdout, stderr);
-                    }
-                });
-            } else if (err) {
-                consoleLog('[ERROR] CHECKING OVERLAY INSTANCE', stdArry, stderr);
+    //    exec(instanceCheck, (err, stdout, stderr) => {
+    //        const stdArry = CRLFArray(stdout);
+    //        if (stdArry.length < 3) {
+
+        consoleLog('launching new overlay instance');
+        exec(newInstance, (error, stdout, stderr) => {
+            if (error) {
+                consoleLog('[failed] launching overlay instance', stdout, stderr);
+                return 'error';
+            } else {
+                return 'new';
             }
         });
+
+    //        } else if (err) {
+    //            consoleLog('[ERROR] CHECKING OVERLAY INSTANCE', stdArry, stderr);
+    //        }
+    //    });
     }
 
     startCommandServer() {
+        console.log(`( ⚡ ) Func: startCommandServer`);
+
         // Create HTTP server with REST API endpoints
         const server = http.createServer(async (req, res) => {
             const url = new URL(req.url, `http://${req.headers.host}`);
@@ -811,7 +858,7 @@ class NDPiClient {
             res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
             
             if (req.method === 'OPTIONS') {
-                consoleLog('(↓↑) command server: rest api', {
+                consoleLog('(↓↓) command server: api', {
                     req: {
                         url: `${req.url}`,
                         method: `${req.method}`,
@@ -833,7 +880,7 @@ class NDPiClient {
                 req.on('end', async () => {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
 
-                    consoleLog('(↓↑) command server: rest api', {
+                    consoleLog('(↓↓) command server: api', {
                         req: {
                             url: `${req.url}`,
                             method: `${req.method}`,
@@ -964,10 +1011,10 @@ class NDPiClient {
             ws.on('message', (message) => {
                 try {
                     const command = JSON.parse(message);
-                    consoleLog('(↓↑) command server: ws');
+                    consoleLog('(↓↓) command server: ws');
                     this.handleCommand(command, ws);
                 } catch (error) {
-                    consoleLog('(↓↑) command server: ws', {Message: message}, error);
+                    consoleLog('(↓↓) command server: ws', {Message: message}, error);
                     ws.send(JSON.stringify({
                         success: false,
                         message: 'Invalid command format'
@@ -990,6 +1037,7 @@ class NDPiClient {
     }
 
     handleCommand(command, ws) {
+        console.log(`( ⚡ ) Func: handleCommand`);
 
         if (command.serverAddress) {
             if (command.serverAddress !== this.__client.link.ip) {
@@ -1075,7 +1123,7 @@ class NDPiClient {
                     type: 'pong',
                     deviceId: this.__client.id
                 }));
-                consoleLog('(↑↓) command server: ws', { data: 'pong' });
+                consoleLog('(↑↑) command server: ws', { data: 'pong' });
                 break;
 
             case 'get-status':
@@ -1101,9 +1149,12 @@ class NDPiClient {
     }
 
     get_mdnsService() {
+        console.log(`( ⚡ ) Func: get_mdnsService`);
+
         // This is the mDNS Service Object.
         this.__client.config.ip = getLocalIP();
         this.saveState();
+
         // Service Object
         return {
             name: `ndpi-client-${this.__client.id}`,
@@ -1121,24 +1172,30 @@ class NDPiClient {
         };
     }
 
-    startMDNSBroadcast() {
-        this.updateMDNSBroadcast();
+    start_mdnsBroadcast() {
+        console.log(`( ⚡ ) Func: start_mdnsBroadcast`);
+
+        this.update_mdnsBroadcast();
 
         const refresh_mDns = 3600000; // 3,600,000 ms  =  1 hr
         setInterval(() => {
-            this.updateMDNSBroadcast();
+            this.update_mdnsBroadcast();
         }, refresh_mDns);
 
         const evaluate_IP = 60000;
         setInterval(() => {
             const ipAddr = getLocalIP();
             if (ipAddr !== this.__client.config.ip) {
-                this.updateMDNSBroadcast();
+                // Updated IP address is saved within 'get_mdnsService()'
+                this.update_mdnsBroadcast();
             }
         }, evaluate_IP);
     }
 
-    updateMDNSBroadcast() {
+    update_mdnsBroadcast() {
+        console.log(`( ⚡ ) Func: update_mdnsBroadcast`);
+
+        // Updated IP address is saved within 'get_mdnsService()'
         let consoleMessage = '(↑↑) mdns';
         if (this.mdnsService) {
             this.mdnsService.stop();
@@ -1150,22 +1207,31 @@ class NDPiClient {
         consoleLog(consoleMessage, service.name);
     }
 
-    async killNdiReceiver() {
+    killNdiReceiver() {
+        console.log(`( ⚡ ) Func: killNdiReceiver`);
+
         if (this.ndiProcess) {
             try {
                 consoleLog('[ ndi ] ⸺  ▶ [SIGKILL]');
                 this.ndiProcess.kill('SIGKILL'); // Use SIGKILL for immediate termination
-            } catch (e) {}
+            } catch (e) {} finally {
 
-            // Kill any orphaned NDI processes
+                return true;
+            }
+
+            /* Kill any orphaned NDI processes
             try {
                 require('child_process').execSync('pkill -9 ndi_receiver_v2 2>/dev/null || true');
             } catch (e) {}
+             */
+        } else {
+            return true;
         }
-        return true;
     }
 
     setNDISource(sourceName, commandInfo = {}) {
+        console.log(`( ⚡ ) Func: setNDISource`);
+
         if (this.ndiReconnectTimer) {
             clearTimeout(this.ndiReconnectTimer);
             this.ndiReconnectTimer = null;
@@ -1186,56 +1252,38 @@ class NDPiClient {
         // If source is None or empty, just stop
         if (!sourceName || sourceName === 'None') {
             this.__client.ndi.source.target = null;
-            this.launchDisplayKiosk();
+            this.broadcastToDisplay();
             setTimeout(() => {
                 this.killNdiReceiver();
             }, 1000);
-            return;
+        } else {
+            this.startNDIReceiver(sourceName);
         }
-        
-        this.startNDIReceiver(sourceName);
+
     }
     
     startNDIReceiver(sourceName) {
+        console.log(`( ⚡ ) Func: startNDIReceiver`);
+
         consoleLog('[Establishing connection] NDI');
-        this.broadcastToDisplay({
-            type: `ndi-init`,
-            serverIp: this.__client.link.ip.split(':')[0] || '',
-            thisDevice: {
-                id: this.__client.id,
-                address: this.__client.config.ip,
-                name: this.__client.name,
-            },
-            service: {
-                name: this.__client.type,
-                version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
-            }
-        });
+
+        this.broadcastToDisplay({ type: `ndi-init` });
+
         setTimeout(() => {
             this._startNDIReceiverInternal(sourceName);
         }, 200);
+
     }
     
     _startNDIReceiverInternal(sourceName) {
-        const killPr = this.killNdiReceiver();
-        if (!killPr) console.log('************ NDI RECEIVER process NOT terminated!');
+        console.log(`( ⚡ ) Func: _startNDIReceiverInternal`);
+
+        this.killNdiReceiver();
 
         if (!fs.existsSync(PATH_NDI_RECEIVER)) {
             consoleLog('[ERROR] ndi', { Path: PATH_NDI_RECEIVER }, { error: 'Receiver path not found.' });
             this.scheduleReconnect();
-            this.broadcastToDisplay({
-                type: `show-${this.__client.config.displayMode}`,
-                serverIp: this.__client.link.ip.split(':')[0] || '',
-                thisDevice: {
-                    id: this.__client.id,
-                    address: this.__client.config.ip,
-                    name: this.__client.name,
-                },
-                service: {
-                    name: this.__client.type,
-                    version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
-                }
-            });
+            this.broadcastToDisplay();
             return;
         }
         
@@ -1258,24 +1306,13 @@ class NDPiClient {
             this.parseNDIInfo(output);
 
             if (output.includes('Connected to:')) { // When Connection to NDI is Successful
-                this.broadcastToDisplay({
-                    type: `ndi-started`,
-                    serverIp: this.__client.link.ip.split(':')[0] || '',
-                    thisDevice: {
-                        id: this.__client.id,
-                        address: this.__client.config.ip,
-                        name: this.__client.name,
-                    },
-                    service: {
-                        name: this.__client.type,
-                        version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
-                    }
-                });
+                this.broadcastToDisplay({ type: `ndi-started` });
                 this.__client.ndi.source.current = sourceName;
                 this.__client.ndi.connectedAt = new Date().toISOString();
+                this.saveState();
+                this.sendStatusToServer();
+                this.broadcastToDisplay({ type: `show-blank` });
             }
-            this.saveState();
-            this.sendStatusToServer();
         });
         
         this.ndiProcess.stderr.on('data', (data) => {
@@ -1294,21 +1331,19 @@ class NDPiClient {
             this.__client.ndi.connectedAt       = null;
             this.saveState();
             this.sendStatusToServer();
-            
-            consoleLog('[ ndi ] ⸺  ▶ [disconnected]', {
-                Code: code
-            });
+            consoleLog('[ ndi ] ⸺  ▶ [TERMINATED]', {Code: code});
+            this.broadcastToDisplay();
             this.scheduleReconnect();
         });
         
         this.ndiProcess.on('error', (error) => {
             consoleLog('[error] ndi', null, error);
-            this.ndiProcess = null;
-            this.scheduleReconnect();
         });
     }
     
     scheduleReconnect() {
+        console.log(`( ⚡ ) Func: scheduleReconnect`);
+
         // Only reconnect if we have a target source and aren't already trying
         if (
             !this.__client.ndi.source.target || 
@@ -1316,19 +1351,7 @@ class NDPiClient {
             this.ndiReconnectTimer
         ) return;
 
-        this.broadcastToDisplay({
-            type: `ndi-init`,
-            serverIp: this.__client.link.ip.split(':')[0] || '',
-            thisDevice: {
-                id: this.__client.id,
-                address: this.__client.config.ip,
-                name: this.__client.name,
-            },
-            service: {
-                name: this.__client.type,
-                version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
-            }
-        });
+        this.broadcastToDisplay({ type: `ndi-init` });
 
         this.ndiReconnectTimer = setTimeout(() => {
             this.ndiReconnectTimer = null;
@@ -1341,84 +1364,42 @@ class NDPiClient {
     }
 
     showOverlay(commandInfo = {}) {
+        console.log(`( ⚡ ) Func: showOverlay`);
+
         if (this.ndiReconnectTimer) {
             clearTimeout(this.ndiReconnectTimer);
             this.ndiReconnectTimer = null;
         }
+
         this.__client.ndi.source.target = null;
         this.__client.config.displayMode = 'overlay';
+
         this.saveState(commandInfo);
 
-        this.launchDisplayKiosk();
+        this.broadcastToDisplay();
 
-        setTimeout(() => {
-            this.broadcastToDisplay({
-                type: `show-blank`,
-                serverIp: this.__client.link.ip.split(':')[0] || '',
-                thisDevice: {
-                    id: this.__client.id,
-                    address: this.__client.config.ip,
-                    name: this.__client.name,
-                },
-                service: {
-                    name: this.__client.type,
-                    version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
-                }
-            });
+        this.killNdiReceiver();
+        this.sendStatusToServer();
 
-            const killPr = this.killNdiReceiver();
-            if (!killPr) console.log('************ NDI RECEIVER process NOT terminated!');
-
-            this.sendStatusToServer();
-
-            // wait 5 seconds to ensure display is launched, to ensure a smooth fade in of the overlay
-            setTimeout(() => {
-                this.broadcastToDisplay({
-                    type: `show-${this.__client.config.displayMode}`,
-                    serverIp: this.__client.link.ip.split(':')[0] || '',
-                    thisDevice: {
-                        id: this.__client.id,
-                        address: this.__client.config.ip,
-                        name: this.__client.name,
-                    },
-                    service: {
-                        name: this.__client.type,
-                        version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
-                    }
-                });
-            }, 500);
-        }, 1000);
     }
 
     showBlank(commandInfo = {}) {
+        console.log(`( ⚡ ) Func: showBlank`);
+
         if (this.ndiReconnectTimer) {
             clearTimeout(this.ndiReconnectTimer);
             this.ndiReconnectTimer = null;
         }
+
         this.__client.ndi.source.target = null;
         this.__client.config.displayMode = 'blank';
+
         this.saveState(commandInfo);
 
-        this.launchDisplayKiosk();
+        this.broadcastToDisplay();
 
-        setTimeout(() => {
-            this.broadcastToDisplay({
-                type: `show-${this.__client.config.displayMode}`,
-                serverIp: this.__client.link.ip.split(':')[0] || '',
-                thisDevice: {
-                    id: this.__client.id,
-                    address: this.__client.config.ip,
-                    name: this.__client.name,
-                },
-                service: {
-                    name: this.__client.type,
-                    version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
-                }
-            });
-            const killPr = this.killNdiReceiver();
-            if (!killPr) console.log('************ NDI RECEIVER process NOT terminated!');
-            this.sendStatusToServer();
-        }, 1000);
+        this.killNdiReceiver();
+        this.sendStatusToServer();
     }
 
     applyNetworkSettings(config) {
