@@ -747,7 +747,9 @@ class NDPiClient {
         console.log(`( ⚡ ) Func: broadcastToDisplay`);
 
         const currentConfig = this.getConfig() || this.__client;
+        console.log('current config');
         const displayMode = message.type || this.ndiProcess ? 'show-blank' : `show-${currentConfig.config.displayMode}`;
+        console.log('display mode');
         const updateData = {
             type: displayMode,
             serverIp: currentConfig.link.ip.split(':')[0] || '',
@@ -761,20 +763,28 @@ class NDPiClient {
                 version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
             }
         };
+        console.log('update date');
 
         let kioskResult = this.launchDisplayKiosk();
+        console.log('kiosk result');
         let delay;
+        console.log('delay');
 
         if (kioskResult === 'open') {
+        console.log('open');
             delay = 100;
         } else if (kioskResult === 'new') {
+        console.log('new');
             delay = 1000;
         } else if (kioskResult === 'error') {
+        console.log('error');
             setTimeout(() => this.broadcastToDisplay(message), 5000);
             return;
         }
+        console.log('return');
 
         setTimeout(() => {
+        console.log('timeout to send');
             consoleLog('(↑↑) Display Server: ws', { type: displayMode });
             const data = JSON.stringify(updateData);
     
