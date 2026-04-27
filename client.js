@@ -31,17 +31,17 @@ const versionIsStable = versionCurrent === versionStable;
 
 function startupConsoleLog() {
     console.log(`
-
-
+ 
+ 
 ════════════════════════════════════════════════════════════════════════
-      ⌈▔∖ ⌈▔⌈▔▔▔▔∖⌈▔▔▔▔∖(-)   ⌈▔▔∖/▔▔|           (-)ʃ▔▏           
+      ⌈▔∖ ⌈▔⌈▔▔▔▔∖⌈▔▔▔▔∖(-)   ⌈▔▔∖/▔▔|           (-)ʃ▔▏
       ⏐  ∖⏐ ⏐ ⌈▔| ⏐ ⌈-) ⌈▔|   ⏐ ⌈∖/| ⏐/▔▔▔∖⌈▔'▔▔∖⌈▔|▏ ▔/▔▔▔∖⌈▔'▔▔|
       ⏐ ⌈∖  ⏐ ⌊_| ⏐  __/⏐ ⏐▔▔▔⏐ ⏐  ⏐ ⏐ (-) ⏐ ⌈▔⏐ ⏐ ⏐▏ ⎡▏(-) ⏐ ⌈▔▔             
-      ⌊_| ∖_⌊____/⌊_|   ⌊_|▔▔▔⌊_|  ⌊_|∖___/⌊_| ⌊_⌊_|∖__∖___/⌊_|              𓀡
+      ⌊_| ∖_⌊____/⌊_|   ⌊_|▔▔▔⌊_|  ⌊_|∖___/⌊_| ⌊_⌊_|∖__∖___/⌊_|
       𝘝𝘦𝕣𝕤𝕚𝕠𝕟   ⸻      ${versionCurrent}${versionIsStable ? ' (Stable)' : ''}
 ════════════════════════════════════════════════════════════════════════
- 
- 
+                                                                      𓀡
+        
 `);
 }
 // N D P i - M O N I T O R
@@ -1507,7 +1507,7 @@ process.on('SIGTERM', () => {
 
 process.on('exit', (code) => {
     console.log(`Exit Code: ${code}`);
-    console.log('══════════════════════════════ END OF NDPi MONITOR PROCESS ═════');
+    console.log('══════════════════════════════════════ END OF NDPi MONITOR PROCESS ═════');
 });
 
 process.on('uncaughtException', (err) => {
