@@ -722,7 +722,7 @@ class NDPiClient {
             
             // Send current state
             setTimeout(() => {
-                this.broadcastToDisplay(ws);
+                this.broadcastToDisplay();
             }, 1500);
             
             ws.on('close', () => {
@@ -740,7 +740,7 @@ class NDPiClient {
         });
     }
 
-    broadcastToDisplay(message, ws = null) {
+    broadcastToDisplay(message,) {
         console.log(`( ⚡ ) Func: broadcastToDisplay`);
 
         const currentConfig = this.__client;
@@ -762,16 +762,12 @@ class NDPiClient {
 
         let connectedDisplayClients = [];
 
-        if (ws) {
-            ws.send(data);
-        } else {
             consoleLog('(↑↑) Display Server: ws', { type: displayMode });
             const data = JSON.stringify(updateData);
 
             this.displayClients.forEach(client => {
                 if (client.readyState === WebSocket.OPEN) client.send(data);
             });
-        }
 
     }
 
