@@ -202,47 +202,6 @@
             }
             
         }
-        
-        
-        let ws = null;
-        let reconnectInterval;
-        function connect() {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-
-            if (ws) {
-                ws.src
-            }
-
-            ws = new WebSocket(`${protocol}//${window.location.host}`);
-
-            ws.onopen = () => {
-                console.log('Connected to display server');
-                if (reconnectInterval) {
-                    clearInterval(reconnectInterval);
-                    reconnectInterval = null;
-                }
-            };
-
-            ws.onmessage = (event) => {
-                try {
-                    const msg = JSON.parse(event.data);
-                    handleDisplayCommand(msg);
-                } catch (e) {
-                    console.error('Invalid message:', e);
-                }
-            };
-
-            ws.onclose = () => {
-                console.log('Disconnected from display server');
-                if (!reconnectInterval) {
-                    reconnectInterval = setInterval(connect, 5000);
-                }
-            };
-
-            ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
-            };
-        }
 
         function handleDisplayCommand(msg) {
             updateDetails(msg);

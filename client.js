@@ -51,10 +51,12 @@ function consoleLog(message = 'SYSTEM UPDATE', data, error) {
             console.log(`DATA:`);
             console.log(JSON.stringify(data, null, 2));
         }
+        console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
     } else {
         console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
         console.log(`  [${ipAddr}] ⸺  ▶ ${message.toUpperCase()}`);
         if (data) console.log(JSON.stringify(data, null, 2));
+        console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
     }
 }
 function getDeviceId() {
