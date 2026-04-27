@@ -180,7 +180,6 @@ async function cecPowerOff(commandInfo = {}) {
 
 class NDPiClient {
     constructor() {
-        console.log(`( ⚡ ) Func: new Class NDPiCLient()`);
         startupConsoleLog();
         this.defaultDeviceName  = 'NDPi Client';
         this.displayClients     = new Set();
@@ -1208,13 +1207,17 @@ class NDPiClient {
                 consoleLog('[ ndi ] ⸺  ▶ [SIGKILL]');
                 this.ndiProcess.kill('SIGKILL'); // Use SIGKILL for immediate termination
                 this.ndiProcess = null;
-            } catch (e) {}
+            } catch (e) {
+                consoleLog('[ ndi ] ⸺  ▶ [SIGKILL]', null, e);
+            }
         }
 
         // Kill any orphaned NDI processes
         try {
             exec('pkill -9 ndi_receiver_v2 2>/dev/null || true');
-        } catch (e) {}
+        } catch (e) {
+            consoleLog('[ ndi ] ⸺  ▶ [pkill -9]', null, e);
+        }
     }
 
     setNDISource(sourceName, commandInfo = {}) {
