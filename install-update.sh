@@ -13,7 +13,6 @@ install() {
     sleep 1
     cp /home/ndpi-client/ndpi/config/openbox/rpd-rc.xml /home/ndpi-client/.config/openbox/rpd-rc.xml
     chown ndpi-client:ndpi-client /home/ndpi-client/.config/openbox/rpd-rc.xml
-    export DISPLAY=:0 && sudo openbox --reconfigure
     sudo reboot
 }
 install

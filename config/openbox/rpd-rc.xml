@@ -23,7 +23,7 @@
   <applications>
     
     <!--  NDI Receiver <<Must Be: name="ndi_receiver_v2*">>  -->
-    <application name="*ndi_receiver*">
+    <application name="*ndi_receiver_v2">
       <decor>no</decor>
       <layer>above</layer>
     </application>
@@ -34,7 +34,7 @@
       <layer>below</layer>
     </application>
 
-    <application name="*vncserver*">
+    <application name="vncserver*">
       <skip_taskbar>yes</skip_taskbar>
     </application>
 
