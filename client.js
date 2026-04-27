@@ -746,45 +746,36 @@ class NDPiClient {
         console.log(`( ⚡ ) Func: broadcastToDisplay`);
 
         const currentConfig = this.__client;
-        console.log('Current Config:', currentConfig);
-        const displayMode = message.type || this.ndiProcess ? 'show-blank' : `show-${currentConfig.config.displayMode}`;
-        console.log('display mode');
+        const displayMode = message.type || this.ndiProcess ? 'show-blank' : `show-${this.__client.config.displayMode}`;
 
         const updateData = {
             type: displayMode,
-            serverIp: currentConfig.link.ip.split(':')[0] || '',
+            serverIp: this.__client.link.ip.split(':')[0] || '',
             thisDevice: {
-                id: currentConfig.id,
-                address: currentConfig.config.ip,
-                name: currentConfig.name,
+                id: this.__client.id,
+                address: this.__client.config.ip,
+                name: this.__client.name,
             },
             service: {
-                name: currentConfig.type,
+                name: this.__client.type,
                 version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
             }
         };
-        console.log('UpdateData:', updateData);
 
         let delay = 1000;
         let connectedDisplayClients = [];
 
-        this.displayClients.forEach((val) => {
-            connectedDisplayClients.push({ state: val.readyState });
+        this.displayClients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) connectedDisplayClients.push({ state: client.readyState });
         });
 
-        if (connectedDisplayClients.length === 1) {
-            delay = 100;
-        }
-
-        console.log('timeout to send', delay);
+        if (connectedDisplayClients.length >= 1) delay = 100;
 
         consoleLog('(↑↑) Display Server: ws', { type: displayMode });
         const data = JSON.stringify(updateData);
 
         this.displayClients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(data);
-            }
+            if (client.readyState === WebSocket.OPEN) client.send(data);
         });
     }
 
