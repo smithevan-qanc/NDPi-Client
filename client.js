@@ -765,7 +765,7 @@ class NDPiClient {
         };
         console.log('UpdateData:', updateData);
 
-        let delay;
+        let delay = 1000;
         let connectedDisplayClients = [];
 
         this.displayClients.forEach((val) => {
@@ -774,8 +774,6 @@ class NDPiClient {
 
         if (connectedDisplayClients.length === 1) {
             delay = 100;
-        } else if (connectedDisplayClients.length >= 2) {
-            delay = 1000;
         }
 
         console.log('timeout to send', delay);
