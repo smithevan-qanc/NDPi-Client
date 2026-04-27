@@ -315,10 +315,10 @@ class NDPiClient {
                     if (this.__client.ndi.source.target) {
                         this.startNDIReceiver(this.__client.ndi.source.target);
                         setTimeout(() => {
-                            this.broadcastToDisplay();
+                            this.launchDisplayKiosk();
                         }, 8000);
                     } else {
-                        this.broadcastToDisplay();
+                        this.launchDisplayKiosk();
                     }
                 }, 2000);   // 3rd.     If source is set, start NDI Receiver - wait 8s - launch display, else launch display.
             }, 500);            // 2nd.     Move cursor to top right (activate autohide taskbar) Then ^^
@@ -802,6 +802,7 @@ class NDPiClient {
         const instanceCheck = 'pgrep -f "chromium" 2>/dev/null';
         
         const newInstance = `/usr/bin/chromium \
+            --kiosk \
             --disable-popup-blocking \
             --hide-crash-restore-bubble \
             --aggressive-cache-discard \
@@ -1213,11 +1214,10 @@ class NDPiClient {
                 return true;
             }
 
-            /* Kill any orphaned NDI processes
+            // Kill any orphaned NDI processes
             try {
                 require('child_process').execSync('pkill -9 ndi_receiver_v2 2>/dev/null || true');
             } catch (e) {}
-             */
         } else {
             return true;
         }
