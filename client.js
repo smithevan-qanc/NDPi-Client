@@ -88,7 +88,6 @@ function getDeviceModel() {
     }
 }
 function getLocalIP() {
-    console.log(`( ⚡ ) Func: getLocalIP`);
     const interfaces = os.networkInterfaces();
     for (const name of Object.keys(interfaces)) {
         for (const iface of interfaces[name]) {
@@ -763,28 +762,18 @@ class NDPiClient {
                 version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
             }
         };
-        console.log('update date');
 
-        let kioskResult = this.launchDisplayKiosk();
-        console.log('kiosk result');
         let delay;
-        console.log('delay');
 
         if (kioskResult === 'open') {
-        console.log('open');
             delay = 100;
         } else if (kioskResult === 'new') {
-        console.log('new');
             delay = 1000;
-        } else if (kioskResult === 'error') {
-        console.log('error');
-            setTimeout(() => this.broadcastToDisplay(message), 5000);
-            return;
         }
-        console.log('return');
+
+        console.log('timeout to send', delay);
 
         setTimeout(() => {
-        console.log('timeout to send');
             consoleLog('(↑↑) Display Server: ws', { type: displayMode });
             const data = JSON.stringify(updateData);
     
@@ -1389,6 +1378,7 @@ class NDPiClient {
 
         this.saveState(commandInfo);
 
+        this.launchDisplayKiosk();
         this.broadcastToDisplay();
 
         this.killNdiReceiver();
@@ -1409,6 +1399,7 @@ class NDPiClient {
 
         this.saveState(commandInfo);
 
+        this.launchDisplayKiosk();
         this.broadcastToDisplay();
 
         this.killNdiReceiver();
