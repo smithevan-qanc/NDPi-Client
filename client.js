@@ -1203,6 +1203,7 @@ class NDPiClient {
             try {
                 consoleLog('[ ndi ] ⸺  ▶ [SIGKILL]');
                 this.ndiProcess.kill('SIGKILL'); // Use SIGKILL for immediate termination
+                this.ndiProcess = null;
             } catch (e) {}
         }
 
@@ -1236,9 +1237,9 @@ class NDPiClient {
         if (!sourceName || sourceName === 'None') {
             this.__client.ndi.source.target = null;
             this.broadcastToDisplay();
-            setTimeout(() => {
+            //setTimeout(() => {
                 this.killNdiReceiver();
-            }, 1000);
+            //}, 1000);
         } else {
             this.startNDIReceiver(sourceName);
         }
@@ -1252,16 +1253,15 @@ class NDPiClient {
 
         this.broadcastToDisplay({ type: `ndi-init` });
 
+        this.killNdiReceiver();
         setTimeout(() => {
             this._startNDIReceiverInternal(sourceName);
-        }, 200);
+        }, 1000);
 
     }
     
     _startNDIReceiverInternal(sourceName) {
         console.log(`( ⚡ ) Func: _startNDIReceiverInternal`);
-
-        this.killNdiReceiver();
 
         if (!fs.existsSync(PATH_NDI_RECEIVER)) {
             consoleLog('[ERROR] ndi', { Path: PATH_NDI_RECEIVER }, { error: 'Receiver path not found.' });
