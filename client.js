@@ -749,11 +749,20 @@ class NDPiClient {
 
     launchDisplayKiosk() {
 
-        console.log('Display Clients');
+        let connectedDisplayClients = [];
         this.displayClients.forEach((val) => {
-            console.log(val.readyState);
+            connectedDisplayClients.push({ state: val.readyState });
         });
-        console.log('Display Clients Length', this.displayClients.values().length);
+
+        console.log(connectedDisplayClients);
+        if (connectedDisplayClients.length === 1) {
+            console.log('Abording Display Launch');
+            return;
+        } else if (connectedDisplayClients >= 2) {
+            console.log('Killing Display Instances');
+            exec('pkill -f "chromium" 2>/dev/null')
+        }
+        console.log('Opening Chromium Display');
 
         //const instanceCheck = `pgrep -f "chromium.*localhost:${this.__client.config.displayPort}" 2`;
         const instanceCheck = 'pgrep -f "chromium" 2>/dev/null';
@@ -779,7 +788,7 @@ class NDPiClient {
         exec(instanceCheck, (err, stdout, stderr) => {
             const stdArry = CRLFArray(stdout);
             if (stdArry.length < 3) {
-                consoleLog('launching new overlay instance');
+                //consoleLog('launching new overlay instance');
                 exec(newInstance, (error, stdout, stderr) => {
                     if (error) {
                         consoleLog('[failed] launching overlay instance', stdout, stderr);
