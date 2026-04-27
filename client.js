@@ -457,10 +457,10 @@ class NDPiClient {
             this.serverWs.on('message', (data) => {
                 try {
                     const message = JSON.parse(data);
-                    consoleLog('(↓↑) ndpi Server', message);
+                    consoleLog('(↓↓) ndpi Server', message);
                     this.handleServerMessage(message);
                 } catch (error) {
-                    consoleLog('(↓↑) ndpi server', data, error);
+                    consoleLog('(↓↓) ndpi server', data, error);
                 }
             });
             
@@ -478,6 +478,8 @@ class NDPiClient {
             
             this.serverWs.on('error', (error) => {
                 consoleLog('[connection error] ndpi server', null, error);
+                clearInterval(this.statusInterval);
+                this.statusInterval = null;
             });
             
         } catch (error) {
@@ -1360,10 +1362,11 @@ class NDPiClient {
         this.saveState(commandInfo);
 
         this.launchDisplayKiosk();
-        this.broadcastToDisplay();
 
-        this.killNdiReceiver();
-        this.sendStatusToServer();
+        setTimeout(() => {
+            this.killNdiReceiver();
+            this.sendStatusToServer();
+        }, 1000);
 
     }
 
@@ -1381,10 +1384,10 @@ class NDPiClient {
         this.saveState(commandInfo);
 
         this.launchDisplayKiosk();
-        this.broadcastToDisplay();
 
-        this.killNdiReceiver();
-        this.sendStatusToServer();
+        setTimeout(() => {
+            this.killNdiReceiver();
+        }, 1000);
     }
 
     applyNetworkSettings(config) {
