@@ -1505,10 +1505,10 @@ process.on('exit', (code) => {
     //                                            N D P i - M O N I T O R ═════ END ═════
 });
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', (err, orig) => {
     console.log(' ');
     console.log(' ');
-    consoleLog('UNCAUGHT EXCEPTION', null, err);
+    consoleLog('UNCAUGHT EXCEPTION', orig, err);
     console.log(' ');
     console.log(' ');
 });
