@@ -26,13 +26,13 @@
     <application name="*ndi_receiver_v2">
       <decor>no</decor>
       <layer>above</layer>
-      <maximized>true</maximized>
+      <maximized>Horizontal</maximized>
     </application>
 
     <application name="*">
       <decor>no</decor>
       <layer>above</layer>
-      <maximized>true</maximized>
+      <maximized>Horizontal</maximized>
     </application>
 
     <!--  Display Browser  -->

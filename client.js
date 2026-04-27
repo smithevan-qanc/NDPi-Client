@@ -298,7 +298,7 @@ class NDPiClient {
 
         setTimeout(() => {
             this.displayStartup();
-        }, 1000);
+        }, 1500);
     }
 
     displayStartup() {
@@ -311,14 +311,12 @@ class NDPiClient {
                 exec('xdotool mousemove 3840 0', (error, stdout, stderr) => {
                     if (error) consoleLog('xdotool error', null, stderr);
                 });
+                this.launchDisplayKiosk();
                 setTimeout(() => {
                     if (this.__client.ndi.source.target) {
                         this.startNDIReceiver(this.__client.ndi.source.target);
-                        setTimeout(() => {
-                            this.launchDisplayKiosk();
-                        }, 8000);
                     } else {
-                        this.launchDisplayKiosk();
+                        this.broadcastToDisplay();
                     }
                 }, 2000);   // 3rd.     If source is set, start NDI Receiver - wait 8s - launch display, else launch display.
             }, 500);            // 2nd.     Move cursor to top right (activate autohide taskbar) Then ^^
@@ -451,7 +449,7 @@ class NDPiClient {
                 this.sendStatusToServer();
                 this.statusInterval = setInterval(() => {
                     this.sendStatusToServer();
-                    //this.broadcastToDisplay({ type: 'ndpi-server-connected' });
+                    this.broadcastToDisplay({ type: 'ndpi-server-connected' });
                 }, sendStatusInterval);
                 
             });
@@ -723,7 +721,9 @@ class NDPiClient {
             this.displayClients.add(ws);
             
             // Send current state
-            //this.broadcastToDisplay();
+            setTimeout(() => {
+                this.broadcastToDisplay();
+            }, 1500);
             
             ws.on('close', () => {
                 this.displayClients.delete(ws);
@@ -740,7 +740,7 @@ class NDPiClient {
         });
     }
 
-    broadcastToDisplay(message) {
+    broadcastToDisplay(message = {}, ws) {
         console.log(`( ⚡ ) Func: broadcastToDisplay`);
 
         const currentConfig = this.__client;
@@ -760,21 +760,19 @@ class NDPiClient {
             }
         };
 
-        let delay = 1000;
         let connectedDisplayClients = [];
 
-        this.displayClients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) connectedDisplayClients.push({ state: client.readyState });
-        });
+        if (ws) {
+            ws.send(data);
+        } else {
+            consoleLog('(↑↑) Display Server: ws', { type: displayMode });
+            const data = JSON.stringify(updateData);
 
-        if (connectedDisplayClients.length >= 1) delay = 100;
+            this.displayClients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) client.send(data);
+            });
+        }
 
-        consoleLog('(↑↑) Display Server: ws', { type: displayMode });
-        const data = JSON.stringify(updateData);
-
-        this.displayClients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) client.send(data);
-        });
     }
 
     launchDisplayKiosk() {
@@ -1209,18 +1207,13 @@ class NDPiClient {
             try {
                 consoleLog('[ ndi ] ⸺  ▶ [SIGKILL]');
                 this.ndiProcess.kill('SIGKILL'); // Use SIGKILL for immediate termination
-            } catch (e) {} finally {
-
-                return true;
-            }
-
-            // Kill any orphaned NDI processes
-            try {
-                require('child_process').execSync('pkill -9 ndi_receiver_v2 2>/dev/null || true');
             } catch (e) {}
-        } else {
-            return true;
         }
+
+        // Kill any orphaned NDI processes
+        try {
+            exec('pkill -9 ndi_receiver_v2 2>/dev/null || true');
+        } catch (e) {}
     }
 
     setNDISource(sourceName, commandInfo = {}) {
@@ -1246,7 +1239,7 @@ class NDPiClient {
         // If source is None or empty, just stop
         if (!sourceName || sourceName === 'None') {
             this.__client.ndi.source.target = null;
-            //this.broadcastToDisplay();
+            this.broadcastToDisplay();
             setTimeout(() => {
                 this.killNdiReceiver();
             }, 1000);
@@ -1261,7 +1254,7 @@ class NDPiClient {
 
         consoleLog('[Establishing connection] NDI');
 
-        //this.broadcastToDisplay({ type: `ndi-init` });
+        this.broadcastToDisplay({ type: `ndi-init` });
 
         setTimeout(() => {
             this._startNDIReceiverInternal(sourceName);
@@ -1277,7 +1270,7 @@ class NDPiClient {
         if (!fs.existsSync(PATH_NDI_RECEIVER)) {
             consoleLog('[ERROR] ndi', { Path: PATH_NDI_RECEIVER }, { error: 'Receiver path not found.' });
             this.scheduleReconnect();
-            //this.broadcastToDisplay();
+            this.broadcastToDisplay();
             return;
         }
         
