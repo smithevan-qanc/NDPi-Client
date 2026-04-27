@@ -492,7 +492,6 @@ class NDPiClient {
     }
 
     getSystemStats() {
-        console.log(`( ⚡ ) Func: getSystemStats`);
 
         const stats = {
             cpu: 0,
@@ -540,7 +539,6 @@ class NDPiClient {
     }
 
     sendStatusToServer() {
-        console.log(`( ⚡ ) Func: sendStatusToServer`);
 
         if (!this.serverWs || this.serverWs.readyState !== WebSocket.OPEN) return;
         

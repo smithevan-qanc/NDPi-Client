@@ -21,13 +21,21 @@
     <textColor>#81C127</textColor>
   </theme>
   <applications>
+    
     <!--  NDI Receiver <<Must Be: name="ndi_receiver_v2*">>  -->
-    <application name="*">
+    <application name="*ndi_receiver*">
       <decor>no</decor>
+      <layer>above</layer>
     </application>
+
     <!--  Display Browser  -->
-    <application class="Chromium">
+    <application name="chromium">
+      <fullscreen>yes</fullscreen>
       <layer>below</layer>
+    </application>
+
+    <application name="*vncserver*">
+      <skip_taskbar>yes</skip_taskbar>
     </application>
 
     <!--
