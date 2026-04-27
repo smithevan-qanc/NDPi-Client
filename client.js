@@ -451,7 +451,7 @@ class NDPiClient {
                 this.sendStatusToServer();
                 this.statusInterval = setInterval(() => {
                     this.sendStatusToServer();
-                    this.broadcastToDisplay({ type: 'ndpi-server-connected' });
+                    //this.broadcastToDisplay({ type: 'ndpi-server-connected' });
                 }, sendStatusInterval);
                 
             });
@@ -725,7 +725,7 @@ class NDPiClient {
             this.displayClients.add(ws);
             
             // Send current state
-            this.broadcastToDisplay();
+            //this.broadcastToDisplay();
             
             ws.on('close', () => {
                 this.displayClients.delete(ws);
@@ -1248,7 +1248,7 @@ class NDPiClient {
         // If source is None or empty, just stop
         if (!sourceName || sourceName === 'None') {
             this.__client.ndi.source.target = null;
-            this.broadcastToDisplay();
+            //this.broadcastToDisplay();
             setTimeout(() => {
                 this.killNdiReceiver();
             }, 1000);
@@ -1263,7 +1263,7 @@ class NDPiClient {
 
         consoleLog('[Establishing connection] NDI');
 
-        this.broadcastToDisplay({ type: `ndi-init` });
+        //this.broadcastToDisplay({ type: `ndi-init` });
 
         setTimeout(() => {
             this._startNDIReceiverInternal(sourceName);
@@ -1279,7 +1279,7 @@ class NDPiClient {
         if (!fs.existsSync(PATH_NDI_RECEIVER)) {
             consoleLog('[ERROR] ndi', { Path: PATH_NDI_RECEIVER }, { error: 'Receiver path not found.' });
             this.scheduleReconnect();
-            this.broadcastToDisplay();
+            //this.broadcastToDisplay();
             return;
         }
         
