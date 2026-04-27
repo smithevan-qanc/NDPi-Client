@@ -406,9 +406,14 @@ class NDPiClient {
 
     getConfig() {
         console.log(`( ⚡ ) Func: getConfig`);
+        let data;
         try {
-            if (fs.existsSync(PATH_CONFIG)) return JSON.parse(fs.readFileSync(PATH_CONFIG, 'utf8'));
-        } catch (e) {} finally {
+            if (fs.existsSync(PATH_CONFIG)) {
+                return JSON.parse(fs.readFileSync(PATH_CONFIG, 'utf8'));
+            } else {
+                return null;
+            }
+        } catch (e) {
             return null;
         }
     }
