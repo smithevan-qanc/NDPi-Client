@@ -8,12 +8,12 @@
  *  -   Launching NDI video streams and displaying them to HDMI out.
  */
 const WebSocket = require('ws');
-const http = require('http');
-const bonjour = require('bonjour')();
-const os = require('os');
-const fs = require('fs');
-const path = require('path');
-const { exec } = require('child_process');
+const http      = require('http');
+const bonjour   = require('bonjour')();
+const os        = require('os');
+const fs        = require('fs');
+const path      = require('path');
+const { exec }  = require('child_process');
 
 const readFile  = (pathToFile, bufferEncoding = 'utf8') => fs.existsSync(pathToFile) ? fs.readFileSync(pathToFile, bufferEncoding) : bufferEncoding === 'utf8' ? '' : null;
 const CRLFArray = string => string.split(/\r?\n/);

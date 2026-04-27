@@ -157,7 +157,7 @@
     </div>
 
     <script>
-        class ConnectWebsocket {
+        class DisplayServer {
             constructor() {
                 this._ws = null;
                 this.protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -168,9 +168,7 @@
             }
 
             disconnect() {
-                if (this._ws && this._ws.readyState === WebSocket.OPEN) {
-                    this._ws.close();
-                }
+                if (this._ws && this._ws.readyState === WebSocket.OPEN) this._ws.close();
                 this._ws = null;
             }
 
@@ -344,7 +342,7 @@
         setTimeout(() => {
             showOverlay();
             //connect();
-            const server = new ConnectWebsocket();
+            const server = new DisplayServer();
         }, 500);
 
         // Prevent screen from sleeping

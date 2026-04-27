@@ -55,6 +55,7 @@ tmp/
 temp/
 
 *00path
+*NOTES.txt
 
 complete-deploy-client.sh
 GitHub-Deploy-Client.sh
@@ -64,5 +65,4 @@ updateGit.sh
 GitHubRepoUrl.txt
 zzTest.sh
 VERSION-NOTES.md
-version-notes.txt
 MANUAL-COMMANDS.md
