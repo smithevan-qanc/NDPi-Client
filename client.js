@@ -44,7 +44,6 @@ function startupConsoleLog() {
         
 `);
 }
-// N D P i - M O N I T O R
 function consoleLog(message = 'SYSTEM UPDATE', data, error) {
     const ipAddr = getLocalIP();
     if (error) {
@@ -406,16 +405,15 @@ class NDPiClient {
 
     getConfig() {
         console.log(`( ⚡ ) Func: getConfig`);
-        let data;
+        let data = null;
         try {
             if (fs.existsSync(PATH_CONFIG)) {
-                return JSON.parse(fs.readFileSync(PATH_CONFIG, 'utf8'));
-            } else {
-                return null;
+                data = JSON.parse(fs.readFileSync(PATH_CONFIG, 'utf8'));
             }
         } catch (e) {
-            return null;
+            consoleLog('Get Config', null, e);
         }
+        return data;
     }
 
     connectToServer(serverAddress) {
@@ -1507,7 +1505,9 @@ process.on('SIGTERM', () => {
 
 process.on('exit', (code) => {
     console.log(`Exit Code: ${code}`);
-    console.log('══════════════════════════════════════ END OF NDPi MONITOR PROCESS ═════');
+    //console.log('══════════════════════════════════════ END OF NDPi MONITOR PROCESS ═════');
+    console.log('════════════════════════════════ N D P i - M O N I T O R ═════ END ═════');
+    //                                            N D P i - M O N I T O R ═════ END ═════
 });
 
 process.on('uncaughtException', (err) => {
