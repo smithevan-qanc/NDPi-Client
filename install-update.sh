@@ -11,7 +11,6 @@ install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
     sudo systemctl restart ndpi-monitor-client.service
-    export DISPLAY=:0
     sudo lxpanelctl-pi notify "Software Update In Progress..."
     # sudo reboot
 }
