@@ -746,9 +746,10 @@ class NDPiClient {
         console.log(`( ⚡ ) Func: broadcastToDisplay`);
 
         const currentConfig = this.__client;
-        console.log('current config', currentConfig);
+        console.log('Current Config:', currentConfig);
         const displayMode = message.type || this.ndiProcess ? 'show-blank' : `show-${currentConfig.config.displayMode}`;
         console.log('display mode');
+
         const updateData = {
             type: displayMode,
             serverIp: currentConfig.link.ip.split(':')[0] || '',
@@ -762,12 +763,18 @@ class NDPiClient {
                 version: `${versionCurrent}${versionIsStable ? ' (Stable)' : ''}`,
             }
         };
+        console.log('UpdateData:', updateData);
 
         let delay;
+        let connectedDisplayClients = [];
 
-        if (kioskResult === 'open') {
+        this.displayClients.forEach((val) => {
+            connectedDisplayClients.push({ state: val.readyState });
+        });
+
+        if (connectedDisplayClients.length === 1) {
             delay = 100;
-        } else if (kioskResult === 'new') {
+        } else if (connectedDisplayClients.length >= 2) {
             delay = 1000;
         }
 
