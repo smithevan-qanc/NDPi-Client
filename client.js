@@ -747,7 +747,7 @@ class NDPiClient {
         console.log(`( ⚡ ) Func: broadcastToDisplay`);
 
         const currentConfig = this.getConfig() || this.__client;
-        console.log('current config');
+        console.log('current config', currentConfig);
         const displayMode = message.type || this.ndiProcess ? 'show-blank' : `show-${currentConfig.config.displayMode}`;
         console.log('display mode');
         const updateData = {
