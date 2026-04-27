@@ -1506,16 +1506,16 @@ process.on('exit', (code) => {
 });
 
 process.on('uncaughtException', (err, orig) => {
-    console.log(' ');
-    console.log(' ');
-    consoleLog('UNCAUGHT EXCEPTION', orig, err);
-    console.log(' ');
-    console.log(' ');
+    console.log('*');
+    console.log('*');
+    consoleLog('UNCAUGHT EXCEPTION', null, err);
+    console.log('*');
+    console.log('*');
 });
 process.on('unhandledRejection', (err) => {
-    console.log(' ');
-    console.log(' ');
+    console.log('*');
+    console.log('*');
     consoleLog('UNHANDLED REJECTION', null, err);
-    console.log(' ');
-    console.log(' ');
+    console.log('*');
+    console.log('*');
 });
