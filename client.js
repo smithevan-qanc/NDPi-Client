@@ -447,9 +447,9 @@ class NDPiClient {
 
                 // Start/Repeat Status Updates to Server
                 this.sendStatusToServer();
+                this.broadcastToDisplay({ type: 'ndpi-server-connected' });
                 this.statusInterval = setInterval(() => {
                     this.sendStatusToServer();
-                    this.broadcastToDisplay({ type: 'ndpi-server-connected' });
                 }, sendStatusInterval);
                 
             });
@@ -738,7 +738,9 @@ class NDPiClient {
         });
 
         displayServer.listen(this.__client.config.displayPort, () => {
-            consoleLog('[online] display server', {url: `http://${this.__client.config.ip}:${this.__client.config.displayPort}`});
+            consoleLog('[online] display server', {
+                url: `http://${this.__client.config.ip}:${this.__client.config.displayPort}`
+            });
         });
     }
 
