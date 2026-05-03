@@ -670,8 +670,8 @@ class NDPiClient {
             let filePath;
             const assetsDir = path.join(__dirname, 'assets');
             
-            if (req.url === '/' || req.url === '/index.html') {
-                filePath = path.join(__dirname, 'index.html');
+            if (req.url === '/' || req.url === '/client.html') {
+                filePath = path.join(__dirname, 'client.html');
             } else if (req.url.startsWith('/assets/')) {
                 filePath = path.join(assetsDir, req.url.substring(8));
             } else {
