@@ -18,10 +18,10 @@ const { exec }  = require('child_process');
 const readFile  = (pathToFile, bufferEncoding = 'utf8') => fs.existsSync(pathToFile) ? fs.readFileSync(pathToFile, bufferEncoding) : bufferEncoding === 'utf8' ? '' : null;
 const CRLFArray = string => string.split(/\r?\n/);
 
-const PATH_VERSION_CURRENT  = path.join(__dirname, 'version-current.txt');
-const PATH_VERSION_STABLE   = path.join(__dirname, 'version-stable.txt');
+const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
+const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
 const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
-const PATH_CONFIG           = path.join(__dirname, 'client-state.json');
+const PATH_CONFIG           = path.join(__dirname, 'data', 'client-state.json');
 
 /** VERSION CONTROL **/
 const versionCurrent  = readFile(PATH_VERSION_CURRENT) || '';
@@ -183,6 +183,8 @@ class NDPiClient {
         startupConsoleLog();
         this.defaultDeviceName  = 'NDPi Client';
         this.displayClients     = new Set();
+        this.localMachineGUI    = null;
+        this.ndiProcess         = null;
         this.ndiReconnectTimer  = null;
 
         this.__client = {
@@ -668,8 +670,8 @@ class NDPiClient {
             let filePath;
             const assetsDir = path.join(__dirname, 'assets');
             
-            if (req.url === '/' || req.url === '/display.html') {
-                filePath = path.join(__dirname, 'display.html');
+            if (req.url === '/' || req.url === '/index.html') {
+                filePath = path.join(__dirname, 'index.html');
             } else if (req.url.startsWith('/assets/')) {
                 filePath = path.join(assetsDir, req.url.substring(8));
             } else {
@@ -774,15 +776,24 @@ class NDPiClient {
 
     }
 
-    launchDisplayKiosk() {
-        console.log(`( ⚡ ) Func: launchDisplayKiosk`);
+    killOverlayBrowser() {
 
+    }
+
+    launchOverlayBrowser() {
         /**
          * This Function Returns:
          *      'open'  for Chromium instance already started.
          *      'new'   for a new instance of Chromium started.
          *      'error' indicating logic to retry starting Chromium.
          */
+
+        if (this.localMachineGUI) {
+            return 'open';
+        }
+        console.log(`( ⚡ ) Func: launchOverlayBrowser`);
+
+        /*
 
         let connectedDisplayClients = [];
 
@@ -796,8 +807,10 @@ class NDPiClient {
             exec('pkill -f "chromium" 2>/dev/null');
         }
 
+        */
+
         const instanceCheck = 'pgrep -f "chromium" 2>/dev/null';
-        
+
         const newInstance = `/usr/bin/chromium \
             --kiosk \
             --disable-popup-blocking \
@@ -815,13 +828,25 @@ class NDPiClient {
             --disable-web-security \
             --touch-events=enabled \
             --start-fullscreen \
+            --user-data-dir=${os.homedir()}/.config/chromium \
             http://localhost:${this.__client.config.displayPort}/ &`;
 
     //    exec(instanceCheck, (err, stdout, stderr) => {
     //        const stdArry = CRLFArray(stdout);
     //        if (stdArry.length < 3) {
 
+        const { spawn } = require('child_process');
+
         consoleLog('launching new overlay instance');
+        this.localMachineGUI = spawn(newInstance, {
+            env: {
+                ...process.env,
+                DISPLAY: ':0',
+                XAUTHORITY: '/home/ndpi-client/.Xauthority',
+            },
+            stdio: ['ignore', 'pipe', 'pipe']
+        });
+
         exec(newInstance, (error, stdout, stderr) => {
             if (error) {
                 consoleLog('[failed] launching overlay instance', stdout, stderr);
@@ -1366,7 +1391,7 @@ class NDPiClient {
 
         this.saveState(commandInfo);
 
-        this.launchDisplayKiosk();
+        this.launchOverlayBrowser();
 
         setTimeout(() => {
             this.killNdiReceiver();
@@ -1388,7 +1413,7 @@ class NDPiClient {
 
         this.saveState(commandInfo);
 
-        this.launchDisplayKiosk();
+        this.launchOverlayBrowser();
 
         setTimeout(() => {
             this.killNdiReceiver();

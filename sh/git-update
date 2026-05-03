@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-cd "$(dirname "$0")"
+cd "$(dirname "${0}")/.."
 
-BRANCH="$(head -n 1 version-git.txt)"
+BRANCH="$(head -n 1 version/git)"
 
 git fetch origin $BRANCH
 
@@ -12,10 +12,10 @@ REMOTE=$(git rev-parse origin/$BRANCH)
 
 if [ "$LOCAL" != "$REMOTE" ]; then
     git reset --hard origin/$BRANCH
-    chmod +x git-update.sh
-    chmod +x install-update.sh
+    chmod +x sh/git-update
+    chmod +x sh/install-update
     echo ""
     echo "PREPARING TO UPDATE"
     sleep 1
-    sudo ./install-update.sh
+    sudo ./sh/install-update
 fi

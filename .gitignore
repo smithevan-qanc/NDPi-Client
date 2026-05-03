@@ -57,12 +57,14 @@ temp/
 *00path
 *NOTES.txt
 
+version/notes
+
 complete-deploy-client.sh
 GitHub-Deploy-Client.sh
 initiateGit.sh
 set-res.sh
 updateGit.sh
 GitHubRepoUrl.txt
-zzTest.sh
+zzTest
 VERSION-NOTES.md
 MANUAL-COMMANDS.md

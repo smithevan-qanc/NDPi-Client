@@ -15,4 +15,4 @@ xset -dpms
 xset s noblank
 
 # Hide mouse cursor after 0.2 seconds of inactivity
-unclutter -idle 0.2 &
+# unclutter -idle 0.2 &
