@@ -203,8 +203,8 @@ class NDPiClient {
             ndi: {
                 status: 'idle',
                 source: {
-                    current: null,
-                    target: null,
+                    current: '',
+                    target: '',
                 },
                 resolution: null,
                 framerate: null,
