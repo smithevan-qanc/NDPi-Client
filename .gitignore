@@ -60,10 +60,10 @@ temp/
 version/notes
 
 complete-deploy-client.sh
-GitHub-Deploy-Client.sh
-initiateGit.sh
-set-res.sh
-updateGit.sh
+GitHub-Deploy-Client
+initiateGit
+update-git-hub
+ndi_receiverv2.cpp
 GitHubRepoUrl.txt
 zzTest
 VERSION-NOTES.md
