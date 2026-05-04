@@ -855,10 +855,10 @@ class NDPiClient {
     //        const stdArry = CRLFArray(stdout);
     //        if (stdArry.length < 3) {
 
-        const { spawn } = require('child_process');
+        const { exec } = require('child_process');
 
         consoleLog('launching new overlay instance');
-        this.localMachineGUI = spawn(newInstance, {
+        this.localMachineGUI = exec(newInstance, {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
