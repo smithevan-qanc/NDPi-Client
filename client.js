@@ -777,8 +777,21 @@ class NDPiClient {
 
     }
 
-    killOverlayBrowser() {
+    relaunchOverlayBrowser() {
+        if (this.localMachineGUI) {
+            this.killOverlayBrowser();
+        }
+        setTimeout(() => {
+            if (this.localMachineGUI) return;
+            this.launchOverlayBrowser();
+        }, 1500);
+    }
 
+    killOverlayBrowser() {
+        if (this.localMachineGUI) {
+            this.localMachineGUI.kill();
+            this.localMachineGUI = null;
+        }
     }
 
     launchOverlayBrowser() {
@@ -830,7 +843,7 @@ class NDPiClient {
             --touch-events=enabled \
             --start-fullscreen \
             --user-data-dir=${os.homedir()}/.config/chromium \
-            http://localhost:${this.__client.config.displayPort}/ &`;
+            http://localhost:${this.__client.config.displayPort}/`;
 
     //    exec(instanceCheck, (err, stdout, stderr) => {
     //        const stdArry = CRLFArray(stdout);
@@ -848,6 +861,16 @@ class NDPiClient {
             stdio: ['ignore', 'pipe', 'pipe']
         });
 
+        this.localMachineGUI.on('exit', () => {
+            this.localMachineGUI = null;
+        });
+
+        this.localMachineGUI.on('error', (err) => {
+            consoleLog('Chromium Error', null, err);
+            this.relaunchOverlayBrowser();
+        });
+
+        /*
         exec(newInstance, (error, stdout, stderr) => {
             if (error) {
                 consoleLog('[failed] launching overlay instance', stdout, stderr);
@@ -856,7 +879,7 @@ class NDPiClient {
                 return 'new';
             }
         });
-
+ */
     //        } else if (err) {
     //            consoleLog('[ERROR] CHECKING OVERLAY INSTANCE', stdArry, stderr);
     //        }
