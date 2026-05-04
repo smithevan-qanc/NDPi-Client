@@ -1049,8 +1049,6 @@ class NDPiClient {
             }
 
             if (req.method === 'GET') {
-                let body = '';
-                req.on('data', chunk => body += chunk);
                 req.on('end', async () => {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
 
