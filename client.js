@@ -313,7 +313,7 @@ class NDPiClient {
                 exec('xdotool mousemove 3840 0', (error, stdout, stderr) => {
                     if (error) consoleLog('xdotool error', null, stderr);
                 });
-                this.launchDisplayKiosk();
+                this.launchOverlayBrowser();
                 setTimeout(() => {
                     if (this.__client.ndi.source.target) {
                         this.startNDIReceiver(this.__client.ndi.source.target);
