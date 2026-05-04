@@ -848,7 +848,7 @@ class NDPiClient {
         newInstance = '/usr/bin/chromium ';
         newInstance += '--kiosk ';
         newInstance += `--user-data-dir=${os.homedir()}/.config/chromium `;
-        newInstance += `http://localhost:${this.__client.config.displayPort}/`;
+        newInstance += `http://localhost:${this.__client.config.displayPort}/ &`;
          
 
     //    exec(instanceCheck, (err, stdout, stderr) => {
