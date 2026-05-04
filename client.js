@@ -21,7 +21,7 @@ const CRLFArray = string => string.split(/\r?\n/);
 const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
 const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
 const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
-const PATH_CONFIG           = path.join(__dirname, 'data', 'client-state.json');
+const PATH_CONFIG           = path.join(__dirname, 'DATA_ndpi', 'client-state.json');
 
 /** VERSION CONTROL **/
 const versionCurrent  = readFile(PATH_VERSION_CURRENT) || '';
