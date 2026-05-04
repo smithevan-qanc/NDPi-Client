@@ -845,7 +845,7 @@ class NDPiClient {
             --user-data-dir=${os.homedir()}/.config/chromium \
             http://localhost:${this.__client.config.displayPort}/`;
         
-        //newInstance = '/usr/bin/chromium ';
+        newInstance = '/usr/bin/chromium ';
         //newInstance += '--kiosk ';
         //newInstance += `--user-data-dir=${os.homedir()}/.config/chromium `;
         //newInstance += `http://localhost:${this.__client.config.displayPort}/ &`;
@@ -855,10 +855,10 @@ class NDPiClient {
     //        const stdArry = CRLFArray(stdout);
     //        if (stdArry.length < 3) {
 
-        const { exec } = require('child_process');
+        const { exec, spawn } = require('child_process');
 
         consoleLog('launching new overlay instance');
-        this.localMachineGUI = exec(newInstance, {
+        this.localMachineGUI = spawn(newInstance, {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
