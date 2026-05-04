@@ -19,12 +19,10 @@ const readFile  = (pathToFile, bufferEncoding = 'utf8') => fs.existsSync(pathToF
 const CRLFArray = string => string.split(/\r?\n/);
 
 const DIR_ARRY              = path.join(__dirname).split('/');
-console.log(DIR_ARRY);
 const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
 const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
 const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
-console.log(PATH_NDI_RECEIVER);
-const PATH_CONFIG           = path.join(DIR_ARRY[0], DIR_ARRY[1], DIR_ARRY[2], 'DATA_ndpi', 'client-state.json');
+const PATH_CONFIG           = `/${DIR_ARRY[1]}/${DIR_ARRY[2]}/DATA_ndpi/client-state.json`;
 
 /** VERSION CONTROL **/
 const versionCurrent  = readFile(PATH_VERSION_CURRENT) || '';
