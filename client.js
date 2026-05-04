@@ -864,7 +864,7 @@ class NDPiClient {
                 DISPLAY: ':0',
                 XAUTHORITY: '/home/ndpi-client/.Xauthority',
             },
-            stdio: ['ignore', 'pipe', 'pipe']
+            //stdio: ['ignore', 'pipe', 'pipe']
         });
 
         this.localMachineGUI.on('exit', () => {
@@ -873,7 +873,7 @@ class NDPiClient {
 
         this.localMachineGUI.on('error', (err) => {
             consoleLog('Chromium Error', null, err);
-            this.relaunchOverlayBrowser();
+            //this.relaunchOverlayBrowser();
         });
 
         /*
