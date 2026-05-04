@@ -858,7 +858,7 @@ class NDPiClient {
         const { exec, spawn } = require('child_process');
 
         consoleLog('launching new overlay instance');
-        this.localMachineGUI = spawn(newInstance, {
+        this.localMachineGUI = exec(newInstance, {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
