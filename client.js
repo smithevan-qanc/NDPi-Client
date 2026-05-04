@@ -899,6 +899,7 @@ class NDPiClient {
         // Create HTTP server with REST API endpoints
         const server = http.createServer(async (req, res) => {
             const url = new URL(req.url, `http://${req.headers.host}`);
+            const handled = () => consoleLog(`(↓↑) [handled] ${url.pathname}`);
             
             // CORS headers
             res.setHeader('Access-Control-Allow-Origin', '*');
@@ -924,7 +925,6 @@ class NDPiClient {
             if (req.method === 'POST') {
                 let body = '';
                 req.on('data', chunk => body += chunk);
-
                 req.on('end', async () => {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
 
@@ -937,8 +937,6 @@ class NDPiClient {
                         },
                         res: { status: 200 }
                     });
-
-                    const handled = () => consoleLog(`(↓↑) [handled] ${url.pathname}`);
 
                     let data;
                     try {
@@ -1048,33 +1046,26 @@ class NDPiClient {
                 return;
             }
 
-            if (req.method === 'GET') {
-                req.on('end', async () => {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-
-                    consoleLog('(↓↓) command server: api', {
-                        req: {
-                            url: `${req.url}`,
-                            method: `${req.method}`,
-                        },
-                        res: { status: 200 }
-                    });
-
-                    const handled = () => consoleLog(`(↓↑) [handled] ${url.pathname}`);
-
-                    switch (url.pathname) {
-                        case '/control/browser/restart':
-                            this.relaunchOverlayBrowser();
-                            res.end(JSON.stringify({ status: 200, response: OK }));
-                            handled();
-                            break;
-                        default:
-                            res.end(JSON.stringify(this.__client));
-                            break;
-                    }
-                });
-                return;
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            consoleLog('(↓↓) command server: api', {
+                req: {
+                    url: `${req.url}`,
+                    method: `${req.method}`,
+                },
+                res: { status: 200 }
+            });
+            
+            switch (url.pathname) {
+                case '/control/browser/restart':
+                    this.relaunchOverlayBrowser();
+                    res.end(JSON.stringify({ status: 200, response: OK }));
+                    handled();
+                    break;
+                default:
+                    res.end(JSON.stringify(this.__client));
+                    break;
             }
+
         });
 
         this.wss = new WebSocket.Server({ server });
