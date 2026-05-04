@@ -23,6 +23,7 @@ console.log(DIR_ARRY);
 const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
 const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
 const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
+console.log(PATH_NDI_RECEIVER);
 const PATH_CONFIG           = path.join(DIR_ARRY[0], DIR_ARRY[1], DIR_ARRY[2], 'DATA_ndpi', 'client-state.json');
 
 /** VERSION CONTROL **/
