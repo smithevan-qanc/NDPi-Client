@@ -23,6 +23,7 @@ const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
 const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
 const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
 const PATH_CONFIG           = `/${DIR_ARRY[1]}/${DIR_ARRY[2]}/DATA_ndpi/client-state.json`;
+console.log(os);
 
 /** VERSION CONTROL **/
 const versionCurrent  = readFile(PATH_VERSION_CURRENT) || '';
@@ -784,7 +785,7 @@ class NDPiClient {
         setTimeout(() => {
             if (this.localMachineGUI) return;
             this.launchOverlayBrowser();
-        }, 1500);
+        }, 2000);
     }
 
     killOverlayBrowser() {
@@ -843,9 +844,9 @@ class NDPiClient {
             --touch-events=enabled \
             --start-fullscreen \
             --user-data-dir=${os.homedir()}/.config/chromium \
-            http://localhost:${this.__client.config.displayPort}/`;
+        http://localhost:${this.__client.config.displayPort}/`;
         
-        newInstance = '/usr/bin/chromium ';
+        //newInstance = '/usr/bin/chromium';
         //newInstance += '--kiosk ';
         //newInstance += `--user-data-dir=${os.homedir()}/.config/chromium `;
         //newInstance += `http://localhost:${this.__client.config.displayPort}/ &`;
@@ -1046,9 +1047,36 @@ class NDPiClient {
                 });
                 return;
             }
-            // GET - return status
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(this.__client));
+
+            if (req.method === 'GET') {
+                let body = '';
+                req.on('data', chunk => body += chunk);
+                req.on('end', async () => {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+
+                    consoleLog('(↓↓) command server: api', {
+                        req: {
+                            url: `${req.url}`,
+                            method: `${req.method}`,
+                        },
+                        res: { status: 200 }
+                    });
+
+                    const handled = () => consoleLog(`(↓↑) [handled] ${url.pathname}`);
+
+                    switch (url.pathname) {
+                        case '/control/browser/restart':
+                            this.relaunchOverlayBrowser();
+                            res.end(JSON.stringify({ status: 200, response: OK }));
+                            handled();
+                            break;
+                        default:
+                            res.end(JSON.stringify(this.__client));
+                            break;
+                    }
+                });
+                return;
+            }
         });
 
         this.wss = new WebSocket.Server({ server });
