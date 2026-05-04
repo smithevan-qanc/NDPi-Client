@@ -825,7 +825,7 @@ class NDPiClient {
 
         const instanceCheck = 'pgrep -f "chromium" 2>/dev/null';
 
-        const newInstance = `/usr/bin/chromium \
+        let newInstance = `/usr/bin/chromium \
             --kiosk \
             --disable-popup-blocking \
             --hide-crash-restore-bubble \
@@ -844,6 +844,12 @@ class NDPiClient {
             --start-fullscreen \
             --user-data-dir=${os.homedir()}/.config/chromium \
             http://localhost:${this.__client.config.displayPort}/`;
+        
+        newInstance = '/usr/bin/chromium ';
+        newInstance += '--kiosk ';
+        newInstance += `--user-data-dir=${os.homedir()}/.config/chromium `;
+        newInstance += `http://localhost:${this.__client.config.displayPort}/`;
+         
 
     //    exec(instanceCheck, (err, stdout, stderr) => {
     //        const stdArry = CRLFArray(stdout);
