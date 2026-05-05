@@ -750,9 +750,12 @@ class NDPiClient {
     broadcastToDisplay(message) {
         console.log(`( ⚡ ) Func: broadcastToDisplay`);
 
+        console.log('1');
         const currentConfig = this.__client;
+        console.log('1');
         const displayMode = message.type || `show-${this.__client.config.displayMode}`;
 
+        console.log('1');
         const updateData = {
             type: displayMode,
             serverIp: this.__client.link.ip.split(':')[0] || '',
@@ -767,14 +770,15 @@ class NDPiClient {
             }
         };
 
+        console.log('1');
         let connectedDisplayClients = [];
 
-            consoleLog('(↑↑) Display Server: ws', { type: displayMode });
-            const data = JSON.stringify(updateData);
+        consoleLog('(↑↑) Display Server: ws', { type: displayMode });
+        const data = JSON.stringify(updateData);
 
-            this.displayClients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) client.send(data);
-            });
+        this.displayClients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) client.send(data);
+        });
 
     }
 
