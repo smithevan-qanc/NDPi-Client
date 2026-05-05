@@ -10,11 +10,8 @@ set -e
 install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
-
-    sudo systemctl stop ndpi.service
     sleep 1
-    npm install
-    sudo systemctl start ndpi.service
+    sudo systemctl restart ndpi.service
     # sudo reboot
 }
 install
