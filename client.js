@@ -23,7 +23,26 @@ const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
 const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
 const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
 const PATH_CONFIG           = `/${DIR_ARRY[1]}/${DIR_ARRY[2]}/DATA_ndpi/client-state.json`;
-console.log(os);
+
+console.log(os.arch());
+console.log(os.availableParallelism());
+console.log(os.cpus());
+console.log(os.endianness());
+console.log(os.freemem());
+console.log(os.getPriority());
+console.log(os.homedir());
+console.log(os.hostname());
+console.log(os.loadavg());
+console.log(os.networkInterfaces());
+console.log(os.platform());
+console.log(os.release());
+console.log(os.tmpdir());
+console.log(os.totalmem());
+console.log(os.type());
+console.log(os.userInfo());
+console.log(os.uptime());
+console.log(os.version());
+console.log(os.machine());
 
 /** VERSION CONTROL **/
 const versionCurrent  = readFile(PATH_VERSION_CURRENT) || '';
@@ -748,14 +767,10 @@ class NDPiClient {
     }
 
     broadcastToDisplay(message = {}) {
-        console.log(`( ⚡ ) Func: broadcastToDisplay`);
 
-        console.log('1');
         const currentConfig = this.__client;
-        console.log('1');
         const displayMode = message.type || `show-${this.__client.config.displayMode}`;
 
-        console.log('1');
         const updateData = {
             type: displayMode,
             serverIp: this.__client.link.ip.split(':')[0] || '',
@@ -770,7 +785,6 @@ class NDPiClient {
             }
         };
 
-        console.log('1');
         let connectedDisplayClients = [];
 
         consoleLog('(↑↑) Display Server: ws', { type: displayMode });
@@ -810,7 +824,6 @@ class NDPiClient {
         if (this.localMachineGUI) {
             return 'open';
         }
-        console.log(`( ⚡ ) Func: launchOverlayBrowser`);
 
         /*
 
