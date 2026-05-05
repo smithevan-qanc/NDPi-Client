@@ -37,11 +37,6 @@ version="$(head -n 1 version/current)"
     #echo "..::::..::........:::..:::::::::....:::::::::::..:::::..:::.......:::..::::..::....:::::..::::::.......:::..:::::..::"
 #
 
-xdotool mousemove 3840 2160
-sleep 0.5
-xdotool mousemove 3840 0
-
-echo " "
 echo " "
 echo "  ███╗   ██╗██████╗ ██████╗ ██╗"
 echo "  ████╗  ██║██╔══██╗██╔══██╗╚═╝"
@@ -51,5 +46,9 @@ echo "  ██║ ╚████║██████╔╝██║     ██
 echo "  ╚═╝  ╚═══╝╚═════╝ ╚═╝     ╚═╝"
 echo "   v ${version} "
 echo " "
+
+xdotool mousemove 3840 2160
+sleep 0.5
+xdotool mousemove 3840 0
 
 sleep 5

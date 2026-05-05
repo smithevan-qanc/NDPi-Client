@@ -204,9 +204,12 @@ async function cecPowerOff(commandInfo = {}) {
 
 class NDPiClient {
     constructor() {
+        this.startup = exec(`./sh/startup`);
+        /**
         exec(`./sh/startup`, (error, stdout, stderr) => {
             if (!error) CRLFArray(stdout).forEach((line) => { console.log(line); });
         });
+         */
         
         this.defaultDeviceName  = 'NDPi Client';
         this.displayClients     = new Set();
