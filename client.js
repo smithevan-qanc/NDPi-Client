@@ -212,13 +212,7 @@ class NDPiClient {
         this.ndiProcess         = null;
         this.ndiReconnectTimer  = null;
         
-        exec(`./sh/resolutions`, {
-            env: {
-                ...process.env,
-                DISPLAY: ':0',
-                XAUTHORITY: '/home/ndpi-client/.Xauthority',
-            },
-        }, (error, stdout, stderr) => {
+        exec(`./sh/resolutions`, (error, stdout, stderr) => {
             var output = stdout.trim()
             if (error) {
                 console.log(stderr);
