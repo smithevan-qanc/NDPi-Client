@@ -302,7 +302,7 @@ class NDPiClient {
          * cat /sys/class/drm/card1/card1-HDMI-A-1/edid | edid-decode
          */
         
-        this.init_config();
+        await this.init_config();
         
         this.loadState();
 
@@ -323,14 +323,14 @@ class NDPiClient {
         }, 1500);
     }
 
-    init_config() {
+    async init_config() {
         this.__client = {
             name: this.defaultDeviceName,
             type: 'Certified NDPi Monitor',
             id: getDeviceId(),
             model: getDeviceModel(),
             config: {
-                ip: getLocalIP(),
+                ip: await getLocalIP(),
                 displayPort: 8080,
                 commandPort: 3001,
                 mdnsPort: 3002,
