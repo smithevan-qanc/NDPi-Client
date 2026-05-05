@@ -211,8 +211,9 @@ class NDPiClient {
         this.localMachineGUI    = null;
         this.ndiProcess         = null;
         this.ndiReconnectTimer  = null;
-
-        exec('./sh/resolutions', {
+        
+        console.log(`.${path.join(__dirname, 'sh', 'resolutions')}`);
+        exec(`.${path.join(__dirname, 'sh', 'resolutions')}`, {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
