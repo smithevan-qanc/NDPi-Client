@@ -235,6 +235,10 @@ async function cecPowerOff(commandInfo = {}) {
         }
     });
 }
+(async () => {
+    console.log('Waiting For Network...');
+    console.log(await getLocalIP());
+})();
 
 class NDPiClient {
     constructor() {
