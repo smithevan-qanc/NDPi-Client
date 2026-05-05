@@ -16,7 +16,6 @@ const os         = require('os');
 const fs         = require('fs');
 const path       = require('path');
 const { exec }   = require('child_process');
-const asyncExec  = require('util').promisify(exec);
 const { uptime } = require('process');
 const net        = require('net');
 
@@ -239,56 +238,26 @@ async function cecPowerOff(commandInfo = {}) {
 
 class NDPiClient {
     constructor() {
-        asyncExec(`./sh/startup`, (error, stdout, stderr) => {
+        exec(`./sh/startup`, (error, stdout, stderr) => {
             if (!error) CRLFArray(stdout).forEach((line) => { console.log(line); });
         });
         
-        this.defaultDeviceName              = 'NDPi Client';
-        this.connections__display           = new Set();
+        this.ws_connection__ndpi_server = null;
 
-        this.child_process__chromium        = null;
-        this.child_process__ndi_receiver    = null;
-        this.timer__ndi_reconnect           = null;
+        this.time_interval__reconnect_ndpi_server = 5000;
+        this.timer__reconnect_ndpi_server = null;
 
-        this.__client = {
-            name: this.defaultDeviceName,
-            type: 'Certified NDPi Monitor',
-            id: getDeviceId(),
-            model: getDeviceModel(),
-            config: {
-                ip: getLocalIP(),
-                displayPort: 8080,
-                commandPort: 3001,
-                mdnsPort: 3002,
-                displayMode: 'overlay', // either 'overlay' OR 'blank'
-                version: versionCurrent,
-            },
-            ndi: {
-                status: 'idle',
-                source: {
-                    current: '',
-                    target: '',
-                },
-                resolution: null,
-                framerate: null,
-                connectedAt: null,
-                uptime: null,
-            },
-            display: {
-                resolution: getHdmiResolution(),
-                cecEnabled: false,
-                mfr: null,
-            },
-            link: {
-                ip: 'localhost',
-                lastSeen: null,
-            },
-            lastCommand: {
-                source: null,
-                timestamp: null,
-                command: null,
-            },
-        };
+        this.time_interval__send_status_update = 5000;
+        this.timer__resend_status_update = null;
+
+        this.defaultDeviceName = 'NDPi Client';
+        this.ws_connections__display_server = new Set();
+
+        this.child_process__chromium = null;
+        this.child_process__ndi_receiver = null;
+        this.timer__reconnect_ndi = null;
+
+        this.__client = {};
 
         /**.   Path for Resolution List '/sys/class/drm/card1/card1-HDMI-A-1/modes'
          * 
@@ -332,11 +301,7 @@ class NDPiClient {
             ==> connected
          * cat /sys/class/drm/card1/card1-HDMI-A-1/edid | edid-decode
          */
-
         
-        
-        this.serverWs = null;
-        this.serverWsReconnectTimer = null;
         
         this.loadState();
 
@@ -355,6 +320,48 @@ class NDPiClient {
             this.awaitConnection();
             this.displayStartup();
         }, 1500);
+    }
+
+    init_config() {
+        this.__client = {
+            name: this.defaultDeviceName,
+            type: 'Certified NDPi Monitor',
+            id: getDeviceId(),
+            model: getDeviceModel(),
+            config: {
+                ip: getLocalIP(),
+                displayPort: 8080,
+                commandPort: 3001,
+                mdnsPort: 3002,
+                displayMode: 'overlay', // either 'overlay' OR 'blank'
+                version: versionCurrent,
+            },
+            ndi: {
+                status: 'idle',
+                source: {
+                    current: '',
+                    target: '',
+                },
+                resolution: null,
+                framerate: null,
+                connectedAt: null,
+                uptime: null,
+            },
+            display: {
+                resolution: getHdmiResolution(),
+                cecEnabled: false,
+                mfr: null,
+            },
+            link: {
+                ip: 'localhost',
+                lastSeen: null,
+            },
+            lastCommand: {
+                source: null,
+                timestamp: null,
+                command: null,
+            },
+        };
     }
 
     displayStartup() {
@@ -462,40 +469,34 @@ class NDPiClient {
         this.__client.link.ip = serverAddress;
         
         // Clean up existing connection
-        if (this.serverWs) {
-            try {
-                this.serverWs.close();
-            } catch {}
-            this.serverWs = null;
+        if (this.ws_connection__ndpi_server) {
+            try { this.ws_connection__ndpi_server.close(); } catch {}
+            this.ws_connection__ndpi_server = null;
         }
         
-        if (this.serverWsReconnectTimer) {
-            clearTimeout(this.serverWsReconnectTimer);
-            this.serverWsReconnectTimer = null;
+        if (this.timer__reconnect_ndpi_server) {
+            clearTimeout(this.timer__reconnect_ndpi_server);
+            this.timer__reconnect_ndpi_server = null;
         }
+
+        //consoleLog('[Establishing connection] ndpi server',{ WebSocket: wsUrl });
+        console.log('Connecting to NDPi Command Server')
         
         const wsUrl = `ws://${serverAddress}/ws/client`;
-        const reconnectionTimeout = 5000;
-        const sendStatusInterval = 5000;
-
-        consoleLog('[Establishing connection] ndpi server',{ WebSocket: wsUrl });
-        
         try {
-            this.serverWs = new WebSocket(wsUrl);
+            this.ws_connection__ndpi_server = new WebSocket(wsUrl);
             
-            this.serverWs.on('open', () => {
-                consoleLog('[connected] ndpi server', { details: `Sending status updates every ${sendStatusInterval / 1000} seconds.` });
-
-                // Start/Repeat Status Updates to Server
+            this.ws_connection__ndpi_server.on('open', () => {
+                consoleLog('[connected] ndpi server', { details: `Sending status updates every ${this.time_interval__send_status_update / 1000} seconds.` });
                 this.sendStatusToServer();
                 this.broadcastToDisplay({ type: 'ndpi-server-connected' });
-                this.statusInterval = setInterval(() => {
+                this.timer__resend_status_update = setInterval(() => {
                     this.sendStatusToServer();
-                }, sendStatusInterval);
+                }, this.time_interval__send_status_update);
                 
             });
             
-            this.serverWs.on('message', (data) => {
+            this.ws_connection__ndpi_server.on('message', (data) => {
                 try {
                     const message = JSON.parse(data);
                     consoleLog('(↓↓) ndpi Server', message);
@@ -505,28 +506,28 @@ class NDPiClient {
                 }
             });
             
-            this.serverWs.on('close', () => {
-                consoleLog('[disconnected] ndpi server', { ReconnectingIn: reconnectionTimeout / 1000 });
-                if (this.statusInterval) {
-                    clearInterval(this.statusInterval);
-                    this.statusInterval = null;
+            this.ws_connection__ndpi_server.on('close', () => {
+                consoleLog('[disconnected] ndpi server', { ReconnectingIn: this.time_interval__reconnect_ndpi_server / 1000 });
+                if (this.timer__resend_status_update) {
+                    clearInterval(this.timer__resend_status_update);
+                    this.timer__resend_status_update = null;
                 }
                 
-                this.serverWsReconnectTimer = setTimeout(() => {
+                this.timer__reconnect_ndpi_server = setTimeout(() => {
                     this.connectToServer(this.__client.link.ip);
-                }, reconnectionTimeout);
+                }, this.time_interval__reconnect_ndpi_server);
             });
             
-            this.serverWs.on('error', (error) => {
+            this.ws_connection__ndpi_server.on('error', (error) => {
                 consoleLog('[connection error] ndpi server', null, error);
-                clearInterval(this.statusInterval);
-                this.statusInterval = null;
+                clearInterval(this.timer__resend_status_update);
+                this.timer__resend_status_update = null;
             });
             
         } catch (error) {
             consoleLog('[connection failed] ndpi server', {ReconnectTimeout: 5000}, error);
             
-            this.serverWsReconnectTimer = setTimeout(() => {
+            this.timer__reconnect_ndpi_server = setTimeout(() => {
                 this.connectToServer(serverAddress);
             }, 5000);
         }
@@ -581,7 +582,7 @@ class NDPiClient {
 
     sendStatusToServer() {
 
-        if (!this.serverWs || this.serverWs.readyState !== WebSocket.OPEN) return;
+        if (!this.ws_connection__ndpi_server || this.ws_connection__ndpi_server.readyState !== WebSocket.OPEN) return;
         
         const systemStats = this.getSystemStats();
         
@@ -605,7 +606,7 @@ class NDPiClient {
         };
         
         try {
-            this.serverWs.send(JSON.stringify(status));
+            this.ws_connection__ndpi_server.send(JSON.stringify(status));
         } catch (error) {
             consoleLog('[failed] status update to server', null, error);
         }
@@ -656,7 +657,7 @@ class NDPiClient {
                 
             case 'ping':
                 consoleLog('(↑↓) ndpi Server: ws', { data: 'pong' });
-                this.serverWs.send(JSON.stringify({ type: 'pong', deviceId: this.__client.id }));
+                this.ws_connection__ndpi_server.send(JSON.stringify({ type: 'pong', deviceId: this.__client.id }));
                 break;
             default:
                 consoleLog(`(↑↓) [unhandled] ${message.type}`);
@@ -754,7 +755,7 @@ class NDPiClient {
         
         this.displayWss.on('connection', (ws) => {
             
-            this.connections__display.add(ws);
+            this.ws_connections__display_server.add(ws);
             
             // Send current state
             setTimeout(() => {
@@ -762,7 +763,7 @@ class NDPiClient {
             }, 1500);
             
             ws.on('close', () => {
-                this.connections__display.delete(ws);
+                this.ws_connections__display_server.delete(ws);
                 consoleLog('[disconnected] display server: ws');
             });
 
@@ -797,12 +798,12 @@ class NDPiClient {
             }
         };
 
-        let connectedconnections__display = [];
+        let connectedws_connections__display_server = [];
 
         consoleLog('(↑↑) Display Server: ws', { type: displayMode });
         const data = JSON.stringify(updateData);
 
-        this.connections__display.forEach(client => {
+        this.ws_connections__display_server.forEach(client => {
             if (client.readyState === WebSocket.OPEN) client.send(data);
         });
 
@@ -1059,7 +1060,8 @@ class NDPiClient {
                             load_avg: os.loadavg(),
                             uptime: os.uptime(),
                             uptime_ndpi: uptime(),
-                        }
+                        },
+                        get_stats: this.getSystemStats()
                     }));
                     break;
             }
@@ -1287,9 +1289,9 @@ class NDPiClient {
 
     setNDISource(sourceName, commandInfo = {}) {
 
-        if (this.timer__ndi_reconnect) {
-            clearTimeout(this.timer__ndi_reconnect);
-            this.timer__ndi_reconnect = null;
+        if (this.timer__reconnect_ndi) {
+            clearTimeout(this.timer__reconnect_ndi);
+            this.timer__reconnect_ndi = null;
         }
         
         this.__client.ndi.source.target = sourceName;
@@ -1297,7 +1299,7 @@ class NDPiClient {
         // Save server address if provided
         if (commandInfo.serverAddress) {
             this.__client.link.ip = commandInfo.serverAddress;
-            if (!this.serverWs || this.serverWs.readyState !== WebSocket.OPEN) {
+            if (!this.ws_connection__ndpi_server || this.ws_connection__ndpi_server.readyState !== WebSocket.OPEN) {
                 this.connectToServer(commandInfo.serverAddress);
             }
         }
@@ -1399,13 +1401,13 @@ class NDPiClient {
         if (
             !this.__client.ndi.source.target || 
             this.__client.ndi.source.target === 'None' || 
-            this.timer__ndi_reconnect
+            this.timer__reconnect_ndi
         ) return;
 
         this.broadcastToDisplay({type: `ndi-init`});
 
-        this.timer__ndi_reconnect = setTimeout(() => {
-            this.timer__ndi_reconnect = null;
+        this.timer__reconnect_ndi = setTimeout(() => {
+            this.timer__reconnect_ndi = null;
             if (
                 this.__client.ndi.source.target && 
                 this.__client.ndi.source.target !== 'None' && 
@@ -1416,9 +1418,9 @@ class NDPiClient {
 
     showOverlay(commandInfo = {}) {
 
-        if (this.timer__ndi_reconnect) {
-            clearTimeout(this.timer__ndi_reconnect);
-            this.timer__ndi_reconnect = null;
+        if (this.timer__reconnect_ndi) {
+            clearTimeout(this.timer__reconnect_ndi);
+            this.timer__reconnect_ndi = null;
         }
 
         this.__client.ndi.source.target = null;
@@ -1437,9 +1439,9 @@ class NDPiClient {
 
     showBlank(commandInfo = {}) {
 
-        if (this.timer__ndi_reconnect) {
-            clearTimeout(this.timer__ndi_reconnect);
-            this.timer__ndi_reconnect = null;
+        if (this.timer__reconnect_ndi) {
+            clearTimeout(this.timer__reconnect_ndi);
+            this.timer__reconnect_ndi = null;
         }
 
         this.__client.ndi.source.target = null;
