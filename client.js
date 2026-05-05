@@ -8,15 +8,16 @@
  *  -   Launching NDI video streams and displaying them to HDMI out.
  */
 
-const express   = require('express');
-const WebSocket = require('ws');
-const http      = require('http');
-const bonjour   = require('bonjour')();
-const os        = require('os');
-const fs        = require('fs');
-const path      = require('path');
-const { exec }  = require('child_process');
+const express    = require('express');
+const WebSocket  = require('ws');
+const http       = require('http');
+const bonjour    = require('bonjour')();
+const os         = require('os');
+const fs         = require('fs');
+const path       = require('path');
+const { exec }   = require('child_process');
 const { uptime } = require('process');
+const net        = require('net');
 
 const readFile  = (pathToFile, bufferEncoding = 'utf8') => fs.existsSync(pathToFile) ? fs.readFileSync(pathToFile, bufferEncoding) : bufferEncoding === 'utf8' ? '' : null;
 
@@ -204,18 +205,16 @@ async function cecPowerOff(commandInfo = {}) {
 
 class NDPiClient {
     constructor() {
-        this.startup = exec(`./sh/startup`);
-        /**
         exec(`./sh/startup`, (error, stdout, stderr) => {
             if (!error) CRLFArray(stdout).forEach((line) => { console.log(line); });
         });
-         */
         
         this.defaultDeviceName  = 'NDPi Client';
-        this.displayClients     = new Set();
-        this.localMachineGUI    = null;
-        this.ndiProcess         = null;
-        this.ndiReconnectTimer  = null;
+        this.connections__display           = new Set();
+
+        this.child_process__chromium        = null;
+        this.child_process__ndi_receiver    = null;
+        this.timer__ndi_reconnect           = null;
 
         this.__client = {
             name: this.defaultDeviceName,
@@ -300,6 +299,7 @@ class NDPiClient {
          * cat /sys/class/drm/card1/card1-HDMI-A-1/edid | edid-decode
          */
 
+        
         /*
          *  NDI stream info 
          */
@@ -310,6 +310,23 @@ class NDPiClient {
             displayResolution: null,
             displayName: null
         };
+
+        this.net_socket = new net.Socket();
+        this.net_socket.on('connectionAttempt', (ip, port) => {
+            console.log('*** Connecting...', ip, port);
+        });
+        this.net_socket.on('connect', () => {
+            console.log('*** Connected!');
+        });
+        this.net_socket.on('connectionAttemptFailed', (ip, port, family, error) => {
+            console.log('*** Could Not Connect...', ip, port, family, error);
+        });
+        this.net_socket.on('connectionAttemptTimeout', (ip, port) => {
+            console.log('*** Could Not Establish Connection...', ip, port);
+        });
+        this.net_socket.on('data', (data) => {
+            console.log(`*** Data: ${data}`);
+        });
         
         this.serverWs = null;
         this.serverWsReconnectTimer = null;
@@ -739,7 +756,7 @@ class NDPiClient {
         
         this.displayWss.on('connection', (ws) => {
             
-            this.displayClients.add(ws);
+            this.connections__display.add(ws);
             
             // Send current state
             setTimeout(() => {
@@ -747,7 +764,7 @@ class NDPiClient {
             }, 1500);
             
             ws.on('close', () => {
-                this.displayClients.delete(ws);
+                this.connections__display.delete(ws);
                 consoleLog('[disconnected] display server: ws');
             });
 
@@ -782,31 +799,31 @@ class NDPiClient {
             }
         };
 
-        let connectedDisplayClients = [];
+        let connectedconnections__display = [];
 
         consoleLog('(↑↑) Display Server: ws', { type: displayMode });
         const data = JSON.stringify(updateData);
 
-        this.displayClients.forEach(client => {
+        this.connections__display.forEach(client => {
             if (client.readyState === WebSocket.OPEN) client.send(data);
         });
 
     }
 
     relaunchOverlayBrowser() {
-        if (this.localMachineGUI) {
+        if (this.child_process__chromium) {
             this.killOverlayBrowser();
         }
         setTimeout(() => {
-            if (this.localMachineGUI) return;
+            if (this.child_process__chromium) return;
             this.launchOverlayBrowser();
         }, 2000);
     }
 
     killOverlayBrowser() {
-        if (this.localMachineGUI) {
-            this.localMachineGUI.kill();
-            this.localMachineGUI = null;
+        if (this.child_process__chromium) {
+            this.child_process__chromium.kill();
+            this.child_process__chromium = null;
         }
     }
 
@@ -818,7 +835,7 @@ class NDPiClient {
          *      'error' indicating logic to retry starting Chromium.
          */
 
-        if (this.localMachineGUI) {
+        if (this.child_process__chromium) {
             return 'open';
         }
         const instanceCheck = 'pgrep -f "chromium" 2>/dev/null';
@@ -844,7 +861,7 @@ class NDPiClient {
 
         consoleLog('launching new overlay instance');
 
-        this.localMachineGUI = exec(newInstance, {
+        this.child_process__chromium = exec(newInstance, {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
@@ -852,11 +869,11 @@ class NDPiClient {
             },
         });
 
-        this.localMachineGUI.on('exit', () => {
-            this.localMachineGUI = null;
+        this.child_process__chromium.on('exit', () => {
+            this.child_process__chromium = null;
         });
 
-        this.localMachineGUI.on('error', (err) => {
+        this.child_process__chromium.on('error', (err) => {
             consoleLog('Chromium Error', null, err);
             this.relaunchOverlayBrowser();
         });
@@ -1238,11 +1255,11 @@ class NDPiClient {
 
     killNdiReceiver() {
 
-        if (this.ndiProcess) {
+        if (this.child_process__ndi_receiver) {
             try {
                 consoleLog('[ ndi ] ⸺  ▶ [SIGKILL]');
-                this.ndiProcess.kill('SIGKILL'); // Use SIGKILL for immediate termination
-                this.ndiProcess = null;
+                this.child_process__ndi_receiver.kill('SIGKILL'); // Use SIGKILL for immediate termination
+                this.child_process__ndi_receiver = null;
             } catch (e) {
                 consoleLog('[ ndi ] ⸺  ▶ [SIGKILL]', null, e);
             }
@@ -1258,9 +1275,9 @@ class NDPiClient {
 
     setNDISource(sourceName, commandInfo = {}) {
 
-        if (this.ndiReconnectTimer) {
-            clearTimeout(this.ndiReconnectTimer);
-            this.ndiReconnectTimer = null;
+        if (this.timer__ndi_reconnect) {
+            clearTimeout(this.timer__ndi_reconnect);
+            this.timer__ndi_reconnect = null;
         }
         
         this.__client.ndi.source.target = sourceName;
@@ -1314,7 +1331,7 @@ class NDPiClient {
 
         console.log(`(↑↓)[ NDI ] ⸺  ▶ [INIT]`, {SourceName: sourceName});
 
-        this.ndiProcess = spawn(PATH_NDI_RECEIVER, [sourceName], {
+        this.child_process__ndi_receiver = spawn(PATH_NDI_RECEIVER, [sourceName], {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
@@ -1324,7 +1341,7 @@ class NDPiClient {
             stdio: ['ignore', 'pipe', 'pipe']
         });
         
-        this.ndiProcess.stdout.on('data', (data) => {
+        this.child_process__ndi_receiver.stdout.on('data', (data) => {
             const output = data.toString().trim();
             this.parseNDIInfo(output);
 
@@ -1338,15 +1355,15 @@ class NDPiClient {
             }
         });
         
-        this.ndiProcess.stderr.on('data', (data) => {
+        this.child_process__ndi_receiver.stderr.on('data', (data) => {
             const output = data.toString().trim();
             CRLFArray(output).forEach((line) => {
                 console.log(`(❌)[ NDI ] ⸺  ▶ [ERROR]: ${line}`);
             });
         });
         
-        this.ndiProcess.on('close', (code) => {
-            this.ndiProcess                     = null;
+        this.child_process__ndi_receiver.on('close', (code) => {
+            this.child_process__ndi_receiver                     = null;
             this.__client.ndi.source.current    = null;
             this.__client.ndi.status            = 'idle';
             this.__client.ndi.resolution        = null;
@@ -1359,7 +1376,7 @@ class NDPiClient {
             this.scheduleReconnect();
         });
         
-        this.ndiProcess.on('error', (error) => {
+        this.child_process__ndi_receiver.on('error', (error) => {
             consoleLog('[error] ndi', null, error);
         });
     }
@@ -1370,26 +1387,26 @@ class NDPiClient {
         if (
             !this.__client.ndi.source.target || 
             this.__client.ndi.source.target === 'None' || 
-            this.ndiReconnectTimer
+            this.timer__ndi_reconnect
         ) return;
 
         this.broadcastToDisplay({type: `ndi-init`});
 
-        this.ndiReconnectTimer = setTimeout(() => {
-            this.ndiReconnectTimer = null;
+        this.timer__ndi_reconnect = setTimeout(() => {
+            this.timer__ndi_reconnect = null;
             if (
                 this.__client.ndi.source.target && 
                 this.__client.ndi.source.target !== 'None' && 
-                !this.ndiProcess
+                !this.child_process__ndi_receiver
             ) this.startNDIReceiver(this.__client.ndi.source.target);
         }, 15000);
     }
 
     showOverlay(commandInfo = {}) {
 
-        if (this.ndiReconnectTimer) {
-            clearTimeout(this.ndiReconnectTimer);
-            this.ndiReconnectTimer = null;
+        if (this.timer__ndi_reconnect) {
+            clearTimeout(this.timer__ndi_reconnect);
+            this.timer__ndi_reconnect = null;
         }
 
         this.__client.ndi.source.target = null;
@@ -1408,9 +1425,9 @@ class NDPiClient {
 
     showBlank(commandInfo = {}) {
 
-        if (this.ndiReconnectTimer) {
-            clearTimeout(this.ndiReconnectTimer);
-            this.ndiReconnectTimer = null;
+        if (this.timer__ndi_reconnect) {
+            clearTimeout(this.timer__ndi_reconnect);
+            this.timer__ndi_reconnect = null;
         }
 
         this.__client.ndi.source.target = null;
@@ -1450,7 +1467,7 @@ async function killProcess() {
         client.mdnsService.stop();
     }
     setTimeout(async () => {
-        if (client.ndiProcess) {
+        if (client.child_process__ndi_receiver) {
             consoleLog('Terminating Service Connections');
             await client.killNdiReceiver();
         }
