@@ -54,6 +54,17 @@ let SYS_DETAILS = {
 };
 console.log(SYS_DETAILS);
 
+exec('./sh/resolutions', (error, stdout, stderr) => {
+    var output = stdout.trim()
+    if (error) {
+        console.log(stderr);
+    } else {
+        CRLFArray(output).forEach((line) => {
+            console.log(line);
+        });
+    }
+});
+
 /** VERSION CONTROL **/
 const versionCurrent  = readFile(PATH_VERSION_CURRENT) || '';
 const versionStable   = readFile(PATH_VERSION_STABLE)  || '';
