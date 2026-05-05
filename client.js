@@ -235,10 +235,6 @@ async function cecPowerOff(commandInfo = {}) {
         }
     });
 }
-(async () => {
-    console.log('Waiting For Network...');
-    console.log(await getLocalIP());
-})();
 
 class NDPiClient {
     constructor() {
@@ -1463,8 +1459,12 @@ class NDPiClient {
 
 }
 
-// Initiate client
-const client = new NDPiClient();
+let client;
+(async () => {
+    console.log('Waiting For Network...');
+    console.log(await getLocalIP());
+    client = new NDPiClient();
+})();
 
 async function deviceShutdown() {
     consoleLog('device powering down');
