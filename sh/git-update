@@ -15,6 +15,7 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     chmod +x sh/git-update
     chmod +x sh/install-update
     chmod +x sh/resolutions
+    chmod +x sh/startup
     echo ""
     echo "PREPARING TO UPDATE"
     sleep 1

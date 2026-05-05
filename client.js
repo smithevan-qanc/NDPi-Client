@@ -7,6 +7,8 @@
  *  -   Communicating with NDPi - Monitor v3 (SERVER)
  *  -   Launching NDI video streams and displaying them to HDMI out.
  */
+
+const express   = require('express');
 const WebSocket = require('ws');
 const http      = require('http');
 const bonjour   = require('bonjour')();
@@ -16,7 +18,9 @@ const path      = require('path');
 const { exec }  = require('child_process');
 const { uptime } = require('process');
 
-const readFile  = (pathToFile, bufferEncoding = 'utf8') => fs.existsSync(pathToFile) ? fs.readFileSync(pathToFile, bufferEncoding) : bufferEncoding === 'utf8' ? '' : null;
+const readFile  = (pathToFile, bufferEncoding = 'utf8') => {
+    fs.existsSync(pathToFile) ? fs.readFileSync(pathToFile, bufferEncoding) : bufferEncoding === 'utf8' ? '' : null;
+};
 const CRLFArray = string => string.split(/\r?\n/);
 
 let SYS_DETAILS = {
@@ -25,21 +29,15 @@ let SYS_DETAILS = {
     memory: {
         free: os.freemem(),
         total: os.totalmem(),
-        percentUsed: ( 1-(os.freemem()/os.totalmem()) ),
+        percentUsed: ( 1-(os.freemem()/os.totalmem()) ).toFixed(3),
     },
-    directories: {
+    dir: {
         home: os.homedir(),
         tmp: os.tmpdir(),
+        data: `${os.homedir()}/DATA_ndpi`
     },
     hostname: os.hostname(),
     load_avg: os.loadavg(),
-    net: Object(os.networkInterfaces()),
-    /*
-    net: {
-        lo: os.networkInterfaces().lo,
-        eth0: os.networkInterfaces().eth0,
-    },
-    */
     platform: os.platform(),
     release: os.release(),
     type: os.type(),
@@ -54,8 +52,7 @@ console.log(SYS_DETAILS);
 const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
 const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
 const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
-const DIR_ARRY              = path.join(__dirname).split('/');
-const PATH_CONFIG           = `/${DIR_ARRY[1]}/${DIR_ARRY[2]}/DATA_ndpi/client-state.json`;
+const PATH_CONFIG           = `${SYS_DETAILS.dir.data}/client-state.json`;
 
 /** VERSION CONTROL **/
 const versionCurrent  = readFile(PATH_VERSION_CURRENT) || '';
@@ -215,7 +212,7 @@ class NDPiClient {
         this.ndiProcess         = null;
         this.ndiReconnectTimer  = null;
         
-        exec(`./sh/resolutions`, (error, stdout, stderr) => {
+        exec(`./sh/startup`, (error, stdout, stderr) => {
             var output = stdout.trim()
             if (error) {
                 console.log(stderr);
