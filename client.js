@@ -336,16 +336,7 @@ class NDPiClient {
     }
 
     awaitConnection() {
-        const EventEmitter = require('events');
-        const myNetworkEmitter = new EventEmitter();
-
-        // Listen
-        myNetworkEmitter.on('network_up', () => {
-            console.log('*** Network is live!');
-        });
-        /*
-        // Emit (call this inside your socket 'connect' callback)
-        myNetworkEmitter.emit('network_up');
+        
         this.net_socket = new net.Socket();
         this.net_socket.connect(3001, '127.0.0.1');
         this.net_socket.on('connectionAttempt', (ip, port) => {
@@ -368,8 +359,7 @@ class NDPiClient {
         });
         this.net_socket.on('close', (hadError) => {
             console.log('*** Socket Closed.', hadError ? 'WITH ERROR' : 'NO ERROR');
-        })
-        */
+        });
     }
 
     displayStartup() {
