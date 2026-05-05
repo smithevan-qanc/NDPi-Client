@@ -24,8 +24,17 @@ const readFile  = (pathToFile, bufferEncoding = 'utf8') => fs.existsSync(pathToF
 const CRLFArray = string => string.split(/\r?\n/);
 
 let SYS_DETAILS = {
+    os: {
+        type: os.type(),
+        platform: os.platform(),
+        version: os.version(),
+        release: os.release(),
+    },
+    machine: os.machine(),
     arch: os.arch(),
     cpus: os.cpus(),
+    load_avg: os.loadavg(),
+    uptime: os.uptime(),
     memory: {
         free: os.freemem(),
         total: os.totalmem(),
@@ -36,16 +45,9 @@ let SYS_DETAILS = {
         tmp: os.tmpdir(),
         data: `${os.homedir()}/DATA_ndpi`
     },
-    hostname: os.hostname(),
-    load_avg: os.loadavg(),
-    platform: os.platform(),
-    release: os.release(),
-    type: os.type(),
-    user: os.userInfo(),
-    uptime: os.uptime(),
     uptime_ndpi: uptime(),
-    version: os.version(),
-    machine: os.machine(),
+    hostname: os.hostname(),
+    user: os.userInfo(),
 };
 
 const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
@@ -1056,8 +1058,19 @@ class NDPiClient {
                     break;
                 default:
                     res.end(JSON.stringify({
-                        ...this.__client,
-                        ...SYS_DETAILS
+                        config: { ...this.__client },
+                        system: { 
+                            ...SYS_DETAILS,
+                            cpus: os.cpus(),
+                            memory: {
+                                free: os.freemem(),
+                                total: os.totalmem(),
+                                percentUsed: ( 1-(os.freemem()/os.totalmem()) ).toFixed(3),
+                            },
+                            load_avg: os.loadavg(),
+                            uptime: os.uptime(),
+                            uptime_ndpi: uptime(),
+                        }
                     }));
                     break;
             }
