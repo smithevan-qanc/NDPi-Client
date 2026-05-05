@@ -47,7 +47,6 @@ let SYS_DETAILS = {
     version: os.version(),
     machine: os.machine(),
 };
-console.log(SYS_DETAILS);
 
 const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
 const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
@@ -143,12 +142,11 @@ function getHdmiResolution() {
             CRLFArray(stdout)[0].split(', ').forEach((ln) => {
                 if (ln.includes('current')) {
                     const pixel = ln.trim().split(' '); //==> [ '1920', 'x', '1080' ]
-                    res = `${pixel[1]}x${pixel[3]}`;
+                    return res = `${pixel[1]}x${pixel[3]}`;
                 }
             });
         }
     });
-    return res;
 }
 function listHdmiResolutions() {
     let resolutionOptions = [];
@@ -369,24 +367,14 @@ class NDPiClient {
     }
 
     displayStartup() {
+        this.launchOverlayBrowser();
         setTimeout(() => {
-            exec('xdotool mousemove 3840 2160', (error, stdout, stderr) => {
-                if (error) consoleLog('xdotool error', null, stderr);
-            });
-            setTimeout(() => {
-                exec('xdotool mousemove 3840 0', (error, stdout, stderr) => {
-                    if (error) consoleLog('xdotool error', null, stderr);
-                });
-                this.launchOverlayBrowser();
-                setTimeout(() => {
-                    if (this.__client.ndi.source.target) {
-                        this.startNDIReceiver(this.__client.ndi.source.target);
-                    } else {
-                        this.broadcastToDisplay();
-                    }
-                }, 2000);   // 3rd.     If source is set, start NDI Receiver - wait 8s - launch display, else launch display.
-            }, 500);            // 2nd.     Move cursor to top right (activate autohide taskbar) Then ^^
-        }, 500);                    // 1st.     Move cursor to bottom right (trigger autohide taskbar) Then ^^^
+            if (this.__client.ndi.source.target) {
+                this.startNDIReceiver(this.__client.ndi.source.target);
+            } else {
+                this.broadcastToDisplay();
+            }
+        }, 2000);
     }
 
     loadState() {
@@ -1067,7 +1055,10 @@ class NDPiClient {
                     res.end(JSON.stringify({ status: 200, response: OK }));
                     break;
                 default:
-                    res.end(JSON.stringify(this.__client));
+                    res.end(JSON.stringify({
+                        ...this.__client,
+                        ...SYS_DETAILS
+                    }));
                     break;
             }
 
