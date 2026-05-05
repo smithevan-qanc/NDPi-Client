@@ -50,3 +50,5 @@ echo " "
 xdotool mousemove 3840 2160
 sleep 0.5
 xdotool mousemove 3840 0
+
+exit 0
