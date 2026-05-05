@@ -1575,14 +1575,14 @@ process.on('exit', (code) => {
 process.on('uncaughtException', (err, orig) => {
     console.log('*');
     console.log('*');
-    consoleLog('UNCAUGHT EXCEPTION', null, err);
+    consoleLog('UNCAUGHT EXCEPTION', orig, err);
     console.log('*');
     console.log('*');
 });
-process.on('unhandledRejection', (err) => {
+process.on('unhandledRejection', (reason) => {
     console.log('*');
     console.log('*');
-    consoleLog('UNHANDLED REJECTION', null, err);
+    consoleLog('UNHANDLED REJECTION', null, reason);
     console.log('*');
     console.log('*');
 });
