@@ -747,7 +747,7 @@ class NDPiClient {
         });
     }
 
-    broadcastToDisplay(message,) {
+    broadcastToDisplay(message) {
         console.log(`( ⚡ ) Func: broadcastToDisplay`);
 
         const currentConfig = this.__client;
