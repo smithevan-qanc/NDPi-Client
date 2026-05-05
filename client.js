@@ -101,7 +101,7 @@ function getDeviceId() {
             return serial[1];
         }
     } catch (error) {
-        consoleLog('Error Reating Serial Number', null, error);
+        consoleLog('Error Reading Serial Number', null, error);
         return null;
     }
 }
