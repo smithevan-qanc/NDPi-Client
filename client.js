@@ -302,6 +302,7 @@ class NDPiClient {
          * cat /sys/class/drm/card1/card1-HDMI-A-1/edid | edid-decode
          */
         
+        this.init_config();
         
         this.loadState();
 
