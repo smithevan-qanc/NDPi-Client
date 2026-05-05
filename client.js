@@ -39,7 +39,10 @@ let SYS_DETAILS = {
     },
     hostname: os.hostname(),
     load_avg: os.loadavg(),
-    net: os.networkInterfaces(),
+    net: {
+        lo: os.networkInterfaces().lo,
+        eth0: os.networkInterfaces().eth0,
+    },
     platform: os.platform(),
     release: os.release(),
     type: os.type(),
