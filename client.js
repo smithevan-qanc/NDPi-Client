@@ -1058,8 +1058,8 @@ class NDPiClient {
             switch (url.pathname) {
                 case '/control/browser/restart':
                     this.relaunchOverlayBrowser();
-                    res.end(JSON.stringify({ status: 200, response: OK }));
                     handled();
+                    res.end(JSON.stringify({ status: 200, response: OK }));
                     break;
                 default:
                     res.end(JSON.stringify(this.__client));
