@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 # This script is executed on the remote machine automatically after the update from GitHub is downloaded.
 # Write the script (if any is required) inside the install() function below.
@@ -10,6 +9,8 @@ set -e
 install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
+    sleep 1
+    chmod +x resolutions
     sleep 1
     sudo systemctl restart ndpi.service
     # sudo reboot

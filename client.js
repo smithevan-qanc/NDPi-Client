@@ -94,7 +94,6 @@ function consoleLog(message = 'SYSTEM UPDATE', data, error) {
     }
 }
 function getDeviceId() {
-    console.log(`( ⚡ ) Func: getDeviceId`);
     try {
         //const cpuinfo = fs.readFileSync('/proc/cpuinfo', 'utf8');
         const serial = readFile('/proc/cpuinfo').match(/Serial\s*:\s*([0-9a-f]+)/i);
@@ -107,7 +106,6 @@ function getDeviceId() {
     }
 }
 function getDeviceModel() {
-    console.log(`( ⚡ ) Func: getDeviceModel`);
     try {
         const model = readFile('/proc/cpuinfo').match(/Model\s*:\s*([0-9a-f]+)/i);
         if (model) {
@@ -131,9 +129,8 @@ function getLocalIP() {
     return 'localhost';
 }
 function getHdmiResolution() {
-    console.log(`( ⚡ ) Func: getHdmiResolution`);
     let res = '';
-    exec('DISPLAY=:0 xrandr', (error, stdout, stderr) => {
+    exec('xrandr', (error, stdout, stderr) => {
         if (error) {
             consoleLog('Get HDMI Resolution', stdout, stderr);
         } else {
@@ -148,7 +145,6 @@ function getHdmiResolution() {
     return res;
 }
 function listHdmiResolutions() {
-    console.log(`( ⚡ ) Func: listHdmiResolutions`);
     let resolutionOptions = [];
     exec('DISPLAY=:0 xrandr', (error, stdout, stderr) => {
         if (error) {
@@ -173,7 +169,6 @@ function listHdmiResolutions() {
     return resolutionOptions;
 }
 async function cecPowerOn(commandInfo = {}) {
-    console.log(`( ⚡ ) Func: cecPowerOn`);
     let success = false;
     consoleLog(`(↑↓) cec command out: 'on 0' && 'as'`);
     exec('echo "on 0" | cec-client -s -d 1 && echo "as" | cec-client -s -d 1', (e,o,err) => {
@@ -191,7 +186,6 @@ async function cecPowerOn(commandInfo = {}) {
     });
 }
 async function cecPowerOff(commandInfo = {}) {
-    console.log(`( ⚡ ) Func: cecPowerOff`);
     let success = false;
     consoleLog(`(↑↓) cec command out: 'standby 0'`);
     exec('echo "standby 0" | cec-client -s -d 1', (e,o,err) => {
@@ -334,7 +328,6 @@ class NDPiClient {
     }
 
     displayStartup() {
-        console.log(`( ⚡ ) Func: displayStartup`);
         setTimeout(() => {
             exec('xdotool mousemove 3840 2160', (error, stdout, stderr) => {
                 if (error) consoleLog('xdotool error', null, stderr);
@@ -356,7 +349,6 @@ class NDPiClient {
     }
 
     loadState() {
-        console.log(`( ⚡ ) Func: loadState`);
         try {
             if (fs.existsSync(PATH_CONFIG)) {
                 const data = JSON.parse(fs.readFileSync(PATH_CONFIG, 'utf8'));
@@ -376,7 +368,6 @@ class NDPiClient {
     }
 
     saveState(commandInfo = {}) {
-        console.log(`( ⚡ ) Func: saveState`);
 
         if (commandInfo.serverAddress) this.__client.link.ip = commandInfo.serverAddress;
 
@@ -433,7 +424,6 @@ class NDPiClient {
     }
 
     getConfig() {
-        console.log(`( ⚡ ) Func: getConfig`);
         let data = null;
         try {
             if (fs.existsSync(PATH_CONFIG)) {
@@ -446,7 +436,6 @@ class NDPiClient {
     }
 
     connectToServer(serverAddress) {
-        console.log(`( ⚡ ) Func: connectToServer`);
 
         if (!serverAddress || serverAddress.includes('localhost')) return;
         
@@ -603,7 +592,6 @@ class NDPiClient {
     }
 
     handleServerMessage(message) {
-        console.log(`( ⚡ ) Func: handleServerMessage`);
 
         const handled = () => consoleLog(`[handled] ${message.type}`);
         
@@ -644,11 +632,6 @@ class NDPiClient {
             case 'shutdown':
                 handled();
                 setTimeout(() => deviceShutdown(), 1000);
-                break;
-                
-            case 'set-network':
-                consoleLog('[unhandled] Network Setting Feature NOT ACTIVE...', message, { error: 'Network config feature not implemented.' });
-                //this.applyNetworkSettings(message.config);
                 break;
                 
             case 'ping':
@@ -694,7 +677,6 @@ class NDPiClient {
     }
 
     startDisplayServer() {
-        console.log(`( ⚡ ) Func: startDisplayServer`);
 
         const displayServer = http.createServer((req, res) => {
 
@@ -877,7 +859,6 @@ class NDPiClient {
     }
 
     startCommandServer() {
-        console.log(`( ⚡ ) Func: startCommandServer`);
 
         // Create HTTP server with REST API endpoints
         const server = http.createServer(async (req, res) => {
@@ -1084,7 +1065,6 @@ class NDPiClient {
     }
 
     handleCommand(command, ws) {
-        console.log(`( ⚡ ) Func: handleCommand`);
 
         if (command.serverAddress) {
             if (command.serverAddress !== this.__client.link.ip) {
@@ -1196,7 +1176,6 @@ class NDPiClient {
     }
 
     get_mdnsService() {
-        console.log(`( ⚡ ) Func: get_mdnsService`);
 
         // This is the mDNS Service Object.
         this.__client.config.ip = getLocalIP();
@@ -1220,7 +1199,6 @@ class NDPiClient {
     }
 
     start_mdnsBroadcast() {
-        console.log(`( ⚡ ) Func: start_mdnsBroadcast`);
 
         this.update_mdnsBroadcast();
 
@@ -1240,7 +1218,6 @@ class NDPiClient {
     }
 
     update_mdnsBroadcast() {
-        console.log(`( ⚡ ) Func: update_mdnsBroadcast`);
 
         // Updated IP address is saved within 'get_mdnsService()'
         let consoleMessage = '(↑↑) mdns';
@@ -1255,7 +1232,6 @@ class NDPiClient {
     }
 
     killNdiReceiver() {
-        console.log(`( ⚡ ) Func: killNdiReceiver`);
 
         if (this.ndiProcess) {
             try {
@@ -1276,7 +1252,6 @@ class NDPiClient {
     }
 
     setNDISource(sourceName, commandInfo = {}) {
-        console.log(`( ⚡ ) Func: setNDISource`);
 
         if (this.ndiReconnectTimer) {
             clearTimeout(this.ndiReconnectTimer);
@@ -1309,7 +1284,6 @@ class NDPiClient {
     }
     
     startNDIReceiver(sourceName) {
-        console.log(`( ⚡ ) Func: startNDIReceiver`);
 
         consoleLog('[Establishing connection] NDI');
 
@@ -1323,7 +1297,6 @@ class NDPiClient {
     }
     
     _startNDIReceiverInternal(sourceName) {
-        console.log(`( ⚡ ) Func: _startNDIReceiverInternal`);
 
         if (!fs.existsSync(PATH_NDI_RECEIVER)) {
             consoleLog('[ERROR] ndi', { Path: PATH_NDI_RECEIVER }, { error: 'Receiver path not found.' });
@@ -1387,7 +1360,6 @@ class NDPiClient {
     }
     
     scheduleReconnect() {
-        console.log(`( ⚡ ) Func: scheduleReconnect`);
 
         // Only reconnect if we have a target source and aren't already trying
         if (
@@ -1409,7 +1381,6 @@ class NDPiClient {
     }
 
     showOverlay(commandInfo = {}) {
-        console.log(`( ⚡ ) Func: showOverlay`);
 
         if (this.ndiReconnectTimer) {
             clearTimeout(this.ndiReconnectTimer);
@@ -1431,7 +1402,6 @@ class NDPiClient {
     }
 
     showBlank(commandInfo = {}) {
-        console.log(`( ⚡ ) Func: showBlank`);
 
         if (this.ndiReconnectTimer) {
             clearTimeout(this.ndiReconnectTimer);
@@ -1450,59 +1420,6 @@ class NDPiClient {
         }, 1000);
     }
 
-    applyNetworkSettings(config) {
-        consoleLog('network settings updated', config);
-        const fs = require('fs');
-        
-        // Determine network interface (usually eth0 for wired, wlan0 for WiFi)
-        const networkInterface = config.wifiSSID ? 'wlan0' : 'eth0';
-        
-        // Build dhcpcd.conf content
-        let dhcpcdConfig = '';
-        
-        if (config.mode === 'static' && config.staticIP) {
-            dhcpcdConfig = `
-interface ${networkInterface}
-static ip_address=${config.staticIP}/${config.subnet === '255.255.255.0' ? '24' : '16'}
-static routers=${config.gateway || config.staticIP.replace(/\.\d+$/, '.1')}
-static domain_name_servers=${config.dns || '8.8.8.8'}
-`;
-        }
-        
-        // Write dhcpcd configuration
-        if (dhcpcdConfig) {
-            fs.writeFileSync('/tmp/ndpi-network-config', dhcpcdConfig);
-            exec('sudo tee -a /etc/dhcpcd.conf < /tmp/ndpi-network-config', (error) => {
-                if (error) consoleLog('Error updating dhcpcd.conf', null, error);
-            });
-        }
-        
-        // Configure WiFi if credentials provided
-        if (config.wifiSSID && config.wifiPassword) {
-            const wpaConfig = `
-network={
-    ssid="${config.wifiSSID}"
-    psk="${config.wifiPassword}"
-}
-`;
-            fs.writeFileSync('/tmp/ndpi-wifi-config', wpaConfig);
-            exec('sudo tee -a /etc/wpa_supplicant/wpa_supplicant.conf < /tmp/ndpi-wifi-config', (error) => {
-                if (error) consoleLog('Error updating wpa_supplicant.conf', null, error);
-            });
-        }
-        
-        // Restart networking
-        exec(`sudo systemctl restart dhcpcd`, (error) => {
-            if (error) {
-                consoleLog('Error restarting dhcpcd:', null, error);
-            } else {
-                consoleLog('Network settings applied successfully');
-                if (config.wifiSSID) {
-                    exec('sudo wpa_cli -i wlan0 reconfigure');
-                }
-            }
-        });
-    }
 }
 
 // Initiate client
