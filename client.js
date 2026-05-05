@@ -16,13 +16,14 @@ const os         = require('os');
 const fs         = require('fs');
 const path       = require('path');
 const { exec }   = require('child_process');
+const asyncExec  = require('util').promisify(exec);
 const { uptime } = require('process');
 const net        = require('net');
 
 const readFile  = (pathToFile, bufferEncoding = 'utf8') => fs.existsSync(pathToFile) ? fs.readFileSync(pathToFile, bufferEncoding) : bufferEncoding === 'utf8' ? '' : null;
-
 const CRLFArray = string => string.split(/\r?\n/);
 
+let NET_ONLINE = false;
 let SYS_DETAILS = {
     os: {
         type: os.type(),
@@ -77,21 +78,22 @@ function startupConsoleLog() {
 `);
 }
 function consoleLog(message = 'SYSTEM UPDATE', data, error) {
-    const ipAddr = getLocalIP();
+    //const ipAddr = getLocalIP();
     if (error) {
         console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-        console.log(`  [${ipAddr}] ⸺  ▶ 🔴 ERROR: ${message.toUpperCase()}`);
+        //console.log(`  [${ipAddr}] ⸺  ▶ 🔴 ERROR: ${message.toUpperCase()}`);
+        console.log(`🔴 ERROR: ${message}`);
         console.log(JSON.stringify(error, null, 2));
         if (data) {
-            console.log(`DATA:`);
-            console.log(JSON.stringify(data, null, 2));
+            console.log(`DATA:`, JSON.stringify(data, null, 2));
         }
         console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
     } else {
-        console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-        console.log(`  [${ipAddr}] ⸺  ▶ ${message.toUpperCase()}`);
+        //console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
+        //console.log(`  [${ipAddr}] ⸺  ▶ ${message.toUpperCase()}`);
+        console.log(`${message.toUpperCase()}`);
         if (data) console.log(JSON.stringify(data, null, 2));
-        console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
+        //console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
     }
 }
 function getDeviceId() {
@@ -117,7 +119,10 @@ function getDeviceModel() {
         return null;
     }
 }
-function getLocalIP() {
+async function getLocalIP() {
+    if (!NET_ONLINE) {
+        await waitForNetwork();
+    }
     const interfaces = os.networkInterfaces();
     for (const name of Object.keys(interfaces)) {
         for (const iface of interfaces[name]) {
@@ -128,6 +133,29 @@ function getLocalIP() {
         }
     }
     return 'localhost';
+}
+async function waitForNetwork({ host = '8.8.8.8', port = 53, retryMs = 1000 } = {}) {
+    NET_ONLINE = await new Promise((resolve) => {
+        const tryConnect = () => {
+            const socket = new net.Socket();
+            socket.setTimeout(2000);
+            socket.once('connect', () => {
+                const localIP = socket.localAddress;
+                socket.destroy();
+                resolve(localIP);
+            });
+            socket.once('timeout', () => {
+                socket.destroy();
+                setTimeout(tryConnect, retryMs);
+            });
+            socket.once('error', () => {
+                socket.destroy();
+                setTimeout(tryConnect, retryMs);
+            });
+            socket.connect(port, host);
+        };
+        tryConnect();
+    });
 }
 function getHdmiResolution() {
     let res = '';
@@ -211,7 +239,7 @@ async function cecPowerOff(commandInfo = {}) {
 
 class NDPiClient {
     constructor() {
-        exec(`./sh/startup`, (error, stdout, stderr) => {
+        asyncExec(`./sh/startup`, (error, stdout, stderr) => {
             if (!error) CRLFArray(stdout).forEach((line) => { console.log(line); });
         });
         
@@ -306,18 +334,6 @@ class NDPiClient {
          */
 
         
-        /*
-         *  NDI stream info 
-         */
-        this.ndiInfo = {
-            resolution: null,
-            framerate: null,
-            connectedAt: null,
-            displayResolution: null,
-            displayName: null
-        };
-
-        this.new_socket = null;
         
         this.serverWs = null;
         this.serverWsReconnectTimer = null;
@@ -339,33 +355,6 @@ class NDPiClient {
             this.awaitConnection();
             this.displayStartup();
         }, 1500);
-    }
-
-    awaitConnection() {
-        
-        this.net_socket = new net.Socket();
-        this.net_socket.connect(3001, '127.0.0.1');
-        this.net_socket.on('connectionAttempt', (ip, port) => {
-            console.log('*** Connecting...', ip, port);
-        });
-        this.net_socket.on('connect', () => {
-            console.log('*** Connected!');
-            setTimeout(() => {
-                this.net_socket._destroy();
-            }, 1000);
-        });
-        this.net_socket.on('connectionAttemptFailed', (ip, port, family, error) => {
-            console.log('*** Could Not Connect...', ip, port, family, error);
-        });
-        this.net_socket.on('connectionAttemptTimeout', (ip, port) => {
-            console.log('*** Could Not Establish Connection...', ip, port);
-        });
-        this.net_socket.on('data', (data) => {
-            console.log(`*** Data: ${data}`);
-        });
-        this.net_socket.on('close', (hadError) => {
-            console.log('*** Socket Closed.', hadError ? 'WITH ERROR' : 'NO ERROR');
-        });
     }
 
     displayStartup() {
@@ -609,7 +598,7 @@ class NDPiClient {
                 framerate: this.__client.ndi.framerate,
                 displayResolution: this.__client.display.resolution,
                 displayName: this.__client.display.mfr,
-                connectedAt: this.ndiInfo.connectedAt,
+                connectedAt: this.__client.ndi.connectedAt,
             },
             systemStats: systemStats,
             status: this.__client.ndi.status,
