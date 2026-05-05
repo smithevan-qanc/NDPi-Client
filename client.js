@@ -834,54 +834,13 @@ class NDPiClient {
         if (this.localMachineGUI) {
             return 'open';
         }
-
-        /*
-
-        let connectedDisplayClients = [];
-
-        this.displayClients.forEach((val) => {
-            connectedDisplayClients.push({ state: val.readyState });
-        });
-
-        if (connectedDisplayClients.length === 1) {
-            return 'open';
-        } else if (connectedDisplayClients.length >= 2) {
-            exec('pkill -f "chromium" 2>/dev/null');
-        }
-
-        */
-
         const instanceCheck = 'pgrep -f "chromium" 2>/dev/null';
-
+        
         let newInstance = `/usr/bin/chromium \
             --kiosk \
-            --disable-popup-blocking \
-            --hide-crash-restore-bubble \
-            --aggressive-cache-discard \
-            --disable-infobars \
-            --disable-session-crashed-bubble \
-            --disable-component-extensions-with-background-pages \
-            --no-first-run \
-            --disable-default-apps \
-            --disable-translate \
-            --hide-scrollbars \
-            --disable-features=TranslateUI \
-            --noerrdialogs \
             --disable-web-security \
-            --touch-events=enabled \
-            --start-fullscreen \
             --user-data-dir=${os.homedir()}/.config/chromium \
         http://localhost:${this.__client.config.displayPort}/`;
-        
-        //newInstance = '/usr/bin/chromium';
-        //newInstance += '--kiosk ';
-        //newInstance += `--user-data-dir=${os.homedir()}/.config/chromium `;
-        //newInstance += `http://localhost:${this.__client.config.displayPort}/ &`;
-         
-
-    //    exec(instanceCheck, (err, stdout, stderr) => {
-    //        const stdArry = CRLFArray(stdout);
-    //        if (stdArry.length < 3) {
 
         const { exec, spawn } = require('child_process');
 
@@ -901,23 +860,9 @@ class NDPiClient {
 
         this.localMachineGUI.on('error', (err) => {
             consoleLog('Chromium Error', null, err);
-            //this.relaunchOverlayBrowser();
+            this.relaunchOverlayBrowser();
         });
 
-        /*
-        exec(newInstance, (error, stdout, stderr) => {
-            if (error) {
-                consoleLog('[failed] launching overlay instance', stdout, stderr);
-                return 'error';
-            } else {
-                return 'new';
-            }
-        });
- */
-    //        } else if (err) {
-    //            consoleLog('[ERROR] CHECKING OVERLAY INSTANCE', stdArry, stderr);
-    //        }
-    //    });
     }
 
     startCommandServer() {
