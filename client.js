@@ -19,12 +19,6 @@ const { uptime } = require('process');
 const readFile  = (pathToFile, bufferEncoding = 'utf8') => fs.existsSync(pathToFile) ? fs.readFileSync(pathToFile, bufferEncoding) : bufferEncoding === 'utf8' ? '' : null;
 const CRLFArray = string => string.split(/\r?\n/);
 
-const DIR_ARRY              = path.join(__dirname).split('/');
-const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
-const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
-const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
-const PATH_CONFIG           = `/${DIR_ARRY[1]}/${DIR_ARRY[2]}/DATA_ndpi/client-state.json`;
-
 let SYS_DETAILS = {
     arch: os.arch(),
     cpus: os.cpus(),
@@ -39,10 +33,13 @@ let SYS_DETAILS = {
     },
     hostname: os.hostname(),
     load_avg: os.loadavg(),
+    net: Object.keys(os.networkInterfaces()),
+    /*
     net: {
         lo: os.networkInterfaces().lo,
         eth0: os.networkInterfaces().eth0,
     },
+    */
     platform: os.platform(),
     release: os.release(),
     type: os.type(),
@@ -53,6 +50,12 @@ let SYS_DETAILS = {
     machine: os.machine(),
 };
 console.log(SYS_DETAILS);
+
+const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
+const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
+const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
+const DIR_ARRY              = path.join(__dirname).split('/');
+const PATH_CONFIG           = `/${DIR_ARRY[1]}/${DIR_ARRY[2]}/DATA_ndpi/client-state.json`;
 
 /** VERSION CONTROL **/
 const versionCurrent  = readFile(PATH_VERSION_CURRENT) || '';
