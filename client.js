@@ -311,22 +311,7 @@ class NDPiClient {
             displayName: null
         };
 
-        this.net_socket = new net.Socket();
-        this.net_socket.on('connectionAttempt', (ip, port) => {
-            console.log('*** Connecting...', ip, port);
-        });
-        this.net_socket.on('connect', () => {
-            console.log('*** Connected!');
-        });
-        this.net_socket.on('connectionAttemptFailed', (ip, port, family, error) => {
-            console.log('*** Could Not Connect...', ip, port, family, error);
-        });
-        this.net_socket.on('connectionAttemptTimeout', (ip, port) => {
-            console.log('*** Could Not Establish Connection...', ip, port);
-        });
-        this.net_socket.on('data', (data) => {
-            console.log(`*** Data: ${data}`);
-        });
+        this.new_socket = null;
         
         this.serverWs = null;
         this.serverWsReconnectTimer = null;
@@ -345,8 +330,35 @@ class NDPiClient {
         this.start_mdnsBroadcast();
 
         setTimeout(() => {
+            this.awaitConnection();
             this.displayStartup();
         }, 1500);
+    }
+
+    awaitConnection() {
+        this.net_socket = new net.Socket();
+        this.net_socket.connect(3000, '127.0.0.1');
+        this.net_socket.on('connectionAttempt', (ip, port) => {
+            console.log('*** Connecting...', ip, port);
+        });
+        this.net_socket.on('connect', () => {
+            console.log('*** Connected!');
+            setTimeout(() => {
+                this.net_socket._destroy();
+            }, 1000);
+        });
+        this.net_socket.on('connectionAttemptFailed', (ip, port, family, error) => {
+            console.log('*** Could Not Connect...', ip, port, family, error);
+        });
+        this.net_socket.on('connectionAttemptTimeout', (ip, port) => {
+            console.log('*** Could Not Establish Connection...', ip, port);
+        });
+        this.net_socket.on('data', (data) => {
+            console.log(`*** Data: ${data}`);
+        });
+        this.net_socket.on('close', (hadError) => {
+            console.log('*** Socket Closed.', hadError ? 'WITH ERROR' : 'NO ERROR');
+        });
     }
 
     displayStartup() {
