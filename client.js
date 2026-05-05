@@ -1466,7 +1466,7 @@ let client;
                 console.log(line);
             });
         });
-        startup.on('close', () => {
+        startup.on('exit', () => {
             resolve;
         })
     }); 
