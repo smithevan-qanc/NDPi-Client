@@ -845,12 +845,12 @@ class NDPiClient {
             --disable-notifications \
             --enable-virtual-keyboard \
             --pull-to-refresh \
-            --show-fps-counter \
             --show-taps \
             --kiosk-splash-screen-min-time-seconds=5 \
             --user-data-dir=${os.homedir()}/.config/chromium \
         http://localhost:${this.__client.config.displayPort}/`;
 
+        // --show-fps-counter \
         // --show-taps ///\\\ Draws a circle at each touch point, similar to the Android OS developer option "Show taps".
 
         const { exec, spawn } = require('child_process');
