@@ -238,9 +238,6 @@ async function cecPowerOff(commandInfo = {}) {
 
 class NDPiClient {
     constructor() {
-        exec(`./sh/startup`, (error, stdout, stderr) => {
-            if (!error) CRLFArray(stdout).forEach((line) => { console.log(line); });
-        });
         
         this.ws_connection__ndpi_server = null;
 
@@ -1461,6 +1458,9 @@ class NDPiClient {
 
 let client;
 (async () => {
+    exec(`./sh/startup`, (error, stdout, stderr) => {
+        if (!error) CRLFArray(stdout).forEach((line) => { console.log(line); });
+    });
     console.log('Waiting For Network...');
     console.log(await getLocalIP());
     client = new NDPiClient();
