@@ -210,9 +210,9 @@ class NDPiClient {
         this.localMachineGUI    = null;
         this.ndiProcess         = null;
         this.ndiReconnectTimer  = null;
-        
+        ;
         exec(`./sh/startup`, (error, stdout, stderr) => {
-            var output = stdout.trim()
+            var output = stdout.toString();
             if (error) {
                 console.log(stderr);
             } else {
