@@ -31,7 +31,7 @@ let SYS_DETAILS = {
     memory: {
         free: os.freemem(),
         total: os.totalmem(),
-        percentUsed: Math.floor(os.freemem() / os.totalmem()),
+        percentUsed: (os.freemem()/os.totalmem()),
     },
     directories: {
         home: os.homedir(),
@@ -856,13 +856,13 @@ class NDPiClient {
         const { exec, spawn } = require('child_process');
 
         consoleLog('launching new overlay instance');
+
         this.localMachineGUI = exec(newInstance, {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
                 XAUTHORITY: '/home/ndpi-client/.Xauthority',
             },
-            //stdio: ['ignore', 'pipe', 'pipe']
         });
 
         this.localMachineGUI.on('exit', () => {
