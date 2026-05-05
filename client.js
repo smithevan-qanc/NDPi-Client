@@ -835,10 +835,11 @@ class NDPiClient {
             return 'open';
         }
         const instanceCheck = 'pgrep -f "chromium" 2>/dev/null';
-        
+
         let newInstance = `/usr/bin/chromium \
             --kiosk \
             --disable-web-security \
+            --default-background-color=#000000 \
             --user-data-dir=${os.homedir()}/.config/chromium \
         http://localhost:${this.__client.config.displayPort}/`;
 
