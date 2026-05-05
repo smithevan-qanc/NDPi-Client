@@ -16,7 +16,6 @@ const os         = require('os');
 const fs         = require('fs');
 const path       = require('path');
 const { exec }   = require('child_process');
-const asyncExec  = require('util').promisify(exec);
 const { uptime } = require('process');
 const net        = require('net');
 
@@ -1459,9 +1458,26 @@ class NDPiClient {
 
 let client;
 (async () => {
-    await asyncExec(`./sh/startup`, (error, stdout, stderr) => {
-        if (!error) CRLFArray(stdout).forEach((line) => { console.log(line); });
+    await new Promise((resolve) => {
+        const startup = exec(`./sh/startup`);
+        startup.stdout.on('data', (data) => {
+            const output = data.toString();
+            CRLFArray(output).forEach((line) => {
+                console.log(line);
+            });
+        });
+        startup.on('exit', () => {
+            resolve;
+        })
+    }); 
+    /*
+    exec(`./sh/startup`, (error, stdout, stderr) => {
+        if (!error) {
+            CRLFArray(stdout).forEach((line) => { console.log(line); });
+        }
     });
+    */
+    
     console.log('Waiting For Network...');
     var ip = await getLocalIP();
     console.log(`Connected: ${ip}`);
