@@ -130,7 +130,13 @@ function getLocalIP() {
 }
 function getHdmiResolution() {
     let res = '';
-    exec('xrandr', (error, stdout, stderr) => {
+    exec('xrandr', {
+        env: {
+            ...process.env,
+            DISPLAY: ':0',
+            XAUTHORITY: '/home/ndpi-client/.Xauthority',
+        },
+    }, (error, stdout, stderr) => {
         if (error) {
             consoleLog('Get HDMI Resolution', stdout, stderr);
         } else {
@@ -209,7 +215,7 @@ class NDPiClient {
             if (!error) CRLFArray(stdout).forEach((line) => { console.log(line); });
         });
         
-        this.defaultDeviceName  = 'NDPi Client';
+        this.defaultDeviceName              = 'NDPi Client';
         this.connections__display           = new Set();
 
         this.child_process__chromium        = null;
