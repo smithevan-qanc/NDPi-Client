@@ -31,7 +31,7 @@ let SYS_DETAILS = {
     memory: {
         free: os.freemem(),
         total: os.totalmem(),
-        percentUsed: (os.freemem()/os.totalmem()),
+        percentUsed: ( 1-(os.freemem()/os.totalmem()) ),
     },
     directories: {
         home: os.homedir(),
