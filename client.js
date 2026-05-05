@@ -306,7 +306,7 @@ class NDPiClient {
          * cat /sys/class/drm/card1/card1-HDMI-A-1/edid | edid-decode
          */
         
-        await this.init_config();
+        this.init_config();
         
         this.loadState();
 
@@ -334,7 +334,7 @@ class NDPiClient {
             id: getDeviceId(),
             model: getDeviceModel(),
             config: {
-                ip: await getLocalIP(),
+                ip: getLocalIP(),
                 displayPort: 8080,
                 commandPort: 3001,
                 mdnsPort: 3002,
@@ -966,7 +966,7 @@ class NDPiClient {
                             }));
                             break;
                         case '/api/cec/on':
-                            const successCecOn = await cecPowerOn(commandInfo);
+                            const successCecOn = cecPowerOn(commandInfo);
                             if (successCecOn === undefined) {
                                 consoleLog(`(↓↑) [handel Unknown] ${url.pathname}`);
                                 res.end(JSON.stringify({
@@ -988,7 +988,7 @@ class NDPiClient {
                             }
                             break;
                         case '/api/cec/standby':
-                            const successCecOff = await cecPowerOff(commandInfo);
+                            const successCecOff = cecPowerOff(commandInfo);
                             if (successCecOff === undefined) {
                                 consoleLog(`(↓↑) [handel Unknown] ${url.pathname}`);
                                 res.end(JSON.stringify({
