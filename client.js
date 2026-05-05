@@ -18,9 +18,8 @@ const path      = require('path');
 const { exec }  = require('child_process');
 const { uptime } = require('process');
 
-const readFile  = (pathToFile, bufferEncoding = 'utf8') => {
-    fs.existsSync(pathToFile) ? fs.readFileSync(pathToFile, bufferEncoding) : bufferEncoding === 'utf8' ? '' : null;
-};
+const readFile  = (pathToFile, bufferEncoding = 'utf8') => fs.existsSync(pathToFile) ? fs.readFileSync(pathToFile, bufferEncoding) : bufferEncoding === 'utf8' ? '' : null;
+
 const CRLFArray = string => string.split(/\r?\n/);
 
 let SYS_DETAILS = {
