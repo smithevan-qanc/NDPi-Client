@@ -839,7 +839,11 @@ class NDPiClient {
         let newInstance = `/usr/bin/chromium \
             --kiosk \
             --disable-web-security \
-            --default-background-color=#000000 \
+            --default-background-color=#00000000 \
+            --disable-crash-reporter \
+            --disable-logging \
+            --disable-notifications \
+            --enable-virtual-keyboard \
             --user-data-dir=${os.homedir()}/.config/chromium \
         http://localhost:${this.__client.config.displayPort}/`;
 
