@@ -1205,7 +1205,7 @@ class NDPiClient {
             --disable-gpu \
             --start-fullscreen \
             --default-background-color=00000000 \
-             --ozone-platform=x11
+             --ozone-platform=x11 \
         http://localhost:${this.__client.config.displayPort}/`;
 
         // --show-fps-counter \
