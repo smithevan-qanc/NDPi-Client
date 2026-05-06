@@ -1205,6 +1205,7 @@ class NDPiClient {
             --disable-gpu \
             --start-fullscreen \
             --default-background-color=00000000 \
+            --disable-features=DarkLightMode \
         http://localhost:${this.__client.config.displayPort}/`;
 
         // --show-fps-counter \
