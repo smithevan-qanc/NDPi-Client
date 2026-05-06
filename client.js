@@ -302,8 +302,6 @@ class NDPiClient {
          */
         
         this.init_config();
-        
-        this.loadState();
 
         consoleLog('starting up...', {
             Service: `NDPi Monitor Client v${versionCurrent}`,
@@ -321,16 +319,20 @@ class NDPiClient {
             this.displayStartup();
         }, 1500);
     }
-
+  ///////////////////////////////////////////////////////////////////////////////////////
     init_config() {
-        const ipa = getLocalIP();
+        const _ip = getLocalIP();
+        const _id = getDeviceId();
+        const _mod = getDeviceModel();
+        const _res = getHdmiResolution();
+
         this.__client = {
             name: this.defaultDeviceName,
             type: 'Certified NDPi Monitor',
-            id: getDeviceId(),
-            model: getDeviceModel(),
+            id: _id,
+            model: _mod,
             config: {
-                ip: ipa,
+                ip: _ip,
                 displayPort: 8080,
                 commandPort: 3001,
                 mdnsPort: 3002,
@@ -349,11 +351,11 @@ class NDPiClient {
                 uptime: null,
             },
             display: {
-                resolution: getHdmiResolution(),
+                resolution: _res,
                 cecEnabled: false,
                 mfr: null,
             },
-            link: {
+            server: {
                 ip: 'localhost',
                 lastSeen: null,
             },
@@ -363,6 +365,30 @@ class NDPiClient {
                 command: null,
             },
         };
+        this.loadState();
+    }
+
+    loadState() {
+        let data = this.__client;
+        try {
+            data = JSON.parse(readFile(PATH_CONFIG));
+        } catch (error) {
+            consoleLog('[ERROR] Loading State', 'Attempted at Initial Load State', error);
+        }
+        this.__client.name                  = data.name;
+        this.__client.type                  = data.type;
+        this.__client.ndi.source.target     = data.ndi.source.target || null;
+        this.__client.server.ip             = data.link.ip;
+        this.__client.lastCommand.source    = data.lastCommand.source;
+        this.__client.lastCommand.timestamp = data.lastCommand.timestamp;
+        this.__client.lastCommand.command   = data.lastCommand.command;
+        console.log('Configuration Loaded');
+        console.log('CONFIG:', JSON.stringify(this.__client, null, 2));
+        if (this.__client.server.ip) {
+            setTimeout(() => {
+                this.connectToServer(this.__client.server.ip);
+            }, 1000);
+        }
     }
 
     displayStartup() {
@@ -376,28 +402,9 @@ class NDPiClient {
         }, 2000);
     }
 
-    loadState() {
-        try {
-            if (fs.existsSync(PATH_CONFIG)) {
-                const data = JSON.parse(fs.readFileSync(PATH_CONFIG, 'utf8'));
-                this.__client.name                  = data.name;
-                this.__client.type                  = data.type;
-                this.__client.ndi.source.target     = data.ndi.source.target || null;
-                this.__client.link.ip               = data.link.ip;
-                this.__client.lastCommand.source    = data.lastCommand.source;
-                this.__client.lastCommand.timestamp = data.lastCommand.timestamp;
-                this.__client.lastCommand.command   = data.lastCommand.command;
-                if (this.__client.link.ip) setTimeout(() => this.connectToServer(this.__client.link.ip), 1000);
-                consoleLog('loading Previous State', this.__client);
-            }
-        } catch (error) {
-            consoleLog('[ERROR] Loading State', 'Attempted at Initial Load State', error);
-        }
-    }
-
     saveState(commandInfo = {}) {
 
-        if (commandInfo.serverAddress) this.__client.link.ip = commandInfo.serverAddress;
+        if (commandInfo.serverAddress) this.__client.server.ip = commandInfo.serverAddress;
 
         const cmdSource     = commandInfo.source    || commandInfo.user || null;
         const cmdTimestamp  = commandInfo.timestamp || new Date().toISOString();
@@ -467,7 +474,7 @@ class NDPiClient {
 
         if (!serverAddress || serverAddress.includes('localhost')) return;
         
-        this.__client.link.ip = serverAddress;
+        this.__client.server.ip = serverAddress;
         
         // Clean up existing connection
         if (this.ws_connection__ndpi_server) {
@@ -515,7 +522,7 @@ class NDPiClient {
                 }
                 
                 this.timer__reconnect_ndpi_server = setTimeout(() => {
-                    this.connectToServer(this.__client.link.ip);
+                    this.connectToServer(this.__client.server.ip);
                 }, this.time_interval__reconnect_ndpi_server);
             });
             
@@ -787,7 +794,7 @@ class NDPiClient {
 
         const updateData = {
             type: displayMode,
-            serverIp: this.__client.link.ip.split(':')[0] || '',
+            serverIp: this.__client.server.ip.split(':')[0] || '',
             thisDevice: {
                 id: this.__client.id,
                 address: this.__client.config.ip,
@@ -1104,8 +1111,8 @@ class NDPiClient {
     handleCommand(command, ws) {
 
         if (command.serverAddress) {
-            if (command.serverAddress !== this.__client.link.ip) {
-                this.__client.link.ip = command.serverAddress;
+            if (command.serverAddress !== this.__client.server.ip) {
+                this.__client.server.ip = command.serverAddress;
                 consoleLog('(↑↓) [handled][updated] server ip address', { ReconnectingIn: 5 });
                 setTimeout(() => {
                     this.connectToServer(command.serverAddress)
@@ -1299,7 +1306,7 @@ class NDPiClient {
         
         // Save server address if provided
         if (commandInfo.serverAddress) {
-            this.__client.link.ip = commandInfo.serverAddress;
+            this.__client.server.ip = commandInfo.serverAddress;
             if (!this.ws_connection__ndpi_server || this.ws_connection__ndpi_server.readyState !== WebSocket.OPEN) {
                 this.connectToServer(commandInfo.serverAddress);
             }
