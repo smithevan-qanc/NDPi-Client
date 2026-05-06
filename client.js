@@ -689,7 +689,7 @@ class NDPiClient {
 
         setInterval(() => {
             this.bonjour__publish();
-        }, this.time_interval__update_bonjour);
+        }, this.time_interval__republish_bonjour);
     }
 
     bonjour__publish() {
