@@ -1198,7 +1198,7 @@ class NDPiClient {
         let commandLine = `/usr/bin/chromium \
             --kiosk \
             --user-data-dir=${os.homedir()}/.config/chromium \
-            --default-background-color=#00000000 \
+            --default-background-color=#81c127 \
             --disable-crash-reporter \
             --disable-logging \
             --disable-notifications \

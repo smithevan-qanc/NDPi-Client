@@ -3,7 +3,7 @@
 # Do not hide any extensions in the about:extensions dialog
 # export CHROMIUM_FLAGS="$CHROMIUM_FLAGS --show-component-extension-options"
 
-export CHROMIUM_FLAGS="$CHROMIUM_FLAGS --default-background-color=#00000000"
+# export CHROMIUM_FLAGS="$CHROMIUM_FLAGS --default-background-color=#00000000"
 
 # Enable GPU rasterization.
 export CHROMIUM_FLAGS="$CHROMIUM_FLAGS --enable-gpu-rasterization"
