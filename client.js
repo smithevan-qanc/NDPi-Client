@@ -240,27 +240,65 @@ async function cecPowerOff(commandInfo = {}) {
 class NDPiClient {
     constructor() {
 
+        this.defaultDeviceName = 'NDPi Client';
+
         // Bonjour - mDNS
         this.bonjour__service = null;
         this.bonjour__options = null;
-        this.time_interval__update_bonjour = 60000;
+        this.time_interval__republish_bonjour = 60000;
         
-        this.ws_connection__ndpi_server = null;
+        // WebSocket Connections
+        this.ws_connections__display_server = new Set();
+        this.child_process__chromium = null;
 
+        this.ws_connection__ndpi_server = null;
+        this.time_interval__send_status_update = 5000;
+        this.timer__resend_status_update = null;
         this.time_interval__reconnect_ndpi_server = 5000;
         this.timer__reconnect_ndpi_server = null;
 
-        this.time_interval__send_status_update = 5000;
-        this.timer__resend_status_update = null;
-
-        this.defaultDeviceName = 'NDPi Client';
-        this.ws_connections__display_server = new Set();
-
-        this.child_process__chromium = null;
         this.child_process__ndi_receiver = null;
         this.timer__reconnect_ndi = null;
 
-        this.__client = null;
+        this.__client = {
+            name: this.defaultDeviceName,
+            type: 'Certified NDPi Monitor',
+            id: '',
+            model: '',
+            config: {
+                ip: '',
+                displayPort: 8080,
+                commandPort: 3001,
+                bonjourPort: 3002,
+                displayMode: 'overlay', // either 'overlay' OR 'blank'
+                version: versionCurrent,
+            },
+            ndi: {
+                status: 'idle',
+                source: {
+                    current: '',
+                    target: '',
+                },
+                resolution: null,
+                framerate: null,
+                connectedAt: null,
+                uptime: null,
+            },
+            display: {
+                resolution: '',
+                cecEnabled: false,
+                mfr: null,
+            },
+            server: {
+                ip: null,
+                lastSeen: null,
+            },
+            lastCommand: {
+                source: null,
+                timestamp: null,
+                command: null,
+            },
+        };
 
         /**.   Path for Resolution List '/sys/class/drm/card1/card1-HDMI-A-1/modes'
          * 
@@ -308,50 +346,6 @@ class NDPiClient {
     }
   ///////////////////////////////////////////////////////////////////////////////////////
     start() {
-        const _id = getDeviceId();
-        const _mod = getDeviceModel();
-        const _res = getHdmiResolution();
-
-        this.__client = {
-            name: this.defaultDeviceName,
-            type: 'Certified NDPi Monitor',
-            id: _id,
-            model: _mod,
-            config: {
-                ip: this.__client.config.ip,
-                displayPort: 8080,
-                commandPort: 3001,
-                bonjourPort: 3002,
-                displayMode: 'overlay', // either 'overlay' OR 'blank'
-                version: versionCurrent,
-            },
-            ndi: {
-                status: 'idle',
-                source: {
-                    current: '',
-                    target: '',
-                },
-                resolution: null,
-                framerate: null,
-                connectedAt: null,
-                uptime: null,
-            },
-            display: {
-                resolution: _res,
-                cecEnabled: false,
-                mfr: null,
-            },
-            server: {
-                ip: 'localhost',
-                lastSeen: null,
-            },
-            lastCommand: {
-                source: null,
-                timestamp: null,
-                command: null,
-            },
-        };
-
         this.loadState();
         this.displayStartup();
     }
@@ -366,9 +360,8 @@ class NDPiClient {
         }
 
         this.__client.name                  = data.name;
-        this.__client.type                  = data.type;
         this.__client.ndi.source.target     = data.ndi.source.target || null;
-        this.__client.server.ip             = data.link.ip;
+        this.__client.server.ip             = data.server.ip || null;
         this.__client.lastCommand.source    = data.lastCommand.source;
         this.__client.lastCommand.timestamp = data.lastCommand.timestamp;
         this.__client.lastCommand.command   = data.lastCommand.command;
@@ -379,7 +372,7 @@ class NDPiClient {
         if (this.__client.server.ip) {
             setTimeout(() => {
                 this.connectToServer(this.__client.server.ip);
-            }, 1000);
+            }, 2000);
         }
 
         this.startDisplayServer();
