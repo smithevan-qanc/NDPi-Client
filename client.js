@@ -347,11 +347,13 @@ class NDPiClient {
   ///////////////////////////////////////////////////////////////////////////////////////
     start() {
         this.loadState();
-        console.log(this.__client);
         this.displayStartup();
     }
 
     loadState() {
+        console.log('Default Config Data');
+        console.log(this.__client);
+
         let data = this.__client;
 
         try {
@@ -360,7 +362,17 @@ class NDPiClient {
             consoleLog('[ERROR] Loading State', 'Attempted at Initial Load State', error);
         }
 
+        var merge = {
+            ...this.__client,
+            ...data
+        };
+
+        this.__client = merge;
+
+        console.log('Saved Config Data');
         console.log(data);
+        console.log('Merged Config Data');
+        console.log(merge);
 
         this.__client.name                  = data.name;
         this.__client.ndi.source.target     = data.ndi.source.target || null;
