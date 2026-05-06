@@ -90,7 +90,7 @@ function consoleLog(message = 'SYSTEM UPDATE', data, error) {
         //console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
         //console.log(`  [${ipAddr}] ⸺  ▶ ${message.toUpperCase()}`);
         console.log(`${message.toUpperCase()}`);
-        if (data) console.log(JSON.stringify(data, null, 2));
+        if (data) console.log(JSON.stringify(data));
         //console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
     }
 }
@@ -1205,7 +1205,7 @@ class NDPiClient {
             --disable-gpu \
             --start-fullscreen \
             --default-background-color=00000000 \
-             --ozone-platform=x11 \
+            --ozone-platform=x11 \
         http://localhost:${this.__client.config.displayPort}/`;
 
         // --show-fps-counter \
