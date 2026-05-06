@@ -113,7 +113,7 @@ function getDeviceModel() {
             return model[1];
         }
     } catch (error) {
-        consoleLog('Error Reating Serial Number', null, error);
+        consoleLog('Error Reading Device Model', null, error);
         return null;
     }
 }
@@ -363,10 +363,10 @@ class NDPiClient {
         }
 
         var merge = {
-            ...this.__client,
+            ...data,
             config: {
                 ...this.__client.config,
-                displayMode: data.displayMode,
+                displayMode: data.config.displayMode,
             },
             ndi: {
                 ...this.__client.ndi,
@@ -1477,9 +1477,14 @@ let client;
 
     console.log('Waiting For Network...');
 
+    var deviceID = getDeviceId();
+    var deviceModel = getDeviceModel();
     var localIp = await getLocalIP();
+
     console.log(`Connected: ${localIp}`);
     client.__client.config.ip = localIp;
+    client.__client.id = deviceID || '';
+    client.__client.model = deviceModel || '';
 
     setTimeout(() => {
         console.log('Starting...')
