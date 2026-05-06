@@ -1204,6 +1204,7 @@ class NDPiClient {
             --enable-transparent-visuals \
             --disable-gpu \
             --start-fullscreen \
+            --default-background-color=00000000 \
         http://localhost:${this.__client.config.displayPort}/`;
 
         // --show-fps-counter \
