@@ -261,8 +261,7 @@ class NDPiClient {
         this.child_process__ndi_receiver = null;
         this.timer__reconnect_ndi = null;
 
-        this.__client = {};
-
+        this.__client = null;
 
         /**.   Path for Resolution List '/sys/class/drm/card1/card1-HDMI-A-1/modes'
          * 
@@ -307,11 +306,10 @@ class NDPiClient {
          * cat /sys/class/drm/card1/card1-HDMI-A-1/edid | edid-decode
          */
         
-        this.init_config();
         this.displayStartup();
     }
   ///////////////////////////////////////////////////////////////////////////////////////
-    init_config() {
+    start() {
         const _ip = getLocalIP();
         const _id = getDeviceId();
         const _mod = getDeviceModel();
@@ -1193,18 +1191,15 @@ class NDPiClient {
             this.killOverlayBrowser();
         }
         setTimeout(() => {
-            if (this.child_process__chromium) return;
             this.launchOverlayBrowser();
         }, 2000);
     }
-
     killOverlayBrowser() {
         if (this.child_process__chromium) {
             this.child_process__chromium.kill();
             this.child_process__chromium = null;
         }
     }
-
     launchOverlayBrowser() {
         if (this.child_process__chromium) {
             return;
@@ -1228,9 +1223,6 @@ class NDPiClient {
         // --show-taps ///\\\ Draws a circle at each touch point, similar to the Android OS developer option "Show taps".
 
         const { exec, spawn } = require('child_process');
-
-        consoleLog('launching new overlay instance');
-
         this.child_process__chromium = exec(commandLine, {
             env: {
                 ...process.env,
@@ -1243,11 +1235,18 @@ class NDPiClient {
             this.child_process__chromium = null;
         });
 
+        this.child_process__chromium.stderr.on('data', (data) => {
+            const output = data.toString();
+            CRLFArray(output).forEach((line) => {
+                console.log(`[ Chromium Error ]: ${line}`);
+            });
+        });
+        
         this.child_process__chromium.on('error', (err) => {
-            consoleLog('Chromium Error', null, err);
+            console.log('[ Chromium Error ]:', err);
+            console.log(`[ Chromium Error ]: Relaunching...`);
             this.relaunchOverlayBrowser();
         });
-
     }
 
     killNdiReceiver() {
@@ -1269,7 +1268,6 @@ class NDPiClient {
             consoleLog('[ ndi ] ⸺  ▶ [pkill -9]', null, e);
         }
     }
-
     setNDISource(sourceName, commandInfo = {}) {
 
         if (this.timer__reconnect_ndi) {
@@ -1301,7 +1299,6 @@ class NDPiClient {
         }
 
     }
-    
     startNDIReceiver(sourceName) {
 
         consoleLog('[Establishing connection] NDI');
@@ -1314,7 +1311,6 @@ class NDPiClient {
         }, 1000);
 
     }
-    
     _startNDIReceiverInternal(sourceName) {
 
         if (!fs.existsSync(PATH_NDI_RECEIVER)) {
@@ -1377,7 +1373,6 @@ class NDPiClient {
             consoleLog('[error] ndi', null, error);
         });
     }
-    
     scheduleReconnect() {
 
         // Only reconnect if we have a target source and aren't already trying
@@ -1419,7 +1414,6 @@ class NDPiClient {
         }, 1000);
 
     }
-
     showBlank(commandInfo = {}) {
 
         if (this.timer__reconnect_ndi) {
@@ -1439,6 +1433,9 @@ class NDPiClient {
         }, 1000);
     }
 
+    inject_IP(ip) {
+        this.__client.config.ip = ip;
+    }
 }
 
 let client;
@@ -1455,18 +1452,15 @@ let client;
             resolve();
         })
     }); 
-    /*
-    exec(`./sh/startup`, (error, stdout, stderr) => {
-        if (!error) {
-            CRLFArray(stdout).forEach((line) => { console.log(line); });
-        }
-    });
-    */
+
+    client = new NDPiClient();
     
     console.log('Waiting For Network...');
     var ip = await getLocalIP();
     console.log(`Connected: ${ip}`);
-    client = new NDPiClient();
+
+    client.inject_IP(ip);
+    client.start();
 })();
 
 async function deviceShutdown() {
@@ -1502,31 +1496,27 @@ async function killProcess() {
     }, 500);
 }
 
-process.on('SIGINT', () => {
-    killProcess();
-});
-process.on('SIGTERM', () => { 
-    killProcess();
-});
-
+process.on('SIGINT', () => { killProcess(); });
+process.on('SIGTERM', () => { killProcess(); });
 process.on('exit', (code) => {
-    console.log(`Exit Code: ${code}`);
-    //console.log('══════════════════════════════════════ END OF NDPi MONITOR PROCESS ═════');
-    console.log('════════════════════════════════ N D P i - M O N I T O R ═════ END ═════');
-    //                                            N D P i - M O N I T O R ═════ END ═════
+    console.log(`    Exit Code: ${code}`);
+    console.log('═════════════════════════════════════════════  N D P i - M O N I T O R  ═');
+    //                                                           N D P i - M O N I T O R ═════ END ═════
 });
-
 process.on('uncaughtException', (err, orig) => {
     console.log('*');
-    console.log('*');
-    consoleLog('UNCAUGHT EXCEPTION', orig, err);
-    console.log('*');
+    console.log('* *');
+    console.log('* * * Uncaught Exception');
+    console.log(orig);
+    console.log(err);
+    console.log('* *');
     console.log('*');
 });
 process.on('unhandledRejection', (reason) => {
     console.log('*');
-    console.log('*');
-    consoleLog('UNHANDLED REJECTION', null, reason);
-    console.log('*');
+    console.log('* *');
+    console.log('* * * Unhandled Rejection');
+    console.log(reason);
+    console.log('* *');
     console.log('*');
 });
