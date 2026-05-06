@@ -47,6 +47,8 @@ echo "  ╚═╝  ╚═══╝╚═════╝ ╚═╝     ╚═╝"
 echo "   v ${version} "
 echo " "
 
+export DISPLAY=":0"
+
 xdotool mousemove 3840 2160
 sleep 0.5
 xdotool mousemove 3840 0
