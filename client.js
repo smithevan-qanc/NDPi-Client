@@ -347,6 +347,7 @@ class NDPiClient {
   ///////////////////////////////////////////////////////////////////////////////////////
     start() {
         this.loadState();
+        console.log(this.__client);
         this.displayStartup();
     }
 
