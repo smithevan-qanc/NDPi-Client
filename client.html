@@ -24,7 +24,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #000;
+            background: rgba(0, 0, 0, 0);
         }
         #overlay-container {
             width: 100%;
@@ -300,7 +300,6 @@
         // Connect to display server
         setTimeout(() => {
             showOverlay();
-            //connect();
             const server = new DisplayServer();
         }, 500);
 

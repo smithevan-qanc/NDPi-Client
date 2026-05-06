@@ -11,6 +11,12 @@ install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
     sleep 1
+    cd $HOME
+    sudo rsync -zq ndpi/config/pcmanfm/desktop-items-0.conf .config/pcmanfm/default/
+    sudo rsync -zq ndpi/config/openbox/autostart .config/openbox/
+    sudo chown ndpi-client:ndpi-client .config/openbox/autostart
+    sudo rsync -zq ndpi/config/chromium.d/default-flags /etc/chromium.d/
+    sleep 1
     sudo systemctl restart ndpi.service
     # sudo reboot
 }

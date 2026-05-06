@@ -13,6 +13,7 @@ export DISPLAY=:0
 xset s off
 xset -dpms
 xset s noblank
+xrandr --output HDMI-1 --mode 1920x1080
 
 # Hide mouse cursor after 0.2 seconds of inactivity
 # unclutter -idle 0.2 &

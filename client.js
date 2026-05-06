@@ -1202,15 +1202,20 @@ class NDPiClient {
             --disable-crash-reporter \
             --disable-logging \
             --disable-notifications \
-            --enable-virtual-keyboard \
-            --pull-to-refresh \
-            --show-taps \
             --kiosk-splash-screen-min-time-seconds=5 \
             --disable-web-security \
         http://localhost:${this.__client.config.displayPort}/`;
 
         // --show-fps-counter \
         // --show-taps ///\\\ Draws a circle at each touch point, similar to the Android OS developer option "Show taps".
+        /**
+         *  --show-fps-counter
+         *  --show-taps
+         *      Draws a circle at each touch point, similar to the Android OS developer option "Show taps".
+         *  --pull-to-refresh
+         *  --enable-virtual-keyboard
+         *  
+         */
 
         const { exec, spawn } = require('child_process');
         this.child_process__chromium = exec(commandLine, {
@@ -1223,13 +1228,6 @@ class NDPiClient {
 
         this.child_process__chromium.on('exit', () => {
             this.child_process__chromium = null;
-        });
-
-        this.child_process__chromium.stderr.on('data', (data) => {
-            const output = data.toString();
-            CRLFArray(output).forEach((line) => {
-                console.log(`[ Chromium Error ]: ${line}`);
-            });
         });
         
         this.child_process__chromium.on('error', (err) => {
