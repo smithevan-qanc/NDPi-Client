@@ -1198,12 +1198,12 @@ class NDPiClient {
         let commandLine = `/usr/bin/chromium \
             --kiosk \
             --user-data-dir=${os.homedir()}/.config/chromium \
-            --default-background-color=#81c127 \
             --disable-crash-reporter \
             --disable-logging \
             --disable-notifications \
-            --kiosk-splash-screen-min-time-seconds=5 \
             --disable-web-security \
+            --enable-transparent-visuals \
+            --disable-gpu \
         http://localhost:${this.__client.config.displayPort}/`;
 
         // --show-fps-counter \
@@ -1214,7 +1214,8 @@ class NDPiClient {
          *      Draws a circle at each touch point, similar to the Android OS developer option "Show taps".
          *  --pull-to-refresh
          *  --enable-virtual-keyboard
-         *  
+         *  --default-background-color=#81c127
+         *  --kiosk-splash-screen-min-time-seconds=5
          */
 
         const { exec, spawn } = require('child_process');
