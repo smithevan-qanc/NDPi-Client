@@ -120,7 +120,7 @@ function getDeviceModel() {
 }
 async function getLocalIP() {
     if (!NET_ONLINE) {
-        await waitForNetwork();
+        return await waitForNetwork();
         NET_ONLINE = true;
     }
     const interfaces = os.networkInterfaces();
@@ -135,13 +135,14 @@ async function getLocalIP() {
     return 'localhost';
 }
 async function waitForNetwork({ host = '8.8.8.8', port = 53, retryMs = 1000 } = {}) {
-    await new Promise((resolve) => {
+    return await new Promise((resolve) => {
         const tryConnect = () => {
             const socket = new net.Socket();
             socket.setTimeout(2000);
             socket.once('connect', () => {
                 const localIP = socket.localAddress;
                 socket.destroy();
+                NET_ONLINE = true;
                 resolve(localIP);
             });
             socket.once('timeout', () => {
@@ -322,13 +323,14 @@ class NDPiClient {
     }
 
     init_config() {
+        const ipa = getLocalIP();
         this.__client = {
             name: this.defaultDeviceName,
             type: 'Certified NDPi Monitor',
             id: getDeviceId(),
             model: getDeviceModel(),
             config: {
-                ip: getLocalIP(),
+                ip: ipa,
                 displayPort: 8080,
                 commandPort: 3001,
                 mdnsPort: 3002,
