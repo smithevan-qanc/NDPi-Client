@@ -77,7 +77,6 @@ function startupConsoleLog() {
 `);
 }
 function consoleLog(message = 'SYSTEM UPDATE', data, error) {
-    //const ipAddr = getLocalIP();
     if (error) {
         console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
         //console.log(`  [${ipAddr}] ⸺  ▶ 🔴 ERROR: ${message.toUpperCase()}`);
@@ -1451,8 +1450,11 @@ let client;
 
     var localIp = await getLocalIP();
     console.log(`Connected: ${localIp}`);
-    client.__client.config.ip = localIp
-    client.start();
+    client.__client.config.ip = localIp;
+
+    setTimeout(() => {
+        client.start();
+    }, 700);
 
     setInterval(async () => {
         localIp = await getLocalIP();
@@ -1497,7 +1499,7 @@ process.on('SIGINT', () => { killProcess(); });
 process.on('SIGTERM', () => { killProcess(); });
 process.on('exit', (code) => {
     console.log(`    Exit Code: ${code}`);
-    console.log('═════════════════════════════════════════════  N D P i - M O N I T O R  ═');
+    console.log('════════════════════════════════════════════  N D P i - M O N I T O R  ═');
     //                                                           N D P i - M O N I T O R ═════ END ═════
 });
 process.on('uncaughtException', (err, orig) => {
@@ -1516,4 +1518,5 @@ process.on('unhandledRejection', (reason) => {
     console.log(reason);
     console.log('* *');
     console.log('*');
+    process.exit();
 });
