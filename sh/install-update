@@ -11,7 +11,11 @@ install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
     sleep 1
-    sudo systemctl restart ndpi.service
+    cd /home/ndpi-client
+    sudo rsync -zq ndpi/config/openbox/autostart /home/ndpi-client/.config/openbox/
+    sudo chown ndpi-client:ndpi-client /home/ndpi-client/.config/openbox/autostart
+    sleep 1
+    sudo reboot
     # sudo reboot
 }
 install

@@ -1232,6 +1232,7 @@ class NDPiClient {
 
         this.child_process__chromium.on('exit', () => {
             this.child_process__chromium = null;
+            this.relaunchOverlayBrowser();
         });
         
         this.child_process__chromium.on('error', (err) => {
