@@ -12,12 +12,14 @@ install() {
     echo "INSTALLING UPDATE"
     sleep 1
     cd $HOME
-    sudo rsync -zq ndpi/config/pcmanfm/desktop-items-0.conf .config/pcmanfm/default/
-    sudo rsync -zq ndpi/config/openbox/autostart .config/openbox/
-    sudo chown ndpi-client:ndpi-client .config/openbox/autostart
+    sudo rsync -zq ndpi/config/pcmanfm/desktop-items-0.conf /home/ndpi-client/.config/pcmanfm/default/
+    sudo rsync -zq ndpi/config/openbox/autostart /home/ndpi-client/.config/openbox/
+    sudo chown ndpi-client:ndpi-client /home/ndpi-client/.config/openbox/autostart
     sudo rsync -zq ndpi/config/chromium.d/default-flags /etc/chromium.d/
     sleep 1
-    sudo systemctl restart ndpi.service
+    sudo systemctl stop ndpi.service
+    sleep 2
+    sudo reboot
     # sudo reboot
 }
 install
