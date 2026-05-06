@@ -306,11 +306,9 @@ class NDPiClient {
          * cat /sys/class/drm/card1/card1-HDMI-A-1/edid | edid-decode
          */
         
-        this.displayStartup();
     }
   ///////////////////////////////////////////////////////////////////////////////////////
     start() {
-        const _ip = getLocalIP();
         const _id = getDeviceId();
         const _mod = getDeviceModel();
         const _res = getHdmiResolution();
@@ -321,7 +319,7 @@ class NDPiClient {
             id: _id,
             model: _mod,
             config: {
-                ip: _ip,
+                ip: this.__client.config.ip,
                 displayPort: 8080,
                 commandPort: 3001,
                 bonjourPort: 3002,
@@ -356,6 +354,7 @@ class NDPiClient {
         };
 
         this.loadState();
+        this.displayStartup();
     }
 
     loadState() {
@@ -699,9 +698,6 @@ class NDPiClient {
     }
 
     bonjour__publish() {
-            console.log('publishing bonjour', 'getting ip');
-        this.__client.config.ip = getLocalIP();
-            console.log('publishing bonjour', `IP: ${this.__client.config.ip}`, 'setting options');
         this.bonjour__options = {
             name: `ndpi-client-${this.__client.id}`,
             type: 'ndpi-monitor-client',
@@ -1432,10 +1428,6 @@ class NDPiClient {
             this.killNdiReceiver();
         }, 1000);
     }
-
-    inject_IP(ip) {
-        this.__client.config.ip = ip;
-    }
 }
 
 let client;
@@ -1454,13 +1446,18 @@ let client;
     }); 
 
     client = new NDPiClient();
-    
-    console.log('Waiting For Network...');
-    var ip = await getLocalIP();
-    console.log(`Connected: ${ip}`);
 
-    client.inject_IP(ip);
+    console.log('Waiting For Network...');
+
+    var localIp = await getLocalIP();
+    console.log(`Connected: ${localIp}`);
+    client.__client.config.ip = localIp
     client.start();
+
+    setInterval(async () => {
+        localIp = await getLocalIP();
+        client.__client.config.ip = localIp;
+    }, 10000);
 })();
 
 async function deviceShutdown() {
