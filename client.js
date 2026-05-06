@@ -240,6 +240,11 @@ async function cecPowerOff(commandInfo = {}) {
 
 class NDPiClient {
     constructor() {
+
+        // Bonjour - mDNS
+        this.bonjour__service = null;
+        this.bonjour__options = null;
+        this.time_interval__update_bonjour = 60000;
         
         this.ws_connection__ndpi_server = null;
 
@@ -257,6 +262,7 @@ class NDPiClient {
         this.timer__reconnect_ndi = null;
 
         this.__client = {};
+
 
         /**.   Path for Resolution List '/sys/class/drm/card1/card1-HDMI-A-1/modes'
          * 
@@ -302,22 +308,7 @@ class NDPiClient {
          */
         
         this.init_config();
-
-        consoleLog('starting up...', {
-            Service: `NDPi Monitor Client v${versionCurrent}`,
-            DeviceId: this.__client.id,
-            DeviceName: this.__client.name,
-            IP: this.__client.config.ip
-        });
-
-        this.startDisplayServer();
-        this.startCommandServer();
-        this.start_mdnsBroadcast();
-
-        setTimeout(() => {
-            this.awaitConnection();
-            this.displayStartup();
-        }, 1500);
+        this.displayStartup();
     }
   ///////////////////////////////////////////////////////////////////////////////////////
     init_config() {
@@ -335,7 +326,7 @@ class NDPiClient {
                 ip: _ip,
                 displayPort: 8080,
                 commandPort: 3001,
-                mdnsPort: 3002,
+                bonjourPort: 3002,
                 displayMode: 'overlay', // either 'overlay' OR 'blank'
                 version: versionCurrent,
             },
@@ -365,16 +356,19 @@ class NDPiClient {
                 command: null,
             },
         };
+
         this.loadState();
     }
 
     loadState() {
         let data = this.__client;
+
         try {
             data = JSON.parse(readFile(PATH_CONFIG));
         } catch (error) {
             consoleLog('[ERROR] Loading State', 'Attempted at Initial Load State', error);
         }
+
         this.__client.name                  = data.name;
         this.__client.type                  = data.type;
         this.__client.ndi.source.target     = data.ndi.source.target || null;
@@ -382,12 +376,471 @@ class NDPiClient {
         this.__client.lastCommand.source    = data.lastCommand.source;
         this.__client.lastCommand.timestamp = data.lastCommand.timestamp;
         this.__client.lastCommand.command   = data.lastCommand.command;
+        
         console.log('Configuration Loaded');
         console.log('CONFIG:', JSON.stringify(this.__client, null, 2));
+
         if (this.__client.server.ip) {
             setTimeout(() => {
                 this.connectToServer(this.__client.server.ip);
             }, 1000);
+        }
+
+        this.startDisplayServer();
+        this.startCommandServer();
+        this.bonjour__start();
+    }
+
+    startDisplayServer() {
+
+        const displayServer = http.createServer((req, res) => {
+
+            let filePath;
+            const assetsDir = path.join(__dirname, 'assets');
+            
+            if (req.url === '/' || req.url === '/client.html') {
+                filePath = path.join(__dirname, 'client.html');
+            } else if (req.url.startsWith('/assets/')) {
+                filePath = path.join(assetsDir, req.url.substring(8));
+            } else {
+                res.writeHead(404);
+                res.end('Not found');
+                return;
+            }
+            
+            const ext = path.extname(filePath);
+            const contentTypes = {
+                '.html': 'text/html',
+                '.svg': 'image/svg+xml',
+                '.css': 'text/css',
+                '.js': 'application/javascript'
+            };
+            
+            fs.readFile(filePath, (err, data) => {
+                let code;
+                if (err) {
+                    code = 404;
+                } else {
+                    code = 200;
+                }
+
+                consoleLog('(↓↑) Display Server: rest API', {
+                    req: {
+                        url: `${req.url}`,
+                        method: `${req.method}`,
+                        //headers: req.headers ?? {},
+                        body: req.body ?? {}
+                    },
+                    res: { status: code }
+                });
+
+                if (err) {
+                    res.writeHead(404);
+                    res.end('File not found: ' + filePath);
+                    return;
+                }
+                res.writeHead(200, { 'Content-Type': contentTypes[ext] || 'text/plain' });
+                res.end(data);
+            });
+        });
+
+        // WebSocket server for display control
+        this.displayWss = new WebSocket.Server({ server: displayServer });
+        
+        this.displayWss.on('connection', (ws) => {
+            
+            this.ws_connections__display_server.add(ws);
+            
+            // Send current state
+            setTimeout(() => {
+                this.broadcastToDisplay();
+            }, 1500);
+            
+            ws.on('close', () => {
+                this.ws_connections__display_server.delete(ws);
+            });
+
+            ws.on('error', (error) => {
+                console.log('Display WebSocket Error:', error);
+            });
+        });
+
+        displayServer.listen(this.__client.config.displayPort, () => {
+            console.log(`Display Server running on port ${this.__client.config.displayPort}`);
+            console.log(`Web interface: http://${this.__client.config.ip}:${this.__client.config.displayPort}`);
+        });
+    }
+
+    startCommandServer() {
+
+        // Create HTTP server with REST API endpoints
+        const server = http.createServer(async (req, res) => {
+            const url = new URL(req.url, `http://${req.headers.host}`);
+            const handled = () => consoleLog(`(↓↑) [handled] ${url.pathname}`);
+            
+            // CORS headers
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+            
+            if (req.method === 'OPTIONS') {
+                consoleLog('(↓↓) command server: api', {
+                    req: {
+                        url: `${req.url}`,
+                        method: `${req.method}`,
+                        //headers: req.headers ?? {},
+                        body: req.body ?? {}
+                    },
+                    res: { status: 200 }
+                });
+                res.writeHead(200);
+                res.end();
+                return;
+            }
+            
+            // REST API endpoints
+            if (req.method === 'POST') {
+                let body = '';
+                req.on('data', chunk => body += chunk);
+                req.on('end', async () => {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+
+                    consoleLog('(↓↓) command server: api', {
+                        req: {
+                            url: `${req.url}`,
+                            method: `${req.method}`,
+                            //headers: req.headers ?? {},
+                            body: JSON.parse(body) ?? {}
+                        },
+                        res: { status: 200 }
+                    });
+
+                    let data;
+                    try {
+                        data = JSON.parse(body);
+                    } catch (e) {}
+
+                    const commandInfo = {
+                        source:     req.headers['host'] || 'Unknown Host',
+                        timestamp:  new Date().toISOString(),
+                        command:    url.pathname,
+                        data:       data,
+                    };
+                    
+                    switch (url.pathname) {
+                        case '/api/overlay':
+                            this.showOverlay(commandInfo);
+                            handled();
+                            res.end(JSON.stringify({
+                                success: true,
+                                message: 'Overlay displayed'
+                            }));
+                            break;
+                        case '/api/blank':
+                            this.showBlank(commandInfo);
+                            handled();
+                            res.end(JSON.stringify({
+                                success: true,
+                                message: 'Blank screen displayed'
+                            }));
+                            break;
+                        case '/api/source':
+                            this.setNDISource(data.sourceName, commandInfo);
+                            handled();
+                            res.end(JSON.stringify({
+                                success: true,
+                                message: `Source set to ${data.sourceName}`
+                            }));
+                            break;
+                        case '/api/cec/on':
+                            const successCecOn = cecPowerOn(commandInfo);
+                            if (successCecOn === undefined) {
+                                consoleLog(`(↓↑) [handel Unknown] ${url.pathname}`);
+                                res.end(JSON.stringify({
+                                    success: true,
+                                    message: 'TV Power On'
+                                }));
+                            } else if (!successCecOn.success) {
+                                handled();
+                                res.end(JSON.stringify({
+                                    success: false,
+                                    message: 'TV Power On Failed'
+                                }));
+                            } else if (successCecOn.success) {
+                                handled();
+                                res.end(JSON.stringify({
+                                    success: true,
+                                    message: 'TV Power On'
+                                }));
+                            }
+                            break;
+                        case '/api/cec/standby':
+                            const successCecOff = cecPowerOff(commandInfo);
+                            if (successCecOff === undefined) {
+                                consoleLog(`(↓↑) [handel Unknown] ${url.pathname}`);
+                                res.end(JSON.stringify({
+                                    success: true,
+                                    message: 'TV Power Off'
+                                }));
+                            } else if (!successCecOff.success) {
+                                handled();
+                                res.end(JSON.stringify({
+                                    success: false,
+                                    message: 'TV Power Off Failed'
+                                }));
+                            } else if (successCecOff.success) {
+                                handled();
+                                res.end(JSON.stringify({
+                                    success: true,
+                                    message: 'TV Power Off'
+                                }));
+                            }
+                            break;
+                        case '/api/deviceName':
+                            const currentDeviceName = this.__client.name;
+                            this.__client.name      = data.deviceName || this.defaultDeviceName;
+                            this.saveState(commandInfo);
+                            handled();
+                            res.end(JSON.stringify({
+                                success: true,
+                                message: `Device name updated.`,
+                                updates: {
+                                    deviceName: {
+                                        previous: currentDeviceName,
+                                        new: data.deviceName
+                                    }
+                                }
+                            }));
+                            break;
+                        default:
+                            consoleLog(`(↓↑) [unhandled] ${url.pathname}`, {details: 'Path Not Defined'});
+                            res.end(JSON.stringify({
+                                success: false,
+                                message: 'Path Not found'
+                            }));
+                    }
+                });
+                return;
+            }
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            consoleLog('(↓↓) command server: api', {
+                req: {
+                    url: `${req.url}`,
+                    method: `${req.method}`,
+                },
+                res: { status: 200 }
+            });
+            
+            switch (url.pathname) {
+                case '/control/browser/restart':
+                    this.relaunchOverlayBrowser();
+                    handled();
+                    res.end(JSON.stringify({ status: 200, response: OK }));
+                    break;
+                default:
+                    res.end(JSON.stringify({
+                        config: { ...this.__client },
+                        system: { 
+                            ...SYS_DETAILS,
+                            cpus: os.cpus(),
+                            memory: {
+                                free: os.freemem(),
+                                total: os.totalmem(),
+                                percentUsed: ( 1-(os.freemem()/os.totalmem()) ).toFixed(3),
+                            },
+                            load_avg: os.loadavg(),
+                            uptime: os.uptime(),
+                            uptime_ndpi: uptime(),
+                        },
+                        get_stats: this.getSystemStats()
+                    }));
+                    break;
+            }
+
+        });
+
+        this.wss = new WebSocket.Server({ server });
+
+        this.wss.on('connection', (ws) => {
+
+            ws.on('message', (message) => {
+                try {
+                    const command = JSON.parse(message);
+                    consoleLog('(↓↓) command server: ws');
+                    this.handleCommand(command, ws);
+                } catch (error) {
+                    consoleLog('(↓↓) command server: ws', {Message: message}, error);
+                    ws.send(JSON.stringify({
+                        success: false,
+                        message: 'Invalid command format'
+                    }));
+                }
+            });
+
+            ws.on('close', () => {
+                consoleLog('[disconnected] command server: ws');
+            });
+
+            ws.on('error', (error) => {
+                consoleLog('[connection error] command server: ws', null, error);
+            });
+        });
+
+        server.listen(this.__client.config.commandPort, () => {
+            console.log(`Command Handler API running on port ${this.__client.config.commandPort}`);
+        });
+    }
+
+    bonjour__start() {
+        this.bonjour__publish();
+
+        setInterval(() => {
+            this.bonjour__publish();
+        }, this.time_interval__update_bonjour);
+    }
+
+    bonjour__publish() {
+            console.log('publishing bonjour', 'getting ip');
+        this.__client.config.ip = getLocalIP();
+            console.log('publishing bonjour', `IP: ${this.__client.config.ip}`, 'setting options');
+        this.bonjour__options = {
+            name: `ndpi-client-${this.__client.id}`,
+            type: 'ndpi-monitor-client',
+            port: this.__client.config.bonjourPort,
+            txt: {
+                deviceId: String(this.__client.id),
+                deviceName: String(this.__client.name),
+                ip: String(this.__client.config.ip),
+                commandPort: String(this.__client.config.commandPort),
+                type: String(this.__client.type),
+                status: String('online'),
+                version: String(this.__client.config.version)
+            }
+        };
+
+        if (this.bonjour__service) {
+            this.bonjour__service.stop();
+            this.bonjour__service = null;
+        } else {
+            console.log('(↑↑) Starting Bonjour');
+        }
+
+        setTimeout(() => {
+            console.log('bonjour start');
+            this.bonjour__service = bonjour.publish(this.bonjour__options);
+        }, 500);
+
+    }
+
+    handleCommand(command, ws) {
+
+        if (command.serverAddress) {
+            if (command.serverAddress !== this.__client.server.ip) {
+                this.__client.server.ip = command.serverAddress;
+                consoleLog('(↑↓) [handled][updated] server ip address', { ReconnectingIn: 5 });
+                setTimeout(() => {
+                    this.connectToServer(command.serverAddress)
+                }, 5000)
+            }
+        }
+
+        const commandInfo = {
+            source:     command.source      || 'unknown',
+            timestamp:  command.timestamp   || new Date().toISOString(),
+            command:    command.type        || 'unknown',
+        };
+
+        const handled = () => consoleLog(`(↑↓) [handled]`, commandInfo);
+
+        switch (command.type) {
+            case 'set-source':
+                commandInfo.data = { sourceName: command.sourceName };
+                this.setNDISource(command.sourceName, commandInfo);
+                handled();
+                ws.send(JSON.stringify({
+                    success: true,
+                    message: `Source set to ${command.sourceName}`
+                }));
+                break;
+
+            case 'rename':
+                commandInfo.data = { deviceName: command.newName };
+                this.__client.name = command.newName
+                this.saveState(commandInfo);
+                handled();
+                ws.send(JSON.stringify({
+                    success: true,
+                    message: `Renamed to ${command.newName}`
+                }));
+                break;
+
+            case 'show-overlay':
+            case 'overlay':
+                this.showOverlay(commandInfo);
+                handled();
+                ws.send(JSON.stringify({
+                    success: true,
+                    message: 'Overlay displayed'
+                }));
+                break;
+
+            case 'show-blank':
+            case 'blank':
+                this.showBlank(commandInfo);
+                handled();
+                ws.send(JSON.stringify({
+                    success: true,
+                    message: 'Blank screen displayed'
+                }));
+                break;
+
+            case 'shutdown':
+                ws.send(JSON.stringify({
+                    success: true,
+                    message: 'Shutting down...'
+                }));
+                handled();
+                setTimeout(() => deviceShutdown(), 1000);
+                break;
+
+            case 'reboot':
+                ws.send(JSON.stringify({
+                    success: true,
+                    message: 'Rebooting...'
+                }));
+                handled();
+                setTimeout(() => deviceReboot(), 1000);
+                break;
+
+            case 'ping':
+                ws.send(JSON.stringify({
+                    success: true,
+                    type: 'pong',
+                    deviceId: this.__client.id
+                }));
+                consoleLog('(↑↑) command server: ws', { data: 'pong' });
+                break;
+
+            case 'get-status':
+                ws.send(JSON.stringify({
+                    success: true,
+                    deviceId: this.__client.id,
+                    deviceName: this.__client.name,
+                    ip: this.__client.config.ip,
+                    currentSource: this.__client.ndi.source.current || 'None',
+                    displayMode: this.__client.config.displayMode || 'overlay',
+                    status: 'online'
+                }));
+                handled();
+                break;
+
+            default:
+                ws.send(JSON.stringify({
+                    success: false,
+                    message: `Unknown command: ${command.type}`
+                }));
+                consoleLog(`(↑↓) [unhandled]`, commandInfo);
         }
     }
 
@@ -705,88 +1158,6 @@ class NDPiClient {
         }
     }
 
-    startDisplayServer() {
-
-        const displayServer = http.createServer((req, res) => {
-
-            let filePath;
-            const assetsDir = path.join(__dirname, 'assets');
-            
-            if (req.url === '/' || req.url === '/client.html') {
-                filePath = path.join(__dirname, 'client.html');
-            } else if (req.url.startsWith('/assets/')) {
-                filePath = path.join(assetsDir, req.url.substring(8));
-            } else {
-                res.writeHead(404);
-                res.end('Not found');
-                return;
-            }
-            
-            const ext = path.extname(filePath);
-            const contentTypes = {
-                '.html': 'text/html',
-                '.svg': 'image/svg+xml',
-                '.css': 'text/css',
-                '.js': 'application/javascript'
-            };
-            
-            fs.readFile(filePath, (err, data) => {
-                let code;
-                if (err) {
-                    code = 404;
-                } else {
-                    code = 200;
-                }
-
-                consoleLog('(↓↑) Display Server: rest API', {
-                    req: {
-                        url: `${req.url}`,
-                        method: `${req.method}`,
-                        //headers: req.headers ?? {},
-                        body: req.body ?? {}
-                    },
-                    res: { status: code }
-                });
-
-                if (err) {
-                    res.writeHead(404);
-                    res.end('File not found: ' + filePath);
-                    return;
-                }
-                res.writeHead(200, { 'Content-Type': contentTypes[ext] || 'text/plain' });
-                res.end(data);
-            });
-        });
-
-        // WebSocket server for display control
-        this.displayWss = new WebSocket.Server({ server: displayServer });
-        
-        this.displayWss.on('connection', (ws) => {
-            
-            this.ws_connections__display_server.add(ws);
-            
-            // Send current state
-            setTimeout(() => {
-                this.broadcastToDisplay();
-            }, 1500);
-            
-            ws.on('close', () => {
-                this.ws_connections__display_server.delete(ws);
-                consoleLog('[disconnected] display server: ws');
-            });
-
-            ws.on('error', (error) => {
-                consoleLog('[failed] display server: ws', null, error);
-            });
-        });
-
-        displayServer.listen(this.__client.config.displayPort, () => {
-            consoleLog('[online] display server', {
-                url: `http://${this.__client.config.ip}:${this.__client.config.displayPort}`
-            });
-        });
-    }
-
     broadcastToDisplay(message = {}) {
 
         const currentConfig = this.__client;
@@ -835,19 +1206,11 @@ class NDPiClient {
     }
 
     launchOverlayBrowser() {
-        /**
-         * This Function Returns:
-         *      'open'  for Chromium instance already started.
-         *      'new'   for a new instance of Chromium started.
-         *      'error' indicating logic to retry starting Chromium.
-         */
-
         if (this.child_process__chromium) {
-            return 'open';
+            return;
         }
-        const instanceCheck = 'pgrep -f "chromium" 2>/dev/null';
 
-        let newInstance = `/usr/bin/chromium \
+        let commandLine = `/usr/bin/chromium \
             --kiosk \
             --disable-web-security \
             --default-background-color=#00000000 \
@@ -868,7 +1231,7 @@ class NDPiClient {
 
         consoleLog('launching new overlay instance');
 
-        this.child_process__chromium = exec(newInstance, {
+        this.child_process__chromium = exec(commandLine, {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
@@ -885,394 +1248,6 @@ class NDPiClient {
             this.relaunchOverlayBrowser();
         });
 
-    }
-
-    startCommandServer() {
-
-        // Create HTTP server with REST API endpoints
-        const server = http.createServer(async (req, res) => {
-            const url = new URL(req.url, `http://${req.headers.host}`);
-            const handled = () => consoleLog(`(↓↑) [handled] ${url.pathname}`);
-            
-            // CORS headers
-            res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-            res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-            
-            if (req.method === 'OPTIONS') {
-                consoleLog('(↓↓) command server: api', {
-                    req: {
-                        url: `${req.url}`,
-                        method: `${req.method}`,
-                        //headers: req.headers ?? {},
-                        body: req.body ?? {}
-                    },
-                    res: { status: 200 }
-                });
-                res.writeHead(200);
-                res.end();
-                return;
-            }
-            
-            // REST API endpoints
-            if (req.method === 'POST') {
-                let body = '';
-                req.on('data', chunk => body += chunk);
-                req.on('end', async () => {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-
-                    consoleLog('(↓↓) command server: api', {
-                        req: {
-                            url: `${req.url}`,
-                            method: `${req.method}`,
-                            //headers: req.headers ?? {},
-                            body: JSON.parse(body) ?? {}
-                        },
-                        res: { status: 200 }
-                    });
-
-                    let data;
-                    try {
-                        data = JSON.parse(body);
-                    } catch (e) {}
-
-                    const commandInfo = {
-                        source:     req.headers['host'] || 'Unknown Host',
-                        timestamp:  new Date().toISOString(),
-                        command:    url.pathname,
-                        data:       data,
-                    };
-                    
-                    switch (url.pathname) {
-                        case '/api/overlay':
-                            this.showOverlay(commandInfo);
-                            handled();
-                            res.end(JSON.stringify({
-                                success: true,
-                                message: 'Overlay displayed'
-                            }));
-                            break;
-                        case '/api/blank':
-                            this.showBlank(commandInfo);
-                            handled();
-                            res.end(JSON.stringify({
-                                success: true,
-                                message: 'Blank screen displayed'
-                            }));
-                            break;
-                        case '/api/source':
-                            this.setNDISource(data.sourceName, commandInfo);
-                            handled();
-                            res.end(JSON.stringify({
-                                success: true,
-                                message: `Source set to ${data.sourceName}`
-                            }));
-                            break;
-                        case '/api/cec/on':
-                            const successCecOn = cecPowerOn(commandInfo);
-                            if (successCecOn === undefined) {
-                                consoleLog(`(↓↑) [handel Unknown] ${url.pathname}`);
-                                res.end(JSON.stringify({
-                                    success: true,
-                                    message: 'TV Power On'
-                                }));
-                            } else if (!successCecOn.success) {
-                                handled();
-                                res.end(JSON.stringify({
-                                    success: false,
-                                    message: 'TV Power On Failed'
-                                }));
-                            } else if (successCecOn.success) {
-                                handled();
-                                res.end(JSON.stringify({
-                                    success: true,
-                                    message: 'TV Power On'
-                                }));
-                            }
-                            break;
-                        case '/api/cec/standby':
-                            const successCecOff = cecPowerOff(commandInfo);
-                            if (successCecOff === undefined) {
-                                consoleLog(`(↓↑) [handel Unknown] ${url.pathname}`);
-                                res.end(JSON.stringify({
-                                    success: true,
-                                    message: 'TV Power Off'
-                                }));
-                            } else if (!successCecOff.success) {
-                                handled();
-                                res.end(JSON.stringify({
-                                    success: false,
-                                    message: 'TV Power Off Failed'
-                                }));
-                            } else if (successCecOff.success) {
-                                handled();
-                                res.end(JSON.stringify({
-                                    success: true,
-                                    message: 'TV Power Off'
-                                }));
-                            }
-                            break;
-                        case '/api/deviceName':
-                            const currentDeviceName = this.__client.name;
-                            this.__client.name      = data.deviceName || this.defaultDeviceName;
-                            this.saveState(commandInfo);
-                            handled();
-                            res.end(JSON.stringify({
-                                success: true,
-                                message: `Device name updated.`,
-                                updates: {
-                                    deviceName: {
-                                        previous: currentDeviceName,
-                                        new: data.deviceName
-                                    }
-                                }
-                            }));
-                            break;
-                        default:
-                            consoleLog(`(↓↑) [unhandled] ${url.pathname}`, {details: 'Path Not Defined'});
-                            res.end(JSON.stringify({
-                                success: false,
-                                message: 'Path Not found'
-                            }));
-                    }
-                });
-                return;
-            }
-
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            consoleLog('(↓↓) command server: api', {
-                req: {
-                    url: `${req.url}`,
-                    method: `${req.method}`,
-                },
-                res: { status: 200 }
-            });
-            
-            switch (url.pathname) {
-                case '/control/browser/restart':
-                    this.relaunchOverlayBrowser();
-                    handled();
-                    res.end(JSON.stringify({ status: 200, response: OK }));
-                    break;
-                default:
-                    res.end(JSON.stringify({
-                        config: { ...this.__client },
-                        system: { 
-                            ...SYS_DETAILS,
-                            cpus: os.cpus(),
-                            memory: {
-                                free: os.freemem(),
-                                total: os.totalmem(),
-                                percentUsed: ( 1-(os.freemem()/os.totalmem()) ).toFixed(3),
-                            },
-                            load_avg: os.loadavg(),
-                            uptime: os.uptime(),
-                            uptime_ndpi: uptime(),
-                        },
-                        get_stats: this.getSystemStats()
-                    }));
-                    break;
-            }
-
-        });
-
-        this.wss = new WebSocket.Server({ server });
-
-        this.wss.on('connection', (ws) => {
-
-            ws.on('message', (message) => {
-                try {
-                    const command = JSON.parse(message);
-                    consoleLog('(↓↓) command server: ws');
-                    this.handleCommand(command, ws);
-                } catch (error) {
-                    consoleLog('(↓↓) command server: ws', {Message: message}, error);
-                    ws.send(JSON.stringify({
-                        success: false,
-                        message: 'Invalid command format'
-                    }));
-                }
-            });
-
-            ws.on('close', () => {
-                consoleLog('[disconnected] command server: ws');
-            });
-
-            ws.on('error', (error) => {
-                consoleLog('[connection error] command server: ws', null, error);
-            });
-        });
-
-        server.listen(this.__client.config.commandPort, () => {
-            consoleLog('[online] command server', {url: `http://${this.__client.config.ip}:${this.__client.config.commandPort}`});
-        });
-    }
-
-    handleCommand(command, ws) {
-
-        if (command.serverAddress) {
-            if (command.serverAddress !== this.__client.server.ip) {
-                this.__client.server.ip = command.serverAddress;
-                consoleLog('(↑↓) [handled][updated] server ip address', { ReconnectingIn: 5 });
-                setTimeout(() => {
-                    this.connectToServer(command.serverAddress)
-                }, 5000)
-            }
-        }
-
-        const commandInfo = {
-            source:     command.source      || 'unknown',
-            timestamp:  command.timestamp   || new Date().toISOString(),
-            command:    command.type        || 'unknown',
-        };
-
-        const handled = () => consoleLog(`(↑↓) [handled]`, commandInfo);
-
-        switch (command.type) {
-            case 'set-source':
-                commandInfo.data = { sourceName: command.sourceName };
-                this.setNDISource(command.sourceName, commandInfo);
-                handled();
-                ws.send(JSON.stringify({
-                    success: true,
-                    message: `Source set to ${command.sourceName}`
-                }));
-                break;
-
-            case 'rename':
-                commandInfo.data = { deviceName: command.newName };
-                this.__client.name = command.newName
-                this.saveState(commandInfo);
-                handled();
-                ws.send(JSON.stringify({
-                    success: true,
-                    message: `Renamed to ${command.newName}`
-                }));
-                break;
-
-            case 'show-overlay':
-            case 'overlay':
-                this.showOverlay(commandInfo);
-                handled();
-                ws.send(JSON.stringify({
-                    success: true,
-                    message: 'Overlay displayed'
-                }));
-                break;
-
-            case 'show-blank':
-            case 'blank':
-                this.showBlank(commandInfo);
-                handled();
-                ws.send(JSON.stringify({
-                    success: true,
-                    message: 'Blank screen displayed'
-                }));
-                break;
-
-            case 'shutdown':
-                ws.send(JSON.stringify({
-                    success: true,
-                    message: 'Shutting down...'
-                }));
-                handled();
-                setTimeout(() => deviceShutdown(), 1000);
-                break;
-
-            case 'reboot':
-                ws.send(JSON.stringify({
-                    success: true,
-                    message: 'Rebooting...'
-                }));
-                handled();
-                setTimeout(() => deviceReboot(), 1000);
-                break;
-
-            case 'ping':
-                ws.send(JSON.stringify({
-                    success: true,
-                    type: 'pong',
-                    deviceId: this.__client.id
-                }));
-                consoleLog('(↑↑) command server: ws', { data: 'pong' });
-                break;
-
-            case 'get-status':
-                ws.send(JSON.stringify({
-                    success: true,
-                    deviceId: this.__client.id,
-                    deviceName: this.__client.name,
-                    ip: this.__client.config.ip,
-                    currentSource: this.__client.ndi.source.current || 'None',
-                    displayMode: this.__client.config.displayMode || 'overlay',
-                    status: 'online'
-                }));
-                handled();
-                break;
-
-            default:
-                ws.send(JSON.stringify({
-                    success: false,
-                    message: `Unknown command: ${command.type}`
-                }));
-                consoleLog(`(↑↓) [unhandled]`, commandInfo);
-        }
-    }
-
-    get_mdnsService() {
-
-        // This is the mDNS Service Object.
-        this.__client.config.ip = getLocalIP();
-        this.saveState();
-
-        // Service Object
-        return {
-            name: `ndpi-client-${this.__client.id}`,
-            type: 'ndpi-monitor-client',
-            port: this.__client.config.mdnsPort,
-            txt: {
-                deviceId: `${this.__client.id}`,
-                deviceName: `${this.__client.name}`,
-                ip: `${this.__client.config.ip}`,
-                commandPort: this.__client.config.commandPort.toString(),
-                type: this.__client.type,
-                status: 'online',
-                version: this.__client.config.version
-            }
-        };
-    }
-
-    start_mdnsBroadcast() {
-
-        this.update_mdnsBroadcast();
-
-        const refresh_mDns = 3600000; // 3,600,000 ms  =  1 hr
-        setInterval(() => {
-            this.update_mdnsBroadcast();
-        }, refresh_mDns);
-
-        const evaluate_IP = 60000;
-        setInterval(() => {
-            const ipAddr = getLocalIP();
-            if (ipAddr !== this.__client.config.ip) {
-                // Updated IP address is saved within 'get_mdnsService()'
-                this.update_mdnsBroadcast();
-            }
-        }, evaluate_IP);
-    }
-
-    update_mdnsBroadcast() {
-
-        // Updated IP address is saved within 'get_mdnsService()'
-        let consoleMessage = '(↑↑) mdns';
-        if (this.mdnsService) {
-            this.mdnsService.stop();
-        } else {
-            consoleMessage += ' init';
-        }
-        const service = this.get_mdnsService();
-        this.mdnsService = bonjour.publish(service);
-        consoleLog(consoleMessage, service.name);
     }
 
     killNdiReceiver() {
