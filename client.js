@@ -1184,7 +1184,7 @@ class NDPiClient {
 
         const updateData = {
             type: displayMode,
-            serverIp: this.__client.server.ip.split(':')[0] || '',
+            serverIp: (this.__client.server.ip || '').split(':')[0],
             thisDevice: {
                 id: this.__client.id,
                 address: this.__client.config.ip,
