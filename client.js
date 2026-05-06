@@ -716,7 +716,6 @@ class NDPiClient {
         }
 
         setTimeout(() => {
-            console.log('bonjour start');
             this.bonjour__service = bonjour.publish(this.bonjour__options);
         }, 500);
 
@@ -1198,7 +1197,7 @@ class NDPiClient {
 
         let commandLine = `/usr/bin/chromium \
             --kiosk \
-            --disable-web-security \
+            --user-data-dir=${os.homedir()}/.config/chromium \
             --default-background-color=#00000000 \
             --disable-crash-reporter \
             --disable-logging \
@@ -1207,7 +1206,7 @@ class NDPiClient {
             --pull-to-refresh \
             --show-taps \
             --kiosk-splash-screen-min-time-seconds=5 \
-            --user-data-dir=${os.homedir()}/.config/chromium \
+            --disable-web-security \
         http://localhost:${this.__client.config.displayPort}/`;
 
         // --show-fps-counter \
