@@ -1202,7 +1202,7 @@ class NDPiClient {
             --disable-notifications \
             --disable-web-security \
             --enable-transparent-visuals \
-            --enable-gpu-rasterization \
+            --disable-gpu \
             --start-fullscreen \
             --default-background-color=00000000 \
             --disable-features=DarkLightMode \
