@@ -364,7 +364,26 @@ class NDPiClient {
 
         var merge = {
             ...this.__client,
-            ...data
+            config: {
+                ...this.__client.config,
+                displayMode: data.displayMode,
+            },
+            ndi: {
+                ...this.__client.ndi,
+                source: {
+                    current: this.__client.ndi.source.current,
+                    target: data.ndi.source.target,
+                },
+            },
+            display: {
+                ...this.__client.display,
+            },
+            server: {
+                ...data.server,
+            },
+            lastCommand: {
+                ...data.lastCommand
+            },
         };
 
         this.__client = merge;
