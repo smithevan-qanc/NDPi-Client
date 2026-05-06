@@ -359,6 +359,8 @@ class NDPiClient {
             consoleLog('[ERROR] Loading State', 'Attempted at Initial Load State', error);
         }
 
+        console.log(data);
+
         this.__client.name                  = data.name;
         this.__client.ndi.source.target     = data.ndi.source.target || null;
         this.__client.server.ip             = data.server.ip || null;
@@ -1446,6 +1448,7 @@ let client;
     client.__client.config.ip = localIp;
 
     setTimeout(() => {
+        console.log('Starting...')
         client.start();
     }, 700);
 
@@ -1495,12 +1498,12 @@ process.on('exit', (code) => {
     console.log('════════════════════════════════════════════  N D P i - M O N I T O R  ═');
     //                                                           N D P i - M O N I T O R ═════ END ═════
 });
-process.on('uncaughtException', (err, orig) => {
+process.on('uncaughtException', (err) => {
     console.log('*');
     console.log('* *');
     console.log('* * * Uncaught Exception');
-    console.log(orig);
     console.log(err);
+    console.log('* * *');
     console.log('* *');
     console.log('*');
 });
@@ -1509,6 +1512,7 @@ process.on('unhandledRejection', (reason) => {
     console.log('* *');
     console.log('* * * Unhandled Rejection');
     console.log(reason);
+    console.log('* * *');
     console.log('* *');
     console.log('*');
     process.exit();
