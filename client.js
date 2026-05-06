@@ -379,8 +379,6 @@ class NDPiClient {
         }
 
         this.startDisplayServer();
-        this.startCommandServer();
-        this.bonjour__start();
     }
 
     startDisplayServer() {
@@ -460,6 +458,7 @@ class NDPiClient {
         displayServer.listen(this.__client.config.displayPort, () => {
             console.log(`Display Server running on port ${this.__client.config.displayPort}`);
             console.log(`Web interface: http://${this.__client.config.ip}:${this.__client.config.displayPort}`);
+            this.startCommandServer();
         });
     }
 
@@ -681,6 +680,7 @@ class NDPiClient {
 
         server.listen(this.__client.config.commandPort, () => {
             console.log(`Command Handler API running on port ${this.__client.config.commandPort}`);
+            this.bonjour__start();
         });
     }
 
