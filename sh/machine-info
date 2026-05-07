@@ -78,3 +78,16 @@ echo "$(xrandr | grep -v 'm' | awk '{print "list_resolutions :", $1, "::", "--mo
 #  [h] or [help]            show this help.
 #  [q] or [quit]            to quit the CEC test client and switch off all connected CEC devices.
 #  ================================================================================
+
+
+hostnamectl
+#  Static hostname: NDPi-Client
+#        Icon name: computer
+#       Machine ID: 5c2c9c075d03474396188cda33e732be
+#          Boot ID: af61e2c3a2cc4212bb47c3549f9f9e3c
+# Operating System: Debian GNU/Linux 13 (trixie)    
+#           Kernel: Linux 6.12.75+rpt-rpi-2712
+#     Architecture: arm64
+
+uptime -p
+# up 49 minutes

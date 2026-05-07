@@ -8,18 +8,16 @@ class CecController extends EventEmitter {
         this.proc = null;
         this.buffer = '';
         this.queue = [];
-        this.isReady = false;
-
+        this.isReady = false
         this.restartDelay = 1000;
-        this.maxDelay = 10000;
-
+        this.maxDelay = 10000
         this.debounceMap = new Map();
 
         this.start();
     }
 
     start() {
-        this.proc = spawn('cec-client', ['-d', '1'], {
+        this.proc = spawn('cec-client', ['-s', '-d'], {
             stdio: ['pipe', 'pipe', 'pipe']
         });
 
@@ -40,7 +38,7 @@ class CecController extends EventEmitter {
 
         setTimeout(() => {
             if (!this.isReady) {
-                this.emit('timeout', 'Never waiting for input signal.');
+                this.emit('timeout', "Never received 'waiting for input signal'");
             }
         }, 10000);
     }
@@ -53,6 +51,7 @@ class CecController extends EventEmitter {
     }
 
     _handleStdout(data) {
+        console.log(data);
         this.buffer += data.toString();
 
         let lines = this.buffer.split('\n');
