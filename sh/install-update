@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 # This script is executed on the remote machine automatically after the update from GitHub is downloaded.
@@ -17,3 +17,5 @@ install() {
 install
 
 echo "INSTALLATION COMPLETE"
+
+exit 0

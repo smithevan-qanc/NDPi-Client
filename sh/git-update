@@ -16,8 +16,11 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     chmod +x sh/install-update
     chmod +x sh/resolutions
     chmod +x sh/startup
+    chmod +x sh/machine-info
     echo ""
     echo "PREPARING TO UPDATE"
     sleep 1
     sudo ./sh/install-update
 fi
+
+exit 0
