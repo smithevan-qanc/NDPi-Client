@@ -7,6 +7,48 @@ const fs            = require('fs');
 const path          = require('path');
 const { uptime }    = require('process');
 
+const readFile  = (pathToFile, bufferEncoding = 'utf8') => fs.existsSync(pathToFile) ? fs.readFileSync(pathToFile, bufferEncoding) : bufferEncoding === 'utf8' ? '' : null;
+const CRLFArray = string => string.split(/\r?\n/);
+
+let NET_ONLINE = false;
+let SYS_DETAILS = {
+    os: {
+        type: os.type(),
+        platform: os.platform(),
+        version: os.version(),
+        release: os.release(),
+    },
+    machine: os.machine(),
+    arch: os.arch(),
+    cpus: os.cpus(),
+    load_avg: os.loadavg(),
+    uptime: os.uptime(),
+    memory: {
+        free: os.freemem(),
+        total: os.totalmem(),
+        percentUsed: ( 1-(os.freemem()/os.totalmem()) ).toFixed(3),
+    },
+    dir: {
+        home: os.homedir(),
+        tmp: os.tmpdir(),
+        data: `${os.homedir()}/DATA_ndpi`
+    },
+    uptime_ndpi: uptime(),
+    hostname: os.hostname(),
+    user: os.userInfo(),
+};
+
+const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
+const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
+const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
+const PATH_CONFIG           = `${SYS_DETAILS.dir.data}/client-state.json`;
+
+/** VERSION CONTROL **/
+const versionCurrent  = readFile(PATH_VERSION_CURRENT) || '';
+const versionStable   = readFile(PATH_VERSION_STABLE)  || '';
+const versionIsStable = versionCurrent === versionStable;
+/** END of - VERSION CONTROL **/
+
 class NDPiClient {
     constructor() {
 
