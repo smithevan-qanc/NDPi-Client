@@ -117,7 +117,7 @@ class NDPiClient {
     start() {
         const { exec } = require('child_process');
         console.log('Starting Up Client');
-        console.log(exec("hostname -I | awk '{print $1}'").stdout.toString().trim());
+        console.log(exec("hostname -I | awk '{print $1}'",(error,stdout) => stdout.toString().trim()));
         console.log('******************')
         this.loadState();
         this.displayStartup();
