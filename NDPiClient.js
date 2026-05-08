@@ -115,6 +115,9 @@ class NDPiClient {
     }
   ///////////////////////////////////////////////////////////////////////////////////////
     start() {
+        console.log('Starting Up Client');
+        console.log(exec("hostname -I | awk '{print $1}'"));
+        console.log('******************')
         this.loadState();
         this.displayStartup();
     }
