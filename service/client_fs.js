@@ -19,7 +19,7 @@ class FileSystemMonitor extends EventEmitter {
         // Data Poll Timers
         this.#fsPoll = null;
 
-        this.dataDir = `${os.homedir()}/DATA_ndpi`;
+        this.dataDir = path.join(__dirname, '..', '..', 'DATA_ndpi');
         this.#fileMap = null;
 
         this.#pgmVersion = version;
@@ -44,11 +44,16 @@ class FileSystemMonitor extends EventEmitter {
         let deviceId = '';
         if (fs.existsSync('/etc/machine-id')) {
             //deviceId = fs.readFileSync('/etc/machine-id', 'utf8');
-            await new Promise((resolve) => {
-                exec(`cat /proc/cpuinfo | grep -Fw 'Serial' | awk '{print $3}'`, (error, stdout) => {
-                    if (!error) deviceId = stdout.trim();
-                });
-            });
+            // deviceId = fs.readFileSync('/sys/firmware/devicetree/base/serial-number', 'utf8');
+            const devIdPth = path.join('sys','firmware','devicetree','base','serial-number');
+            deviceId = fs.readFileSync(devIdPth, 'utf8');
+            console.log(devIdPth);
+            // await new Promise((resolve) => {
+            //     exec(`cat /proc/cpuinfo | grep -Fw 'Serial' | awk '{print $3}'`, (error, stdout) => {
+            //         if (!error) deviceId = stdout.trim();
+            //         resolve();
+            //     });
+            // });
         } else {
             // Mac Compatability
             await new Promise((resolve) => {
