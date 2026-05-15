@@ -199,3 +199,27 @@ class NDPi {
 }
 
 const index = new NDPi();
+
+process.on('uncaughtException', (err) => {
+    console.log('*');
+    console.log('* *');
+    console.log('* * * Uncaught Exception');
+    console.log(err);
+    console.log('* * *');
+    console.log('* *');
+    console.log('*');
+});
+process.on('unhandledRejection', (reason) => {
+    console.log('*');
+    console.log('* *');
+    console.log('* * * Unhandled Rejection');
+    console.log(reason);
+    console.log('* * *');
+    console.log('* *');
+    console.log('*');
+    killProcess();
+});
+process.on('exit', (code) => {
+    console.log(`    [[ Exit Code: ${code} ]]`);
+    console.log('══════════════════════════════════════════  N D P i - M O N I T O R  ═══');
+});
