@@ -11,9 +11,21 @@ install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
     sleep 1
-    sudo systemctl restart ndpi.service
-    # sudo reboot
-}
-install
 
-echo "INSTALLATION COMPLETE"
+    echo "PREPARING TO INSTALL UPDATE:"
+    echo "    [FROM] ${HOME}/TMP_ndpi/"
+    echo "      [TO] ${HOME}/ndpi"
+
+    read -rp "Install? (y/n) " confirm
+    if [[ "$confirm" = [yY] ]]; then
+        sudo rsync -vzq --no-perms --delete "${HOME}/TMP_ndpi/" "${HOME}/ndpi"
+        sleep 1
+        sudo systemctl restart ndpi.service
+        echo "INSTALLATION COMPLETE"
+        # sudo reboot
+    else
+        echo "INSTALLATION ABORTED"
+    fi
+}
+
+install
