@@ -160,7 +160,7 @@
             constructor() {
                 this._ws = null;
                 this.protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                this.host = window.location.host
+                this.host = window.location.host;
 
                 this.reconnectTimer = null;
                 this.connect();
@@ -253,7 +253,7 @@
             document.getElementById('devName').textContent = msg.thisDevice.name || '';
             document.getElementById('devId').textContent = msg.thisDevice.id || '';
             document.getElementById('devIp').textContent = thisDeviceAddr || '';
-            document.getElementById('servIp').textContent = msg.serverIp || '';
+            document.getElementById('servIp').textContent = msg.serverIp || 'Awaiting Adoption...';
             document.getElementById('programName').textContent = msg.service.name || '';
             document.getElementById('programVer').textContent = msg.service.version || '';
         }

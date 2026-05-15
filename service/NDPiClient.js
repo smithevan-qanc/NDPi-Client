@@ -1145,7 +1145,7 @@ class NDPiClient {
         });
         
         this.child_process__ndi_receiver.on('close', (code) => {
-            this.child_process__ndi_receiver                     = null;
+            this.child_process__ndi_receiver    = null;
             this.__client.ndi.source.current    = null;
             this.__client.ndi.status            = 'idle';
             this.__client.ndi.resolution        = null;
@@ -1254,6 +1254,5 @@ async function deviceReboot() {
         if (error) console.log('device reboot failed', null, error);
     });
 }
-
 
 module.exports = NDPiClient;

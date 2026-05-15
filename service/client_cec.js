@@ -1,4 +1,4 @@
-const { spawn } = require('child_process');
+const { spawn }    = require('child_process');
 const EventEmitter = require('events');
 
 class CecController extends EventEmitter {
@@ -8,11 +8,19 @@ class CecController extends EventEmitter {
         this.proc = null;
         this.buffer = '';
         this.queue = [];
-        this.isReady = false
+
+        this.enabled = true;
+        this.isReady = false;
+
         this.restartDelay = 1000;
-        this.maxDelay = 10000
+        this.restartTimer = null;
+
+        this.timeoutTimer = null;
+
+        this.maxDelay = 10000;
         this.debounceMap = new Map();
 
+        console.log('[ client_cec ] Opening CEC Client')
         this.start();
     }
 
@@ -36,17 +44,36 @@ class CecController extends EventEmitter {
             this._scheduleRestart();
         });
 
-        setTimeout(() => {
+        if (this.timeoutTimer) return;
+        this.timeoutTimer = setTimeout(() => {
             if (!this.isReady) {
                 this.emit('timeout', "Never received 'waiting for input signal'");
+                this.quit();
             }
+            this.timeoutTimer = null;
         }, 10000);
     }
 
+    quit() {
+        this.enabled = false;
+        this.isReady = false;
+        if (this.timeoutTimer) {
+            clearTimeout(this.timeoutTimer);
+            this.timeoutTimer = null;
+        }
+        if (this.proc) {
+            this.proc.kill();
+        }
+        this.proc = null;
+        this.queue = [];
+        this.debounceMap.clear();
+    }
+
     _scheduleRestart() {
-        setTimeout(() => {
+        this.restartTimer = setTimeout(() => {
             this.restartDelay = Math.min(this.restartDelay * 2, this.maxDelay);
-            this.start();
+            this.restartTimer = null;
+            if (this.enabled) this.start();
         }, this.restartDelay);
     }
 
@@ -63,6 +90,7 @@ class CecController extends EventEmitter {
 
             if (line.includes('waiting for input')) {
                 this.isReady = true;
+                console.log('[ client_cec ] CEC Ready');
                 this.restartDelay = 1000;
                 this._flushQueue();
             }

@@ -1,380 +1,200 @@
-/**
- *  NDPi - Monitor v3 (CLIENT)
- *      Created By: Evan Smith
- *      On Behalf of: New Life Church COGOP - Atlantic
- * 
- *  This service is used for:
- *  -   Communicating with NDPi - Monitor v3 (SERVER)
- *  -   Launching NDI video streams and displaying them to HDMI out.
- */
+//const NDPiClient = require('./service/NDPiClient.js');
 
-const os            = require('os');
-const fs            = require('fs');
-const path          = require('path');
-const { exec }      = require('child_process');
-const { uptime }    = require('process');
-const net           = require('net');
-const NDPiClient    = require('./NDPiClient.js');
-const CecController = require('./CecController.js');
+const fs = require('fs');
+const path = require('path');
 
-const readFile  = (pathToFile, bufferEncoding = 'utf8') => fs.existsSync(pathToFile) ? fs.readFileSync(pathToFile, bufferEncoding) : bufferEncoding === 'utf8' ? '' : null;
-const CRLFArray = string => string.split(/\r?\n/);
+const VERSION_DIR = path.join(__dirname, 'version');
+const NDPi_VERSION = (
+    fs.existsSync(`${VERSION_DIR}/current`) ? 
+    fs.readFileSync(`${VERSION_DIR}/current`, 'utf8') :
+    '3.1'
+);
+const NDPi_VERSION_DATE = (
+    fs.existsSync(`${VERSION_DIR}/current-date`) ? 
+    fs.readFileSync(`${VERSION_DIR}/current-date`, 'utf8') :
+    '2026-02-04'
+);
 
-let NET_ONLINE = false;
-let SYS_DETAILS = {
-    os: {
-        type: os.type(),
-        platform: os.platform(),
-        version: os.version(),
-        release: os.release(),
-    },
-    machine: os.machine(),
-    arch: os.arch(),
-    cpus: os.cpus(),
-    load_avg: os.loadavg(),
-    uptime: os.uptime(),
-    memory: {
-        free: os.freemem(),
-        total: os.totalmem(),
-        percentUsed: ( 1-(os.freemem()/os.totalmem()) ).toFixed(3),
-    },
-    dir: {
-        home: os.homedir(),
-        tmp: os.tmpdir(),
-        data: `${os.homedir()}/DATA_ndpi`
-    },
-    uptime_ndpi: uptime(),
-    hostname: os.hostname(),
-    user: os.userInfo(),
-};
 
-const PATH_VERSION_CURRENT  = path.join(__dirname, 'version', 'current');
-const PATH_VERSION_STABLE   = path.join(__dirname, 'version', 'stable');
-const PATH_NDI_RECEIVER     = path.join(__dirname, 'ndi_receiver_v2');
-const PATH_CONFIG           = `${SYS_DETAILS.dir.data}/client-state.json`;
+class NDPi {
+    constructor() {
+        this.settings = null;
+        this.server_api = null;
+        this.service_bonjour = null;
+        this.service_chromium = null;
+        this.controller_cec = null;
+        this.connection_ndpiServer = null;
+        this.ndpiServerStatusUpdate = null; // Interval Timer
 
-/** VERSION CONTROL **/
-const versionCurrent  = readFile(PATH_VERSION_CURRENT) || '';
-const versionStable   = readFile(PATH_VERSION_STABLE)  || '';
-const versionIsStable = versionCurrent === versionStable;
-/** END of - VERSION CONTROL **/
+        this.targetSource = null;
 
-function startupConsoleLog() {
-    console.log(`
- 
- 
-════════════════════════════════════════════════════════════════════════
-      ⌈▔∖ ⌈▔⌈▔▔▔▔∖⌈▔▔▔▔∖(-)   ⌈▔▔∖/▔▔|           (-)ʃ▔▏
-      ⏐  ∖⏐ ⏐ ⌈▔| ⏐ ⌈-) ⌈▔|   ⏐ ⌈∖/| ⏐/▔▔▔∖⌈▔'▔▔∖⌈▔|▏ ▔/▔▔▔∖⌈▔'▔▔|
-      ⏐ ⌈∖  ⏐ ⌊_| ⏐  __/⏐ ⏐▔▔▔⏐ ⏐  ⏐ ⏐ (-) ⏐ ⌈▔⏐ ⏐ ⏐▏ ⎡▏(-) ⏐ ⌈▔▔             
-      ⌊_| ∖_⌊____/⌊_|   ⌊_|▔▔▔⌊_|  ⌊_|∖___/⌊_| ⌊_⌊_|∖__∖___/⌊_|
-      𝘝𝘦𝕣𝕤𝕚𝕠𝕟   ⸻      ${versionCurrent}${versionIsStable ? ' (Stable)' : ''}
-════════════════════════════════════════════════════════════════════════
-                                                                      𓀡
-        
-`);
-}
-function consoleLog(message = 'SYSTEM UPDATE', data, error) {
-    if (error) {
-        console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-        //console.log(`  [${ipAddr}] ⸺  ▶ 🔴 ERROR: ${message.toUpperCase()}`);
-        console.log(`🔴 ERROR: ${message}`);
-        console.log(JSON.stringify(error, null, 2));
-        if (data) {
-            console.log(`DATA:`, JSON.stringify(data, null, 2));
-        }
-        console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-    } else {
-        //console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-        //console.log(`  [${ipAddr}] ⸺  ▶ ${message.toUpperCase()}`);
-        console.log(`${message.toUpperCase()}`);
-        if (data) console.log(JSON.stringify(data));
-        //console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
+        this.initiate();
     }
-}
-function getDeviceId() {
-    var cmd = "cat /proc/cpuinfo | grep -Fw 'Serial' | awk '{print}'";
-    exec(cmd, (error, stdout, stderr) => {
-        if (!error) {
-            var out = stdout.toString().split(':')[1].trim();
-            console.log(`Device Serial #: ${out}`);
-            return out;
-        } else {
-            console.log(`ERROR: ${cmd}`, stderr);
-            return null;
-        }
-    });
-    //try {
-    //    const cpuinfo = fs.readFileSync('/proc/cpuinfo', 'utf8');
-    //    const serial = readFile('/proc/cpuinfo').match(/Serial\s*:\s*([0-9a-f]+)/i);
-    //     if (serial) {
-    //         return serial[1];
-    //     }
-    // } catch (error) {
-    //     consoleLog('Error Reading Serial Number', null, error);
-    //     return null;
-    // }
-}
-function getDeviceModel() {
-    var cmd = "cat /proc/cpuinfo | grep -Fw 'Model' | awk '{print}'";
-    exec(cmd, (error, stdout, stderr) => {
-        if (!error) {
-            var out = stdout.toString().split(':')[1].trim();
-            console.log(`Device Model: ${out}`);
-            return out;
-        } else {
-            console.log(`ERROR: ${cmd}`, stderr);
-            return null;
-        }
-    });
-    // try {
-    //     const model = readFile('/proc/cpuinfo').match(/Model\s*:\s*([0-9a-f]+)/i);
-    //     if (model) {
-    //         return model[1];
-    //     }
-    // } catch (error) {
-    //     consoleLog('Error Reading Device Model', null, error);
-    //     return null;
-    // }
-}
-async function getLocalIP() {
-    if (!NET_ONLINE) {
-        return await waitForNetwork();
-        NET_ONLINE = true;
-    }
-    const interfaces = os.networkInterfaces();
-    for (const name of Object.keys(interfaces)) {
-        for (const iface of interfaces[name]) {
-            const isIPv4 = iface.family === 'IPv4' || iface.family === 4;
-            if (isIPv4 && !iface.internal) {
-                return iface.address;
-            }
-        }
-    }
-    return 'localhost';
-}
-async function waitForNetwork({ host = '8.8.8.8', port = 53, retryMs = 1000 } = {}) {
-    return await new Promise((resolve) => {
-        const tryConnect = () => {
-            const socket = new net.Socket();
-            socket.setTimeout(2000);
-            socket.once('connect', () => {
-                const localIP = socket.localAddress;
-                socket.destroy();
-                NET_ONLINE = true;
-                resolve(localIP);
-            });
-            socket.once('timeout', () => {
-                socket.destroy();
-                setTimeout(tryConnect, retryMs);
-            });
-            socket.once('error', () => {
-                socket.destroy();
-                setTimeout(tryConnect, retryMs);
-            });
-            socket.connect(port, host);
-        };
-        tryConnect();
-    });
-}
-function getHdmiResolution() {
-    let res = '';
-    exec('xrandr', {
-        env: {
-            ...process.env,
-            DISPLAY: ':0',
-            XAUTHORITY: '/home/ndpi-client/.Xauthority',
-        },
-    }, (error, stdout, stderr) => {
-        if (error) {
-            consoleLog('Get HDMI Resolution', stdout, stderr);
-        } else {
-            CRLFArray(stdout)[0].split(', ').forEach((ln) => {
-                if (ln.includes('current')) {
-                    const pixel = ln.trim().split(' '); //==> [ '1920', 'x', '1080' ]
-                    return res = `${pixel[1]}x${pixel[3]}`;
-                }
-            });
-        }
-    });
-}
-function listHdmiResolutions() {
-    let resolutionOptions = [];
-    exec('DISPLAY=:0 xrandr', (error, stdout, stderr) => {
-        if (error) {
-            consoleLog('List HDMI Resolutions', stdout, stderr);
-        } else {
-            CRLFArray(stdout).forEach((ln) => {
-                const str = ln.trim();
-                if (
-                    str.startsWith('1') || 
-                    str.startsWith('2') || 
-                    str.startsWith('3') || 
-                    str.startsWith('4') || 
-                    str.startsWith('5') || 
-                    str.startsWith('6') || 
-                    str.startsWith('7') || 
-                    str.startsWith('8') || 
-                    str.startsWith('9')
-                ) resolutionOptions.push(str.split(' ')[0]);
-            });
-        }
-    });
-    return resolutionOptions;
-}
-async function cecPowerOn(commandInfo = {}) {
-    let success = false;
-    consoleLog(`(↑↓) cec command out: 'on 0' && 'as'`);
-    exec('echo "on 0" | cec-client -s -d 1 && echo "as" | cec-client -s -d 1', (e,o,err) => {
-        if (e) {
-            consoleLog('[ERROR] CEC', null, { Message: err || 'No Error String Output' });
-        } else {
-            const res = CRLFArray(o);
-            if (res.length > 0) res.forEach( (line) => {console.log(`(↓↓)[ EXEC STDOUT ] ⸺  ▶ ${line}`)} );
-            success = true;
-        }
-        if (success) {
-            consoleLog('[sent] CEC', stdout);
-            return { success: true };
-        }
-    });
-}
-async function cecPowerOff(commandInfo = {}) {
-    let success = false;
-    consoleLog(`(↑↓) cec command out: 'standby 0'`);
-    exec('echo "standby 0" | cec-client -s -d 1', (e,o,err) => {
-        if (e) {
-            consoleLog('[ERROR] CEC', null, { Message: err || 'No Error String Output' });
-        } else {
-            const res = CRLFArray(o);
-            if (res.length > 0) res.forEach( (line) => {console.log(`(↓↓)[ EXEC STDOUT ] ⸺  ▶ ${line}`)} );
-            success = true;
-        }
-        if (success) {
-            consoleLog('[sent] CEC', stdout);
-            return { success: true };
-        }
-    });
-}
 
-
-const ndpi = new NDPiClient();
-const cec = new CecController();
-
-(async () => {
-    await new Promise((resolve) => {
-        const startup = exec(`./sh/startup`);
-        startup.stdout.on('data', (data) => {
-            const output = data.toString();
-            CRLFArray(output).forEach((line) => {
-                console.log(line);
+    async initiate() {
+        await new Promise((resolve) => {
+            const startup = require('node:child_process').exec(`./sh/startup`);
+            startup.stdout.on('data', (data) => {
+                data
+                    .toString()
+                    .split(/\r?\n/)
+                    .forEach((line) => {
+                    console.log(line);
+                });
+            });
+            startup.on('exit', () => {
+                resolve();
             });
         });
-        startup.on('exit', () => {
-            resolve();
-        })
-    });
+        const FileSystemMonitor = require('./service/client_fs.js');
+        this.settings = new FileSystemMonitor(NDPi_VERSION, NDPi_VERSION_DATE);
 
-    console.log('Waiting For Network...');
+        this.settings.on('ready', () => {
+            this.startApi();
+        });
 
-    var deviceID = getDeviceId();
-    var deviceModel = getDeviceModel();
-    var localIp = await getLocalIP();
-
-    console.log(`Connected: ${localIp}`);
-    ndpi.__client.config.ip = localIp;
-    ndpi.__client.id = deviceID || '';
-    ndpi.__client.model = deviceModel || '';
-
-    setTimeout(() => {
-        console.log('Starting...')
-        ndpi.start();
-    }, 700);
-
-    setInterval(async () => {
-        localIp = await getLocalIP();
-        ndpi.__client.config.ip = localIp;
-    }, 10000);
-})();
-
-
-// react to structured events
-cec.on('event', (evt) => {
-    console.log('CEC Event:', evt.raw);
-    if (evt.type === 'POWER') {
-        console.log('Power event:', evt.raw);
-    }
-});
-cec.on('error_log', (data) => {
-    console.log('CEC ERROR:', data);
-});
-cec.on('timeout', () => {
-    console.log('CEC Timed Out');
-    cec.send('q', { debounceKey: 'quit' });
-});
-
-async function deviceShutdown() {
-    console.log('device powering down');
-    await killProcess();
-    exec('sudo shutdown now', (error) => {
-        if (error) console.log('device powerdown failed', null, error);
-    });
-}
-async function deviceReboot() {
-    console.log('device rebooting...');
-    await killProcess();
-    exec('sudo reboot', (error) => {
-        if (error) console.log('device reboot failed', null, error);
-    });
-}
-async function killProcess() {
-    await new Promise((resolve) => {
-        if (ndpi.bonjour__service) {
-            console.log('Terminating mdns');
-            ndpi.bonjour__service.stop();
-        }
-        setTimeout(async () => {
-            if (ndpi.child_process__ndi_receiver) {
-                console.log('Terminating Service Connections');
-                await ndpi.killNdiReceiver();
+        this.settings.on('ndpi_status_ndi_source_target', (data) => {
+            const updatedTarget = data.toString() || null;
+            if (updatedTarget !== this.targetSource) {
+                this.targetSource = updatedTarget;
+                if (this.targetSource && String(this.targetSource).toLowerCase() !== 'none') {
+                    this.startNdiReceiver();
+                } else {
+                    this.ndiReceiver.close();
+                }
             }
-            console.log('Closing CEC...');
-            cec.send('q', { debounceKey: 'quit' });
-            setTimeout(() => {
-                console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ')
-                console.log('⸻    GOOD BYE 👋');
-                console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-                console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-                process.exit();
-                resolve();
-            }, 1000);
-        }, 500);
-    });
-    return;
+        });
+    }
+
+    startApi() {
+        const port = this.settings.get('local_port_number_api');
+        const NDPiCommandServer_Client = require('./service/client_api_server.js');
+        this.server_api = new NDPiCommandServer_Client(this.settings);
+        this.server_api.on('online', () => {
+            console.log('[ client_api_server ] Ready.');
+            this.startMdns();
+            this.startChromium();
+            this.openCecController();
+            this.connectToNDPiServer();
+            this.targetSource = this.settings.get('ndpi_status_ndi_source_target') || null;
+            if (this.targetSource) this.startNdiReceiver(sourceTarget);
+        });
+    }
+
+    startMdns() {
+        const NDPiBonjourService = require('./service/client_bonjour.js');
+        this.service_bonjour = new NDPiBonjourService(this.settings);
+    }
+
+    startChromium() {
+        if (fs.existsSync('/usr/bin/chromium')) {
+            const ChromiumOverlayDisplay = require('./service/client_chromium.js');
+            this.service_chromium = new ChromiumOverlayDisplay(this.settings);
+        } else {
+            console.log('Skipping Chromium display launch.');
+            console.log(' - Missing binary: /usr/bin/chromium');
+        }
+    }
+
+    openCecController() {
+        const CecController = require('./service/client_cec.js');
+        this.controller_cec = new CecController();
+        this.controller_cec.on('event', (data) => {
+            console.log(`[ client_cec ][ Event ] ${data.toString()}`);
+        });
+        this.controller_cec.on('error_log', (data) => {
+            console.log(`[ client_cec ][ Error ] ${data.toString()}`);
+        });
+        this.controller_cec.on('timeout', (data) => {
+            console.log(data.toString());
+            this.controller_cec = null;
+        })
+    }
+
+    connectToNDPiServer() {
+        const ClientServerWebSocket = require('./service/clientServer_websocket.js');
+        this.connection_ndpiServer = new ClientServerWebSocket(this.settings, this.server_api);
+        this.connection_ndpiServer.on('connected', () => {
+            this.ndpiServerStatusUpdate = setInterval(() => {
+                this.sendStatusToNDPiServer();
+            }, 5000);
+        });
+    }
+
+    sendStatusToNDPiServer() {
+        const status = { type: 'client-status' };
+        status.deviceId = this.settings.get('device_id');
+        status.deviceName = this.settings.get('device_name');
+        status.ip = this.settings.get('local_ip');
+        status.currentSource = this.settings.get('ndpi_status_ndi_source_active');
+        status.targetSource = this.settings.get('ndpi_status_ndi_source_target');
+        status.displayMode = this.settings.get('ndpi_status_no_source_display_mode');
+        status.ndiInfo.resolution = this.settings.get('ndpi_status_ndi_source_resolution');
+        status.ndiInfo.framerate = this.settings.get('ndpi_status_ndi_source_framerate');
+        status.ndiInfo.displayResolution = this.settings.get('output_resolution_current');
+        status.ndiInfo.displayName = this.settings.get('output_framerate_current');
+        status.ndiInfo.connectedAt = this.settings.get('ndpi_status_ndi_source_connected_time');
+        status.status = this.settings.get('ndpi_status_ndi');
+        status.systemStats = this.getSystemStats();
+
+        this.connection_ndpiServer.send(status);
+    }
+    
+    getSystemStats() {
+        const stats = {
+            cpu: 0,
+            memory: { used: 0, total: 0, percent: 0 },
+            temperature: 0,
+            uptime: 0
+        };
+        
+        try {
+            // CPU usage - read from /proc/stat
+            const cpuData = fs.readFileSync('/proc/stat', 'utf8').split('\n')[0].split(/\s+/);
+            const idle = parseInt(cpuData[4]);
+            const total = cpuData.slice(1, 8).reduce((a, b) => a + parseInt(b), 0);
+            
+            if (this.lastCpuStats) {
+                const idleDiff = idle - this.lastCpuStats.idle;
+                const totalDiff = total - this.lastCpuStats.total;
+                stats.cpu = totalDiff > 0 ? Math.round((1 - idleDiff / totalDiff) * 100) : 0;
+            }
+            this.lastCpuStats = { idle, total };
+            
+            // Memory usage - read from /proc/meminfo
+            const memInfo = fs.readFileSync('/proc/meminfo', 'utf8');
+            const memTotal = parseInt(memInfo.match(/MemTotal:\s+(\d+)/)[1]) / 1024; // MB
+            const memAvailable = parseInt(memInfo.match(/MemAvailable:\s+(\d+)/)[1]) / 1024; // MB
+            stats.memory.total = Math.round(memTotal);
+            stats.memory.used = Math.round(memTotal - memAvailable);
+            stats.memory.percent = Math.round((stats.memory.used / stats.memory.total) * 100);
+            
+            // Temperature - read from thermal zone
+            const tempFile = '/sys/class/thermal/thermal_zone0/temp';
+            if (fs.existsSync(tempFile)) {
+                stats.temperature = parseInt(fs.readFileSync(tempFile, 'utf8')) / 1000;
+            }
+            
+            // System uptime
+            const uptimeSeconds = parseFloat(fs.readFileSync('/proc/uptime', 'utf8').split(' ')[0]);
+            stats.uptime = Math.floor(uptimeSeconds);
+        } catch {}
+        return stats;
+    }
+
+    startNdiReceiver() {
+        if (!this.targetSource) return;
+        const NDI_Receiver_v2 = require('./service/client_ndiReceiver.js');
+        this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.targetSource, 'ndi_receiver_v2');
+        this.ndiReceiver.on('connected', () => {
+            ///
+            console.log('Receiver Started');
+        });
+        this.ndiReceiver.on('close', () => {
+            this.ndiReceiver = null;
+            this.server_api.broadcastToDisplay();
+        });
+    }
 }
 
-process.on('SIGINT', () => { killProcess(); });
-process.on('SIGTERM', () => { killProcess(); });
-process.on('uncaughtException', (err) => {
-    console.log('*');
-    console.log('* *');
-    console.log('* * * Uncaught Exception');
-    console.log(err);
-    console.log('* * *');
-    console.log('* *');
-    console.log('*');
-});
-process.on('unhandledRejection', (reason) => {
-    console.log('*');
-    console.log('* *');
-    console.log('* * * Unhandled Rejection');
-    console.log(reason);
-    console.log('* * *');
-    console.log('* *');
-    console.log('*');
-    killProcess();
-});
-process.on('exit', (code) => {
-    console.log(`    [[ Exit Code: ${code} ]]`);
-    console.log('══════════════════════════════════════════  N D P i - M O N I T O R  ═══');
-});
+const index = new NDPi();
