@@ -10,7 +10,7 @@ set -e
 install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
-    echo "$(pwd)"
+    cd ../
     sleep 1
 
     echo "PREPARING TO INSTALL UPDATE:"
