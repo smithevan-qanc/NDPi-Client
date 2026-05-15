@@ -31,21 +31,22 @@ class NDPi {
         this.initiate();
     }
 
-    async initiate() {
-        await new Promise((resolve) => {
-            const startup = require('node:child_process').exec(`./sh/startup`);
-            startup.stdout.on('data', (data) => {
-                data
-                    .toString()
-                    .split(/\r?\n/)
-                    .forEach((line) => {
-                    console.log(line);
-                });
-            });
-            startup.on('exit', () => {
-                resolve();
+    initiate() {
+        const startup = require('node:child_process').exec(`./sh/startup`);
+        startup.stdout.on('data', (data) => {
+            data
+                .toString()
+                .split(/\r?\n/)
+                .forEach((line) => {
+                console.log(line);
             });
         });
+        startup.on('exit', () => {
+            this.startFsData();
+        });
+    }
+
+    startFsData() {
         const FileSystemMonitor = require('./service/client_fs.js');
         this.settings = new FileSystemMonitor(NDPi_VERSION, NDPi_VERSION_DATE);
 
