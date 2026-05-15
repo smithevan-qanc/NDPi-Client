@@ -24,7 +24,7 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     echo ""
     echo "PREPARING TO UPDATE"
     sleep 1
-    sudo ./sh/install-update
+    ./sh/install-update
 fi
 
 exit 0
