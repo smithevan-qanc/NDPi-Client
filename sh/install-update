@@ -7,21 +7,26 @@ set -e
 # NOTE:
 #   The contents of this file will RESET automatically after running updateGit.sh.
 
+customInstallInstructions() {
+    # Write Custom Update Script Here
+    echo ""
+}
+
 install() {
-    # Write Update Script Here
-    echo "INSTALLING UPDATE"
+    echo "PREPARING TO INSTALL UPDATE"
     cd ../
     sleep 1
-
-    echo "PREPARING TO INSTALL UPDATE:"
     local TMP="$(pwd)/TMP_ndpi"
     local PGM="$(pwd)/ndpi"
     echo "    [FROM] $TMP"
     echo "      [TO] $PGM"
-
     read -rp "Install? (y/n) " confirm
     if [[ "$confirm" = [yY] ]]; then
-        sudo rsync -z --no-perms "$TMP"/ "$PGM"
+        sudo rsync -zP --no-perms "$TMP"/ "$PGM"
+        sleep 1
+        cd $PGM
+        echo "$(pwd)"
+        customInstallInstructions
         sleep 1
         sudo systemctl restart ndpi.service
         echo "INSTALLATION COMPLETE"
@@ -30,5 +35,6 @@ install() {
         echo "INSTALLATION ABORTED"
     fi
 }
+
 
 install
