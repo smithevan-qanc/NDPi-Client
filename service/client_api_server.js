@@ -56,7 +56,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             .route('/')
             .get((req, res) => {
                 res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-                res.sendFile(path.join(__dirname, '..', 'client.html'));
+                res.sendFile(path.join(__dirname, '..', 'index.html'));
             });
             
         this.Routes
