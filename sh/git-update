@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-# cd "$(dirname "${0}")/.."
-cd "$HOME/TMP_ndpi"
+cd "$(dirname "${0}")/.."
+# cd "$HOME/TMP_ndpi"
 
 BRANCH="$(head -n 1 version/git)"
 
