@@ -10,10 +10,10 @@ set -e
 install() {
     # Write Update Script Here
     echo "INSTALLING UPDATE"
+    echo "$(pwd)"
     sleep 1
 
     echo "PREPARING TO INSTALL UPDATE:"
-    cd ~
     local TMP="$(pwd)/TMP_ndpi"
     local PGM="$(pwd)/ndpi"
     echo "    [FROM] $TMP"
@@ -21,7 +21,7 @@ install() {
 
     read -rp "Install? (y/n) " confirm
     if [[ "$confirm" = [yY] ]]; then
-        sudo rsync -vz --no-perms "$TMP" "$PGM"
+        sudo rsync -z --no-perms "$TMP"/ "$PGM"
         sleep 1
         sudo systemctl restart ndpi.service
         echo "INSTALLATION COMPLETE"
