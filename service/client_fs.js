@@ -76,7 +76,7 @@ class FileSystemMonitor extends EventEmitter {
                 value: `NDPi Monitor Client`
             }, {
                 key: "device_id",
-                value: deviceId
+                value: deviceId.toWellFormed()
             }, {
                 key: "local_ip",
                 value: ``
