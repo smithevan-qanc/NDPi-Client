@@ -10,7 +10,7 @@ class CecController extends EventEmitter {
         this.deviceName = fsData.get('device_name');
         fsData.on('device_name', (data) => {
             this.deviceName = String(data);
-            this.quit();
+            this.send('q');
         });
 
         this.proc = null;
@@ -44,7 +44,17 @@ class CecController extends EventEmitter {
 
         this.proc.on('close', () => {
             this.isReady = false;
-            this._scheduleRestart();
+            this.proc = null;
+            if (this.enabled) {
+                this._scheduleRestart();
+            } else {
+                if (this.timeoutTimer) {
+                    clearTimeout(this.timeoutTimer);
+                    this.timeoutTimer = null;
+                }
+                this.queue = [];
+                this.debounceMap.clear();
+            }
         });
 
         this.proc.on('error', () => {
@@ -65,16 +75,7 @@ class CecController extends EventEmitter {
     quit() {
         this.enabled = false;
         this.isReady = false;
-        if (this.timeoutTimer) {
-            clearTimeout(this.timeoutTimer);
-            this.timeoutTimer = null;
-        }
-        if (this.proc) {
-            this.proc.kill();
-        }
-        this.proc = null;
-        this.queue = [];
-        this.debounceMap.clear();
+        this.send('q');
     }
 
     _scheduleRestart() {
