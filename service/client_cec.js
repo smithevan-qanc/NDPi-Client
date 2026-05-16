@@ -33,7 +33,7 @@ class CecController extends EventEmitter {
     }
 
     start() {
-        this.proc = spawn('cec-client', ['-o', this.deviceName], {
+        this.proc = spawn('cec-client', ['-o', this.deviceName, ], {
             stdio: ['pipe', 'pipe', 'pipe']
         });
 
@@ -106,6 +106,9 @@ class CecController extends EventEmitter {
                         console.log(`[ client_cec ][ RECEIVE ] ${lineSendReceive}`);
                     } else if (lineSplit.includes('(0):') || lineSplit.includes('(1):')) {
                         console.log(`[ client_cec ][  UPDATE ] ${lineSplit}`);
+                        if (lineSplit.includes('TV') && lineSplit.includes('power status')) {
+                            this.settings.put('output_device_cec_status_power', lineSplit.split("'")[3]);
+                        }
                     } else if (line.includes('ERROR')) {
                         console.log(`[ client_cec ][   ERROR ] ${lineSplit}`);
                     }
