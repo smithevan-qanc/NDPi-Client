@@ -311,8 +311,11 @@ process.on('uncaughtException', (err) => {
     console.log(' ');
     console.log('*');
     console.log('* *');
-    console.log('* * *    Uncaught Exception');
+    console.log('* * *');
+    console.log('Uncaught Exception');
+    console.log('⸻   ⸻   ⸻   ⸻   ⸻');
     console.log(err);
+    console.log('⸻   ⸻   ⸻   ⸻   ⸻');
     console.log('* * *');
     console.log('* *');
     console.log('*');
@@ -323,8 +326,10 @@ process.on('unhandledRejection', (reason) => {
     console.log('*');
     console.log('* *');
     console.log('* * *');
-    console.log(' Unhandled REJECTION');
+    console.log('Unhandled REJECTION');
+    console.log('⸻   ⸻   ⸻   ⸻   ⸻');
     console.log(reason);
+    console.log('⸻   ⸻   ⸻   ⸻   ⸻');
     console.log('* * *');
     console.log('* *');
     console.log('*');
