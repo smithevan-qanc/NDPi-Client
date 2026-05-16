@@ -188,7 +188,7 @@ class FileSystemMonitor extends EventEmitter {
             
             try {
                 if (fs.existsSync(filePath) && getValueFromFile) {
-                    const currentValue = fs.readFileSync(filePath, 'utf8');
+                    const currentValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trimEnd();
                     this.#fileMap.set(key, currentValue);
                 } else {
                     fs.writeFileSync(filePath, value, 'utf8');
@@ -210,7 +210,7 @@ class FileSystemMonitor extends EventEmitter {
 
             if (event === 'change') {
                 const currentValue = this.#fileMap.get(filename);
-                const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').replace(/\0/g, '').trim();
+                const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').replace(/\0/g, '').trimEnd();
 
                 if (currentValue !== fsValue) {
                     console.log(`[ client_fs ] '${filename}' changed from '${currentValue}' to '${fsValue}'`)
@@ -245,7 +245,7 @@ class FileSystemMonitor extends EventEmitter {
     put(fileName, data = '') {
         if (!fileName || !this.#fileMap.has(fileName)) return;
         try {
-            fs.writeFileSync(path.join(this.dataDir, fileName), data, 'utf8');
+            fs.writeFileSync(path.join(this.dataDir, fileName), data.trimEnd(), 'utf8');
         } catch (error) {
             console.error('[ client_fs ] Error Saving to FileSystem');
         }
