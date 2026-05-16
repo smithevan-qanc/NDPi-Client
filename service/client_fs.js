@@ -50,9 +50,9 @@ class FileSystemMonitor extends EventEmitter {
         
         if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1])) {
             try {
-                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8');
+                deviceId = fs.readFileSync(deviceIdPaths[0]);
             } catch {
-                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8');
+                deviceId = fs.readFileSync(deviceIdPaths[1]);
             }
         } else {
             // MacOS Compatability
