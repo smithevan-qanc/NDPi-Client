@@ -11,10 +11,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.controller_cec = null;
 
         this.settings = fsData;
-        this.port = fsData.get('local_port_number_api') || process.env.PORT || 3030
-        fsData.on('ndpi_command_server_host', (data) => { this.updateDisplay({ type: 'update-details', serverIp: String(data) }); });
-        fsData.on('device_ip', (data) => { this.updateDisplay({ type: 'update-details', thisDevice: { address: String(data) } }); });
-        fsData.on('device_name', (data) => { this.updateDisplay({ type: 'update-details', thisDevice: { name: String(data) } }); });
+        this.port = fsData.get('local_port_number_api') || process.env.PORT_API || 3080
         
         this.WebSocket = new WebSocket.Server({ noServer: true });
         this.WebSocketConnections = new Set();

@@ -18,12 +18,15 @@ const NDPi_VERSION_DATE = (
 
 class NDPi {
     constructor() {
+        this.isInitialized = false;
+
         this.settings = null;
         this.server_api = null;
         this.service_bonjour = null;
         this.service_chromium = null;
         this.controller_cec = null;
-        this.connection_ndpiServer = null;
+
+        this.wsConnection_ndpiServer = null;
         this.ndpiServerStatusUpdate = null; // Interval Timer
 
         this.targetSource = null;
@@ -54,31 +57,113 @@ class NDPi {
             this.startApi();
         });
 
+        //  NDI Source Target
         this.settings.on('ndpi_status_ndi_source_target', (data) => {
-            const updatedTarget = data.toString() || null;
-            if (updatedTarget !== this.targetSource) {
-                this.targetSource = updatedTarget;
-                if (this.targetSource && String(this.targetSource).toLowerCase() !== 'none') {
+            const output = String(data) || 'None';
+            if (output !== this.targetSource) {
+                this.targetSource = output;
+                if (String(this.targetSource).toLowerCase() !== 'none') {
                     this.startNdiReceiver();
                 } else {
                     this.ndiReceiver.close();
                 }
             }
         });
+
+        //  Server IP
+        this.settings.on('ndpi_command_server_host', (data) => {
+            const output = String(data).trim() || null;
+            if (!output) return;
+
+            this.server_api.updateDisplay({
+                type: 'update-details',
+                serverIp: output
+            });
+
+            if (output !== this.wsConnection_ndpiServer.ndpiServerIp) {
+                this.wsConnection_ndpiServer.ndpiServerIp = output;
+                this.wsConnection_ndpiServer.close();
+                this.wsConnection_ndpiServer.connect();
+            }
+        });
+
+        //  Server Port
+        this.settings.on('ndpi_command_server_port', (data) => {
+            const output = String(data).trim() || null;
+            if (!output) return;
+
+            if (output !== this.wsConnection_ndpiServer.ndpiServerPort) {
+                this.wsConnection_ndpiServer.close();
+                this.wsConnection_ndpiServer = null;
+                this.connectToNDPiServer();
+            }
+        });
+
+        //  Device Name
+        this.settings.on('device_name', (data) => {
+            const output = String(data) || this.settings.defaultDeviceName;
+
+            this.server_api.updateDisplay({
+                type: 'update-details',
+                thisDevice: {
+                    name: output
+                }
+            });
+
+            this.service_bonjour.deviceName = output;
+            this.service_bonjour._tryPublish();
+
+            this.controller_cec.deviceName = output;
+            this.controller_cec.send('q');
+        });
+
+        //  Device IP
+        this.settings.on('device_ip', (data) => {
+            const output = String(data).trim() || null;
+            if (!output) return;
+
+            this.server_api.updateDisplay({
+                type: 'update-details',
+                thisDevice: {
+                    address: output
+                }
+            });
+
+            this.service_bonjour.localIp = output;
+            this.service_bonjour._tryPublish();
+        });
+
+        //  Device Port Number
+        this.settings.on('local_port_number_api', (data) => {
+            const output = String(data).trim() || null;
+            if (!output) return;
+
+            try { this.server_api.close(); } catch {}
+            this.startApi();
+        });
+
     }
 
     startApi() {
-        const port = this.settings.get('local_port_number_api');
         const NDPiCommandServer_Client = require('./service/client_api_server.js');
         this.server_api = new NDPiCommandServer_Client(this.settings);
         this.server_api.on('online', () => {
-            console.log('[ client_api_server ][ index ] Ready.');
-            this.startMdns();
-            this.startChromium();
-            this.openCecController();
-            this.connectToNDPiServer();
-            this.targetSource = this.settings.get('ndpi_status_ndi_source_target') || null;
-            if (this.targetSource) this.startNdiReceiver(sourceTarget);
+            if (!this.isInitialized) {
+                this.startMdns();
+                this.startChromium();
+                this.openCecController();
+                this.connectToNDPiServer();
+                this.targetSource = this.settings.get('ndpi_status_ndi_source_target') || null;
+                if (this.targetSource) this.startNdiReceiver(sourceTarget);
+                this.isInitialized = true;
+            } else {
+                this.service_bonjour.commandPort = output;
+                this.service_bonjour._tryPublish();
+                try { this.service_chromium?.close(); } catch {} finally { 
+                    this.service_chromium = null;
+                    this.startChromium();
+                }
+            }
         });
     }
 
@@ -92,8 +177,8 @@ class NDPi {
             const ChromiumOverlayDisplay = require('./service/client_chromium.js');
             this.service_chromium = new ChromiumOverlayDisplay(this.settings);
         } else {
-            console.log('[ index ] Skipping Chromium display launch.');
-            console.log('[ index ]  - Missing binary: /usr/bin/chromium');
+            console.log('[ client_chromium ][ index ] Skipping Chromium display launch.');
+            console.log('[ client_chromium ][ index ]  - Missing binary: /usr/bin/chromium');
         }
     }
 
@@ -110,16 +195,17 @@ class NDPi {
             console.log(`[ client_cec ][ index ]`, data);
         });
         this.controller_cec.on('timeout', (data) => {
-            console.log(`[ index ] ${String(data)}`);
+            console.log(`[ client_cec ][ index ] ${String(data)}`);
             this.controller_cec.quit();
             this.controller_cec = null;
         });
     }
 
+    //  TODO: Migrate the server status updates to be triggered like the display status updates.
     connectToNDPiServer() {
         const ClientServerWebSocket = require('./service/clientServer_websocket.js');
-        this.connection_ndpiServer = new ClientServerWebSocket(this.settings, this.server_api);
-        this.connection_ndpiServer.on('connected', () => {
+        this.wsConnection_ndpiServer = new ClientServerWebSocket(this.settings, this.server_api);
+        this.wsConnection_ndpiServer.on('connected', () => {
             this.ndpiServerStatusUpdate = setInterval(() => {
                 this.sendStatusToNDPiServer();
             }, 5000);
@@ -142,7 +228,7 @@ class NDPi {
         status.status = this.settings.get('ndpi_status_ndi');
         status.systemStats = this.getSystemStats();
 
-        this.connection_ndpiServer.send(status);
+        this.wsConnection_ndpiServer.send(status);
     }
     
     getSystemStats() {
@@ -200,30 +286,26 @@ class NDPi {
             this.server_api.broadcastToDisplay();
         });
     }
-
-    quit() {
-        console.log('[ index ] Shutting down application...');
-
-        if (this.ndpiServerStatusUpdate) {
-            clearInterval(this.ndpiServerStatusUpdate);
-            this.ndpiServerStatusUpdate = null;
-        }
-
-        try { this.ndiReceiver.close(); } catch {}
-
-        try { this.controller_cec.close(); } catch {}
-
-        try { this.service_bonjour.close(); } catch {}
-
-        try { this.connection_ndpiServer?.close(); } catch {}
-
-        try { this.server_api.close(); } catch {}
-
-        try { this.settings.close(); } catch {}
-    }
 }
 
 const index = new NDPi();
+
+function quitNDPi(signal) {
+    const sig = signal ? `[ ${signal} ]` : '';
+    console.log(`[ index ]${sig} Shutting down application...`);
+    if (index.ndpiServerStatusUpdate) {
+        clearInterval(index.ndpiServerStatusUpdate);
+        index.ndpiServerStatusUpdate = null;
+    }
+    try { index.ndiReceiver?.close(); } catch {}
+    try { index.controller_cec?.close(); } catch {}
+    try { index.service_bonjour?.close(); } catch {}
+    try { index.service_chromium?.close(); } catch {}
+    try { index.wsConnection_ndpiServer?.close(); } catch {}
+    try { index.server_api?.close(); } catch {}
+    try { index.settings?.close(); } catch {}
+    process.exit(0);
+}
 
 process.on('uncaughtException', (err) => {
     console.log(' ');
@@ -247,16 +329,11 @@ process.on('unhandledRejection', (reason) => {
     console.log('* *');
     console.log('*');
     console.log(' ');
-    process.exit(1);
+    quitNDPi('unhandledRejection');
 });
-function shutdown(signal) {
-    console.log(`[ index ] Received ${signal}`);
-    index.quit();
-    process.exit(0);
-}
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT',  () => shutdown('SIGINT'));
+process.on('SIGTERM', () => quitNDPi('SIGTERM'));
+process.on('SIGINT',  () => quitNDPi('SIGINT'));
 
 process.on('exit', (code) => {
     console.log(`    [[ Exit Code: ${code} ]]`);

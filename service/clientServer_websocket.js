@@ -15,23 +15,6 @@ class ClientServerWebSocket extends EventEmitter {
         this.ndpiServerIp = fsData.get('ndpi_command_server_host') || null;
         this.ndpiServerPort = fsData.get('ndpi_command_server_port') || null;
 
-        fsData.on('ndpi_command_server_host', (data) => {
-            const newIp = String(data || 'localhost');
-            if (newIp !== 'localhost' && newIp !== this.ndpiServerIp) {
-                this.ndpiServerIp = newIp;
-                this.close();
-                this.connect();
-            }
-        });
-        fsData.on('ndpi_command_server_port', (data) => {
-            const newPort = data;
-            if (newPort && newPort !== this.ndpiServerPort) {
-                this.ndpiServerPort = newPort;
-                this.close();
-                this.connect();
-            }
-        });
-
         this.reconnectTimer = null;
 
         if (this.ndpiServerIp && this.ndpiServerPort) {

@@ -16,11 +16,16 @@ class FileSystemMonitor extends EventEmitter {
         super();
         this.setMaxListeners(100)
 
-        // Data Poll Timers
+        this.defaultDeviceName = 'NDPi Client';
+
+        // Data Poll Timer
         this.#fsPoll = null;
 
         this.dataDir = process.env.DATA_NDPI_PATH;
         this.#fileMap = null;
+
+        this.debounceMap = new Map();
+        this.queue = [];
 
         this.#pgmVersion = version;
         this.#pgmVersionDate = new Date(versionDate).toISOString().split('T')[0];
@@ -73,7 +78,7 @@ class FileSystemMonitor extends EventEmitter {
         const files = [
             { 
                 key: "device_name",
-                value: `NDPi Client`
+                value: `${this.defaultDeviceName}`
             }, {
                 key: "device_type",
                 value: `NDPi Monitor Client`
@@ -84,14 +89,15 @@ class FileSystemMonitor extends EventEmitter {
                 key: "device_ip",
                 value: ``
             }, { 
+                // NOT USED
                 key: "local_port_number_display",
                 value: `${8080}`
             }, { 
                 key: "local_port_number_api",
-                value: `${process.env.PORT || 3001}`
+                value: `${process.env.PORT_API || 3080}`
             }, { 
                 key: "local_port_number_bonjour",
-                value: `${3002}`
+                value: `${process.env.PORT_MDNS || 3053}`
             }, {
                 key: "ndpi_version",
                 value: this.#pgmVersion
@@ -169,6 +175,7 @@ class FileSystemMonitor extends EventEmitter {
             'ndpi_version_date',
             'ndpi_version',
             'local_port_number_bonjour',
+            'local_port_number_api',
             'device_id',
             'device_type',
             'output_device_cec_enabled',
@@ -213,8 +220,7 @@ class FileSystemMonitor extends EventEmitter {
                 const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').replace(/\0/g, '').trimEnd();
 
                 if (currentValue !== fsValue) {
-                    console.log(`[ client_fs ] '${filename}' changed from '${currentValue}' to '${fsValue}'`)
-                    this.emit(filename, fsValue);
+                    this.fsEvent(filename, fsValue);
                     this.#fileMap.set(filename, fsValue);
                 }
             }
@@ -249,7 +255,26 @@ class FileSystemMonitor extends EventEmitter {
             console.error('[ client_fs ] Error Saving to FileSystem');
         }
     }
+    
 
+    fsEvent(name, value, debounceMs = 500) {
+        const last = this.debounceMap.get(name) || 0;
+        const now = Date.now();
+
+        if (now - last < debounceMs) return;
+
+        this.debounceMap.set(name, now);
+        this.queue.push({ name, value });
+        this._flushQueue();
+    }
+
+    _flushQueue() {
+        while (this.queue.length > 0) {
+            const { name, value } = this.queue.shift();
+            console.log(`[ client_fs ][ UPDATE ] '${name}' is now '${value}'`);
+            this.emit(name, value);
+        }
+    }
 
     async updateLocalIp() {
         const fileName = 'device_ip';
@@ -281,31 +306,21 @@ class FileSystemMonitor extends EventEmitter {
             let lines = udevBuffer.split('\n');
             udevBuffer = lines.pop();
 
-            const HDMI_1 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1', 'status'));
-            const HDMI_2 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2', 'status'));
-            console.log(`[ client_fs ][ HDMI CHANGE ] HDMI 1: ${HDMI_1}, HDMI 2: ${HDMI_2}`);
+            const HDMI_1 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1', 'status')).trimEnd();
+            const HDMI_2 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2', 'status')).trimEnd();
+            console.log(`[ client_fs ][ HDMI ] HDMI 1: ${HDMI_1}, HDMI 2: ${HDMI_2}`);
+            const currentSetting = this.#fileMap.get('output_device_port');
+            if (HDMI_1.includes('connected')) {
+                this.put('output_device_port', 'HDMI-1');
+            } else if (HDMI_2.includes('connected')) {
+                this.put('output_device_port', 'HDMI-2');
+            }
         });
 
         this.drmMonitor.on('error', () => {
             console.log('[ client_fs ][ ERROR ] udevadm not available, DRM monitor disabled');
             this.drmMonitor = null;
         });
-
-        // setInterval(() => {
-        //     for (const statusPath of hdmiPaths) {
-        //         try {
-        //             const value = fs.readFileSync(statusPath, 'utf8').trim();
-        //             const prev = hdmiStatus.get(statusPath);
-        //             if (prev !== undefined && prev !== value) {
-        //                 console.log(`[ client_fs ] HDMI status changed: ${path.basename(path.dirname(statusPath))} -> ${value}`);
-        //                 this.emit('hdmi_status', { port: path.basename(path.dirname(statusPath)), status: value });
-        //             }
-        //             hdmiStatus.set(statusPath, value);
-        //         } catch {
-        //             // Path doesn't exist on this device, skip
-        //         }
-        //     }
-        // }, 2000);
     }
 
 }

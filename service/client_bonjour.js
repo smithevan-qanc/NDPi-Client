@@ -2,22 +2,15 @@ const bonjour = require('bonjour')();
 
 class NDPiBonjourService {
     constructor(fsData) {
-        this.bonjourPort = fsData.get('local_port_number_bonjour') || 3002;
-        this.service     = null;
 
-        this.deviceId       = fsData.get('device_id')             || null;
-        this.deviceName     = fsData.get('device_name')           || null;
-        this.localIp        = fsData.get('device_ip')             || null;
-        this.commandPort    = fsData.get('local_port_number_api') || null;
-        this.deviceType     = fsData.get('device_type')           || null;
-        this.programVersion = fsData.get('ndpi_version')          || null;
-
-        fsData.on('device_id',             (v) => { this.deviceId       = v; this._tryPublish(); });
-        fsData.on('device_name',           (v) => { this.deviceName     = v; this._tryPublish(); });
-        fsData.on('device_ip',             (v) => { this.localIp        = v; this._tryPublish(); });
-        fsData.on('local_port_number_api', (v) => { this.commandPort    = v; this._tryPublish(); });
-        fsData.on('device_type',           (v) => { this.deviceType     = v; this._tryPublish(); });
-        fsData.on('ndpi_version',          (v) => { this.programVersion = v; this._tryPublish(); });
+        this.service        = null;
+        this.bonjourPort    = fsData.get('local_port_number_bonjour') || process.env.PORT_MDNS || 3053;
+        this.deviceId       = fsData.get('device_id')                 || null;
+        this.deviceName     = fsData.get('device_name')               || null;
+        this.localIp        = fsData.get('device_ip')                 || null;
+        this.commandPort    = fsData.get('local_port_number_api')     || process.env.PORT_API || 3080;
+        this.deviceType     = fsData.get('device_type')               || null;
+        this.programVersion = fsData.get('ndpi_version')              || null;
 
         this._tryPublish();
     }

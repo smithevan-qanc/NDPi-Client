@@ -8,13 +8,10 @@ class CecController extends EventEmitter {
         this.settings = fsData;
 
         this.deviceName = fsData.get('device_name');
-        fsData.on('device_name', (data) => {
-            this.deviceName = String(data);
-            this.send('q');
-        });
 
         this.proc = null;
         this.buffer = '';
+        this.debounceMap = new Map();
         this.queue = [];
 
         this.enabled = true;
@@ -26,7 +23,6 @@ class CecController extends EventEmitter {
         this.timeoutTimer = null;
 
         this.maxDelay = 10000;
-        this.debounceMap = new Map();
 
         console.log('[ client_cec ] Opening CEC Client')
         this.start();
