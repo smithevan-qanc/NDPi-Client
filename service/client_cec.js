@@ -93,19 +93,21 @@ class CecController extends EventEmitter {
 
         const thisLine = String(data).split(/\r?\n/);
         thisLine.forEach((line) => {
-            if (!line.includes('TRAFFIC')) {
+            const lineCheck = line.trim() || null;
+            if (!line.includes('TRAFFIC') && lineCheck && lineCheck !== "'") {
                 if (!line.includes(']')) {
                     console.log(`[ client_cec ][ MESSAGE ] ${line}`);
                 } else {
                     let lineSplit = line.split(']')[1].trim();
+                    let lineSendReceive = `${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`;
                     if (lineSplit.includes('<<')) {
-                        console.log(`[ client_cec ][ SEND ] ${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`);
+                        console.log(`[ client_cec ][    SEND ] ${lineSendReceive}`);
                     } else if (lineSplit.includes('>>')) {
-                        console.log(`[ client_cec ][ RECEIVE ] ${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`);
+                        console.log(`[ client_cec ][ RECEIVE ] ${lineSendReceive}`);
                     } else if (lineSplit.includes('(0):') || lineSplit.includes('(1):')) {
-                        console.log(`[ client_cec ][ UPDATE ] ${lineSplit}`);
+                        console.log(`[ client_cec ][  UPDATE ] ${lineSplit}`);
                     } else if (line.includes('ERROR')) {
-                        console.log(`[ client_cec ][ ERROR ] ${lineSplit}`);
+                        console.log(`[ client_cec ][   ERROR ] ${lineSplit}`);
                     }
                 }
             }
