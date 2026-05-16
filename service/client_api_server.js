@@ -41,7 +41,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             console.log('[ client_api_server ] Display WebSocket connection started.');
             this.WebSocketConnections.add(ws);
             setTimeout(() => {
-                this.broadcastToDisplay();
+                this.broadcastToDisplay(sendAll = true);
             }, 1000);
             
             ws.on('close', () => {
@@ -101,18 +101,25 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.Server.close();
     }
 
-    broadcastToDisplay(message = {}) {
+    broadcastToDisplay(message = {}, sendAll = false) {
         const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
-        const updateData = { type: `show-${displayMode}`, thisDevice: {}, service: {} };
-        if (message.type) updateData.type = message.type;
-        updateData.serverIp = this.settings.get('ndpi_command_server_host');
-        updateData.thisDevice.id = this.settings.get('device_id');
-        updateData.thisDevice.address = this.settings.get('device_ip');
-        updateData.thisDevice.name = this.settings.get('device_name');
-        updateData.service.name = this.settings.get('device_type');
-        updateData.service.version = this.settings.get('ndpi_version');
-
-        console.log('[ client_api_server ] Sending update to GUI');
+        let updateData = {};
+        if (message.type) {
+            updateData.type = message.type;
+        } else {
+            updateData.type = `show-${displayMode}`;
+        }
+        if (sendAll) {
+            updateData.serverIp = this.settings.get('ndpi_command_server_host');
+            updateData.thisDevice = {};
+            updateData.thisDevice.id = this.settings.get('device_id');
+            updateData.thisDevice.address = this.settings.get('device_ip');
+            updateData.thisDevice.name = this.settings.get('device_name');
+            updateData.service = {};
+            updateData.service.name = this.settings.get('device_type');
+            updateData.service.version = this.settings.get('ndpi_version');
+            console.log('[ client_api_server ] Sending update to GUI');
+        }
         
         this.WebSocketConnections.forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
