@@ -69,7 +69,7 @@ class NDPiBonjourService {
         });
     }
 
-    stop() {
+    close() {
         if (this.service) {
             this.service.stop();
             this.service = null;

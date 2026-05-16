@@ -26,6 +26,7 @@ class FileSystemMonitor extends EventEmitter {
         this.#pgmVersionDate = new Date(versionDate).toISOString().split('T')[0];
 
         this.serverCommunicationWebSocket = null;
+        this.drmMonitor = null;
 
         // First run is used as a flag for getLocalIp();
         this.firstRun = true;
@@ -216,32 +217,19 @@ class FileSystemMonitor extends EventEmitter {
                 }
             }
         });
+
+        this.startDrmMonitor();
+
         const pth_thermal_fanSpeed = path.join('/sys','class','thermal','cooling_device0','cur_state');
         const pth_thermal_cpuTemperature = path.join('/sys','class','thermal','thermal_zone0','temp');
 
-        console.log('STARTING DRM MONITOR');
-        try {
-            const HDMI_1_DIR = path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1');
-            fs.watch(`${HDMI_1_DIR}/status`, async (event, filename) => {
-                console.log('[ client_fs ]', event, filename);
-            });
-        } catch {
-            console.log('[ client_fs ][ ERROR ] Unable to monitor HDMI-2');
-        }
-        
-        try {
-            const HDMI_2_DIR = path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2');
-            fs.watch(`${HDMI_2_DIR}/status`, async (event, filename) => {
-                console.log('[ client_fs ]', event, filename);
-            });
-        } catch {
-            console.log('[ client_fs ][ ERROR ] Unable to monitor HDMI-2');
-        }
     }
 
-    stop() {
+    close() {
         clearInterval(this.#fsPoll);
         this.#fsPoll = null;
+        this.drmMonitor.kill();
+        this.drmMonitor = null;
     }
 
     poll(interval = 10000) {
@@ -282,6 +270,49 @@ class FileSystemMonitor extends EventEmitter {
                 this.start();
             }
         }
+    }
+
+    startDrmMonitor() {
+        console.log('STARTING DRM MONITOR');
+        // const hdmiPaths = [
+        //     path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1', 'status'),
+        //     path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2', 'status'),
+        // ];
+        // const hdmiStatus = new Map();
+
+        this.drmMonitor = require('node:child_process').spawn('udevadm', ['monitor', '--subsystem-match=drm', '--kernel']);
+        let udevBuffer = '';
+
+        this.drmMonitor.stdout.on('data', (data) => {
+            udevBuffer += data.toString();
+            let lines = udevBuffer.split('\n');
+            udevBuffer = lines.pop();
+
+            const HDMI_1 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1', 'status'));
+            const HDMI_2 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2', 'status'));
+            console.log(`[ client_fs ][ HDMI CHANGE ] HDMI 1: ${HDMI_1}, HDMI 2: ${HDMI_2}`);
+        });
+
+        this.drmMonitor.on('error', () => {
+            console.log('[ client_fs ][ ERROR ] udevadm not available, DRM monitor disabled');
+            this.drmMonitor = null;
+        });
+
+        // setInterval(() => {
+        //     for (const statusPath of hdmiPaths) {
+        //         try {
+        //             const value = fs.readFileSync(statusPath, 'utf8').trim();
+        //             const prev = hdmiStatus.get(statusPath);
+        //             if (prev !== undefined && prev !== value) {
+        //                 console.log(`[ client_fs ] HDMI status changed: ${path.basename(path.dirname(statusPath))} -> ${value}`);
+        //                 this.emit('hdmi_status', { port: path.basename(path.dirname(statusPath)), status: value });
+        //             }
+        //             hdmiStatus.set(statusPath, value);
+        //         } catch {
+        //             // Path doesn't exist on this device, skip
+        //         }
+        //     }
+        // }, 2000);
     }
 
 }

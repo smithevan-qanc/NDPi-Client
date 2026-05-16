@@ -9,9 +9,13 @@ class NDPiCommandServer_Client extends EventEmitter {
     constructor(fsData) {
         super();
         this.controller_cec = null;
+
         this.settings = fsData;
         this.port = fsData.get('local_port_number_api') || process.env.PORT || 3030
-
+        fsData.on('ndpi_command_server_host', (data) => { this.updateDisplay({ type: 'update-details', serverIp: String(data) }); });
+        fsData.on('local_ip', (data) => { this.updateDisplay({ type: 'update-details', thisDevice: { address: String(data) } }); });
+        fsData.on('device_name', (data) => { this.updateDisplay({ type: 'update-details', thisDevice: { name: String(data) } }); });
+        
         this.WebSocket = new WebSocket.Server({ noServer: true });
         this.WebSocketConnections = new Set();
 
@@ -87,6 +91,16 @@ class NDPiCommandServer_Client extends EventEmitter {
             });
     }
 
+    close() {
+        this.WebSocketConnections.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) client.close();
+            this.WebSocketConnections.delete(client);
+        });
+        this.WebSocket.close();
+        this.Server.closeAllConnections();
+        this.Server.close();
+    }
+
     broadcastToDisplay(message = {}) {
         const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
         const updateData = { type: `show-${displayMode}`, thisDevice: {}, service: {} };
@@ -106,6 +120,16 @@ class NDPiCommandServer_Client extends EventEmitter {
             }
         });
     }
+
+    updateDisplay(message) {
+        if (!message) return;
+        this.WebSocketConnections.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(message));
+            }
+        });
+    }
+
     setCecController(CecController) {
         if (!CecController) return;
         this.controller_cec = CecController;

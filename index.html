@@ -203,8 +203,10 @@
         }
 
         function handleDisplayCommand(msg) {
-            updateDetails(msg);
             switch (msg.type) {
+                case 'update-details':
+                    updateDetails(msg);
+                    break;
                 case 'ndpi-server-connected':
                     pingFromNDPiServer();
                     break;
@@ -216,21 +218,24 @@
                     break;
                 case 'show-overlay':
                     showOverlay();
+                    updateDetails(msg);
                     break;
                 case 'show-blank':
                     showBlank();
+                    updateDetails(msg);
                     break;
                 case 'show-ndi':
                     hideAll();
                     break;
                 case 'show-custom-overlay':
                     showBlank();
+                    updateDetails(msg);
                     setTimeout(() => {
                         showOverlay(msg.srcPth);
                     }, 800);
                     break;
                 default:
-                    console.log("System Updated.");
+                    console.log("Updated.", msg);
                     break;
             }
         }
@@ -248,14 +253,23 @@
         }
 
         function updateDetails(msg) {
-            const thisDeviceAddr = msg.thisDevice.address === 'localhost' ? 'Obtaining...' : msg.thisDevice.address;
+            const fields = {
+                devName:     msg.thisDevice?.name,
+                devId:       msg.thisDevice?.id,
+                devIp:       msg.thisDevice?.address === undefined ? undefined
+                             : msg.thisDevice.address === 'localhost' ? 'Obtaining...'
+                             : msg.thisDevice.address,
+                servIp:      msg.serverIp,
+                programName: msg.service?.name,
+                programVer:  msg.service?.version,
+            };
+
             document.getElementById('sys-details').style.display = 'flex';
-            document.getElementById('devName').textContent = msg.thisDevice.name || '';
-            document.getElementById('devId').textContent = msg.thisDevice.id || '';
-            document.getElementById('devIp').textContent = thisDeviceAddr || '';
-            document.getElementById('servIp').textContent = msg.serverIp || 'Awaiting Adoption...';
-            document.getElementById('programName').textContent = msg.service.name || '';
-            document.getElementById('programVer').textContent = msg.service.version || '';
+
+            for (const [id, value] of Object.entries(fields)) {
+                if (value === undefined) continue;
+                document.getElementById(id).textContent = value;
+            }
         }
 
         const svgContainer = document.getElementById('overlay-svg');

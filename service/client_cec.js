@@ -66,13 +66,13 @@ class CecController extends EventEmitter {
         this.timeoutTimer = setTimeout(() => {
             if (!this.isReady) {
                 this.emit('timeout', "Never received 'waiting for input' signal");
-                this.quit();
+                this.close();
             }
             this.timeoutTimer = null;
         }, 30000);
     }
 
-    quit() {
+    close() {
         this.enabled = false;
         this.isReady = false;
         this.send('q');

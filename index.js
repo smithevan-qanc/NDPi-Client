@@ -201,12 +201,25 @@ class NDPi {
         });
     }
 
-    close() {
-        try {
-            this.server_api.Server.closeAllConnections();
-            this.server_api.Server.close();
-        } catch {}
+    quit() {
+        console.log('Shutting down application...');
 
+        if (this.ndpiServerStatusUpdate) {
+            clearInterval(this.ndpiServerStatusUpdate);
+            this.ndpiServerStatusUpdate = null;
+        }
+
+        try { this.ndiReceiver.close(); } catch {}
+
+        try { this.controller_cec.close(); } catch {}
+
+        try { this.service_bonjour.close(); } catch {}
+
+        try { this.connection_ndpiServer?.close(); } catch {}
+
+        try { this.server_api.close(); } catch {}
+
+        try { this.settings.close(); } catch {}
     }
 }
 
@@ -231,6 +244,15 @@ process.on('unhandledRejection', (reason) => {
     console.log('*');
     process.exit();
 });
+function shutdown(signal) {
+    console.log(`[ NDPi ] Received ${signal}`);
+    index.quit();
+    process.exit(0);
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT',  () => shutdown('SIGINT'));
+
 process.on('exit', (code) => {
     console.log(`    [[ Exit Code: ${code} ]]`);
     console.log('══════════════════════════════════════════  N D P i - M O N I T O R  ═══');
