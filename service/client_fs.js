@@ -50,10 +50,12 @@ class FileSystemMonitor extends EventEmitter {
         
         if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1])) {
             try {
-                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
+                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').trimEnd();
+                // deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
                 console.log('DEVICE ID:', deviceId);
             } catch {
-                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
+                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').trimEnd();
+                // deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
                 console.log('FALLBACK DEVICE ID:', deviceId);
             }
         } else {
@@ -186,10 +188,10 @@ class FileSystemMonitor extends EventEmitter {
             
             try {
                 if (fs.existsSync(filePath) && getValueFromFile) {
-                    const currentValue = fs.readFileSync(filePath, 'utf8');
+                    const currentValue = fs.readFileSync(filePath, 'utf8').trimEnd();
                     this.#fileMap.set(key, currentValue);
                 } else {
-                    fs.writeFileSync(filePath, value, 'utf8');
+                    fs.writeFileSync(filePath, value.trimEnd(), 'utf8');
                     this.#fileMap.set(key, value);
                 }
             } catch (err) {
@@ -208,7 +210,7 @@ class FileSystemMonitor extends EventEmitter {
 
             if (event === 'change') {
                 const currentValue = this.#fileMap.get(filename);
-                const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8');
+                const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').trimEnd();
 
                 if (currentValue !== fsValue) {
                     console.log(`[ client_fs ] '${filename}' changed from '${currentValue}' to '${fsValue}'`)
