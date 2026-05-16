@@ -148,12 +148,13 @@ class NDPi {
             if (!output) return;
             const resolution = this.settings.get('output_resolution_current') || 'auto';
             const framerate  = this.settings.get('output_framerate_current') || null;
+            console.log(`xrandr --output ${output} --mode ${resolution}${framerate ? ` --rate ${framerate}` : ''}`);
             require('child_process')
-            .exec(`xrandr --output ${output} --mode ${resolution}${framerate ? ` --rate ${framerate}` : ''}`, {
-                env: { ...process.env },
-            }, (error, stderr) => {
-                if (error) console.log('[ client_fs ][ index ] Error setting Resolution', stderr);
-            });
+                .exec(`xrandr --output ${output} --mode ${resolution}${framerate ? ` --rate ${framerate}` : ''}`, {
+                    env: { ...process.env },
+                }, (error, stderr) => {
+                    if (error) console.log('[ client_fs ][ index ] Error setting Resolution', stderr);
+                });
         });
 
     }
