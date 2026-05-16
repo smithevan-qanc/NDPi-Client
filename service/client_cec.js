@@ -78,7 +78,6 @@ class CecController extends EventEmitter {
     }
 
     _handleStdout(data) {
-        console.log(data);
         this.buffer += data.toString();
 
         let lines = this.buffer.split('\n');
