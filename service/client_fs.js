@@ -19,8 +19,7 @@ class FileSystemMonitor extends EventEmitter {
         // Data Poll Timers
         this.#fsPoll = null;
 
-        console.log(process.env.DATA_NDPI_PATH);
-        this.dataDir = path.join(__dirname, '..', '..', 'DATA_ndpi');
+        this.dataDir = process.env.DATA_NDPI_PATH;
         this.#fileMap = null;
 
         this.#pgmVersion = version;
@@ -139,6 +138,9 @@ class FileSystemMonitor extends EventEmitter {
                 key: "output_device_framerate_preferred",
                 value: ``
             }, {
+                key: "output_device_port",
+                value: ``
+            }, {
                 key: "output_device_manufacturer",
                 value: ``
             }, {
@@ -214,6 +216,34 @@ class FileSystemMonitor extends EventEmitter {
                 }
             }
         });
+
+        const pth_thermal = path.join('/sys','class','thermal');
+        if (fs.existsSync(pth_thermal)) {
+            fs.watch(pth_thermal, async (event, filename) => {
+                if (event === 'change') {
+                    console.log(filename);
+                }
+            });
+        }
+
+        const pth_renderingManager = path.join('/sys','class','drm');
+        const HDMI_1_DIR = path.join(pth_renderingManager, 'card1-HDMI-A-1');
+        if (fs.existsSync(HDMI_1_DIR)) {
+            fs.watch(HDMI_1_DIR, async (event, filename) => {
+                if (event === 'change') {
+                    console.log(filename);
+                }
+            });
+        }
+        
+        const HDMI_2_DIR = path.join(pth_renderingManager, 'card1-HDMI-A-2');
+        if (fs.existsSync(HDMI_2_DIR)) {
+            fs.watch(HDMI_2_DIR, async (event, filename) => {
+                if (event === 'change') {
+                    console.log(filename);
+                }
+            });
+        }
     }
 
     stop() {
