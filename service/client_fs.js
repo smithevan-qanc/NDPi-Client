@@ -46,7 +46,6 @@ class FileSystemMonitor extends EventEmitter {
             path.join('/sys','firmware','devicetree','base','serial-number'),
             path.join('/etc','machine-id'),
         ]; 
-        console.log(JSON.stringify(deviceIdPaths, null, 2));
         
         if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1])) {
             try {
@@ -77,7 +76,7 @@ class FileSystemMonitor extends EventEmitter {
                 value: `NDPi Monitor Client`
             }, {
                 key: "device_id",
-                value: `${deviceId}`
+                value: deviceId
             }, {
                 key: "local_ip",
                 value: ``
@@ -186,7 +185,7 @@ class FileSystemMonitor extends EventEmitter {
                     const currentValue = fs.readFileSync(filePath, 'utf8');
                     this.#fileMap.set(key, currentValue);
                 } else {
-                    fs.writeFileSync(filePath, String(value), 'utf8');
+                    fs.writeFileSync(filePath, value, 'utf8');
                     this.#fileMap.set(key, value);
                 }
             } catch (err) {
