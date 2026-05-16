@@ -110,20 +110,20 @@ class CecController extends EventEmitter {
         if (line.includes('power status changed')) {
             return {
                 type: 'POWER',
-                raw: line
+                raw: line.split(/\t/)[1]
             };
         }
 
         if (line.includes('>>') || line.includes('<<')) {
             return {
                 type: 'TRAFFIC',
-                raw: line
+                raw: line.split(/\t/)[1]
             };
         }
 
         return {
             type: 'UNKNOWN',
-            raw: line
+            raw: line.split(/\t/)[1]
         };
     }
 
