@@ -55,6 +55,9 @@ class CecController extends EventEmitter {
             }
             this.timeoutTimer = null;
         }, 30000);
+        setInterval(() => {
+            console.log(this.buffer);
+        }, 10000)
     }
 
     quit() {
@@ -82,7 +85,6 @@ class CecController extends EventEmitter {
 
     _handleStdout(data) {
         this.buffer += data.toString();
-        console.log(data.toString());
         let lines = this.buffer.split('\n');
         this.buffer = lines.pop();
 

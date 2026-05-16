@@ -112,7 +112,7 @@ class NDPi {
         });
         setTimeout(() => {
             this.server_api.setCecController(this.controller_cec);
-        }, 10000);
+        }, 5000);
     }
 
     connectToNDPiServer() {
@@ -198,6 +198,14 @@ class NDPi {
             this.ndiReceiver = null;
             this.server_api.broadcastToDisplay();
         });
+    }
+
+    close() {
+        try {
+            this.server_api.Server.closeAllConnections();
+            this.server_api.Server.close();
+        } catch {}
+        
     }
 }
 
