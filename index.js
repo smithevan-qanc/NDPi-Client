@@ -54,6 +54,7 @@ class NDPi {
         this.settings = new FileSystemMonitor(NDPi_VERSION, NDPi_VERSION_DATE);
 
         this.settings.on('ready', () => {
+            this.setDisplayResolution();
             this.startApi();
         });
 
@@ -146,7 +147,17 @@ class NDPi {
         this.settings.on('output_device_port', (data) => {
             const output = String(data).trim() || null;
             if (!output) return;
-            this.setDisplayResolution(output);
+            this.setDisplayResolution();
+        });
+        
+        //  HDMI Resolution
+        this.settings.on('output_resolution_current', (data) => {
+            this.setDisplayResolution();
+        });
+
+        //  HDMI Framerate
+        this.settings.on('output_framerate_current', (data) => {
+            this.setDisplayResolution();
         });
 
     }
@@ -180,9 +191,6 @@ class NDPi {
     }
 
     startChromium() {
-        const displayOutput = this.settings.get('output_device_port') || null;
-        if (displayOutput) this.setDisplayResolution(displayOutput);
-        
         if (fs.existsSync('/usr/bin/chromium')) {
             const ChromiumOverlayDisplay = require('./service/client_chromium.js');
             this.service_chromium = new ChromiumOverlayDisplay(this.settings);
@@ -297,13 +305,13 @@ class NDPi {
         } catch {}
         return stats;
     }
-    setDisplayResolution(output = 'HDMI-1') {
+    setDisplayResolution() {
+        const displayOutput = this.settings.get('output_device_port') || 'HDMI-1';
         const resolution = this.settings.get('output_resolution_current') || null;
         const framerate  = this.settings.get('output_framerate_current') || null;
-        console.log(`xrandr --output ${output} --mode ${resolution}${framerate ? ` --rate ${framerate}` : ''}`);
         require('child_process')
             .exec(`xrandr \
-                --output ${output} \
+                --output ${displayOutput} \
                 ${resolution ? `--mode ${resolution}` : '--auto'} \
                 ${framerate ? `--rate ${framerate}` : ''} \
             `, {
