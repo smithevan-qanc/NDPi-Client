@@ -6,9 +6,9 @@ const path = require('path');
 
 
 class NDPiCommandServer_Client extends EventEmitter {
-    constructor(fsData, cec) {
+    constructor(fsData) {
         super();
-        this.controller_cec = cec;
+        this.controller_cec = null;
         this.settings = fsData;
         this.port = fsData.get('local_port_number_api') || process.env.PORT || 3030
 
@@ -101,6 +101,11 @@ class NDPiCommandServer_Client extends EventEmitter {
                 client.send(JSON.stringify(updateData));
             }
         });
+    }
+    setCecController(CecController) {
+        if (!CecController) return;
+        this.controller_cec = CecController;
+        console.log('[ client_api_server ] CEC Controller Set');
     }
 }
 
