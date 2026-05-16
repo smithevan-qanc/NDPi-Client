@@ -19,6 +19,7 @@ class FileSystemMonitor extends EventEmitter {
         // Data Poll Timers
         this.#fsPoll = null;
 
+        console.log(process.env.DATA_NDPI_PATH);
         this.dataDir = path.join(__dirname, '..', '..', 'DATA_ndpi');
         this.#fileMap = null;
 
