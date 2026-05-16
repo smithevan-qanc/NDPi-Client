@@ -221,7 +221,6 @@ class FileSystemMonitor extends EventEmitter {
         });
 
         this.startDrmMonitor();
-
     }
 
     close() {
@@ -258,10 +257,7 @@ class FileSystemMonitor extends EventEmitter {
         if (updateValue) {
             const storedValue = this.#fileMap.get(fileName);
 
-            if (updateValue !== storedValue) {
-                this.put(fileName, updateValue);
-                this.#fileMap.set(fileName, updateValue);
-            }
+            if (updateValue !== storedValue) this.put(fileName, updateValue);
             if (this.firstRun) {
                 this.poll();
                 this.emit('ready');
