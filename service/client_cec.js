@@ -51,7 +51,7 @@ class CecController extends EventEmitter {
                 this.quit();
             }
             this.timeoutTimer = null;
-        }, 10000);
+        }, 30000);
     }
 
     quit() {
@@ -90,6 +90,10 @@ class CecController extends EventEmitter {
 
             if (line.includes('waiting for input')) {
                 this.isReady = true;
+                if (this.timeoutTimer) {
+                    clearTimeout(this.timeoutTimer);
+                    this.timeoutTimer = null;
+                }
                 console.log('[ client_cec ] CEC Ready');
                 this.restartDelay = 1000;
                 this._flushQueue();

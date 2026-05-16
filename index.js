@@ -101,13 +101,13 @@ class NDPi {
         const CecController = require('./service/client_cec.js');
         this.controller_cec = new CecController();
         this.controller_cec.on('event', (data) => {
-            console.log(`[ client_cec ][ Event ] ${data.toString()}`);
+            console.log(`[ client_cec ][ Event ]`, data);
         });
         this.controller_cec.on('error_log', (data) => {
-            console.log(`[ client_cec ][ Error ] ${data.toString()}`);
+            console.log(`[ client_cec ][ Error ]`, data);
         });
         this.controller_cec.on('timeout', (data) => {
-            console.log(data.toString());
+            console.log(data);
             this.controller_cec = null;
         })
     }
