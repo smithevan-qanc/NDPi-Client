@@ -142,6 +142,20 @@ class NDPi {
             this.startApi();
         });
 
+        //  HDMI Port
+        this.settings.on('output_device_port', (data) => {
+            const output = String(data).trim() || null;
+            if (!output) return;
+            const resolution = this.settings.get('output_resolution_current') || 'auto';
+            const framerate  = this.settings.get('output_framerate_current') || null;
+            require('child_process')
+            .exec(`xrandr --output ${output} --mode ${resolution}${framerate ? ` --rate ${framerate}` : ''}`, {
+                ...process.env
+            }, (error, stderr) => {
+                if (error) console.log('[ client_fs ][ index ] Error setting Resolution', stderr);
+            });
+        });
+
     }
 
     startApi() {
