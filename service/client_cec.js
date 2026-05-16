@@ -11,9 +11,6 @@ class CecController extends EventEmitter {
         fsData.on('device_name', (data) => {
             this.deviceName = String(data);
             this.quit();
-            setTimeout(() => {
-                this.start();
-            }, 5000);
         });
 
         this.proc = null;
@@ -78,7 +75,6 @@ class CecController extends EventEmitter {
         this.proc = null;
         this.queue = [];
         this.debounceMap.clear();
-        this.emit('close');
     }
 
     _scheduleRestart() {
@@ -95,10 +91,9 @@ class CecController extends EventEmitter {
         this.buffer = lines.pop();
 
         let thisLine = data.toString();
-        console.log(`${thisLine}`);
-        // if (thisLine.includes('TRAFFIC')) {
-        //     console.log(`Traffic: ${thisLine.split('<<')[1].trim()}`);
-        // } else if (thisLine.includes(''))
+        if (!thisLine.includes('TRAFFIC')) {
+            console.log(`Traffic: ${thisLine.split('<<')[1].trim()}`);
+        } else if (thisLine.includes(''))
 
         for (const line of lines) {
             const parsed = this._parseLine(line.trim());
