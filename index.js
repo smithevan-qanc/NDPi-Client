@@ -72,7 +72,7 @@ class NDPi {
         const NDPiCommandServer_Client = require('./service/client_api_server.js');
         this.server_api = new NDPiCommandServer_Client(this.settings);
         this.server_api.on('online', () => {
-            console.log('[ client_api_server ] Ready.');
+            console.log('[ client_api_server ][ index ] Ready.');
             this.startMdns();
             this.startChromium();
             this.openCecController();
@@ -92,8 +92,8 @@ class NDPi {
             const ChromiumOverlayDisplay = require('./service/client_chromium.js');
             this.service_chromium = new ChromiumOverlayDisplay(this.settings);
         } else {
-            console.log('Skipping Chromium display launch.');
-            console.log(' - Missing binary: /usr/bin/chromium');
+            console.log('[ index ] Skipping Chromium display launch.');
+            console.log('[ index ]  - Missing binary: /usr/bin/chromium');
         }
     }
 
@@ -101,16 +101,16 @@ class NDPi {
         const CecController = require('./service/client_cec.js');
         this.controller_cec = new CecController(this.settings);
         this.controller_cec.on('event', (data) => {
-            console.log(`[ client_cec ][ Event ]`, data);
+            console.log(`[ client_cec ][ index ]`, data);
         });
         this.controller_cec.on('ready', () => {
             this.server_api.setCecController(this.controller_cec);
         });
         this.controller_cec.on('error_log', (data) => {
-            console.log(`[ client_cec ][ Error ]`, data);
+            console.log(`[ client_cec ][ index ]`, data);
         });
         this.controller_cec.on('timeout', (data) => {
-            console.log(data);
+            console.log(`[ index ] ${String(data)}`);
             this.controller_cec.quit();
             this.controller_cec = null;
         });
@@ -193,7 +193,7 @@ class NDPi {
         this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.targetSource, 'ndi_receiver_v2');
         this.ndiReceiver.on('connected', () => {
             ///
-            console.log('Receiver Started');
+            console.log('[ client_ndiReceiver ][ index ] Receiver Started');
         });
         this.ndiReceiver.on('close', () => {
             this.ndiReceiver = null;
@@ -202,7 +202,7 @@ class NDPi {
     }
 
     quit() {
-        console.log('Shutting down application...');
+        console.log('[ index ] Shutting down application...');
 
         if (this.ndpiServerStatusUpdate) {
             clearInterval(this.ndpiServerStatusUpdate);
@@ -226,26 +226,31 @@ class NDPi {
 const index = new NDPi();
 
 process.on('uncaughtException', (err) => {
+    console.log(' ');
     console.log('*');
     console.log('* *');
-    console.log('* * * Uncaught Exception');
+    console.log('* * *    Uncaught Exception');
     console.log(err);
     console.log('* * *');
     console.log('* *');
     console.log('*');
+    console.log(' ');
 });
 process.on('unhandledRejection', (reason) => {
+    console.log(' ');
     console.log('*');
     console.log('* *');
-    console.log('* * * Unhandled Rejection');
+    console.log('* * *');
+    console.log(' Unhandled REJECTION');
     console.log(reason);
     console.log('* * *');
     console.log('* *');
     console.log('*');
-    process.exit();
+    console.log(' ');
+    process.exit(1);
 });
 function shutdown(signal) {
-    console.log(`[ NDPi ] Received ${signal}`);
+    console.log(`[ index ] Received ${signal}`);
     index.quit();
     process.exit(0);
 }
