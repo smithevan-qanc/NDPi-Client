@@ -151,7 +151,11 @@ class NDPi {
             console.log(`xrandr --output ${output} --mode ${resolution}${framerate ? ` --rate ${framerate}` : ''}`);
             require('child_process')
                 .exec(`xrandr --output ${output} --mode ${resolution}${framerate ? ` --rate ${framerate}` : ''}`, {
-                    env: { ...process.env },
+                    env: { 
+                        ...process.env,
+                        DISPLAY: ':0',
+                        XAUTHORITY: '/home/ndpi-client/.Xauthority',
+                    },
                 }, (error, stderr) => {
                     if (error) console.log('[ client_fs ][ index ] Error setting Resolution', stderr);
                 });
