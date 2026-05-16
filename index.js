@@ -147,17 +147,17 @@ class NDPi {
         this.settings.on('output_device_port', (data) => {
             const output = String(data).trim() || null;
             if (!output) return;
-            this.setDisplayResolution();
+            setTimeout(() => { this.setDisplayResolution(); }, 500);
         });
-        
+
         //  HDMI Resolution
         this.settings.on('output_resolution_current', (data) => {
-            this.setDisplayResolution();
+            setTimeout(() => { this.setDisplayResolution(); }, 500);
         });
 
         //  HDMI Framerate
         this.settings.on('output_framerate_current', (data) => {
-            this.setDisplayResolution();
+            setTimeout(() => { this.setDisplayResolution(); }, 500);
         });
 
     }
