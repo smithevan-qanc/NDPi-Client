@@ -224,9 +224,7 @@ class FileSystemMonitor extends EventEmitter {
         try {
             const HDMI_1_DIR = path.join(pth_renderingManager, 'card1-HDMI-A-1');
             fs.watch(`${HDMI_1_DIR}/status`, async (event, filename) => {
-                if (event === 'change') {
-                    console.log(filename);
-                }
+                console.log('[ client_fs ]', event, filename);
             });
         } catch {
             console.log('[ client_fs ][ ERROR ] Unable to monitor HDMI-2');
@@ -235,9 +233,7 @@ class FileSystemMonitor extends EventEmitter {
         try {
             const HDMI_2_DIR = path.join(pth_renderingManager, 'card1-HDMI-A-2');
             fs.watch(`${HDMI_2_DIR}/status`, async (event, filename) => {
-                if (event === 'change') {
-                    console.log(filename);
-                }
+                console.log('[ client_fs ]', event, filename);
             });
         } catch {
             console.log('[ client_fs ][ ERROR ] Unable to monitor HDMI-2');
