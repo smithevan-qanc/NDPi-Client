@@ -216,20 +216,13 @@ class FileSystemMonitor extends EventEmitter {
                 }
             }
         });
-
-        const pth_thermal = path.join('/sys','class','thermal');
-        if (fs.existsSync(pth_thermal)) {
-            fs.watch(pth_thermal, async (event, filename) => {
-                if (event === 'change') {
-                    console.log(filename);
-                }
-            });
-        }
+        const pth_thermal_fanSpeed = path.join('/sys','class','thermal','cooling_device0','cur_state');
+        const pth_thermal_cpuTemperature = path.join('/sys','class','thermal','thermal_zone0','temp');
 
         const pth_renderingManager = path.join('/sys','class','drm');
         const HDMI_1_DIR = path.join(pth_renderingManager, 'card1-HDMI-A-1');
         if (fs.existsSync(HDMI_1_DIR)) {
-            fs.watch(HDMI_1_DIR, async (event, filename) => {
+            fs.watch(`${HDMI_1_DIR}/status`, async (event, filename) => {
                 if (event === 'change') {
                     console.log(filename);
                 }
@@ -238,7 +231,7 @@ class FileSystemMonitor extends EventEmitter {
         
         const HDMI_2_DIR = path.join(pth_renderingManager, 'card1-HDMI-A-2');
         if (fs.existsSync(HDMI_2_DIR)) {
-            fs.watch(HDMI_2_DIR, async (event, filename) => {
+            fs.watch(`${HDMI_2_DIR}/status`, async (event, filename) => {
                 if (event === 'change') {
                     console.log(filename);
                 }
