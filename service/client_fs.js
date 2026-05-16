@@ -142,9 +142,12 @@ class FileSystemMonitor extends EventEmitter {
                 value: ``
             }, {
                 key: "output_device_cec_enabled",
-                value: ``
+                value: `false`
             }, {
                 key: "output_device_cec_status_power",
+                value: `unknown`
+            }, {
+                key: "output_device_cec_active_source",
                 value: ``
             }, {
                 key: "media_overlay_image",
@@ -152,7 +155,17 @@ class FileSystemMonitor extends EventEmitter {
             },
         ];
 
-        const retainDefaultValue = ['ndpi_status_ndi'];
+        const retainDefaultValue = [
+            'ndpi_status_ndi',
+            'ndpi_version_date',
+            'ndpi_version',
+            'local_port_number_bonjour',
+            'device_id',
+            'device_type',
+            'output_device_cec_enabled',
+            'output_device_cec_status_power',
+            'output_device_cec_active_source',
+        ];
 
         for (const { key, value } of files) {
             const filePath = path.join(this.dataDir, key);

@@ -63,8 +63,12 @@ class NDPiCommandServer_Client extends EventEmitter {
             .route('/api/cec/:cmd')
             .get((req, res) => {
                 const command = req.params.cmd || null;
-                if (command) this.controller_cec.send(command);
-                res.send('OK')
+                if (command && this.controller_cec.isReady) {
+                    this.controller_cec.send(command);
+                    res.send('200 OK');
+                } else {
+                    res.send(`${this.controller_cec.isReady ? '400 Bad Request' : '500 Unavailable'}`)
+                }
             });
             
         this.Routes
