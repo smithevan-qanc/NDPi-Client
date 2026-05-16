@@ -130,7 +130,7 @@ class NDPi {
         const status = { type: 'client-status', ndiInfo: {} };
         status.deviceId = this.settings.get('device_id');
         status.deviceName = this.settings.get('device_name');
-        status.ip = this.settings.get('local_ip');
+        status.ip = this.settings.get('device_ip');
         status.currentSource = this.settings.get('ndpi_status_ndi_source_active');
         status.targetSource = this.settings.get('ndpi_status_ndi_source_target');
         status.displayMode = this.settings.get('ndpi_status_no_source_display_mode');

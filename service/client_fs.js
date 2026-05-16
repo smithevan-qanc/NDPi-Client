@@ -81,7 +81,7 @@ class FileSystemMonitor extends EventEmitter {
                 key: "device_id",
                 value: deviceId.toUpperCase()
             }, {
-                key: "local_ip",
+                key: "device_ip",
                 value: ``
             }, { 
                 key: "local_port_number_display",
@@ -253,7 +253,7 @@ class FileSystemMonitor extends EventEmitter {
 
 
     async updateLocalIp() {
-        const fileName = 'local_ip';
+        const fileName = 'device_ip';
         const updateValue = await getLocalIp(this.firstRun);
         if (updateValue) {
             const storedValue = this.#fileMap.get(fileName);

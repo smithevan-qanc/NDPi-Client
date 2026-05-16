@@ -13,7 +13,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.settings = fsData;
         this.port = fsData.get('local_port_number_api') || process.env.PORT || 3030
         fsData.on('ndpi_command_server_host', (data) => { this.updateDisplay({ type: 'update-details', serverIp: String(data) }); });
-        fsData.on('local_ip', (data) => { this.updateDisplay({ type: 'update-details', thisDevice: { address: String(data) } }); });
+        fsData.on('device_ip', (data) => { this.updateDisplay({ type: 'update-details', thisDevice: { address: String(data) } }); });
         fsData.on('device_name', (data) => { this.updateDisplay({ type: 'update-details', thisDevice: { name: String(data) } }); });
         
         this.WebSocket = new WebSocket.Server({ noServer: true });
@@ -107,7 +107,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         if (message.type) updateData.type = message.type;
         updateData.serverIp = this.settings.get('ndpi_command_server_host');
         updateData.thisDevice.id = this.settings.get('device_id');
-        updateData.thisDevice.address = this.settings.get('local_ip');
+        updateData.thisDevice.address = this.settings.get('device_ip');
         updateData.thisDevice.name = this.settings.get('device_name');
         updateData.service.name = this.settings.get('device_type');
         updateData.service.version = this.settings.get('ndpi_version');
