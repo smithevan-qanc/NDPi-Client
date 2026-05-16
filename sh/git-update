@@ -2,7 +2,7 @@
 set -e
 
 # cd "$(dirname "${0}")/.."
-cd "~/TMP_ndpi"
+cd "TMP_ndpi"
 
 BRANCH="$(head -n 1 version/git)"
 
