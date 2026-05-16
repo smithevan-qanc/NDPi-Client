@@ -85,7 +85,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
     broadcastToDisplay(message = {}) {
         const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
-        const updateData = { type: `show-${displayMode}` };
+        const updateData = { type: `show-${displayMode}`, thisDevice: {}, service: {} };
         if (message.type) updateData.type = message.type;
         updateData.serverIp = this.settings.get('ndpi_command_server_host');
         updateData.thisDevice.id = this.settings.get('device_id');
