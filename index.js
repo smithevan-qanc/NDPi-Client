@@ -110,7 +110,9 @@ class NDPi {
             console.log(data);
             this.controller_cec = null;
         });
-        this.server_api.setCecController(this.controller_cec);
+        setTimeout(() => {
+            this.server_api.setCecController(this.controller_cec);
+        }, 10000);
     }
 
     connectToNDPiServer() {
