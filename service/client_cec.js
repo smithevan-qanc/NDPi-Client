@@ -95,7 +95,7 @@ class CecController extends EventEmitter {
         this.buffer = lines.pop();
 
         let thisLine = data.toString();
-        console.log(`${this.line}`);
+        console.log(`${thisLine}`);
         // if (thisLine.includes('TRAFFIC')) {
         //     console.log(`Traffic: ${thisLine.split('<<')[1].trim()}`);
         // } else if (thisLine.includes(''))
