@@ -6,8 +6,9 @@ const path = require('path');
 
 
 class NDPiCommandServer_Client extends EventEmitter {
-    constructor(fsData) {
+    constructor(fsData, cec) {
         super();
+        this.controller_cec = cec;
         this.settings = fsData;
         this.port = fsData.get('local_port_number_api') || process.env.PORT || 3030
 
@@ -57,6 +58,13 @@ class NDPiCommandServer_Client extends EventEmitter {
             .get((req, res) => {
                 res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
                 res.sendFile(path.join(__dirname, '..', 'index.html'));
+            });
+        this.Routes
+            .route('/api/cec/:cmd')
+            .get((req, res) => {
+                const command = req.params.cmd || null;
+                if (command) this.controller_cec.send(command);
+                res.send('OK')
             });
             
         this.Routes
