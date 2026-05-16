@@ -219,10 +219,9 @@ class FileSystemMonitor extends EventEmitter {
         const pth_thermal_fanSpeed = path.join('/sys','class','thermal','cooling_device0','cur_state');
         const pth_thermal_cpuTemperature = path.join('/sys','class','thermal','thermal_zone0','temp');
 
-        const pth_renderingManager = path.join('/sys','class','drm');
         console.log('STARTING DRM MONITOR');
         try {
-            const HDMI_1_DIR = path.join(pth_renderingManager, 'card1-HDMI-A-1');
+            const HDMI_1_DIR = path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1');
             fs.watch(`${HDMI_1_DIR}/status`, async (event, filename) => {
                 console.log('[ client_fs ]', event, filename);
             });
@@ -231,7 +230,7 @@ class FileSystemMonitor extends EventEmitter {
         }
         
         try {
-            const HDMI_2_DIR = path.join(pth_renderingManager, 'card1-HDMI-A-2');
+            const HDMI_2_DIR = path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2');
             fs.watch(`${HDMI_2_DIR}/status`, async (event, filename) => {
                 console.log('[ client_fs ]', event, filename);
             });
