@@ -93,7 +93,7 @@ class CecController extends EventEmitter {
 
         let thisLine = data.toString();
         if (!thisLine.includes('TRAFFIC')) {
-            if (!thisLine.includes(']  ')) {
+            if (!thisLine.includes(']')) {
                 console.log(`[ client_cec ][ Message ] ${thisLine}`);
             } else {
                 let thisLineSplit = thisLine.split(']')[1].trim();
