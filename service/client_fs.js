@@ -306,8 +306,8 @@ class FileSystemMonitor extends EventEmitter {
             let lines = udevBuffer.split('\n');
             udevBuffer = lines.pop();
 
-            const HDMI_1 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1', 'status')).trimEnd();
-            const HDMI_2 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2', 'status')).trimEnd();
+            const HDMI_1 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1', 'status'), 'utf8').trimEnd();
+            const HDMI_2 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2', 'status'), 'utf8').trimEnd();
             console.log(`[ client_fs ][ HDMI ] HDMI 1: ${HDMI_1}, HDMI 2: ${HDMI_2}`);
             const currentSetting = this.#fileMap.get('output_device_port');
             if (HDMI_1.includes('connected')) {
