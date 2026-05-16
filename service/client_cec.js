@@ -91,10 +91,10 @@ class CecController extends EventEmitter {
         let lines = this.buffer.split('\n');
         this.buffer = lines.pop();
 
-        let thisLine = data.toString();
+        let thisLine = data.toString().trim();
         if (!thisLine.includes('TRAFFIC')) {
             if (!thisLine.includes(']')) {
-                console.log(`[ client_cec ][ Message ] ${thisLine}`);
+                console.log(`[ client_cec ][ MESSAGE ] ${thisLine}`);
             } else {
                 let thisLineSplit = thisLine.split(']')[1].trim();
                 if (thisLineSplit.includes('<<')) {
@@ -102,7 +102,7 @@ class CecController extends EventEmitter {
                 } else if (thisLineSplit.includes('>>')) {
                     console.log(`[ client_cec ][ RECEIVE ] ${thisLineSplit.includes('->') ? thisLineSplit.split(':')[1].trim() : thisLineSplit}`);
                 } else if (thisLineSplit.includes('(0):') || thisLineSplit.includes('(1):')) {
-                    console.log(`[ client_cec ][ Update ] ${thisLineSplit}`);
+                    console.log(`[ client_cec ][ UPDATE ] ${thisLineSplit}`);
                 } else if (thisLine.includes('ERROR')) {
                     console.log(`[ client_cec ][ ERROR ] ${thisLineSplit}`);
                 }
