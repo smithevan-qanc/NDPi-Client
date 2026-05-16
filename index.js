@@ -217,7 +217,7 @@ process.on('unhandledRejection', (reason) => {
     console.log('* * *');
     console.log('* *');
     console.log('*');
-    killProcess();
+    process.exit();
 });
 process.on('exit', (code) => {
     console.log(`    [[ Exit Code: ${code} ]]`);

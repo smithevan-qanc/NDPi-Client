@@ -45,7 +45,7 @@ class FileSystemMonitor extends EventEmitter {
         if (fs.existsSync('/etc/machine-id')) {
             //deviceId = fs.readFileSync('/etc/machine-id', 'utf8');
             // deviceId = fs.readFileSync('/sys/firmware/devicetree/base/serial-number', 'utf8');
-            const devIdPth = path.join('sys','firmware','devicetree','base','serial-number');
+            const devIdPth = path.join('/sys','firmware','devicetree','base','serial-number');
             deviceId = fs.readFileSync(devIdPth, 'utf8');
             console.log(devIdPth);
             // await new Promise((resolve) => {
