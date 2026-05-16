@@ -36,7 +36,7 @@ class CecController extends EventEmitter {
     }
 
     start() {
-        this.proc = spawn('cec-client', [`-o '${this.deviceName}'`], {
+        this.proc = spawn(`cec-client -o "${this.deviceName}"`, {
             stdio: ['pipe', 'pipe', 'pipe']
         });
 
