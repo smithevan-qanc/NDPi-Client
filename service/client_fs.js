@@ -41,11 +41,13 @@ class FileSystemMonitor extends EventEmitter {
             fs.mkdirSync(this.dataDir, { recursive: true });
         }
 
-        const deviceIdPaths = [
-            path.join('/etc','machine-id'),
-            path.join('/sys','firmware','devicetree','base','serial-number')
-        ]; console.log(JSON.stringify(deviceIdPaths, null, 2));
         let deviceId = '';
+        const deviceIdPaths = [
+            path.join('/sys','firmware','devicetree','base','serial-number'),
+            path.join('/etc','machine-id'),
+        ]; 
+        console.log(JSON.stringify(deviceIdPaths, null, 2));
+        
         if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1])) {
             try {
                 deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8');
