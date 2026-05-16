@@ -91,23 +91,25 @@ class CecController extends EventEmitter {
         let lines = this.buffer.split('\n');
         this.buffer = lines.pop();
 
-        let thisLine = data.toString().trim();
-        if (!thisLine.includes('TRAFFIC')) {
-            if (!thisLine.includes(']')) {
-                console.log(`[ client_cec ][ MESSAGE ] ${thisLine}`);
-            } else {
-                let thisLineSplit = thisLine.split(']')[1].trim();
-                if (thisLineSplit.includes('<<')) {
-                    console.log(`[ client_cec ][ SEND ] ${thisLineSplit.includes('->') ? thisLineSplit.split(':')[1].trim() : thisLineSplit}`);
-                } else if (thisLineSplit.includes('>>')) {
-                    console.log(`[ client_cec ][ RECEIVE ] ${thisLineSplit.includes('->') ? thisLineSplit.split(':')[1].trim() : thisLineSplit}`);
-                } else if (thisLineSplit.includes('(0):') || thisLineSplit.includes('(1):')) {
-                    console.log(`[ client_cec ][ UPDATE ] ${thisLineSplit}`);
-                } else if (thisLine.includes('ERROR')) {
-                    console.log(`[ client_cec ][ ERROR ] ${thisLineSplit}`);
+        const thisLine = String(data).split(/\r?\n/);
+        thisLine.forEach((line) => {
+            if (!line.includes('TRAFFIC')) {
+                if (!line.includes(']')) {
+                    console.log(`[ client_cec ][ MESSAGE ] ${line}`);
+                } else {
+                    let lineSplit = line.split(']')[1].trim();
+                    if (lineSplit.includes('<<')) {
+                        console.log(`[ client_cec ][ SEND ] ${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`);
+                    } else if (lineSplit.includes('>>')) {
+                        console.log(`[ client_cec ][ RECEIVE ] ${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`);
+                    } else if (lineSplit.includes('(0):') || lineSplit.includes('(1):')) {
+                        console.log(`[ client_cec ][ UPDATE ] ${lineSplit}`);
+                    } else if (line.includes('ERROR')) {
+                        console.log(`[ client_cec ][ ERROR ] ${lineSplit}`);
+                    }
                 }
             }
-        }
+        });
 
         for (const line of lines) {
             const parsed = this._parseLine(line.trim());
