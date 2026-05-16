@@ -25,7 +25,10 @@ class CecController extends EventEmitter {
     }
 
     start() {
-        this.proc = spawn('cec-client', ['-s', '-d'], {
+        // this.proc = spawn('cec-client', ['-s', '-d'], {
+        //     stdio: ['pipe', 'pipe', 'pipe']
+        // });
+        this.proc = spawn('cec-client', {
             stdio: ['pipe', 'pipe', 'pipe']
         });
 
@@ -101,6 +104,7 @@ class CecController extends EventEmitter {
     }
 
     _handleStderr(data) {
+        console.log(data.toString());
         this.emit('error_log', data.toString());
     }
 
