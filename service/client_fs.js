@@ -50,12 +50,12 @@ class FileSystemMonitor extends EventEmitter {
         
         if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1])) {
             try {
-                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').trimEnd();
-                // deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
+                // deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').trimEnd();
+                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
                 console.log('DEVICE ID:', deviceId);
             } catch {
-                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').trimEnd();
-                // deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
+                // deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').trimEnd();
+                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
                 console.log('FALLBACK DEVICE ID:', deviceId);
             }
         } else {
@@ -188,10 +188,10 @@ class FileSystemMonitor extends EventEmitter {
             
             try {
                 if (fs.existsSync(filePath) && getValueFromFile) {
-                    const currentValue = fs.readFileSync(filePath, 'utf8').trimEnd();
+                    const currentValue = fs.readFileSync(filePath, 'utf8');
                     this.#fileMap.set(key, currentValue);
                 } else {
-                    fs.writeFileSync(filePath, value.trimEnd(), 'utf8');
+                    fs.writeFileSync(filePath, value, 'utf8');
                     this.#fileMap.set(key, value);
                 }
             } catch (err) {
@@ -210,7 +210,7 @@ class FileSystemMonitor extends EventEmitter {
 
             if (event === 'change') {
                 const currentValue = this.#fileMap.get(filename);
-                const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').trimEnd();
+                const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').replace(/\0/g, '').trim();
 
                 if (currentValue !== fsValue) {
                     console.log(`[ client_fs ] '${filename}' changed from '${currentValue}' to '${fsValue}'`)
@@ -221,9 +221,6 @@ class FileSystemMonitor extends EventEmitter {
         });
 
         this.startDrmMonitor();
-
-        const pth_thermal_fanSpeed = path.join('/sys','class','thermal','cooling_device0','cur_state');
-        const pth_thermal_cpuTemperature = path.join('/sys','class','thermal','thermal_zone0','temp');
 
     }
 
@@ -276,11 +273,9 @@ class FileSystemMonitor extends EventEmitter {
 
     startDrmMonitor() {
         console.log('STARTING DRM MONITOR');
-        // const hdmiPaths = [
-        //     path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1', 'status'),
-        //     path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2', 'status'),
-        // ];
-        // const hdmiStatus = new Map();
+
+        // const pth_thermal_fanSpeed = path.join('/sys','class','thermal','cooling_device0','cur_state');
+        // const pth_thermal_cpuTemperature = path.join('/sys','class','thermal','thermal_zone0','temp');
 
         this.drmMonitor = require('node:child_process').spawn('udevadm', ['monitor', '--subsystem-match=drm', '--kernel']);
         let udevBuffer = '';
