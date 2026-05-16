@@ -41,21 +41,19 @@ class FileSystemMonitor extends EventEmitter {
             fs.mkdirSync(this.dataDir, { recursive: true });
         }
 
+        const deviceIdPaths = [
+            path.join('/etc','machine-id'),
+            path.join('/sys','firmware','devicetree','base','serial-number')
+        ]; console.log(JSON.stringify(deviceIdPaths, null, 2));
         let deviceId = '';
-        if (fs.existsSync('/etc/machine-id')) {
-            //deviceId = fs.readFileSync('/etc/machine-id', 'utf8');
-            // deviceId = fs.readFileSync('/sys/firmware/devicetree/base/serial-number', 'utf8');
-            const devIdPth = path.join('/sys','firmware','devicetree','base','serial-number');
-            deviceId = fs.readFileSync(devIdPth, 'utf8');
-            console.log(devIdPth);
-            // await new Promise((resolve) => {
-            //     exec(`cat /proc/cpuinfo | grep -Fw 'Serial' | awk '{print $3}'`, (error, stdout) => {
-            //         if (!error) deviceId = stdout.trim();
-            //         resolve();
-            //     });
-            // });
+        if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1])) {
+            try {
+                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8');
+            } catch {
+                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8');
+            }
         } else {
-            // Mac Compatability
+            // MacOS Compatability
             await new Promise((resolve) => {
                 exec(`ioreg -l | grep IOPlatformSerialNumber | awk '{print $4}' | tr -d '"'`, (error, stdout) => {
                     if (!error) deviceId = stdout.trim();

@@ -2,8 +2,19 @@ const { spawn }    = require('child_process');
 const EventEmitter = require('events');
 
 class CecController extends EventEmitter {
-    constructor() {
+    constructor(fsData) {
         super();
+
+        this.settings = fsData;
+
+        this.deviceName = fsData.get('device_name');
+        fsData.on('device_name', (data) => {
+            this.deviceName = String(data);
+            this.quit();
+            setTimeout(() => {
+                this.start();
+            }, 5000);
+        });
 
         this.proc = null;
         this.buffer = '';
@@ -25,10 +36,7 @@ class CecController extends EventEmitter {
     }
 
     start() {
-        // this.proc = spawn('cec-client', ['-s', '-d'], {
-        //     stdio: ['pipe', 'pipe', 'pipe']
-        // });
-        this.proc = spawn('cec-client', {
+        this.proc = spawn('cec-client', [`-o '${this.deviceName}'`], {
             stdio: ['pipe', 'pipe', 'pipe']
         });
 
@@ -55,9 +63,6 @@ class CecController extends EventEmitter {
             }
             this.timeoutTimer = null;
         }, 30000);
-        setInterval(() => {
-            console.log(this.buffer);
-        }, 10000)
     }
 
     quit() {
@@ -73,6 +78,7 @@ class CecController extends EventEmitter {
         this.proc = null;
         this.queue = [];
         this.debounceMap.clear();
+        this.emit('close');
     }
 
     _scheduleRestart() {
@@ -88,6 +94,12 @@ class CecController extends EventEmitter {
         let lines = this.buffer.split('\n');
         this.buffer = lines.pop();
 
+        let thisLine = data.toString();
+        console.log(`${this.line}`);
+        // if (thisLine.includes('TRAFFIC')) {
+        //     console.log(`Traffic: ${thisLine.split('<<')[1].trim()}`);
+        // } else if (thisLine.includes(''))
+
         for (const line of lines) {
             const parsed = this._parseLine(line.trim());
             //if (parsed) this.emit('event', parsed);
@@ -101,6 +113,8 @@ class CecController extends EventEmitter {
                 console.log('[ client_cec ] CEC Ready');
                 this.restartDelay = 1000;
                 this._flushQueue();
+                this.emit('ready');
+                this.settings.put('output_device_cec_enabled', 'true');
             }
         }
     }

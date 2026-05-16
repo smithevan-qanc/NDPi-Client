@@ -99,20 +99,21 @@ class NDPi {
 
     openCecController() {
         const CecController = require('./service/client_cec.js');
-        this.controller_cec = new CecController();
+        this.controller_cec = new CecController(this.settings);
         this.controller_cec.on('event', (data) => {
             console.log(`[ client_cec ][ Event ]`, data);
+        });
+        this.controller_cec.on('ready', () => {
+            this.server_api.setCecController(this.controller_cec);
         });
         this.controller_cec.on('error_log', (data) => {
             console.log(`[ client_cec ][ Error ]`, data);
         });
         this.controller_cec.on('timeout', (data) => {
             console.log(data);
+            this.controller_cec.quit();
             this.controller_cec = null;
         });
-        setTimeout(() => {
-            this.server_api.setCecController(this.controller_cec);
-        }, 5000);
     }
 
     connectToNDPiServer() {
@@ -126,7 +127,7 @@ class NDPi {
     }
 
     sendStatusToNDPiServer() {
-        const status = { type: 'client-status' };
+        const status = { type: 'client-status', ndiInfo: {} };
         status.deviceId = this.settings.get('device_id');
         status.deviceName = this.settings.get('device_name');
         status.ip = this.settings.get('local_ip');
@@ -205,7 +206,7 @@ class NDPi {
             this.server_api.Server.closeAllConnections();
             this.server_api.Server.close();
         } catch {}
-        
+
     }
 }
 
