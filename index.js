@@ -146,19 +146,7 @@ class NDPi {
         this.settings.on('output_device_port', (data) => {
             const output = String(data).trim() || null;
             if (!output) return;
-            const resolution = this.settings.get('output_resolution_current') || 'auto';
-            const framerate  = this.settings.get('output_framerate_current') || null;
-            console.log(`xrandr --output ${output} --mode ${resolution}${framerate ? ` --rate ${framerate}` : ''}`);
-            require('child_process')
-                .exec(`xrandr --output ${output} --mode ${resolution}${framerate ? ` --rate ${framerate}` : ''}`, {
-                    env: { 
-                        ...process.env,
-                        DISPLAY: ':0',
-                        XAUTHORITY: '/home/ndpi-client/.Xauthority',
-                    },
-                }, (error, stderr) => {
-                    if (error) console.log('[ client_fs ][ index ] Error setting Resolution', stderr);
-                });
+            this.setDisplayResolution(output);
         });
 
     }
@@ -192,6 +180,9 @@ class NDPi {
     }
 
     startChromium() {
+        const displayOutput = this.settings.get('output_device_port') || null;
+        if (displayOutput) this.setDisplayResolution(displayOutput);
+        
         if (fs.existsSync('/usr/bin/chromium')) {
             const ChromiumOverlayDisplay = require('./service/client_chromium.js');
             this.service_chromium = new ChromiumOverlayDisplay(this.settings);
@@ -220,6 +211,20 @@ class NDPi {
         });
     }
 
+    startNdiReceiver() {
+        if (!this.targetSource) return;
+        const NDI_Receiver_v2 = require('./service/client_ndiReceiver.js');
+        this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.targetSource, 'ndi_receiver_v2');
+        this.ndiReceiver.on('connected', () => {
+            ///
+            console.log('[ client_ndiReceiver ][ index ] Receiver Started');
+        });
+        this.ndiReceiver.on('close', () => {
+            this.ndiReceiver = null;
+            this.server_api.broadcastToDisplay();
+        });
+    }
+
     //  TODO: Migrate the server status updates to be triggered like the display status updates.
     connectToNDPiServer() {
         const ClientServerWebSocket = require('./service/clientServer_websocket.js');
@@ -231,6 +236,8 @@ class NDPi {
         });
     }
 
+
+    // FUNCTIONS
     sendStatusToNDPiServer() {
         const status = { type: 'client-status', ndiInfo: {} };
         status.deviceId = this.settings.get('device_id');
@@ -249,7 +256,6 @@ class NDPi {
 
         this.wsConnection_ndpiServer.send(status);
     }
-    
     getSystemStats() {
         const stats = {
             cpu: 0,
@@ -291,19 +297,24 @@ class NDPi {
         } catch {}
         return stats;
     }
-
-    startNdiReceiver() {
-        if (!this.targetSource) return;
-        const NDI_Receiver_v2 = require('./service/client_ndiReceiver.js');
-        this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.targetSource, 'ndi_receiver_v2');
-        this.ndiReceiver.on('connected', () => {
-            ///
-            console.log('[ client_ndiReceiver ][ index ] Receiver Started');
-        });
-        this.ndiReceiver.on('close', () => {
-            this.ndiReceiver = null;
-            this.server_api.broadcastToDisplay();
-        });
+    setDisplayResolution(output = 'HDMI-1') {
+        const resolution = this.settings.get('output_resolution_current') || null;
+        const framerate  = this.settings.get('output_framerate_current') || null;
+        console.log(`xrandr --output ${output} --mode ${resolution}${framerate ? ` --rate ${framerate}` : ''}`);
+        require('child_process')
+            .exec(`xrandr \
+                --output ${output} \
+                ${resolution ? `--mode ${resolution}` : '--auto'} \
+                ${framerate ? `--rate ${framerate}` : ''} \
+            `, {
+                env: { 
+                    ...process.env,
+                    DISPLAY: ':0',
+                    XAUTHORITY: '/home/ndpi-client/.Xauthority',
+                },
+            }, (error, stderr) => {
+                if (error) console.log('[ index ] Error setting Resolution', stderr);
+            });
     }
 }
 
