@@ -41,7 +41,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             console.log('[ client_api_server ] Display WebSocket connection started.');
             this.WebSocketConnections.add(ws);
             setTimeout(() => {
-                this.broadcastToDisplay(sendAll = true);
+                this.broadcastToDisplay(undefined, true);
             }, 1000);
             
             ws.on('close', () => {
