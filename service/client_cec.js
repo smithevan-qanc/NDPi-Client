@@ -79,13 +79,13 @@ class CecController extends EventEmitter {
 
     _handleStdout(data) {
         this.buffer += data.toString();
-
+        console.log(data.toString());
         let lines = this.buffer.split('\n');
         this.buffer = lines.pop();
 
         for (const line of lines) {
             const parsed = this._parseLine(line.trim());
-            if (parsed) this.emit('event', parsed);
+            //if (parsed) this.emit('event', parsed);
 
             if (line.includes('waiting for input')) {
                 this.isReady = true;
