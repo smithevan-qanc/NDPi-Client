@@ -49,10 +49,10 @@ class FileSystemMonitor extends EventEmitter {
         
         if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1])) {
             try {
-                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8');
+                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
                 console.log('DEVICE ID:', deviceId);
             } catch {
-                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8');
+                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
                 console.log('FALLBACK DEVICE ID:', deviceId);
             }
         } else {
