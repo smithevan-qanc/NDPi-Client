@@ -57,11 +57,11 @@ class FileSystemMonitor extends EventEmitter {
             try {
                 // deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').trimEnd();
                 deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
-                console.log('DEVICE ID:','\x1b[31m%s\x1b[0m',  deviceId);
+                console.log('[ client_fs ][ DEVICE ID ] ',  deviceId);
             } catch {
                 // deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').trimEnd();
                 deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
-                console.log('FALLBACK DEVICE ID:', deviceId);
+                console.log('[ client_fs ][ FALLBACK DEVICE ID ] ', deviceId);
             }
         } else {
             // MacOS Compatability
