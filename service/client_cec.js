@@ -36,7 +36,7 @@ class CecController extends EventEmitter {
     }
 
     start() {
-        this.proc = spawn(`cec-client -o "${this.deviceName}"`, {
+        this.proc = spawn(`cec-client -o ${this.deviceName}`, {
             stdio: ['pipe', 'pipe', 'pipe']
         });
 
@@ -58,7 +58,7 @@ class CecController extends EventEmitter {
         if (this.timeoutTimer) return;
         this.timeoutTimer = setTimeout(() => {
             if (!this.isReady) {
-                this.emit('timeout', "Never received 'waiting for input signal'");
+                this.emit('timeout', "Never received 'waiting for input' signal");
                 this.quit();
             }
             this.timeoutTimer = null;
