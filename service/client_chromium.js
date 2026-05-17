@@ -26,7 +26,7 @@ class ChromiumOverlayDisplay {
         this.enabled = true;
         
         const connectionPort = this.settings.get('local_port_number_api');
-        let commandLine = `/usr/bin/chromium --kiosk ` +
+        let commandLine = `/usr/bin/chromium ` +
             `--user-data-dir=${this.homeDirectory}/.config/chromium/Default ` +
             `--disable-web-security ` +
             `http://localhost:${connectionPort}/`;
