@@ -88,8 +88,6 @@ class NDPiCommandServer_Client extends EventEmitter {
                     ...req.query,
                     id: randomUUID(),
                 });
-
-                    console.log('TEST RESPONSE', commandRes);
                 
                 if (commandRes && commandRes.success)
                      { res.status(200).json(commandRes); }
@@ -109,8 +107,14 @@ class NDPiCommandServer_Client extends EventEmitter {
             });
 
         this.Routes
-            .route('/api/cec/:cmd')
-            .get((req, res) => {
+            .route('/internal/api/v1')
+            .get('/cec', (req, res) => {
+                res.send('test cec');
+            })
+            .get('/cec1', (req, res) => {
+                res.send('test cec1');
+            })
+            .get('/cec', (req, res) => {
                 const command = req.params.cmd || null;
                 if (command && this.controller_cec.isReady) {
                     this.controller_cec.send(command);
