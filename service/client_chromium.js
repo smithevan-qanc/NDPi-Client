@@ -26,32 +26,10 @@ class ChromiumOverlayDisplay {
         this.enabled = true;
         
         const connectionPort = this.settings.get('local_port_number_api');
-        let commandLine = `xsetroot -solid black
-            /usr/bin/chromium \
-            --kiosk \
-            --user-data-dir=${this.homeDirectory}/.config/chromium \
-            --disable-crash-reporter \
-            --disable-logging \
-            --disable-notifications \
-            --disable-web-security \
-            --enable-transparent-visuals \
-            --disable-gpu \
-            --default-background-color=00000000 \
-            --ozone-platform=x11 \
-            http://localhost:${connectionPort}/`;
-
-         /** 
-            --show-fps-counter
-            --show-taps
-                Draws a circle at each touch point, similar to the Android OS developer option "Show taps".
-            --pull-to-refresh
-            --enable-virtual-keyboard
-            --default-background-color=#81c127
-            --kiosk-splash-screen-min-time-seconds=5
-            --start-fullscreen
-         */
-
-        
+        let commandLine = `/usr/bin/chromium --kiosk ` +
+            `--user-data-dir=${this.homeDirectory}/.config/chromium/Default ` +
+            `--disable-web-security ` +
+            `http://localhost:${connectionPort}/`;
 
         this.service = exec(commandLine, {
             env: {
