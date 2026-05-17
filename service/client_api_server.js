@@ -3,6 +3,8 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
+const { processCommand } = require('./functions');
+const { randomUUID } = require('crypto');
 
 
 class NDPiCommandServer_Client extends EventEmitter {
@@ -24,9 +26,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             .listen(this.port, '0.0.0.0', () => {
                 console.log('[ client_api_server ] API/Display Server Online');
                 console.log(`[ client_api_server ] PORT: ${this.port}`);
-                process.nextTick(() => {
-                    this.emit('online');
-                });
+                process.nextTick(() => { this.emit('online'); });
             })
             .on('upgrade', (req, socket, head) => {
                 this.WebSocket.handleUpgrade(req, socket, head, (ws) => {
@@ -75,14 +75,45 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.Routes
             .route('/api/ndi/?:src')
             .get((req, res) => {
-                const source = req.params.src || 'None';
+                const source = (!req.params.src || req.params.src.toLowerCase() === 'none') ? 'none' : req.params.src;
                 this.emit('start-ndi', `${source}`);
-                res.send(`Starting Source: ${source}`);
+                res.send(`Starting Source: ${source.toUpperCase()}`);
                 // Get Current NDI Source Data
             })
-            .post((req, res) => {
-                res.send('test');
+            .post(async (req, res) => {
+                res.send('POST. No action performed.')
                 // Change NDI Source
+            })
+            .delete((req, res) => {
+                res.send('test');
+                // Stop NDI Viewer
+            });
+
+        this.Routes
+            .route('/api/command/:type')
+            .get((req, res) => {
+                // to use: http://<ip>:<port>/api/command/set-source?data=EVAN-MSI (OBS PGM)
+                console.log('[ client_api_server ][ GET    ]', req.url);
+                const type = req.params.type;
+                const { data } = req.query;
+                const id = randomUUID();
+                const testRes = await processCommand({ id: id, type: type, data: data });
+                if (testRes && testRes.success) {
+                    res.status(200).json(testRes);
+                } else {
+                    res.status(400).json(testRes);
+                }
+            })
+            .post(async (req, res) => {
+                console.log('[ client_api_server ][ POST   ]', req.url);
+                const { type, data } = req.body;
+                const id = randomUUID();
+                const testRes = await processCommand({ id: id, type: type, data: data });
+                if (testRes && testRes.success) {
+                    res.send(200).json(testRes)
+                } else {
+                    res.status(400).json(testRes);
+                }
             })
             .delete((req, res) => {
                 res.send('test');

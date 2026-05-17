@@ -60,7 +60,7 @@ class NDPi {
 
         //  NDI Source Target
         this.settings.on('ndpi_status_ndi_source_target', (data) => {
-            const output = String(data) || 'None';
+            const output = String(data) || 'none';
             if (output !== this.targetSource) {
                 this.targetSource = output;
                 if (String(this.targetSource).toLowerCase() !== 'none') {
@@ -172,7 +172,7 @@ class NDPi {
                 this.openCecController();
                 this.connectToNDPiServer();
                 this.targetSource = this.settings.get('ndpi_status_ndi_source_target') || null;
-                if (this.targetSource) this.startNdiReceiver(sourceTarget);
+                if (this.targetSource && String(this.targetSource).toLowerCase !== 'none') this.startNdiReceiver();
                 this.isInitialized = true;
             } else {
                 this.service_bonjour.commandPort = output;
@@ -184,7 +184,7 @@ class NDPi {
             }
         });
         this.server_api.on('start-ndi', (data) => {
-            const output = String(data).trim() || 'None';
+            const output = String(data).trim() || 'none';
             this.targetSource = output;
             this.startNdiReceiver();
         });

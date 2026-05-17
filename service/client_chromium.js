@@ -1,8 +1,11 @@
 const path = require('path');
 const { exec } = require('child_process');
+const { EventEmitter } = require('events');
 
-class ChromiumOverlayDisplay {
+class ChromiumOverlayDisplay extends EventEmitter {
     constructor(fsData) {
+        super();
+        
         this.service = null;
         this.settings = fsData;
         this.homeDirectory = path.join(__dirname, '..', '..');
@@ -62,6 +65,7 @@ class ChromiumOverlayDisplay {
         this.service.on('exit', () => {
             this.service = null;
             console.log(`[ client_chromium ] Relaunching...`);
+            this.emit('close');
             //this.start();
         });
         

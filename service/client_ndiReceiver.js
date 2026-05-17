@@ -7,7 +7,7 @@ class NDI_Receiver_v2 extends EventEmitter {
     constructor(
         fsData,
         api,
-        sourceName = 'None',
+        sourceName = 'none',
         receiverName = 'ndi_receiver_v2',
         libraryPath = `/opt/NDI SDK for Linux/lib/aarch64-rpi4-linux-gnueabi:${(process.env.LD_LIBRARY_PATH || '')}`,
         xAuthority = ''
@@ -29,7 +29,7 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.xAuth = xAuthority || `${this.homeDirectory}/.Xauthority`;
         this.libraryPath = libraryPath;
 
-        this.ndiSource = sourceName || 'None';
+        this.ndiSource = sourceName || 'none';
         this.settings.put('ndpi_status_ndi_source_target', this.ndiSource);
         this.ndiActiveSource = null;
         this.ndiConnectedAt = null;
@@ -128,7 +128,7 @@ class NDI_Receiver_v2 extends EventEmitter {
             this.reconnectTimer = setTimeout(() => {
                 if (
                     this.ndiSource
-                    && this.ndiSource !== 'None'
+                    && this.ndiSource !== 'none'
                     && !this.receiver
                 ) {
                     this.connect();
@@ -143,7 +143,7 @@ class NDI_Receiver_v2 extends EventEmitter {
             clearTimeout(this.updateFsDebounce);
         }
         this.updateFsDebounce = setTimeout(() => {
-            this.settings.put('ndpi_status_ndi_source_framerate', String(this.ndiFramerate) || '');
+            this.settings.put('ndpi_status_ndi_source_framerate', String(this.ndiFramerate || ''));
             this.settings.put('ndpi_status_ndi_source_resolution', this.ndiResolution || '');
             this.updateFsDebounce = null;
         }, debounce);

@@ -620,7 +620,7 @@ class NDPiClient {
                     deviceId: this.__client.id,
                     deviceName: this.__client.name,
                     ip: this.__client.config.ip,
-                    currentSource: this.__client.ndi.source.current || 'None',
+                    currentSource: this.__client.ndi.source.current || 'none',
                     displayMode: this.__client.config.displayMode || 'overlay',
                     status: 'online'
                 }));
@@ -844,8 +844,8 @@ class NDPiClient {
             deviceId: this.__client.id,
             deviceName: this.__client.name,
             ip: this.__client.config.ip,
-            currentSource: this.__client.ndi.source.current || 'None',
-            targetSource: this.__client.ndi.source.target || 'None',
+            currentSource: this.__client.ndi.source.current || 'none',
+            targetSource: this.__client.ndi.source.target || 'none',
             displayMode: this.__client.config.displayMode,
             ndiInfo: {
                 resolution: this.__client.ndi.resolution,
@@ -1077,7 +1077,7 @@ class NDPiClient {
         this.saveState(commandInfo);
         
         // If source is None or empty, just stop
-        if (!sourceName || sourceName === 'None') {
+        if (!sourceName || sourceName === 'none') {
             this.__client.ndi.source.target = null;
             this.broadcastToDisplay();
             //setTimeout(() => {
@@ -1167,7 +1167,7 @@ class NDPiClient {
         // Only reconnect if we have a target source and aren't already trying
         if (
             !this.__client.ndi.source.target || 
-            this.__client.ndi.source.target === 'None' || 
+            this.__client.ndi.source.target === 'none' || 
             this.timer__reconnect_ndi
         ) return;
 
