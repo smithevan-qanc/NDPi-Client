@@ -26,10 +26,29 @@ class ChromiumOverlayDisplay {
         this.enabled = true;
         
         const connectionPort = this.settings.get('local_port_number_api');
-        let commandLine = `/usr/bin/chromium ` +
-            `--user-data-dir=${this.homeDirectory}/.config/chromium/Default ` +
-            `--disable-web-security ` +
-            `http://localhost:${connectionPort}/`;
+        let commandLine = `/usr/bin/chromium \
+            --no-default-browser-check \
+            --user-data-dir=${this.homeDirectory}/.config/chromium/Default \
+            --disable-web-security \
+            --aggressive-cache-discard \
+            --disable-pings \
+            --disable-popup-blocking \
+            --hide-crash-restore-bubble \
+            --disable-infobars \
+            --disable-session-crashed-bubble \
+            --disable-component-extensions-with-background-pages \
+            --no-first-run \
+            --disable-default-apps \
+            --disable-translate \
+            --hide-scrollbars \
+            --disable-features=TranslateUI \
+            --noerrdialogs \
+            --touch-events=enabled \
+            --start-fullscreen \
+            --disable-notifications \
+            --disable-logging \
+            --disable-crash-reporter \
+            http://localhost:${connectionPort}/`;
 
         this.service = exec(commandLine, {
             env: {
