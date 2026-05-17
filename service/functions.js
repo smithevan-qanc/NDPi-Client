@@ -25,7 +25,7 @@ const net = require('net');
                 return response;
             }
 
-            response.data.ts = new Date().getUTCMilliseconds();
+            response.data.ts = new Date();
 
             switch (command.type) {
                 case 'ping':
