@@ -93,7 +93,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             .route('/api/command/:type')
             .get(async (req, res) => {
                 // to use: http://<ip>:<port>/api/command/set-source?data=EVAN-MSI (OBS PGM)
-                console.log('[ client_api_server ][ GET    ]', req.url);
+                console.log('[ client_api_server ][ GET ]', req.url);
                 const type = req.params.type;
                 const { data } = req.query;
                 const id = randomUUID();
@@ -106,7 +106,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                 }
             })
             .post(async (req, res) => {
-                console.log('[ client_api_server ][ POST   ]', req.url);
+                console.log('[ client_api_server ][ POST ]', req.url);
                 const { type, data } = req.body;
                 const id = randomUUID();
                 const testRes = await processCommand({ id: id, type: type, data: data });

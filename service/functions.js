@@ -7,7 +7,7 @@ const net = require('net');
     /** TODO */
 
         async function processCommand(message = {}) {
-
+            console.log('(1) Processing Command', message);
             // ... Reference For Building
             let command = {
                 id:     message?.id,     // UUID of command for tracking
@@ -19,20 +19,19 @@ const net = require('net');
                 success:    false,
                 data:       {}
             };
-
+            console.log('(2) Processing Command', command);
             if (!command.type) {
                 response.data.message = "Missing 'type'";
                 return response;
             }
 
             response.data.ts = new Date().getUTCMilliseconds();
-            const complete = () => { return response; };
 
             switch (command.type) {
                 case 'ping':
                     console.log(`command: ${command.type}`);
                     response.success = true;
-                    complete();
+                    return response;
                     break;
 
                 // Device Commands
@@ -40,56 +39,56 @@ const net = require('net');
                     console.log(`command: ${command.type}`);
 
                     response.success = true;
-                    complete();
+                    return response;
                     break;
                 case 'reboot-device':
                     console.log(`command: ${command.type}`);
 
                     response.success = true;
-                    complete();
+                    return response;
                     break;
                 case 'rename-device':
                     console.log(`command: ${command.type}`);
 
                     response.success = true;
-                    complete();
+                    return response;
                     break;
 
                 // case '':
                 //     console.log(`command: ${command.type}`);
 
                 //     response.success = true;
-                //     complete();
+                //     return response;
                 //     break;
                 // case '':
                 //     console.log(`command: ${command.type}`);
 
                 //     response.success = true;
-                //     complete();
+                //     return response;
                 //     break;
                 // case '':
                 //     console.log(`command: ${command.type}`);
 
                 //     response.success = true;
-                //     complete();
+                //     return response;
                 //     break;
                 // case '':
                 //     console.log(`command: ${command.type}`);
 
                 //     response.success = true;
-                //     complete();
+                //     return response;
                 //     break;
                 // case '':
                 //     console.log(`command: ${command.type}`);
 
                 //     response.success = true;
-                //     complete();
+                //     return response;
                 //     break;
                 // case '':
                 //     console.log(`command: ${command.type}`);
 
                 //     response.success = true;
-                //     complete();
+                //     return response;
                 //     break;
 
                 // Content Display Commands
@@ -97,26 +96,26 @@ const net = require('net');
                     displayForceBlank();
 
                     response.success = true;
-                    complete();
+                    return response;
                     break;
                 case 'show-overlay':
                     displayForceOverlay();
 
                     response.success = true;
-                    complete();
+                    return response;
                     break;
                 case 'set-overlay':
                     const imageBase64 = command.data.content;
                     updateOverlay(imageBase64);
 
                     response.success = true;
-                    complete();
+                    return response;
                     break;
                 case 'set-source':
                     console.log(`command: ${command.type}`);
 
                     response.success = true;
-                    complete();
+                    return response;
                     break;
 
                 // Default Fallback
@@ -124,7 +123,7 @@ const net = require('net');
                     console.log('[ functions ] Unhandled Command Received', command.type);
 
                     response.data.message = "Unknown 'type'";
-                    complete();
+                    return response;
                     break;
                 // End of Command Handler
             };
