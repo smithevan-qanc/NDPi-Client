@@ -34,64 +34,7 @@ const net = require('net');
                     return response;
                     break;
 
-                // Device Commands
-                case 'shutdown-device':
-                    console.log(`command: ${command.type}`);
-
-                    response.success = true;
-                    return response;
-                    break;
-                case 'reboot-device':
-                    console.log(`command: ${command.type}`);
-
-                    response.success = true;
-                    return response;
-                    break;
-                case 'rename-device':
-                    console.log(`command: ${command.type}`);
-
-                    response.success = true;
-                    return response;
-                    break;
-
-                // case '':
-                //     console.log(`command: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
-                // case '':
-                //     console.log(`command: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
-                // case '':
-                //     console.log(`command: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
-                // case '':
-                //     console.log(`command: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
-                // case '':
-                //     console.log(`command: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
-                // case '':
-                //     console.log(`command: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
-
-                // Content Display Commands
+                // Visual Display Commands
                 case 'show-blank':
                     displayForceBlank();
 
@@ -112,6 +55,64 @@ const net = require('net');
                     return response;
                     break;
                 case 'set-source':
+                    console.log(`command: ${command.type}`);
+
+                    response.success = true;
+                    return response;
+                    break;
+
+                // Physical Display Commands
+                case '':
+                    console.log(`command: ${command.type}`);
+
+                    response.success = true;
+                    return response;
+                    break;
+                // case '':
+                //     console.log(`command: ${command.type}`);
+
+                //     response.success = true;
+                //     return response;
+                //     break;
+                // case '':
+                //     console.log(`command: ${command.type}`);
+
+                //     response.success = true;
+                //     return response;
+                //     break;
+                // case '':
+                //     console.log(`command: ${command.type}`);
+
+                //     response.success = true;
+                //     return response;
+                //     break;
+                // case '':
+                //     console.log(`command: ${command.type}`);
+
+                //     response.success = true;
+                //     return response;
+                //     break;
+                // case '':
+                //     console.log(`command: ${command.type}`);
+
+                //     response.success = true;
+                //     return response;
+                //     break;
+
+                // Device Commands
+                case 'shutdown-device':
+                    console.log(`command: ${command.type}`);
+
+                    response.success = true;
+                    return response;
+                    break;
+                case 'reboot-device':
+                    console.log(`command: ${command.type}`);
+
+                    response.success = true;
+                    return response;
+                    break;
+                case 'rename-device':
                     console.log(`command: ${command.type}`);
 
                     response.success = true;
