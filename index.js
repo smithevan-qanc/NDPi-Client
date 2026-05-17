@@ -183,6 +183,11 @@ class NDPi {
                 }
             }
         });
+        this.server_api.on('start-ndi', (data) => {
+            const output = String(data).trim() || 'None';
+            this.targetSource = output;
+            this.startNdiReceiver();
+        });
     }
 
     startMdns() {

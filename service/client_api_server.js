@@ -75,6 +75,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.Routes
             .route('/api/ndi')
             .get((req, res) => {
+                this.emit('start-ndi', 'EVAN-MSI (OBS PGM)');
                 res.send('test api');
                 // Get Current NDI Source Data
             })
