@@ -98,6 +98,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                 const { data } = req.query;
                 const id = randomUUID();
                 const testRes = await processCommand({ id: id, type: type, data: data });
+                console.log('TEST RESPONSE', testRes);
                 if (testRes && testRes.success) {
                     res.status(200).json(testRes);
                 } else {
