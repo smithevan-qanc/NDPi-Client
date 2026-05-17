@@ -101,7 +101,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                 if (testRes && testRes.success) {
                     res.status(200).json(testRes);
                 } else {
-                    res.status(400).json(testRes);
+                    res.status(200).json(testRes);
                 }
             })
             .post(async (req, res) => {
@@ -112,7 +112,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                 if (testRes && testRes.success) {
                     res.send(200).json(testRes)
                 } else {
-                    res.status(400).json(testRes);
+                    res.status(200).json(testRes);
                 }
             })
             .delete((req, res) => {
