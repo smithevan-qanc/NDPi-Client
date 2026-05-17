@@ -17,15 +17,14 @@ const net = require('net');
             let response = {
                 id:         command.id,
                 success:    false,
-                data:       { ts: 0 }
+                ts:         Date.now(),
+                data:       {}
             };
             console.log('(2) Processing Command', command);
             if (!command.type) {
                 response.data.message = "Missing 'type'";
                 return response;
             }
-
-            response.data.ts = Date.now();
 
             switch (command.type) {
                 case 'ping':
