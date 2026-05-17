@@ -20,6 +20,7 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.homeDirectory = path.join(__dirname, '..', '..');
         this.parentDirectory = path.join(__dirname, '..');
         this.reconnectTimer = null;
+        this.updateFsDebounce = null;
 
         this.enabled = true;
 
@@ -28,16 +29,14 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.xAuth = xAuthority || `${this.homeDirectory}/.Xauthority`;
         this.libraryPath = libraryPath;
 
-        this.updateFsDebounce = null;
-
         this.ndiSource = sourceName || 'None';
+        this.settings.put('ndpi_status_ndi_source_target', this.ndiSource);
         this.ndiActiveSource = null;
         this.ndiConnectedAt = null;
         this.ndiFramerate = null;
         this.ndiResolution = null;
         this.ndiStatus = 'idle';
 
-        this.updateFs(50);
         setTimeout(() => {
             if (sourceName.toLowerCase() === 'none') {
                 this.close();
@@ -65,35 +64,49 @@ class NDI_Receiver_v2 extends EventEmitter {
             if (output.includes('Connected to:')) {
                 this.server.broadcastToDisplay({ type: `ndi-started` });
                 this.ndiActiveSource = this.ndiSource;
+                this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
+
                 this.ndiStatus = 'streaming';
+                this.settings.put('ndpi_status_ndi', this.ndiStatus);
+                
                 this.ndiConnectedAt = new Date().toISOString();
+                this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
+                
                 this.updateFs(5000);
                 this.emit('connected');
             }
         });
 
         this.receiver.on('error', (error) => {
-            console.log(`[ client_ndiReceiver ][ NDI ] ⸺  ▶ ❌ Critical Error:`, error);
+            console.log(`[ client_ndiReceiver ][ NDI ] --▶ ❌ Critical Error:`, error);
         });
 
         this.receiver.stderr.on('data', (data) => {
             const output = data.toString().trim();
             output.split(/\r?\n/).forEach((line) => {
-                console.log(`[ client_ndiReceiver ][ NDI ] ⸺  ▶ ❌ Error: ${line}`);
+                console.log(`[ client_ndiReceiver ][ NDI ] --▶ ❌ Error: ${line}`);
                 this.close();
             });
         });
 
         this.receiver.on('close', (code, signal) => {
+            this.receiver = null;
+
             this.ndiActiveSource = null;
+            this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
+
+            this.ndiStatus = 'idle';
+            this.settings.put('ndpi_status_ndi', this.ndiStatus);
+
             this.ndiConnectedAt = null;
+            this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
+
             this.ndiFramerate = null;
             this.ndiResolution = null;
-            this.ndiStatus = 'idle';
-            this.receiver = null;
-            this.updateFs(1);
+            this.updateFs(1000);
+
             this.scheduleReconnect();
-            console.log(`[ client_ndiReceiver ][ NDI ] ⸺  ▶ Terminated - Code:${code}, Signal:${signal}`);
+            console.log(`[ client_ndiReceiver ][ NDI ] --▶ Terminated - Code:${code}, Signal:${signal}`);
         });
     }
 
@@ -101,7 +114,7 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.enabled = false;
         if (this.receiver) {
             this.receiver.kill();
-            console.log('[ client_ndiReceiver ][ NDI ] ⸺  ▶ SIGKILL');
+            console.log('[ client_ndiReceiver ][ NDI ] --▶ SIGKILL');
             this.receiver = null;
         }
         setTimeout(() => {
@@ -130,19 +143,15 @@ class NDI_Receiver_v2 extends EventEmitter {
             clearTimeout(this.updateFsDebounce);
         }
         this.updateFsDebounce = setTimeout(() => {
-            this.settings.put('ndpi_status_ndi_source_target', this.ndiSource)
-            this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource)
-            this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt)
-            this.settings.put('ndpi_status_ndi_source_framerate', this.ndiFramerate)
-            this.settings.put('ndpi_status_ndi_source_resolution', this.ndiResolution)
-            this.settings.put('ndpi_status_ndi', this.ndiStatus)
+            this.settings.put('ndpi_status_ndi_source_framerate', this.ndiFramerate || '');
+            this.settings.put('ndpi_status_ndi_source_resolution', this.ndiResolution || '');
             this.updateFsDebounce = null;
         }, debounce);
     }
 
     parseInfo(data) {
         data.split(/\r?\n/).forEach((stdout) => {
-            console.log(`[ client_ndiReceiver ][ NDI ] ⸺  ▶ ${stdout}`);
+            console.log(`[ client_ndiReceiver ][ NDI ] --▶ ${stdout}`);
         });
 
         const videoMatch = data.match(/(?:Video|Source):\s*(\d+)x(\d+)\s*@\s*(\d+(?:\.\d+)?)/i);

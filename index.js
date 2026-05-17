@@ -226,6 +226,10 @@ class NDPi {
 
     startNdiReceiver() {
         if (!this.targetSource) return;
+        if (this.ndiReceiver) {
+            this.ndiReceiver.close();
+            this.ndiReceiver = null;
+        }
         const NDI_Receiver_v2 = require('./service/client_ndiReceiver.js');
         this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.targetSource, 'ndi_receiver_v2');
         this.ndiReceiver.on('connected', () => {
