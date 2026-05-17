@@ -60,17 +60,6 @@ class NDPiCommandServer_Client extends EventEmitter {
                 res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
                 res.sendFile(path.join(__dirname, '..', 'index.html'));
             });
-        this.Routes
-            .route('/api/cec/:cmd')
-            .get((req, res) => {
-                const command = req.params.cmd || null;
-                if (command && this.controller_cec.isReady) {
-                    this.controller_cec.send(command);
-                    res.send('200 OK');
-                } else {
-                    res.send(`${this.controller_cec.isReady ? '400 Bad Request' : '500 Unavailable'}`)
-                }
-            });
             
         this.Routes
             .route('/api/ndi/?:src')
@@ -90,35 +79,45 @@ class NDPiCommandServer_Client extends EventEmitter {
             });
 
         this.Routes
-            .route('/api/command/:type')
+            .route('/api/v1/command')
             .get(async (req, res) => {
                 // to use: http://<ip>:<port>/api/command/set-source?data=EVAN-MSI (OBS PGM)
-                console.log('[ client_api_server ][ GET ]', req.url);
-                const type = req.params.type;
-                const { data } = req.query;
-                const id = randomUUID();
-                const testRes = await processCommand({ id: id, type: type, data: data });
-                console.log('TEST RESPONSE', testRes);
-                if (testRes && testRes.success) {
-                    res.status(200).json(testRes);
-                } else {
-                    res.status(200).json(testRes);
-                }
+                console.log('[ client_api_server ] GET:', req.url);
+
+                const commandRes = await processCommand({
+                    ...req.query,
+                    id: randomUUID(),
+                });
+
+                    console.log('TEST RESPONSE', commandRes);
+                
+                if (commandRes && commandRes.success)
+                     { res.status(200).json(commandRes); }
+                else { res.status(400).json(commandRes); }
             })
             .post(async (req, res) => {
-                console.log('[ client_api_server ][ POST ]', req.url);
-                const { type, data } = req.body;
-                const id = randomUUID();
-                const testRes = await processCommand({ id: id, type: type, data: data });
-                if (testRes && testRes.success) {
-                    res.send(200).json(testRes)
+                console.log('[ client_api_server ] POST:', req.url);
+
+                const commandRes = await processCommand({
+                    ...req.body,
+                    id: randomUUID(),
+                });
+
+                if (commandRes && commandRes.success)
+                     { res.status(200).json(commandRes); }
+                else { res.status(400).json(commandRes); }
+            });
+
+        this.Routes
+            .route('/api/cec/:cmd')
+            .get((req, res) => {
+                const command = req.params.cmd || null;
+                if (command && this.controller_cec.isReady) {
+                    this.controller_cec.send(command);
+                    res.send('200 OK');
                 } else {
-                    res.status(200).json(testRes);
+                    res.send(`${this.controller_cec.isReady ? '400 Bad Request' : '500 Unavailable'}`)
                 }
-            })
-            .delete((req, res) => {
-                res.send('test');
-                // Stop NDI Viewer
             });
     }
 

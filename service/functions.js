@@ -20,33 +20,35 @@ const net = require('net');
                 ts:         Date.now(),
                 data:       {}
             };
-            console.log('(2) Processing Command', command);
+
             if (!command.type) {
                 response.data.message = "Missing 'type'";
                 return response;
             }
-
             switch (command.type) {
                 case 'ping':
-                    console.log(`command: ${command.type}`);
+                    console.log(`PROCESSING: ${command.type}`);
                     response.success = true;
                     return response;
                     break;
 
                 // Visual Display Commands
                 case 'show-blank':
+                    console.log(`PROCESSING: ${command.type}`);
                     displayForceBlank();
 
                     response.success = true;
                     return response;
                     break;
                 case 'show-overlay':
+                    console.log(`PROCESSING: ${command.type}`);
                     displayForceOverlay();
 
                     response.success = true;
                     return response;
                     break;
                 case 'set-overlay':
+                    console.log(`PROCESSING: ${command.type}`);
                     const imageBase64 = command.data.content;
                     updateOverlay(imageBase64);
 
@@ -54,45 +56,45 @@ const net = require('net');
                     return response;
                     break;
                 case 'set-source':
-                    console.log(`command: ${command.type}`);
+                    console.log(`PROCESSING: ${command.type}`);
 
                     response.success = true;
                     return response;
                     break;
 
                 // Physical Display Commands
-                case '':
-                    console.log(`command: ${command.type}`);
+                case 'send-cec':
+                    console.log(`PROCESSING: ${command.type}`);
 
                     response.success = true;
                     return response;
                     break;
                 // case '':
-                //     console.log(`command: ${command.type}`);
+                //     console.log(`PROCESSING: ${command.type}`);
 
                 //     response.success = true;
                 //     return response;
                 //     break;
                 // case '':
-                //     console.log(`command: ${command.type}`);
+                //     console.log(`PROCESSING: ${command.type}`);
 
                 //     response.success = true;
                 //     return response;
                 //     break;
                 // case '':
-                //     console.log(`command: ${command.type}`);
+                //     console.log(`PROCESSING: ${command.type}`);
 
                 //     response.success = true;
                 //     return response;
                 //     break;
                 // case '':
-                //     console.log(`command: ${command.type}`);
+                //     console.log(`PROCESSING: ${command.type}`);
 
                 //     response.success = true;
                 //     return response;
                 //     break;
                 // case '':
-                //     console.log(`command: ${command.type}`);
+                //     console.log(`PROCESSING: ${command.type}`);
 
                 //     response.success = true;
                 //     return response;
@@ -100,19 +102,19 @@ const net = require('net');
 
                 // Device Commands
                 case 'shutdown-device':
-                    console.log(`command: ${command.type}`);
+                    console.log(`PROCESSING: ${command.type}`);
 
                     response.success = true;
                     return response;
                     break;
                 case 'reboot-device':
-                    console.log(`command: ${command.type}`);
+                    console.log(`PROCESSING: ${command.type}`);
 
                     response.success = true;
                     return response;
                     break;
                 case 'rename-device':
-                    console.log(`command: ${command.type}`);
+                    console.log(`PROCESSING: ${command.type}`);
 
                     response.success = true;
                     return response;
