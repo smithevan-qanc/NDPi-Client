@@ -310,19 +310,28 @@ class NDPi {
         const resolution = this.settings.get('output_resolution_current') || null;
         const framerate  = this.settings.get('output_framerate_current') || null;
         require('child_process')
-            .exec(`xrandr \
-                --output ${displayOutput} \
-                ${resolution ? `--mode ${resolution}` : '--auto'} \
-                ${framerate ? `--rate ${framerate}` : ''} \
-            `, {
-                env: { 
-                    ...process.env,
-                    DISPLAY: ':0',
-                    XAUTHORITY: '/home/ndpi-client/.Xauthority',
-                },
-            }, (error, stderr) => {
-                if (error) console.log('[ index ] Error setting Resolution', stderr);
-            });
+        .exec(`xrandr \
+            --output ${displayOutput} \
+            ${resolution ? `--mode ${resolution}` : '--auto'} \
+            ${framerate ? `--rate ${framerate}` : ''} \
+        `, {
+            env: { 
+                ...process.env,
+                DISPLAY: ':0',
+                XAUTHORITY: '/home/ndpi-client/.Xauthority',
+            },
+        }, (error, stderr) => {
+            if (error) {
+                console.log('[ index ] Error setting Resolution', stderr);
+            } else {
+                require('node:child_process')
+                .exec('openbox --restart', {
+                    env: { ...process.env }
+                }, (error, stdout, stderr) => {
+                    console.log(error ? `[ index ] ERROR: ${String(stderr)}` : `[ index ] ${String(stdout)}`);
+                });
+            }
+        });
     }
 }
 
