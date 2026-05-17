@@ -27,6 +27,7 @@ class ChromiumOverlayDisplay {
         
         const connectionPort = this.settings.get('local_port_number_api');
         let commandLine = `/usr/bin/chromium \
+            --kiosk \
             --no-default-browser-check \
             --aggressive-cache-discard \
             --disable-pings \
