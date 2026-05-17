@@ -28,8 +28,6 @@ class ChromiumOverlayDisplay {
         const connectionPort = this.settings.get('local_port_number_api');
         let commandLine = `/usr/bin/chromium \
             --no-default-browser-check \
-            --user-data-dir=${this.homeDirectory}/.config/chromium/Default \
-            --disable-web-security \
             --aggressive-cache-discard \
             --disable-pings \
             --disable-popup-blocking \
@@ -48,6 +46,8 @@ class ChromiumOverlayDisplay {
             --disable-notifications \
             --disable-logging \
             --disable-crash-reporter \
+            --user-data-dir=${this.homeDirectory}/.config/chromium/Default \
+            --disable-web-security \
             http://localhost:${connectionPort}/`;
 
         this.service = exec(commandLine, {
