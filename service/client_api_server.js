@@ -73,7 +73,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             });
             
         this.Routes
-            .route('/api/ndi/:src')
+            .route('/api/ndi/?:src')
             .get((req, res) => {
                 const source = req.params.src || 'None';
                 this.emit('start-ndi', `${source}`);
