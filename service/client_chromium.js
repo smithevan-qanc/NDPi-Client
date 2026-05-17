@@ -61,7 +61,7 @@ class ChromiumOverlayDisplay {
         this.service.on('exit', () => {
             this.service = null;
             console.log(`[ client_chromium ] Relaunching...`);
-            this.start();
+            //this.start();
         });
         
         this.service.on('error', (err) => {
