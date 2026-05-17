@@ -143,7 +143,7 @@ class NDI_Receiver_v2 extends EventEmitter {
             clearTimeout(this.updateFsDebounce);
         }
         this.updateFsDebounce = setTimeout(() => {
-            this.settings.put('ndpi_status_ndi_source_framerate', this.ndiFramerate || '');
+            this.settings.put('ndpi_status_ndi_source_framerate', String(this.ndiFramerate) || '');
             this.settings.put('ndpi_status_ndi_source_resolution', this.ndiResolution || '');
             this.updateFsDebounce = null;
         }, debounce);
