@@ -17,7 +17,7 @@ const net = require('net');
             let response = {
                 id:         command.id,
                 success:    false,
-                data:       {}
+                data:       { ts: 0 }
             };
             console.log('(2) Processing Command', command);
             if (!command.type) {
@@ -25,7 +25,7 @@ const net = require('net');
                 return response;
             }
 
-            response.data.ts = new Date();
+            response.data.ts = Date.now();
 
             switch (command.type) {
                 case 'ping':
