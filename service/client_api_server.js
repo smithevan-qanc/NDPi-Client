@@ -117,7 +117,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             })
             .post((req, res) => {
                 const PATH = req.params.path;
-                const { BODY } = req.body;
+                const BODY = req.body;
                 switch (PATH) {
                     case 'cec':
                         //this.controller_cec.send(BODY);
