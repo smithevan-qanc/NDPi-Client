@@ -29,7 +29,7 @@ class NDPi {
         this.wsConnection_ndpiServer = null;
         this.ndpiServerStatusUpdate = null; // Interval Timer
 
-        this.targetSource = null;
+        this.targetSource = 'none';
 
         this.initiate();
     }
@@ -45,7 +45,6 @@ class NDPi {
             });
         });
         startup.on('exit', () => {
-            console.log(`DATA_NDPI_PATH: ${process.env.DATA_NDPI_PATH}`);
             this.startFsData();
         });
     }
@@ -61,20 +60,24 @@ class NDPi {
 
         //  NDI Source Target
         this.settings.on('ndpi_status_ndi_source_target', (data) => {
-            const output = String(data) || 'none';
+            const output = String(data || 'none');
             if (output !== this.targetSource) {
                 this.targetSource = output;
-                if (String(this.targetSource).toLowerCase() !== 'none') {
-                    this.startNdiReceiver();
-                } else {
-                    this.ndiReceiver.close();
-                }
+                if (String(this.targetSource).toLowerCase() !== 'none')
+                     { this.startNdiReceiver(); }
+                else { this.ndiReceiver.close(); }
             }
+        });
+
+        //  No Source Display Mode
+        this.settings.on('ndpi_status_no_source_display_mode', (data) => {
+            const output = String(data || 'overlay');
+            this.server_api.updateDisplay();
         });
 
         //  Server IP
         this.settings.on('ndpi_command_server_host', (data) => {
-            const output = String(data).trim() || null;
+            const output = String(data || '').trim() || null;
             if (!output) return;
 
             this.server_api.updateDisplay({
@@ -91,7 +94,7 @@ class NDPi {
 
         //  Server Port
         this.settings.on('ndpi_command_server_port', (data) => {
-            const output = String(data).trim() || null;
+            const output = String(data || '').trim() || null;
             if (!output) return;
 
             if (output !== this.wsConnection_ndpiServer.ndpiServerPort) {
@@ -103,7 +106,7 @@ class NDPi {
 
         //  Device Name
         this.settings.on('device_name', (data) => {
-            const output = String(data) || this.settings.defaultDeviceName;
+            const output = String(data || this.settings.defaultDeviceName);
 
             this.server_api.updateDisplay({
                 type: 'update-details',
@@ -121,7 +124,7 @@ class NDPi {
 
         //  Device IP
         this.settings.on('device_ip', (data) => {
-            const output = String(data).trim() || null;
+            const output = String(data || '').trim() || null;
             if (!output) return;
 
             this.server_api.updateDisplay({
@@ -137,7 +140,7 @@ class NDPi {
 
         //  Device Port Number
         this.settings.on('local_port_number_api', (data) => {
-            const output = String(data).trim() || null;
+            const output = String(data || '').trim() || null;
             if (!output) return;
 
             try { this.server_api.close(); } catch {}
@@ -146,7 +149,7 @@ class NDPi {
 
         //  HDMI Port
         this.settings.on('output_device_port', (data) => {
-            const output = String(data).trim() || null;
+            const output = String(data || '').trim() || null;
             if (!output) return;
             setTimeout(() => { this.setDisplayResolution(); }, 500);
         });
@@ -340,7 +343,7 @@ class NDPi {
                 .exec('openbox --restart', {
                     env: { ...process.env }
                 }, (error, stdout, stderr) => {
-                    console.log(error ? `[ index ] ERROR: ${String(stderr)}` : `[ index ] ${String(stdout)}`);
+                    console.log(error ? `[ index ] ERROR: ${String(stderr)}` : ``);
                 });
             }
         });

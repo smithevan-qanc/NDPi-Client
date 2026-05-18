@@ -218,8 +218,8 @@ class FileSystemMonitor extends EventEmitter {
                 const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').replace(/\0/g, '').trimEnd();
 
                 if (currentValue !== fsValue) {
-                    this.fsEvent(filename, fsValue);
                     this.#fileMap.set(filename, fsValue);
+                    this.fsEvent(filename, fsValue);
                 }
             }
         });

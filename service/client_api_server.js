@@ -36,19 +36,14 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         this.WebSocket.on('connection', (ws) =>{
             console.log('[ client_api_server ] Display WebSocket connection started.');
-            this.WebSocketConnections.add(ws);
-            setTimeout(() => {
-                this.broadcastToDisplay(undefined, true);
-            }, 1000);
             
-            ws.on('close', () => {
-                this.WebSocketConnections.delete(ws);
-            });
+            this.WebSocketConnections.add(ws);
+            
+            setTimeout(() => { this.broadcastToDisplay(undefined, true); }, 1000);
+            
+            ws.on('close', () => { this.WebSocketConnections.delete(ws); });
 
-            ws.on('error', (error) => {
-                console.log('[ client_api_server ] Error: WebSocket GUI Connection', error);
-            });
-
+            ws.on('error', (error) => { console.log('[ client_api_server ] Error: WebSocket GUI Connection', error); });
         });
 
         this.Routes = express.Router();
@@ -64,9 +59,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.Routes
             .route('/api/ndi/?:src')
             .get((req, res) => {
-                const source = (!req.params.src || req.params.src.toLowerCase() === 'none') ? 'none' : req.params.src;
-                this.emit('start-ndi', `${source}`);
-                res.send(`Starting Source: ${source.toUpperCase()}`);
+                
                 // Get Current NDI Source Data
             })
             .post(async (req, res) => {
@@ -115,19 +108,19 @@ class NDPiCommandServer_Client extends EventEmitter {
             .get((req, res) => { res.status(403) })
             .post((req, res) => {
                 const { id, data } = req.body;
-                const switch_path = req.params.path;
+                const switch_path  = req.params.path;
 
                 console.log('TEST (internal API)', data, 'HOSTNAME:', req.hostname);
+
                 if (req.hostname !== 'localhost') {
                     res.status(403).json({ status: 403, message: 'forbidden' });
                 }
                 
                 let reqValid = false;
-
                 switch (switch_path) {
                     case 'cec':
                         reqValid = (typeof data === 'string' && this.controller_cec.isReady);
-                        
+
                         if (reqValid) {
                             this.controller_cec.send(data);
                             res.status(200).json({ success: true });
@@ -135,13 +128,18 @@ class NDPiCommandServer_Client extends EventEmitter {
 
                         break;
                     case 'ndi':
-                        reqValid = true;
+                        let source;
 
-                        if (reqValid) {
-                            // set ndi function
-                            res.status(200).json({ success: true });
-                        } else { res.status(400).json({ success: false }); }
-
+                        if (!data) {
+                            source = 'none';
+                        } else if (String(data).toLowerCase() === 'none') {
+                            source = 'none';
+                        } else {
+                            source = String(data);
+                        }
+                        this.emit('start-ndi', `${source}`);
+                        res.send(200).json({ success: true, message: `NDI Source Set: ${source}` });
+                        
                         break;
                     default:
                         res.status(200).send();
@@ -163,11 +161,11 @@ class NDPiCommandServer_Client extends EventEmitter {
     broadcastToDisplay(message = {}, sendAll = false) {
         const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
         let updateData = {};
-        if (message.type) {
-            updateData.type = message.type;
-        } else {
-            updateData.type = `show-${displayMode}`;
-        }
+        
+        if (message.type)
+             { updateData.type = message.type; }
+        else { updateData.type = `show-${displayMode}`; }
+
         if (sendAll) {
             updateData.serverIp = this.settings.get('ndpi_command_server_host');
             updateData.thisDevice = {};
@@ -187,8 +185,8 @@ class NDPiCommandServer_Client extends EventEmitter {
         });
     }
 
-    updateDisplay(message) {
-        if (!message) return;
+    updateDisplay(message = {}) {
+        if (!message.type) return;
         this.WebSocketConnections.forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(JSON.stringify(message));
