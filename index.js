@@ -208,8 +208,8 @@ class NDPi {
             } 
         else
             {
-                console.log('[ client_chromium ][ index ] Skipping Chromium display launch.');
-                console.log('[ client_chromium ][ index ] -- Missing binary: /usr/bin/chromium');
+                console.log('[ index ][ client_chromium ] Skipping Chromium display launch.');
+                console.log('[ index ][ client_chromium ] -- Missing binary: /usr/bin/chromium');
             }
     }
 
@@ -222,15 +222,15 @@ class NDPi {
         });
 
         this.controller_cec.on('event', (data) => {
-            console.log(`[ client_cec ][ index ]`, data);
+            console.log(`[ index ][ client_cec ]`, data);
         });
         
         this.controller_cec.on('error_log', (data) => {
-            console.log(`🔴 [ client_cec ][ index ][ Error ]`, data);
+            console.log(`🔴 [ index ][ client_cec ][ ERROR ]`, data);
         });
 
         this.controller_cec.on('timeout', (data) => {
-            console.log(`[ client_cec ][ index ] ${String(data || 'CEC Unavailable')}`);
+            console.log(`[ index ][ client_cec ] ${String(data || 'CEC Unavailable')}`);
             this.controller_cec.quit();
             this.controller_cec = null;
         });
@@ -248,7 +248,7 @@ class NDPi {
         this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.targetSource, 'ndi_receiver_v2');
 
         this.ndiReceiver.on('connected', () => {
-            console.log('[ client_ndiReceiver ][ index ] Receiver Started');
+            console.log('[ index ][ client_ndiReceiver ] Receiver Started');
             this.service_chromium.close();
         });
 
@@ -346,13 +346,13 @@ class NDPi {
             ${framerate ? `--rate ${framerate}` : ''} \
         `, { env: { ...process.env } }, (error, stderr) => {
             if (error)
-                { console.log('🔴 [ index ][ Error ] Resolution Set', stderr) }
+                { console.log('🔴 [ index ][ ERROR ] Resolution Set', stderr) }
             else
                 {
                     require('node:child_process').exec('openbox --restart', {
                         env: { ...process.env }
                     }, (error, stdout, stderr) => {
-                        console.log(error ? `🔴 [ index ][ Error ] ${String(stderr)}` : ``);
+                        console.log(error ? `🔴 [ index ][ ERROR ] ${String(stderr)}` : ``);
                     });
                 }
         });

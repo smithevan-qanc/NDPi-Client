@@ -114,7 +114,7 @@ class CecController extends EventEmitter {
                                         { this.settings.put('output_device_cec_status_power', lineSplit.split("'")[3]) }
                                 }
                             else if (line.includes('ERROR'))
-                                { console.log(`🔴 [ client_cec ][ Error ] ${lineSplit}`) }
+                                { console.log(`🔴 [ client_cec ][ ERROR ] ${lineSplit}`) }
                         }
                 }
         });

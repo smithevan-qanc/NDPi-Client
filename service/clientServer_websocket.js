@@ -68,13 +68,13 @@ class ClientServerWebSocket extends EventEmitter {
             }
             catch (error)
             {
-                console.log('🔴 [ clientServer_websocket ][ Error ] NDPi Server: Message:', data);
-                console.log('🔴 [ clientServer_websocket ][ Error ] NDPi Server: Error:', error);
+                console.log('🔴 [ clientServer_websocket ][ ERROR ] NDPi Server: Message:', data);
+                console.log('🔴 [ clientServer_websocket ][ ERROR ] NDPi Server: Error:', error);
             }
         });
         
         this.socket.on('error', (error) => {
-            console.log('🔴 [ clientServer_websocket ][ Error ] NDPi Server Connection', error);
+            console.log('🔴 [ clientServer_websocket ][ ERROR ] NDPi Server Connection', error);
         });
         
         this.socket.on('close', () => {
@@ -114,13 +114,13 @@ class ClientServerWebSocket extends EventEmitter {
             { return }
         if (!message.type)
             {
-                console.log("🔴 [ clientServer_websocket ][ Error ] Missing 'message.type'. Message:", message);
+                console.log("🔴 [ clientServer_websocket ][ ERROR ] Missing 'message.type'. Message:", message);
                 return;
             }
         if (this.socket && this.socket.readyState <= 1)
             { this.socket.send(JSON.stringify(message)) }
         else
-            { console.log("🔴 [ clientServer_websocket ][ Error ] Unable to send message.") }
+            { console.log("🔴 [ clientServer_websocket ][ ERROR ] Unable to send message.") }
     }
 
 }

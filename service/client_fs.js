@@ -207,7 +207,7 @@ class FileSystemMonitor extends EventEmitter {
                         }
                 }
                 catch (err)
-                { console.log(`🔴 [ client_fs ][ Error ] Saving File: Name:${key}, Value: ${value}`, err) }
+                { console.log(`🔴 [ client_fs ][ ERROR ] Saving File: Name:${key}, Value: ${value}`, err) }
             };
 
         // Call updateLocalIp() right away. It will call poll() after.
@@ -258,7 +258,7 @@ class FileSystemMonitor extends EventEmitter {
         try
         { fs.writeFileSync(path.join(this.dataDir, fileName), data.trimEnd(), 'utf8') }
         catch (error)
-        { console.error('🔴 [ client_fs ][ Error ] Saving to FileSystem') }
+        { console.error('🔴 [ client_fs ][ ERROR ] Saving to FileSystem') }
     }
     
     fsEvent(name, value, debounceMs = 500) {
@@ -299,7 +299,7 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     startDrmMonitor() {
-        console.log('STARTING DRM MONITOR');
+        console.log('[ client_fs ] STARTING DRM MONITOR');
 
         // const pth_thermal_fanSpeed = path.join('/sys','class','thermal','cooling_device0','cur_state');
         // const pth_thermal_cpuTemperature = path.join('/sys','class','thermal','thermal_zone0','temp');
@@ -316,7 +316,7 @@ class FileSystemMonitor extends EventEmitter {
         });
 
         this.drmMonitor.on('error', () => {
-            console.log("🔴 [ client_fs ][ Error ] 'udevadm' not available, DRM monitor disabled");
+            console.log("🔴 [ client_fs ][ ERROR ] 'udevadm' not available, DRM monitor disabled");
             this.drmMonitor = null;
         });
     }

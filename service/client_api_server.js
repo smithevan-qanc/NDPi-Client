@@ -43,7 +43,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             
             ws.on('close', () => { this.WebSocketConnections.delete(ws); });
 
-            ws.on('error', (error) => { console.log('🔴 [ client_api_server ][ Error ] WebSocket GUI Connection', error); });
+            ws.on('error', (error) => { console.log('🔴 [ client_api_server ][ ERROR ] WebSocket GUI Connection', error); });
         });
 
         this.Routes = express.Router();
