@@ -32,7 +32,7 @@ const net = require('net');
                     return response;
                     break;
 
-                // Visual Display Commands
+                // Visual Display
                 case 'show-blank':
                     console.log(`PROCESSING: ${command.type}`);
                     displayForceBlank();
@@ -62,18 +62,17 @@ const net = require('net');
                     return response;
                     break;
 
-                // Physical Display Commands
+                // Physical Display
                 case 'send-cec':
-                    console.log(`PROCESSING: ${command.type}`);
-                    const fetchRes = await fetch('http://localhost:3080/internal/api/v1/cec', {
+                    const f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(command)
                     });
-                    if (fetchRes.ok)
+                    if (f.ok)
                          { response.success = true; }
                     else { response.success = false; }
-                    console.log('Fetch RES', fetchRes);
+                    console.log('Fetch RES', f);
                     return response;
                     break;
                 // case '':
@@ -107,7 +106,7 @@ const net = require('net');
                 //     return response;
                 //     break;
 
-                // Device Commands
+                // Device
                 case 'shutdown-device':
                     console.log(`PROCESSING: ${command.type}`);
 
