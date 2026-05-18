@@ -122,6 +122,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                     case 'cec':
                         //this.controller_cec.send(BODY);
                         console.log('TEST (CEC)', BODY);
+                        res.status(200);
                         break;
                     case 'ndi':
                         //
@@ -130,7 +131,6 @@ class NDPiCommandServer_Client extends EventEmitter {
                         //
                         break;
                 }
-                res.status(200);
 
                 // if (command && this.controller_cec.isReady) {
                 //     this.controller_cec.send(command);
