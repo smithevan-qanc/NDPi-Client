@@ -3,10 +3,11 @@ const { exec } = require('child_process');
 const { EventEmitter } = require('events');
 
 class ChromiumOverlayDisplay extends EventEmitter {
-    constructor(fsData) {
+    constructor(fsData, api) {
         super();
         this.service = null;
         this.settings = fsData;
+        this.server = api;
         this.homeDirectory = path.join(__dirname, '..', '..');
         this.start();
     }
@@ -14,13 +15,13 @@ class ChromiumOverlayDisplay extends EventEmitter {
     start() {
         if (this.service)
             { this.close() }
-        setTimeout(() => { this.launch() }, 1500);
+        setTimeout(() => { this.launch() }, 1000);
     }
 
     close() {
         require('node:child_process').exec('killall chromium', (error) => {
             if (error)
-            { console.log('🔴 [ client_chromium ][ ERROR ] killall') }
+                { console.log('🔴 [ client_chromium ][ ERROR ] killall') }
         });
         this.service = null;
         // if (this.service)

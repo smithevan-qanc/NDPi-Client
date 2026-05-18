@@ -7,6 +7,7 @@ class NDI_Receiver_v2 extends EventEmitter {
     constructor(
         fsData,
         api,
+        chromium,
         sourceName = 'none',
         receiverName = 'ndi_receiver_v2',
         libraryPath = `/opt/NDI SDK for Linux/lib/aarch64-rpi4-linux-gnueabi:${(process.env.LD_LIBRARY_PATH || '')}`,
@@ -18,6 +19,7 @@ class NDI_Receiver_v2 extends EventEmitter {
 
         this.settings = fsData;
         this.server = api;
+        this.chromium = chromium;
         this.server.broadcastToDisplay({ type: `ndi-init` });
 
         this.homeDirectory = path.join(__dirname, '..', '..');
@@ -116,11 +118,13 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.enabled = false;
         if (this.receiver)
             {
-                this.receiver.kill('SIGKILL');
-                console.log('[ client_ndiReceiver ][ NDI ] --▶ SIGKILL');
-                this.receiver = null;
+                this.chromium.launch();
+                this.server.broadcastToDisplay();
             }
         setTimeout(() => {
+            this.receiver.kill('SIGKILL');
+            console.log('[ client_ndiReceiver ][ NDI ] --▶ SIGKILL');
+            this.receiver = null;
             if (!this.enabled)
                 { this.emit('close') }
         }, 1000);

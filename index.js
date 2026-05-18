@@ -204,7 +204,7 @@ class NDPi {
         if (fs.existsSync('/usr/bin/chromium'))
             {
                 const ChromiumOverlayDisplay = require('./service/client_chromium.js');
-                this.service_chromium = new ChromiumOverlayDisplay(this.settings);
+                this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
             } 
         else
             {
@@ -240,12 +240,9 @@ class NDPi {
         if (!this.targetSource)
             { return }
         if (this.ndiReceiver)
-            {
-                this.ndiReceiver.close();
-                this.ndiReceiver = null;
-            }
+            { this.ndiReceiver.close() }
         const NDI_Receiver_v2 = require('./service/client_ndiReceiver.js');
-        this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.targetSource, 'ndi_receiver_v2');
+        this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.service_chromium, this.targetSource, 'ndi_receiver_v2');
 
         this.ndiReceiver.on('connected', () => {
             console.log('[ index ][ client_ndiReceiver ] Receiver Started');
@@ -253,9 +250,7 @@ class NDPi {
         });
 
         this.ndiReceiver.on('close', () => {
-            this.service_chromium.launch();
             this.ndiReceiver = null;
-            this.server_api.broadcastToDisplay();
         });
     }
 
