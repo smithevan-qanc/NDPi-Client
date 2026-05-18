@@ -112,38 +112,39 @@ class NDPiCommandServer_Client extends EventEmitter {
 
                 console.log('TEST (internal API)', data, 'HOSTNAME:', req.hostname);
 
-                if (req.hostname !== 'localhost') {
-                    res.status(403).json({ status: 403, message: 'forbidden' });
-                }
+                if (req.hostname !== 'localhost') { res.sendStatus(403).json({ status: 403, message: 'forbidden' }); }
                 
                 let reqValid = false;
                 switch (switch_path) {
                     case 'cec':
                         reqValid = (typeof data === 'string' && this.controller_cec.isReady);
 
-                        if (reqValid) {
-                            this.controller_cec.send(data);
-                            res.status(200).json({ success: true });
-                        } else { res.status(400).json({ success: false }); }
+                        if (reqValid)
+                            {
+                                this.controller_cec.send(data);
+                                res.sendStatus(200).json({ success: true });
+                            }
+                        else
+                            { res.sendStatus(400).json({ success: false }); }
 
                         break;
                     case 'ndi':
                         let source;
 
-                        if (!data) {
-                            source = 'none';
-                        } else if (String(data).toLowerCase() === 'none') {
-                            source = 'none';
-                        } else {
-                            source = String(data);
-                        }
+                        if (!data)
+                            { source = 'none'; }
+                        else if (String(data).toLowerCase() === 'none')
+                            { source = 'none'; }
+                        else
+                            { source = String(data); }
+
                         this.emit('start-ndi', `${source}`);
-                        res.status(200)
-                            .json({ success: true, message: `NDI Source Set: ${source}` });
+                        res.sendStatus(200).json({ success: true, message: `NDI Source Set: ${source}` });
 
                         break;
                     default:
-                        res.status(200).send();
+                        
+                        res.sendStatus(200).end();
                         break;
                 }
             });
