@@ -45,6 +45,7 @@ class NDPi {
             });
         });
         startup.on('exit', () => {
+            console.log(`DATA_NDPI_PATH: ${process.env.DATA_NDPI_PATH}`);
             this.startFsData();
         });
     }

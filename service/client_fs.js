@@ -40,31 +40,27 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     async init() {
-
         console.log(`[ client_fs ] NDPi Data Management Module - ${this.#pgmVersion} - ${this.#pgmVersionDate}`);
 
-        if (!fs.existsSync(this.dataDir)) {
-            fs.mkdirSync(this.dataDir, { recursive: true });
-        }
+        // Create directory if it doesn't exist.
+        if (!fs.existsSync(this.dataDir)) { fs.mkdirSync(this.dataDir, { recursive: true }); }
 
+        // Set the deviceId from either serial-number or machine-id
         let deviceId = '';
         const deviceIdPaths = [
             path.join('/sys','firmware','devicetree','base','serial-number'),
             path.join('/etc','machine-id'),
-        ]; 
-        
+        ];
         if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1])) {
             try {
-                // deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').trimEnd();
                 deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
                 console.log('[ client_fs ][ DEVICE ID ] ',  deviceId);
-            } catch {
-                // deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').trimEnd();
+            }
+            catch {
                 deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
                 console.log('[ client_fs ][ FALLBACK DEVICE ID ] ', deviceId);
             }
-        } else {
-            // MacOS Compatability
+        } else { // MacOS Compatability
             await new Promise((resolve) => {
                 exec(`ioreg -l | grep IOPlatformSerialNumber | awk '{print $4}' | tr -d '"'`, (error, stdout) => {
                     if (!error) deviceId = stdout.trim();
@@ -73,10 +69,9 @@ class FileSystemMonitor extends EventEmitter {
             });
         }
 
+        // Map file names and values with to standard defaults.
         this.#fileMap = new Map();
-
-        const files = [
-            { 
+        const files = [{ 
                 key: "device_name",
                 value: `${this.defaultDeviceName}`
             }, {
@@ -88,14 +83,10 @@ class FileSystemMonitor extends EventEmitter {
             }, {
                 key: "device_ip",
                 value: ``
-            }, { 
-                // NOT USED
-                key: "local_port_number_display",
-                value: `${8080}`
-            }, { 
+            }, {
                 key: "local_port_number_api",
                 value: `${process.env.PORT_API || 3080}`
-            }, { 
+            }, {
                 key: "local_port_number_bonjour",
                 value: `${process.env.PORT_MDNS || 3053}`
             }, {
@@ -170,6 +161,7 @@ class FileSystemMonitor extends EventEmitter {
             },
         ];
 
+        // Files that will NOT initialize with their previously stored values.
         const retainDefaultValue = [
             'ndpi_status_ndi',
             'ndpi_version_date',
@@ -183,12 +175,17 @@ class FileSystemMonitor extends EventEmitter {
             'output_device_cec_active_source',
         ];
 
+
         for (const { key, value } of files) {
             const filePath = path.join(this.dataDir, key);
-
             /**
-             * If the @key is within the retainDefaultValue Array,
-             * then change the getValueFromFile flag to false to prevent reading value from file.
+             * 
+             *  If the @key is within the retainDefaultValue Array,
+             *      then change the @getValueFromFile flag to false.
+             *      then overwrite the stored value with the default value.
+             * 
+             *  This is used to prevent reading value from file.
+             * 
              */
             let getValueFromFile = true;
             if (retainDefaultValue.includes(key)) getValueFromFile = false;
@@ -206,6 +203,7 @@ class FileSystemMonitor extends EventEmitter {
             }
         };
 
+        // Call updateLocalIp() right away. It will call poll() after.
         setTimeout(() => {
             this.updateLocalIp();
         }, 500);
@@ -225,7 +223,6 @@ class FileSystemMonitor extends EventEmitter {
                 }
             }
         });
-
         this.startDrmMonitor();
     }
 

@@ -1,6 +1,7 @@
 const { setTimeout } = require('timers');
 const os = require('os');
 const net = require('net');
+const fs = require('fs');
 
 /** ---- Export Functions ---- */
 
@@ -69,18 +70,13 @@ const net = require('net');
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(command)
                     });
+
                     if (f.ok)
                          { response.success = true; }
                     else { response.success = false; }
-                    console.log('Fetch RES', f);
+                    
                     return response;
                     break;
-                // case '':
-                //     console.log(`PROCESSING: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
                 // case '':
                 //     console.log(`PROCESSING: ${command.type}`);
 
@@ -125,6 +121,12 @@ const net = require('net');
                     response.success = true;
                     return response;
                     break;
+                // case '':
+                //     console.log(`PROCESSING: ${command.type}`);
+
+                //     response.success = true;
+                //     return response;
+                //     break;
 
                 // Default Fallback
                 default:

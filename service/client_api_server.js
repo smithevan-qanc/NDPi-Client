@@ -117,19 +117,29 @@ class NDPiCommandServer_Client extends EventEmitter {
                 const { id, data } = req.body;
                 const switch_path = req.params.path;
 
-                console.log('TEST (internal API)', data, 'HOST:', req.host, 'HOSTNAME:', req.hostname);
+                console.log('TEST (internal API)', data, 'HOSTNAME:', req.hostname);
+                if (req.hostname !== 'localhost') {
+                    res.status(403).json({ status: 403, message: 'forbidden' });
+                }
 
                 switch (switch_path) {
                     case 'cec':
-                        if (typeof data === 'string' && this.controller_cec.isReady) {
+                        let reqValid = (typeof data === 'string' && this.controller_cec.isReady);
+                        
+                        if (reqValid) {
                             this.controller_cec.send(data);
-                            res.status(200).send();
-                        } else {
-                            res.status(400).send();
-                        }
+                            res.status(200).json({ success: true });
+                        } else { res.status(400).json({ success: false }); }
+
                         break;
                     case 'ndi':
-                        res.status(200).send();
+                        let reqValid = (true);
+                        
+                        if (reqValid) {
+                            // set ndi function
+                            res.status(200).json({ success: true });
+                        } else { res.status(400).json({ success: false }); }
+
                         break;
                     default:
                         res.status(200).send();
