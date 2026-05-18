@@ -119,9 +119,13 @@ class NDPiCommandServer_Client extends EventEmitter {
                 const { id, data } = req.body;
                 switch (req.params.path) {
                     case 'cec':
-                        //this.controller_cec.send(BODY);
                         console.log('TEST (CEC)', data);
-                        res.status(200).send();
+                        if (typeof data === 'string' && this.controller_cec.isReady) {
+                            this.controller_cec.send(data);
+                            res.status(200).send();
+                        } else {
+                            res.status(400).send();
+                        }
                         break;
                     case 'ndi':
                         res.status(200).send();
