@@ -106,16 +106,23 @@ class NDPiCommandServer_Client extends EventEmitter {
                 else { res.status(400).json(commandRes); }
             });
 
+        // Internal API (v1)
         this.Routes
-            .route('/internal/api/v1')
-            .get('/cec', (req, res) => {
-                res.send('test cec');
+            .route('/internal/api/v1/:path')
+            .get((req, res) => {
+                res.status(403);
             })
-            .get('/cec1', (req, res) => {
-                res.send('test cec1');
-            })
-            .get('/cec', (req, res) => {
-                const command = req.params.cmd || null;
+            .post((req, res) => {
+                const PATH = req.params.path;
+                switch (PATH) {
+                    case 'cec':
+                        //
+                        break;
+                    case 'ndi':
+                        //
+                        break;
+                }
+
                 if (command && this.controller_cec.isReady) {
                     this.controller_cec.send(command);
                     res.send('200 OK');
