@@ -55,21 +55,6 @@ class NDPiCommandServer_Client extends EventEmitter {
                 res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
                 res.sendFile(path.join(__dirname, '..', 'index.html'));
             });
-            
-        this.Routes
-            .route('/api/ndi/?:src')
-            .get((req, res) => {
-                
-                // Get Current NDI Source Data
-            })
-            .post(async (req, res) => {
-                res.send('POST. No action performed.')
-                // Change NDI Source
-            })
-            .delete((req, res) => {
-                res.send('test');
-                // Stop NDI Viewer
-            });
 
         this.Routes
             .route('/api/v1/command')
@@ -81,10 +66,16 @@ class NDPiCommandServer_Client extends EventEmitter {
                     ...req.query,
                     id: randomUUID(),
                 });
-                
                 if (commandRes && commandRes.success)
-                     { res.status(200).json(commandRes); }
-                else { res.status(400).json(commandRes); }
+                    {
+                        res.status(200)
+                        res.json(commandRes);
+                    }
+                else
+                    {
+                        res.status(400)
+                        res.json(commandRes);
+                    }
             })
             .post(async (req, res) => {
                 console.log('[ client_api_server ] POST:', req.url);
@@ -93,10 +84,16 @@ class NDPiCommandServer_Client extends EventEmitter {
                     ...req.body,
                     id: randomUUID(),
                 });
-
                 if (commandRes && commandRes.success)
-                     { res.status(200).json(commandRes); }
-                else { res.status(400).json(commandRes); }
+                    {
+                        res.status(200)
+                        res.json(commandRes);
+                    }
+                else
+                    {
+                        res.status(400)
+                        res.json(commandRes);
+                    }
             });
 
         //  Internal API (v1)
@@ -105,28 +102,35 @@ class NDPiCommandServer_Client extends EventEmitter {
         //          BODY {data} of any type
         this.Routes
             .route('/api/v1/__internal/:path')
-            .get((req, res) => { res.status(403) })
+            .get((req, res) => { res.sendStatus(403) })
             .post((req, res) => {
                 const { id, data } = req.body;
                 const switch_path  = req.params.path;
 
                 console.log('TEST (internal API)', data, 'HOSTNAME:', req.hostname);
 
-                if (req.hostname !== 'localhost') { res.sendStatus(403).json({ status: 403, message: 'forbidden' }); }
+                if (req.hostname !== 'localhost')
+                    {
+                        res.status(403)
+                        res.json({ status: 403, message: 'forbidden' });
+                    }
 
                 let reqValid = false;
                 switch (switch_path) {
 
                     case 'cec':
                         reqValid = (typeof data === 'string' && this.controller_cec.isReady);
-
                         if (reqValid)
                             {
                                 this.controller_cec.send(data);
-                                res.sendStatus(200).json({ success: true });
+                                res.status(200)
+                                res.json({ success: true });
                             }
                         else
-                            { res.sendStatus(400).json({ success: false }); }
+                            {
+                                res.status(400)
+                                res.json({ success: false });
+                            }
 
                         break;
 
@@ -141,12 +145,14 @@ class NDPiCommandServer_Client extends EventEmitter {
                             { source = String(data); }
 
                         this.emit('start-ndi', `${source}`);
-                        res.sendStatus(200).json({ success: true, message: `NDI Source Set: ${source}` });
+                        res.status(200)
+                        res.json({ success: true, message: `NDI Source Set: ${source}` });
 
                         break;
 
                     default:
-                        res.sendStatus(200).end();
+                        res.status(200)
+                        res.end();
                         break;
                 }
             });
@@ -154,7 +160,8 @@ class NDPiCommandServer_Client extends EventEmitter {
 
     close() {
         this.WebSocketConnections.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) client.close();
+            if (client.readyState === WebSocket.OPEN)
+                { client.close() }
             this.WebSocketConnections.delete(client);
         });
         this.WebSocket.close();
@@ -167,39 +174,41 @@ class NDPiCommandServer_Client extends EventEmitter {
         let updateData = {};
         
         if (message.type)
-             { updateData.type = message.type; }
-        else { updateData.type = `show-${displayMode}`; }
+            { updateData.type = message.type; }
+        else
+            { updateData.type = `show-${displayMode}`; }
 
-        if (sendAll) {
-            updateData.serverIp = this.settings.get('ndpi_command_server_host');
-            updateData.thisDevice = {};
-            updateData.thisDevice.id = this.settings.get('device_id');
-            updateData.thisDevice.address = this.settings.get('device_ip');
-            updateData.thisDevice.name = this.settings.get('device_name');
-            updateData.service = {};
-            updateData.service.name = this.settings.get('device_type');
-            updateData.service.version = this.settings.get('ndpi_version');
-            console.log('[ client_api_server ] Sending update to GUI');
-        }
+        if (sendAll)
+            {
+                updateData.serverIp = this.settings.get('ndpi_command_server_host');
+                updateData.thisDevice = {};
+                updateData.thisDevice.id = this.settings.get('device_id');
+                updateData.thisDevice.address = this.settings.get('device_ip');
+                updateData.thisDevice.name = this.settings.get('device_name');
+                updateData.service = {};
+                updateData.service.name = this.settings.get('device_type');
+                updateData.service.version = this.settings.get('ndpi_version');
+                console.log('[ client_api_server ] Sending update to GUI');
+            }
         
         this.WebSocketConnections.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify(updateData));
-            }
+            if (client.readyState === WebSocket.OPEN)
+                { client.send(JSON.stringify(updateData)) }
         });
     }
 
     updateDisplay(message = {}) {
-        if (!message.type) return;
+        if (!message.type)
+            { return }
         this.WebSocketConnections.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify(message));
-            }
+            if (client.readyState === WebSocket.OPEN)
+                { client.send(JSON.stringify(message)) }
         });
     }
 
     setCecController(CecController) {
-        if (!CecController) return;
+        if (!CecController)
+            { return }
         this.controller_cec = CecController;
         console.log('[ client_api_server ] CEC Controller Set');
     }
