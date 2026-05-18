@@ -81,7 +81,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.Routes
             .route('/api/v1/command')
             .get(async (req, res) => {
-                // to use: http://<ip>:<port>/api/command/set-source?data=EVAN-MSI (OBS PGM)
+                // to use: http://<ip>:<port>/api/v1/command?type=set-source&data=EVAN-MSI (OBS PGM)
                 console.log('[ client_api_server ] GET:', req.url);
 
                 const commandRes = await processCommand({

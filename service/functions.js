@@ -65,7 +65,7 @@ const net = require('net');
                 // Physical Display Commands
                 case 'send-cec':
                     console.log(`PROCESSING: ${command.type}`);
-                    const fetchRes = await fetch('/internal/api/v1/cec', {
+                    const fetchRes = await fetch('http://localhost:3080/internal/api/v1/cec', {
                         method: 'POST',
                         body: JSON.stringify({ BODY: command.data })
                     });
