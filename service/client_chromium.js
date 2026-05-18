@@ -8,7 +8,6 @@ class ChromiumOverlayDisplay extends EventEmitter {
         this.service = null;
         this.settings = fsData;
         this.homeDirectory = path.join(__dirname, '..', '..');
-        this.enabled = true;
         this.start();
     }
 
@@ -19,16 +18,19 @@ class ChromiumOverlayDisplay extends EventEmitter {
     }
 
     close() {
-        this.enabled = false;
-        if (this.service)
-            { this.service.kill('SIGTERM') }
+        require('node:child_process').exec('killall chromium', (error) => {
+            if (error)
+            { console.log('🔴 [ client_chromium ][ ERROR ] killall') }
+        });
+        this.service = null;
+        // if (this.service)
+        //     { this.service.kill('SIGKILL') }
     }
 
     launch() {
-        if (this.service) return;
-        this.enabled = true;
+        if (this.service)
+            { return }
         const connectionPort = this.settings.get('local_port_number_api');
-
         let commandLine = `/usr/bin/chromium \
             --kiosk \
             --no-default-browser-check \
@@ -64,6 +66,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
 
         this.service.on('close', () => {
             this.service = null;
+            console.log('[ client_chromium ] Closed')
             this.emit('close');
         });
         
