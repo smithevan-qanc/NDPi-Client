@@ -106,7 +106,10 @@ class NDPiCommandServer_Client extends EventEmitter {
                 else { res.status(400).json(commandRes); }
             });
 
-        // Internal API (v1)
+        //  Internal API (v1)
+        //      Required Inputs
+        //          PATH '/internal/api/v1/{PATH}'
+        //          BODY {data} of any type
         this.Routes
             .route('/internal/api/v1/:path')
             .get((req, res) => {
@@ -114,21 +117,27 @@ class NDPiCommandServer_Client extends EventEmitter {
             })
             .post((req, res) => {
                 const PATH = req.params.path;
+                const { BODY } = req.body;
                 switch (PATH) {
                     case 'cec':
-                        //
+                        //this.controller_cec.send(BODY?.command);
+                        console.log('TEST (CEC)', BODY?.command);
                         break;
                     case 'ndi':
                         //
                         break;
+                    default:
+                        //
+                        break;
                 }
+                res.status(200);
 
-                if (command && this.controller_cec.isReady) {
-                    this.controller_cec.send(command);
-                    res.send('200 OK');
-                } else {
-                    res.send(`${this.controller_cec.isReady ? '400 Bad Request' : '500 Unavailable'}`)
-                }
+                // if (command && this.controller_cec.isReady) {
+                //     this.controller_cec.send(command);
+                //     res.send('200 OK');
+                // } else {
+                //     res.send(`${this.controller_cec.isReady ? '400 Bad Request' : '500 Unavailable'}`)
+                // }
             });
     }
 

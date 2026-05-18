@@ -12,7 +12,7 @@ const net = require('net');
             let command = {
                 id:     message?.id,     // UUID of command for tracking
                 type:   message?.type,
-                data:   message?.data,
+                data:   message?.data,  // data can be of any type
             };
             let response = {
                 id:         command.id,
@@ -65,8 +65,14 @@ const net = require('net');
                 // Physical Display Commands
                 case 'send-cec':
                     console.log(`PROCESSING: ${command.type}`);
-
-                    response.success = true;
+                    const fetchRes = await fetch('/internal/api/v1/cec', {
+                        method: 'POST',
+                        body: JSON.stringify({ BODY: command.data })
+                    });
+                    if (fetchRes.ok)
+                         { response.success = true; }
+                    else { response.success = false; }
+                    console.log('Fetch RES', fetchRes);
                     return response;
                     break;
                 // case '':
