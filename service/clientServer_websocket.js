@@ -17,56 +17,64 @@ class ClientServerWebSocket extends EventEmitter {
 
         this.reconnectTimer = null;
 
-        if (this.ndpiServerIp && this.ndpiServerPort) {
-            this.connect();
-        }
+        if (this.ndpiServerIp && this.ndpiServerPort)
+            { this.connect() }
     }
     connect() {
-        if (!this.ndpiServerIp || this.ndpiServerIp.includes('localhost')) {
-            this.scheduleReconnect();
-            return;
-        }
+        if (!this.ndpiServerIp || this.ndpiServerIp.includes('localhost'))
+            {
+                this.scheduleReconnect();
+                return;
+            }
 
         this.enabled = true;
         
         // Clean up existing connection
-        if (this.socket) {
-            try { this.socket.close(); } catch {}
-            this.socket = null;
-        }
-        if (this.reconnectTimer) {
-            clearTimeout(this.reconnectTimer);
-            this.reconnectTimer = null;
-        }
+        if (this.socket)
+            {
+                try { this.socket.close(); } catch {}
+                this.socket = null;
+            }
+        if (this.reconnectTimer)
+            {
+                clearTimeout(this.reconnectTimer);
+                this.reconnectTimer = null;
+            }
 
         console.log('[ clientServer_websocket ] Connecting');
-        try {
+        try
+        {
             const wsUrl = `ws://${this.ndpiServerIp}:${this.ndpiServerPort}/ws/client`;
             this.socket = new WebSocket(wsUrl);
-        } catch (error) {
-            console.log('[ clientServer_websocket ] Connection Failed', error);
+        }
+        catch (error)
+        {
+            console.log('🔴 [ clientServer_websocket ] Connection Failed', error);
             this.scheduleReconnect();
         }
             
         this.socket.on('open', () => {
             console.log(`[ clientServer_websocket ] Connected NDPi Server`);
-            this.server.broadcastToDisplay({ type: 'ndpi-server-connected' });
+            this.server.broadcastToDisplay({ type: 'ndpi-server-connected' }, true);
             this.emit('connected');
         });
         
         this.socket.on('message', (data) => {
-            try {
+            try
+            {
                 const message = JSON.parse(data);
                 console.log('[ clientServer_websocket ][ Message ] NDPi Server: Message:', message);
                 processCommand(message);
-            } catch (error) {
-                console.log('[ clientServer_websocket ][ Error ] NDPi Server: Message:', data);
-                console.log('[ clientServer_websocket ][ Error ] NDPi Server: Error:', error);
+            }
+            catch (error)
+            {
+                console.log('🔴 [ clientServer_websocket ][ Error ] NDPi Server: Message:', data);
+                console.log('🔴 [ clientServer_websocket ][ Error ] NDPi Server: Error:', error);
             }
         });
         
         this.socket.on('error', (error) => {
-            console.log('[ clientServer_websocket ] NDPi Server Connection Error', error);
+            console.log('🔴 [ clientServer_websocket ][ Error ] NDPi Server Connection', error);
         });
         
         this.socket.on('close', () => {
@@ -77,36 +85,42 @@ class ClientServerWebSocket extends EventEmitter {
 
     close() {
         this.enabled = false;
-        if (this.socket) {
-            if (this.socket.readyState === WebSocket.OPEN) this.socket.close();
-        }
+        if (this.socket)
+            {
+                if (this.socket.readyState === WebSocket.OPEN)
+                    { this.socket.close() }
+            }
         this.socket = null;
     }
 
     scheduleReconnect(ms = 5000) {
-        if (this.reconnectTimer) {
-            clearTimeout(this.reconnectTimer);
-            this.reconnectTimer = null;
-        }
-        if (this.enabled) {
-            this.reconnectTimer = setTimeout(() => {
-                if (this.enabled) this.connect();
+        if (this.reconnectTimer)
+            {
+                clearTimeout(this.reconnectTimer);
                 this.reconnectTimer = null;
-            }, ms);
-        }
+            }
+        if (this.enabled)
+            {
+                this.reconnectTimer = setTimeout(() => {
+                    if (this.enabled)
+                        { this.connect() }
+                    this.reconnectTimer = null;
+                }, ms);
+            }
     }
 
     send(message = {}) {
-        if (!this.enabled) return;
-        if (!message.type) {
-            console.log("[ clientServer_websocket ][ Error ] Missing 'message.type'. Message:", message);
-            return;
-        }
-        if (this.socket && this.socket.readyState <= 1) {
-            this.socket.send(JSON.stringify(message));
-        } else {
-            console.log("[ clientServer_websocket ][ Error ] Unable to send message.");
-        }
+        if (!this.enabled)
+            { return }
+        if (!message.type)
+            {
+                console.log("🔴 [ clientServer_websocket ][ Error ] Missing 'message.type'. Message:", message);
+                return;
+            }
+        if (this.socket && this.socket.readyState <= 1)
+            { this.socket.send(JSON.stringify(message)) }
+        else
+            { console.log("🔴 [ clientServer_websocket ][ Error ] Unable to send message.") }
     }
 
 }

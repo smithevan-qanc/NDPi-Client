@@ -68,8 +68,8 @@ class ChromiumOverlayDisplay extends EventEmitter {
         });
         
         this.service.on('error', (err) => {
-            console.log('[ client_chromium ][ Error ]', err);
-            
+            console.log('🔴 [ client_chromium ][ Error ]', err);
+
         });
     }
 }

@@ -43,7 +43,8 @@ class FileSystemMonitor extends EventEmitter {
         console.log(`[ client_fs ] NDPi Data Management Module - ${this.#pgmVersion} - ${this.#pgmVersionDate}`);
 
         // Create directory if it doesn't exist.
-        if (!fs.existsSync(this.dataDir)) { fs.mkdirSync(this.dataDir, { recursive: true }); }
+        if (!fs.existsSync(this.dataDir))
+            { fs.mkdirSync(this.dataDir, { recursive: true }) }
 
         // Set the deviceId from either serial-number or machine-id
         let deviceId = '';
@@ -51,27 +52,31 @@ class FileSystemMonitor extends EventEmitter {
             path.join('/sys','firmware','devicetree','base','serial-number'),
             path.join('/etc','machine-id'),
         ];
-        if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1])) {
-            try {
-                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
-                console.log('[ client_fs ][ DEVICE ID ] ',  deviceId);
+        if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1]))
+            {
+                try
+                {
+                    deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
+                    console.log('[ client_fs ][ DEVICE ID ] ',  deviceId);
+                }
+                catch 
+                {
+                    deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
+                    console.log('[ client_fs ][ FALLBACK DEVICE ID ] ', deviceId);
+                }
             }
-            catch {
-                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
-                console.log('[ client_fs ][ FALLBACK DEVICE ID ] ', deviceId);
-            }
-        } else { // MacOS Compatability
-            await new Promise((resolve) => {
+        else // MacOS Compatability
+            { await new Promise((resolve) => {
                 exec(`ioreg -l | grep IOPlatformSerialNumber | awk '{print $4}' | tr -d '"'`, (error, stdout) => {
                     if (!error) deviceId = stdout.trim();
                     resolve();
                 });
-            });
-        }
+            }) }
 
         // Map file names and values with to standard defaults.
         this.#fileMap = new Map();
-        const files = [{ 
+        const files = [
+            { 
                 key: "device_name",
                 value: `${this.defaultDeviceName}`
             }, {
@@ -160,7 +165,6 @@ class FileSystemMonitor extends EventEmitter {
                 value: ``
             },
         ];
-
         // Files that will NOT initialize with their previously stored values.
         const retainDefaultValue = [
             'ndpi_status_ndi',
@@ -174,54 +178,56 @@ class FileSystemMonitor extends EventEmitter {
             'output_device_cec_status_power',
             'output_device_cec_active_source',
         ];
-
-
-        for (const { key, value } of files) {
-            const filePath = path.join(this.dataDir, key);
-            /**
-             * 
-             *  If the @key is within the retainDefaultValue Array,
-             *      then change the @getValueFromFile flag to false.
-             *      then overwrite the stored value with the default value.
-             * 
-             *  This is used to prevent reading value from file.
-             * 
-             */
-            let getValueFromFile = true;
-            if (retainDefaultValue.includes(key)) getValueFromFile = false;
-            
-            try {
-                if (fs.existsSync(filePath) && getValueFromFile) {
-                    const currentValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trimEnd();
-                    this.#fileMap.set(key, currentValue);
-                } else {
-                    fs.writeFileSync(filePath, value, 'utf8');
-                    this.#fileMap.set(key, value);
+        /**
+         * 
+         *  If the @key is within the retainDefaultValue Array,
+         *      then change the @getValueFromFile flag to false.
+         *      then overwrite the stored value with the default value.
+         * 
+         *  This is used to prevent reading value from file.
+         * 
+         */
+        for (const { key, value } of files)
+            {
+                const filePath = path.join(this.dataDir, key);
+                let getValueFromFile = true;
+                if (retainDefaultValue.includes(key))
+                    { getValueFromFile = false }
+                try
+                {
+                    if (fs.existsSync(filePath) && getValueFromFile)
+                        {
+                            const currentValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trimEnd();
+                            this.#fileMap.set(key, currentValue);
+                        }
+                    else
+                        {
+                            fs.writeFileSync(filePath, value, 'utf8');
+                            this.#fileMap.set(key, value);
+                        }
                 }
-            } catch (err) {
-                console.error(`[ client_fs ] Error Saving File: Name:${key}, Value: ${value}`, err);
-            }
-        };
+                catch (err)
+                { console.log(`🔴 [ client_fs ][ Error ] Saving File: Name:${key}, Value: ${value}`, err) }
+            };
 
         // Call updateLocalIp() right away. It will call poll() after.
-        setTimeout(() => {
-            this.updateLocalIp();
-        }, 500);
+        setTimeout(() => { this.updateLocalIp() }, 500);
     }
 
     start() {
         fs.watch(this.dataDir, async (event, filename) => {
-            if (!this.#fileMap.has(filename)) return;
-
-            if (event === 'change') {
-                const currentValue = this.#fileMap.get(filename);
-                const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').replace(/\0/g, '').trimEnd();
-
-                if (currentValue !== fsValue) {
-                    this.#fileMap.set(filename, fsValue);
-                    this.fsEvent(filename, fsValue);
+            if (!this.#fileMap.has(filename))
+                { return }
+            if (event === 'change')
+                {
+                    const currentValue = this.#fileMap.get(filename);
+                    const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').replace(/\0/g, '').trimEnd();
+                    if (currentValue !== fsValue)
+                        {
+                            this.#fileMap.set(filename, fsValue);
+                            this.fsEvent(filename, fsValue);
+                        }
                 }
-            }
         });
         this.startDrmMonitor();
     }
@@ -236,57 +242,60 @@ class FileSystemMonitor extends EventEmitter {
     poll(interval = 10000) {
         this.#fsPoll = setInterval(() => {
             this.updateLocalIp();
+            // Add other functions to poll
         }, interval);
     }
 
     get(fileName) {
-        if (!fileName || !this.#fileMap.has(fileName)) return null;
+        if (!fileName || !this.#fileMap.has(fileName))
+            { return null }
         return this.#fileMap.get(fileName);
     }
 
     put(fileName, data = '') {
-        if (!fileName || !this.#fileMap.has(fileName)) return;
-        try {
-            fs.writeFileSync(path.join(this.dataDir, fileName), data.trimEnd(), 'utf8');
-        } catch (error) {
-            console.error('[ client_fs ] Error Saving to FileSystem');
-        }
+        if (!fileName || !this.#fileMap.has(fileName))
+            { return }
+        try
+        { fs.writeFileSync(path.join(this.dataDir, fileName), data.trimEnd(), 'utf8') }
+        catch (error)
+        { console.error('🔴 [ client_fs ][ Error ] Saving to FileSystem') }
     }
     
-
     fsEvent(name, value, debounceMs = 500) {
         const last = this.debounceMap.get(name) || 0;
         const now = Date.now();
-
-        if (now - last < debounceMs) return;
-
+        if (now - last < debounceMs)
+            { return }
         this.debounceMap.set(name, now);
         this.queue.push({ name, value });
         this._flushQueue();
     }
 
     _flushQueue() {
-        while (this.queue.length > 0) {
-            const { name, value } = this.queue.shift();
-            console.log(`[ client_fs ][ UPDATE ] '${name}' is now '${value}'`);
-            this.emit(name, value);
-        }
+        while (this.queue.length > 0)
+            {
+                const { name, value } = this.queue.shift();
+                console.log(`[ client_fs ][ UPDATE ] '${name}' is now '${value}'`);
+                this.emit(name, value);
+            }
     }
 
     async updateLocalIp() {
         const fileName = 'device_ip';
         const updateValue = await getLocalIp(this.firstRun);
-        if (updateValue) {
-            const storedValue = this.#fileMap.get(fileName);
-
-            if (updateValue !== storedValue) this.put(fileName, updateValue);
-            if (this.firstRun) {
-                this.poll();
-                this.emit('ready');
-                this.firstRun = false;
-                this.start();
+        if (updateValue)
+            {
+                const storedValue = this.#fileMap.get(fileName);
+                if (updateValue !== storedValue)
+                    { this.put(fileName, updateValue) }
+                if (this.firstRun)
+                    {
+                        this.poll();
+                        this.emit('ready');
+                        this.firstRun = false;
+                        this.start();
+                    }
             }
-        }
     }
 
     startDrmMonitor() {
@@ -296,30 +305,21 @@ class FileSystemMonitor extends EventEmitter {
         // const pth_thermal_cpuTemperature = path.join('/sys','class','thermal','thermal_zone0','temp');
 
         this.drmMonitor = require('node:child_process').spawn('udevadm', ['monitor', '--subsystem-match=drm', '--kernel']);
-        let udevBuffer = '';
 
         this.drmMonitor.stdout.on('data', (data) => {
-            udevBuffer += data.toString();
-            let lines = udevBuffer.split('\n');
-            udevBuffer = lines.pop();
-
             const HDMI_1 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1', 'status'), 'utf8').trimEnd();
             const HDMI_2 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2', 'status'), 'utf8').trimEnd();
-            console.log(`[ client_fs ][ HDMI ] HDMI 1: ${HDMI_1}, HDMI 2: ${HDMI_2}`);
-
-            if (HDMI_1.startsWith('connected')) {
-                this.put('output_device_port', 'HDMI-1');
-            } else if (HDMI_2.startsWith('connected')) {
-                this.put('output_device_port', 'HDMI-2');
-            }
+            if (HDMI_1.startsWith('connected'))
+                { this.put('output_device_port', 'HDMI-1') }
+            else if (HDMI_2.startsWith('connected'))
+                { this.put('output_device_port', 'HDMI-2') }
         });
 
         this.drmMonitor.on('error', () => {
-            console.log('[ client_fs ][ ERROR ] udevadm not available, DRM monitor disabled');
+            console.log("🔴 [ client_fs ][ Error ] 'udevadm' not available, DRM monitor disabled");
             this.drmMonitor = null;
         });
     }
-
 }
 
 module.exports = FileSystemMonitor;

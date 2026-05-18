@@ -58,7 +58,7 @@ class NDPiBonjourService {
 
         this.service = bonjour.publish(options);
         this.service.on('error', (err) => {
-            console.log('[ client_bonjour ] Error:', err.message);
+            console.log('🔴 [ client_bonjour ][ Error ]', err.message);
         });
     }
 

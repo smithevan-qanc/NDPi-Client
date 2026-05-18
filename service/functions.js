@@ -23,12 +23,13 @@ const path = require('path');
                 data:       {}
             };
 
-            if (!command.type) {
-                response.data.message = "Missing 'type'";
-                return response;
-            }
-            
-            switch (command.type) {
+            if (!command.type)
+                {
+                    response.data.message = "Missing 'type'";
+                    return response;
+                }
+            switch (command.type)
+            {
                 case 'ping':
                     console.log(`PROCESSING: ${command.type}`);
                     response.success = true;
@@ -38,10 +39,13 @@ const path = require('path');
                 // Visual Display
                 case 'show-blank':
                     console.log(`PROCESSING: ${command.type}`);
-                    try {
+                    try
+                    {
                         fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndpi_status_no_source_display_mode'), 'blank', 'utf8');
                         response.success = true;
-                    } catch (error) {
+                    }
+                    catch (error)
+                    {
                         response.data.message = error;
                         response.success = false;
                     }
@@ -49,11 +53,13 @@ const path = require('path');
                     break;
                 case 'show-overlay':
                     console.log(`PROCESSING: ${command.type}`);
-                    try {
+                    try
+                    {
                         fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndpi_status_no_source_display_mode'), 'overlay', 'utf8');
                         response.success = true;
                     }
-                    catch (error) {
+                    catch (error)
+                    {
                         response.data.message = error;
                         response.success = false;
                     }
@@ -69,17 +75,20 @@ const path = require('path');
                     break;
                 case 'set-source':
                     console.log(`PROCESSING: ${command.type}`);
-                    try {
+                    try
+                    {
                         const f = await fetch('http://localhost:3080/api/v1/__internal/ndi', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(command)
                         });
                         if (f.ok)
-                             { response.success = true; }
-                        else { response.success = false; }
+                            { response.success = true }
+                        else
+                            { response.success = false }
                     }
-                    catch (error) {
+                    catch (error)
+                    {
                         response.data.message = error;
                         response.success = false;
                     }
@@ -89,15 +98,17 @@ const path = require('path');
                 // Physical Display
                 case 'send-cec':
                     console.log(`PROCESSING: ${command.type}`);
-                    try {
+                    try
+                    {
                         const f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(command)
                         });
                         if (f.ok)
-                             { response.success = true; }
-                        else { response.success = false; }
+                            { response.success = true }
+                        else
+                            { response.success = false }
                     }
                     catch (error) {
                         response.data.message = error;
@@ -170,19 +181,21 @@ const path = require('path');
     /** COMPLETED */
 
         async function getLocalIp(testForNetwork = false) {
-            if (testForNetwork) {
-                console.log('[ functions ] Waiting for network online...');
-                await waitForNetwork();
-            }
-            const interfaces = os.networkInterfaces();
-            for (const name of Object.keys(interfaces)) {
-                for (const iface of interfaces[name]) {
-                    const isIPv4 = iface.family === 'IPv4' || iface.family === 4;
-                    if (isIPv4 && !iface.internal) {
-                        return iface.address || null;
-                    }
+            if (testForNetwork)
+                {
+                    console.log('[ functions ] Waiting for network online...');
+                    await waitForNetwork();
                 }
-            }
+            const interfaces = os.networkInterfaces();
+            for (const name of Object.keys(interfaces))
+                {
+                    for (const iface of interfaces[name])
+                        {
+                            const isIPv4 = iface.family === 'IPv4' || iface.family === 4;
+                            if (isIPv4 && !iface.internal)
+                                { return iface.address || null }
+                        }
+                }
             return null;
         }
 
