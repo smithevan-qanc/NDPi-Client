@@ -5,30 +5,30 @@ const { EventEmitter } = require('events');
 class ChromiumOverlayDisplay extends EventEmitter {
     constructor(fsData) {
         super();
-        
         this.service = null;
         this.settings = fsData;
         this.homeDirectory = path.join(__dirname, '..', '..');
         this.enabled = true;
         this.start();
     }
+
     start() {
-        if (!this.enabled) return;
-        if (this.service) this.close();
-        setTimeout(() => { this.launch(); }, 500);
+        if (this.service)
+            { this.close() }
+        setTimeout(() => { this.launch() }, 1500);
     }
 
     close() {
         this.enabled = false;
-        if (this.service) this.service.kill();
-        this.service = null;
+        if (this.service)
+            { this.service.kill('SIGTERM') }
     }
 
     launch() {
         if (this.service) return;
         this.enabled = true;
-        
         const connectionPort = this.settings.get('local_port_number_api');
+
         let commandLine = `/usr/bin/chromium \
             --kiosk \
             --no-default-browser-check \
@@ -62,15 +62,14 @@ class ChromiumOverlayDisplay extends EventEmitter {
             },
         });
 
-        this.service.on('exit', () => {
+        this.service.on('close', () => {
             this.service = null;
-            console.log(`[ client_chromium ] Relaunching...`);
             this.emit('close');
-            //this.start();
         });
         
         this.service.on('error', (err) => {
             console.log('[ client_chromium ][ Error ]', err);
+            
         });
     }
 }

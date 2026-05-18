@@ -40,13 +40,9 @@ class NDPi {
             data
                 .toString()
                 .split(/\r?\n/)
-                .forEach((line) => {
-                console.log(line);
-            });
+                .forEach((line) => { console.log(line) });
         });
-        startup.on('exit', () => {
-            this.startFsData();
-        });
+        startup.on('exit', () => { this.startFsData(); });
     }
 
     startFsData() {
@@ -61,12 +57,14 @@ class NDPi {
         //  NDI Source Target
         this.settings.on('ndpi_status_ndi_source_target', (data) => {
             const output = String(data || 'none');
-            if (output !== this.targetSource) {
-                this.targetSource = output;
-                if (String(this.targetSource).toLowerCase() !== 'none')
-                     { this.startNdiReceiver(); }
-                else { this.ndiReceiver.close(); }
-            }
+            if (output !== this.targetSource)
+                {
+                    this.targetSource = output;
+                    if (String(this.targetSource).toLowerCase() !== 'none')
+                        { this.startNdiReceiver(); }
+                    else
+                        { this.ndiReceiver.close(); }
+                }
         });
 
         //  No Source Display Mode
@@ -110,14 +108,10 @@ class NDPi {
 
             this.server_api.updateDisplay({
                 type: 'update-details',
-                thisDevice: {
-                    name: output
-                }
+                thisDevice: { name: output }
             });
-
             this.service_bonjour.deviceName = output;
             this.service_bonjour._tryPublish();
-
             this.controller_cec.deviceName = output;
             this.controller_cec.send('q');
         });
@@ -129,11 +123,8 @@ class NDPi {
 
             this.server_api.updateDisplay({
                 type: 'update-details',
-                thisDevice: {
-                    address: output
-                }
+                thisDevice: { address: output }
             });
-
             this.service_bonjour.localIp = output;
             this.service_bonjour._tryPublish();
         });
@@ -151,6 +142,7 @@ class NDPi {
         this.settings.on('output_device_port', (data) => {
             const output = String(data || '').trim() || null;
             if (!output) return;
+
             setTimeout(() => { this.setDisplayResolution(); }, 500);
         });
 
@@ -169,26 +161,33 @@ class NDPi {
     startApi() {
         const NDPiCommandServer_Client = require('./service/client_api_server.js');
         this.server_api = new NDPiCommandServer_Client(this.settings);
+
         this.server_api.on('online', () => {
-            if (!this.isInitialized) {
-                this.startMdns();
-                this.startChromium();
-                this.openCecController();
-                this.connectToNDPiServer();
-                this.targetSource = this.settings.get('ndpi_status_ndi_source_target') || null;
-                if (this.targetSource && String(this.targetSource).toLowerCase !== 'none') this.startNdiReceiver();
-                this.isInitialized = true;
-            } else {
-                this.service_bonjour.commandPort = output;
-                this.service_bonjour._tryPublish();
-                try { this.service_chromium?.close(); } catch {} finally { 
-                    this.service_chromium = null;
+            if (!this.isInitialized)
+                {
+                    this.startMdns();
                     this.startChromium();
+                    this.openCecController();
+                    this.connectToNDPiServer();
+                    this.targetSource = this.settings.get('ndpi_status_ndi_source_target');
+                    if (String(this.targetSource || 'none').toLowerCase() !== 'none')
+                        { setTimeout(() => { this.startNdiReceiver(); }, 5000); }
+                    this.isInitialized = true;
                 }
-            }
+            else 
+                {
+                    this.service_bonjour.commandPort = output;
+                    this.service_bonjour._tryPublish();
+                    try { this.service_chromium?.close(); } catch {} finally { 
+                        this.service_chromium = null;
+                        this.startChromium();
+                    }
+                }
         });
+
         this.server_api.on('start-ndi', (data) => {
-            const output = String(data).trim() || 'none';
+            const output = String(data || 'none').trim();
+
             this.targetSource = output;
             this.startNdiReceiver();
         });
@@ -205,42 +204,51 @@ class NDPi {
             this.service_chromium = new ChromiumOverlayDisplay(this.settings);
         } else {
             console.log('[ client_chromium ][ index ] Skipping Chromium display launch.');
-            console.log('[ client_chromium ][ index ]  - Missing binary: /usr/bin/chromium');
+            console.log('[ client_chromium ][ index ] -- Missing binary: /usr/bin/chromium');
         }
     }
 
     openCecController() {
         const CecController = require('./service/client_cec.js');
         this.controller_cec = new CecController(this.settings);
-        this.controller_cec.on('event', (data) => {
-            console.log(`[ client_cec ][ index ]`, data);
-        });
+        console.log('test 🔴');
+
         this.controller_cec.on('ready', () => {
             this.server_api.setCecController(this.controller_cec);
         });
-        this.controller_cec.on('error_log', (data) => {
+
+        this.controller_cec.on('event', (data) => {
             console.log(`[ client_cec ][ index ]`, data);
         });
+        
+        this.controller_cec.on('error_log', (data) => {
+            console.log(`[ client_cec ][ index ][ 🔴Error ]`, data);
+        });
+
         this.controller_cec.on('timeout', (data) => {
-            console.log(`[ client_cec ][ index ] ${String(data)}`);
+            console.log(`[ client_cec ][ index ] ${String(data || 'CEC Unavailable')}`);
             this.controller_cec.quit();
             this.controller_cec = null;
         });
     }
 
     startNdiReceiver() {
-        if (!this.targetSource) return;
-        if (this.ndiReceiver) {
-            this.ndiReceiver.close();
-            this.ndiReceiver = null;
-        }
+        if (!this.targetSource)
+            { return; }
+        if (this.ndiReceiver)
+            {
+                this.ndiReceiver.close();
+                this.ndiReceiver = null;
+            }
+
         const NDI_Receiver_v2 = require('./service/client_ndiReceiver.js');
         this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.targetSource, 'ndi_receiver_v2');
+
         this.ndiReceiver.on('connected', () => {
-            this.service_chromium.service.kill();
-            this.service_chromium.service = null;
             console.log('[ client_ndiReceiver ][ index ] Receiver Started');
+            this.service_chromium.close();
         });
+
         this.ndiReceiver.on('close', () => {
             this.service_chromium.launch();
             this.ndiReceiver = null;

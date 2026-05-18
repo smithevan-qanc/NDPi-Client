@@ -113,9 +113,10 @@ class NDPiCommandServer_Client extends EventEmitter {
                 console.log('TEST (internal API)', data, 'HOSTNAME:', req.hostname);
 
                 if (req.hostname !== 'localhost') { res.sendStatus(403).json({ status: 403, message: 'forbidden' }); }
-                
+
                 let reqValid = false;
                 switch (switch_path) {
+
                     case 'cec':
                         reqValid = (typeof data === 'string' && this.controller_cec.isReady);
 
@@ -128,6 +129,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                             { res.sendStatus(400).json({ success: false }); }
 
                         break;
+
                     case 'ndi':
                         let source;
 
@@ -142,8 +144,8 @@ class NDPiCommandServer_Client extends EventEmitter {
                         res.sendStatus(200).json({ success: true, message: `NDI Source Set: ${source}` });
 
                         break;
+
                     default:
-                        
                         res.sendStatus(200).end();
                         break;
                 }
