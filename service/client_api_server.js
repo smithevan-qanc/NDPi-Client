@@ -114,10 +114,10 @@ class NDPiCommandServer_Client extends EventEmitter {
             .route('/api/v1/__internal/:path')
             .get((req, res) => { res.status(403) })
             .post((req, res) => {
-                console.log('TEST (internal API)', data, 'HOST:', req.host, 'HOSTNAME:', req.hostname);
-
                 const { id, data } = req.body;
                 const switch_path = req.params.path;
+
+                console.log('TEST (internal API)', data, 'HOST:', req.host, 'HOSTNAME:', req.hostname);
 
                 switch (switch_path) {
                     case 'cec':
