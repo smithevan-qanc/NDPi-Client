@@ -138,8 +138,9 @@ class NDPiCommandServer_Client extends EventEmitter {
                             source = String(data);
                         }
                         this.emit('start-ndi', `${source}`);
-                        res.send(200).json({ success: true, message: `NDI Source Set: ${source}` });
-                        
+                        res.status(200)
+                            .json({ success: true, message: `NDI Source Set: ${source}` });
+
                         break;
                     default:
                         res.status(200).send();
