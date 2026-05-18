@@ -67,7 +67,8 @@ const net = require('net');
                     console.log(`PROCESSING: ${command.type}`);
                     const fetchRes = await fetch('http://localhost:3080/internal/api/v1/cec', {
                         method: 'POST',
-                        body: JSON.stringify(command.data)
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(command)
                     });
                     if (fetchRes.ok)
                          { response.success = true; }
