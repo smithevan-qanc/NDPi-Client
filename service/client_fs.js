@@ -40,7 +40,7 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     async init() {
-        console.log(`[ client_fs ] NDPi Data Management Module - ${this.#pgmVersion} - ${this.#pgmVersionDate}`);
+        console.log(`[ client_fs ] NDPi Data Management Module - v${this.#pgmVersion} - ${this.#pgmVersionDate}`);
 
         // Create directory if it doesn't exist.
         if (!fs.existsSync(this.dataDir))
@@ -57,7 +57,7 @@ class FileSystemMonitor extends EventEmitter {
                 try
                 {
                     deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
-                    console.log('[ client_fs ][ DEVICE ID ] ',  deviceId);
+                    console.log('[ client_fs ][ DEVICE ID ]',  deviceId);
                 }
                 catch 
                 {
@@ -275,7 +275,7 @@ class FileSystemMonitor extends EventEmitter {
         while (this.queue.length > 0)
             {
                 const { name, value } = this.queue.shift();
-                console.log(`[ client_fs ][ UPDATE ] '${name}' is now '${value}'`);
+                console.log(`[ client_fs ][ UPDATE ] '${name}' ==> '${value}'`);
                 this.emit(name, value);
             }
     }

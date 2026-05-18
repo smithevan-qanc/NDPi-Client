@@ -288,52 +288,14 @@ class NDPi {
         status.ndiInfo.displayName = this.settings.get('output_framerate_current');
         status.ndiInfo.connectedAt = this.settings.get('ndpi_status_ndi_source_connected_time');
         status.status = this.settings.get('ndpi_status_ndi');
-        status.systemStats = this.getSystemStats();
-
-        this.wsConnection_ndpiServer.send(status);
-    }
-
-    getSystemStats() {
-        const stats = {
+        status.systemStats = {
             cpu: 0,
             memory: { used: 0, total: 0, percent: 0 },
             temperature: 0,
             uptime: 0
         };
-        try
-        {
-            // CPU usage - read from /proc/stat
-            const cpuData = fs.readFileSync('/proc/stat', 'utf8').split('\n')[0].split(/\s+/);
-            const idle = parseInt(cpuData[4]);
-            const total = cpuData.slice(1, 8).reduce((a, b) => a + parseInt(b), 0);
-            
-            if (this.lastCpuStats)
-                {
-                    const idleDiff = idle - this.lastCpuStats.idle;
-                    const totalDiff = total - this.lastCpuStats.total;
-                    stats.cpu = totalDiff > 0 ? Math.round((1 - idleDiff / totalDiff) * 100) : 0;
-                }
-            this.lastCpuStats = { idle, total };
-            
-            // Memory usage - read from /proc/meminfo
-            const memInfo = fs.readFileSync('/proc/meminfo', 'utf8');
-            const memTotal = parseInt(memInfo.match(/MemTotal:\s+(\d+)/)[1]) / 1024; // MB
-            const memAvailable = parseInt(memInfo.match(/MemAvailable:\s+(\d+)/)[1]) / 1024; // MB
-            stats.memory.total = Math.round(memTotal);
-            stats.memory.used = Math.round(memTotal - memAvailable);
-            stats.memory.percent = Math.round((stats.memory.used / stats.memory.total) * 100);
-            
-            // Temperature - read from thermal zone
-            const tempFile = '/sys/class/thermal/thermal_zone0/temp';
-            if (fs.existsSync(tempFile))
-                { stats.temperature = parseInt(fs.readFileSync(tempFile, 'utf8')) / 1000 }
-            
-            // System uptime
-            const uptimeSeconds = parseFloat(fs.readFileSync('/proc/uptime', 'utf8').split(' ')[0]);
-            stats.uptime = Math.floor(uptimeSeconds);
-        }
-        catch {}
-        return stats;
+
+        this.wsConnection_ndpiServer.send(status);
     }
 
     setDisplayResolution() {

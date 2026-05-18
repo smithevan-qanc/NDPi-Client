@@ -202,7 +202,7 @@ const path = require('path');
 
 module.exports = {
     getLocalIp,
-    processCommand
+    processCommand,
 };
 
 
