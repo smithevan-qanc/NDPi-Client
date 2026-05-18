@@ -121,10 +121,12 @@ class NDPiCommandServer_Client extends EventEmitter {
                 if (req.hostname !== 'localhost') {
                     res.status(403).json({ status: 403, message: 'forbidden' });
                 }
+                
+                let reqValid = false;
 
                 switch (switch_path) {
                     case 'cec':
-                        let reqValid = (typeof data === 'string' && this.controller_cec.isReady);
+                        reqValid = (typeof data === 'string' && this.controller_cec.isReady);
                         
                         if (reqValid) {
                             this.controller_cec.send(data);
@@ -133,8 +135,8 @@ class NDPiCommandServer_Client extends EventEmitter {
 
                         break;
                     case 'ndi':
-                        let reqValid = (true);
-                        
+                        reqValid = true;
+
                         if (reqValid) {
                             // set ndi function
                             res.status(200).json({ success: true });
