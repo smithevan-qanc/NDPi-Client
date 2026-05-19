@@ -9,7 +9,7 @@ class NDI_Receiver_v2 extends EventEmitter {
         api,
         chromium,
         receiverName = '',
-        libraryPath = `/opt/NDI SDK for Linux/lib/aarch64-rpi4-linux-gnueabi:${(process.env.LD_LIBRARY_PATH || '')}`,
+        libraryPath = '',
         xAuthority = ''
     ) {
         super();
@@ -29,8 +29,8 @@ class NDI_Receiver_v2 extends EventEmitter {
 
         this.receiver = null;
         this.receiverName = receiverName || 'ndi_receiver_v3';
+        this.libraryPath = libraryPath || `/opt/NDI SDK for Linux/lib/aarch64-rpi4-linux-gnueabi:${(process.env.LD_LIBRARY_PATH || '')}`;
         this.xAuth = xAuthority || `${this.homeDirectory}/.Xauthority`;
-        this.libraryPath = libraryPath;
 
         this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
         // this.settings.put('ndpi_status_ndi_source_target', this.ndiSource);
@@ -49,7 +49,7 @@ class NDI_Receiver_v2 extends EventEmitter {
     }
 
     connect() {
-        
+
         this.receiver = spawn(`${this.parentDirectory}/${this.receiverName}`, [this.ndiSource], {
             env: {
                 ...process.env,
