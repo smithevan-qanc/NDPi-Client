@@ -167,7 +167,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.Server.close();
     }
 
-    broadcastToDisplay(message = {}, sendAll = false) {
+    broadcastToDisplay(ws, message = {}, sendAll = false) {
         const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
         let updateData = {};
         
@@ -175,6 +175,9 @@ class NDPiCommandServer_Client extends EventEmitter {
             { updateData.type = message.type; }
         else
             { updateData.type = `show-${displayMode}`; }
+        
+        if (this.settings.get('ndpi_status_no_source_display_mode') === 'streaming')
+            { updateData.type = 'show-ndi'; }
 
         if (sendAll)
             {

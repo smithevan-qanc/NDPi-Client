@@ -73,7 +73,7 @@ class NDPi {
         //  No Source Display Mode
         this.settings.on('ndpi_status_no_source_display_mode', (data) => {
             const output = String(data || 'overlay');
-            this.server_api.broadcastToDisplay();
+            this.server_api.updateDisplay({ type: `show-${output}` });
         });
 
         //  NDPi Hub Server IP
@@ -256,7 +256,7 @@ class NDPi {
 
         this.ndiReceiver.on('connected', () => {
             console.log('[ index ][ client_ndiReceiver ] Receiver Started');
-            this.server_api.updateDisplay({ type: `ndi-started` });
+            this.server_api.updateDisplay({ type: `show-ndi` });
             //this.service_chromium.close();
         });
 
@@ -266,7 +266,7 @@ class NDPi {
             if (String(this.targetSource || 'none').toLowerCase() !== 'none') 
             { this.__restartNdiReceiver(); }
             else 
-            { setTimeout(() => { this.server_api.broadcastToDisplay(); }, 600); }
+            { setTimeout(() => { this.server_api.broadcastToDisplay(); }, 400); }
         });
     }
 
