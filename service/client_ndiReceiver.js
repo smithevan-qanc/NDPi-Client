@@ -41,7 +41,7 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.ndiStatus = 'idle';
 
         setTimeout(() => {
-            if (sourceName.toLowerCase() === 'none')
+            if (this.ndiSource.toLowerCase() === 'none')
                 { this.close(); }
             else
                 { this.connect(); }
