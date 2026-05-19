@@ -39,7 +39,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             
             this.WebSocketConnections.add(ws);
             
-            setTimeout(() => { this.broadcastToDisplay(undefined, true); }, 1000);
+            setTimeout(() => { this.broadcastToDisplay(undefined, true, { ws }); }, 1000);
             
             ws.on('close', () => { this.WebSocketConnections.delete(ws); });
 
@@ -167,7 +167,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.Server.close();
     }
 
-    broadcastToDisplay(ws = null, message = {}, sendAll = false) {
+    broadcastToDisplay(message = {}, sendAll = false, options = {}) {
         const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
         let updateData = {};
         
@@ -191,7 +191,16 @@ class NDPiCommandServer_Client extends EventEmitter {
                 updateData.service.version = this.settings.get('ndpi_version');
                 console.log('[ client_api_server ] Sending update to GUI');
             }
-        
+
+        if (options.ws) 
+        {
+            if (options.ws.readyState === WebSocket.OPEN) 
+            {
+                options.ws.send(JSON.stringify(updateData));
+                return;
+            }
+        }
+
         this.WebSocketConnections.forEach(client => {
             if (client.readyState === WebSocket.OPEN)
                 { client.send(JSON.stringify(updateData)) }

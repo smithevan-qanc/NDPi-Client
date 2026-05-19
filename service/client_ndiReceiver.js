@@ -19,7 +19,7 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.settings = fsData;
         this.server = api;
         this.chromium = chromium;
-        this.server.broadcastToDisplay({ type: `ndi-init` });
+        this.server.updateDisplay({ type: `ndi-init` });
 
         this.homeDirectory = path.join(__dirname, '..', '..');
         this.parentDirectory = path.join(__dirname, '..');
