@@ -43,7 +43,7 @@ const { exec } = require('node:child_process');
                     try
                     {
                         fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndpi_status_no_source_display_mode'), 'blank', 'utf8');
-                        response.success = true;
+                        response = await setNdi(response, command);
                     }
                     catch (error)
                     {
@@ -57,7 +57,7 @@ const { exec } = require('node:child_process');
                     try
                     {
                         fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndpi_status_no_source_display_mode'), 'overlay', 'utf8');
-                        response.success = true;
+                        response = await setNdi(response, command);
                     }
                     catch (error)
                     {
@@ -76,27 +76,7 @@ const { exec } = require('node:child_process');
                     break;
                 case 'set-source':
                     console.log(`PROCESSING: ${command.type}`);
-                    try
-                    {
-                        const res = await fetch('http://localhost:3080/api/v1/__internal/ndi', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(command)
-                        });
-                        if (res.ok)
-                            {
-                                const data = await res.json();
-                                response.message = data?.message ?? 'OK';
-                                response.success = true
-                            }
-                        else
-                            { response.success = false }
-                    }
-                    catch (error)
-                    {
-                        response.data.message = error;
-                        response.success = false;
-                    }
+                    response = await setNdi(response, command);
                     return response;
                     break;
 
@@ -298,6 +278,32 @@ const { exec } = require('node:child_process');
                         }
                 }
             return null;
+        }
+
+        async function setNdi(res = {}, command = {}) {
+            let response = { ...res };
+            try
+            {
+                const res = await fetch('http://localhost:3080/api/v1/__internal/ndi', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(command)
+                });
+                if (res.ok)
+                {
+                    const data = await res.json();
+                    response.message = data?.message ?? 'OK';
+                    response.success = true
+                }
+                else
+                { response.success = false }
+            }
+            catch (error)
+            {
+                response.data.message = error;
+                response.success = false;
+            }
+            return response;
         }
 
 

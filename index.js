@@ -73,7 +73,7 @@ class NDPi {
         //  No Source Display Mode
         this.settings.on('ndpi_status_no_source_display_mode', (data) => {
             const output = String(data || 'overlay');
-            this.server_api.updateDisplay();
+            this.server_api.broadcastToDisplay();
         });
 
         //  NDPi Hub Server IP
