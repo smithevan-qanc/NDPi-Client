@@ -3,6 +3,7 @@ const os = require('os');
 const net = require('net');
 const fs = require('fs');
 const path = require('path');
+const { exec } = require('node:child_process');
 
 /** ---- Export Functions ---- */
 
@@ -120,13 +121,39 @@ const path = require('path');
                     }
                     return response;
                     break;
-                // case '':
-                //     console.log(`PROCESSING: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
-                // case '':
+                case 'focus-chromium':
+                    console.log(`PROCESSING: ${command.type}`);
+                    await new Promise((resolve, reject) => {
+                        exec('xdotool search --onlyvisible --class "chromium" | head -n 1', (error, stdout, stderr) => {
+                            if (error)
+                                {
+                                    response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
+                                    response.success = false;
+                                    reject();
+                                }
+                            else 
+                                {
+                                    console.log('[ functions ] Chromium Visible Window ID:', stdout.toString().trim());
+                                    exec(`xdotool windowactivate ${stdout.toString().trim()}`, (error, stdout, stderr) => {
+                                        if (!error)
+                                            {
+                                                response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
+                                                response.success = false;
+                                                reject();
+                                            }
+                                        else 
+                                            {
+                                                response.success = true;
+                                                resolve();
+                                            }
+                                    });
+                                }
+                        });
+                    });
+                    response.success = true;
+                    return response;
+                    break;
+                case '':
                 //     console.log(`PROCESSING: ${command.type}`);
 
                 //     response.success = true;
