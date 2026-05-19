@@ -61,11 +61,11 @@ dtparam=fan_temp1=47000
 dtparam=fan_temp1_hyst=2000
 dtparam=fan_temp1_speed=160
 
-dtparam=fan_temp2=48000
-dtparam=fan_temp2_hyst=1000
-dtparam=fan_temp2_speed=220
+dtparam=fan_temp2=49000
+dtparam=fan_temp2_hyst=2000
+dtparam=fan_temp2_speed=230
 
-dtparam=fan_temp3=50000
+dtparam=fan_temp3=51000
 dtparam=fan_temp3_hyst=2000
 dtparam=fan_temp3_speed=255
 
