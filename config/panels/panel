@@ -13,7 +13,7 @@ Global {
   alpha=1
   autohide=1
   heightwhenhidden=0
-  autohidedelay=2000
+  autohidedelay=1000
   setdocktype=1
   setpartialstrut=1
   usefontcolor=0

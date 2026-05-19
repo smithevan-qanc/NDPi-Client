@@ -77,12 +77,12 @@ const path = require('path');
                     console.log(`PROCESSING: ${command.type}`);
                     try
                     {
-                        const f = await fetch('http://localhost:3080/api/v1/__internal/ndi', {
+                        const res = await fetch('http://localhost:3080/api/v1/__internal/ndi', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(command)
                         });
-                        if (f.ok)
+                        if (res.ok)
                             { response.success = true }
                         else
                             { response.success = false }

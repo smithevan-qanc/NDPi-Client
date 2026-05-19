@@ -26,12 +26,7 @@
     <application name="*ndi_receiver_v2">
       <decor>no</decor>
       <layer>above</layer>
-      <maximized>Horizontal</maximized>
-    </application>
-
-    <application name="*">
-      <decor>no</decor>
-      <layer>above</layer>
+      <focus>yes</focus>
       <maximized>Horizontal</maximized>
     </application>
 
@@ -39,6 +34,12 @@
     <application name="chromium">
       <fullscreen>yes</fullscreen>
       <layer>below</layer>
+    </application>
+
+    <application name="*">
+      <decor>no</decor>
+      <layer>above</layer>
+      <maximized>Horizontal</maximized>
     </application>
 
     <application name="vncserver*">
