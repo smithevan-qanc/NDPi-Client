@@ -147,10 +147,61 @@ const { exec } = require('node:child_process');
                                     return;
                                 }
                                 const a = `xdotool windowactivate ${stdout.toString().trim()}`;
-                                exec(`xdotool windowactivate ${stdout.toString().trim()}`, {
+                                exec(a, {
                                     env: { ...process.env }
                                 }, (error, stdout, stderr) => {
-                                    if (!error)
+                                    if (error)
+                                    {
+                                        console.log('(4) 🔴 [ functions ] Could NOT activate window:', stderr.toString().trim());
+                                        response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
+                                        response.success = false;
+                                        resolve();
+                                        return;
+                                    }
+                                    else 
+                                    {
+                                        console.log('(5) [ functions ] All Good');
+                                        response.success = true;
+                                        resolve();
+                                        return;
+                                    }
+                                });
+                            }
+                        });
+                    });
+                    response.success = true;
+                    return response;
+                    break;
+                case 'focus-ndi':
+                    console.log(`PROCESSING: ${command.type}`);
+                    await new Promise((resolve) => {
+                        exec('xdotool search --onlyvisible --class "gstreamer" | head -n 1', {
+                            env: { ...process.env }
+                        }, (error, stdout, stderr) => {
+                            if (error)
+                            {
+                                console.log('(1) 🔴 [ functions ] Could NOT find window:', stderr.toString().trim());
+                                response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
+                                response.success = false;
+                                resolve();
+                                return;
+                            }
+                            else 
+                            {
+                                console.log('(2) [ functions ] NDI Visible Window ID:', stdout.toString().trim());
+                                if (!stdout.toString().trim())
+                                {
+                                    console.log('(3) 🔴 [ functions ] NDI is NOT running.');
+                                    response.data.message = 'NDI is NOT running.';
+                                    response.success = false;
+                                    resolve();
+                                    return;
+                                }
+                                const a = `xdotool windowactivate ${stdout.toString().trim()}`;
+                                exec(a, {
+                                    env: { ...process.env }
+                                }, (error, stdout, stderr) => {
+                                    if (error)
                                     {
                                         console.log('(4) 🔴 [ functions ] Could NOT activate window:', stderr.toString().trim());
                                         response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
