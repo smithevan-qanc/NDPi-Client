@@ -47,7 +47,9 @@ class NDPi {
         startup.on('exit', () => { this.startFsData(); });
         try { exec('killall xcompmgr'); } catch {}
         try { exec('killall picom'); } catch {}
-        this.compMgr = exec('./sh/xcompmgr');
+        setTimeout(() => {
+            this.compMgr = exec('./sh/xcompmgr');
+        }, 1000);
     }
 
     startFsData() {
