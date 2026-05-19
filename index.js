@@ -262,9 +262,11 @@ class NDPi {
 
         this.ndiReceiver.on('close', () => {
             this.ndiReceiver = null;
-            this.server_api.broadcastToDisplay();
+            
             if (String(this.targetSource || 'none').toLowerCase() !== 'none') 
-                { this.__restartNdiReceiver(); }
+            { this.__restartNdiReceiver(); }
+            else 
+            { setTimeout(() => { this.server_api.broadcastToDisplay(); }, 600); }
         });
     }
 
