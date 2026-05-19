@@ -124,7 +124,9 @@ const { exec } = require('node:child_process');
                 case 'focus-chromium':
                     console.log(`PROCESSING: ${command.type}`);
                     await new Promise((resolve, reject) => {
-                        exec('xdotool search --onlyvisible --class "chromium" | head -n 1', (error, stdout, stderr) => {
+                        exec('xdotool search --onlyvisible --class "chromium" | head -n 1', {
+                            env: { ...process.env }
+                        }, (error, stdout, stderr) => {
                             if (error)
                                 {
                                     response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
@@ -134,7 +136,9 @@ const { exec } = require('node:child_process');
                             else 
                                 {
                                     console.log('[ functions ] Chromium Visible Window ID:', stdout.toString().trim());
-                                    exec(`xdotool windowactivate ${stdout.toString().trim()}`, (error, stdout, stderr) => {
+                                    exec(`xdotool windowactivate ${stdout.toString().trim()}`, {
+                                        env: { ...process.env }
+                                    }, (error, stdout, stderr) => {
                                         if (!error)
                                             {
                                                 response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
