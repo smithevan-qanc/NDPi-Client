@@ -20,6 +20,10 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         this.App = express();
         this.App.use(express.json());
+
+        this.App.use(express.static(path.join(__dirname, '..', 'public'), {
+            setHeaders: (res, path) => { res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private'); }
+        }));
         this.App.use('/assets', express.static(path.join(__dirname, '..', 'assets')));
 
         this.Server = http.createServer(this.App)
@@ -53,7 +57,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             .route('/')
             .get((req, res) => {
                 res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-                res.sendFile(path.join(__dirname, '..', 'index.html'));
+                res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
             });
 
         this.Routes

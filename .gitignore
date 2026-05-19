@@ -59,11 +59,12 @@ temp/
 
 version/notes
 
+*.cpp
+
 complete-deploy-client.sh
 git-hub-deploy-client
 git-hub-initiate-new
 git-hub-push-update
-ndi_receiver_v2.cpp
 GitHubRepoUrl.txt
 zzTest
 VERSION-NOTES.md
