@@ -158,7 +158,8 @@
 
     <script>
         class DisplayServer {
-            constructor() {
+            constructor(document) {
+                this.document = document;
                 this._ws = null;
                 this.protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
                 this.host = window.location.host;
@@ -192,9 +193,9 @@
                 };
                 this._ws.onclose = () => {
                     console.log('Disconnected from display server');
-                    if (!this.reconnectTimer) {
-                        this.reconnectTimer = setInterval(this.connect, 5000);
-                    }
+                    setTimeout(() => {
+                        window.navigation.reload();
+                    }, 500);
                 }
                 this._ws.onerror = (error) => {
                     console.error('WebSocket error:', error);
@@ -274,18 +275,15 @@
         }
 
         const svgContainer = document.getElementById('overlay-svg');
-        const defaultSvgSrc = '/assets/Display_Overlay.svg';
 
-        function showOverlay(source = defaultSvgSrc) {
+        function showOverlay(source = '/assets/Display_Overlay.svg') {
             svgContainer.src = source;
             setTimeout(() => {
                 svgContainer.style.opacity = 1;
             }, 200);
         }
 
-        function showBlank() {
-            svgContainer.style.opacity = 0;
-        }
+        function showBlank() { svgContainer.style.opacity = 0 }
 
         function hideAll() {
             showBlank();
@@ -310,18 +308,21 @@
             }
         }
 
-        // Start with overlay visible
-        // Connect to display server
-        setTimeout(() => {
-            showOverlay();
-            const server = new DisplayServer();
-        }, 500);
+        (() => {
+            // Start with overlay visible
+            // Connect to display server
+            setTimeout(() => {
+                showOverlay();
+                const server = new DisplayServer(document);
+            }, 500);
 
-        // Prevent screen from sleeping
-        if ('wakeLock' in navigator) {
-            console.log('Wake lock active.')
-            navigator.wakeLock.request('screen').catch(e => console.log('Wake lock failed:', e));
-        }
+            // Prevent screen from sleeping
+            if ('wakeLock' in navigator)
+            {
+                console.log('Wake lock active.')
+                navigator.wakeLock.request('screen').catch(e => console.log('Wake lock failed:', e));
+            }
+        })();
     </script>
 </body>
 
