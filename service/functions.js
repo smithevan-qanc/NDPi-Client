@@ -123,35 +123,50 @@ const { exec } = require('node:child_process');
                     break;
                 case 'focus-chromium':
                     console.log(`PROCESSING: ${command.type}`);
-                    await new Promise((resolve, reject) => {
+                    await new Promise((resolve) => {
                         exec('xdotool search --onlyvisible --class "chromium" | head -n 1', {
                             env: { ...process.env }
                         }, (error, stdout, stderr) => {
                             if (error)
-                                {
-                                    response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
-                                    response.success = false;
-                                    reject();
-                                }
+                            {
+                                console.log('(1) 🔴 [ functions ] Could NOT find window:', stderr.toString().trim());
+                                response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
+                                response.success = false;
+                                resolve();
+                                return;
+                            }
                             else 
+                            {
+                                console.log('(2) [ functions ] Chromium Visible Window ID:', stdout.toString().trim());
+                                if (!stdout.toString().trim())
                                 {
-                                    console.log('[ functions ] Chromium Visible Window ID:', stdout.toString().trim());
-                                    exec(`xdotool windowactivate ${stdout.toString().trim()}`, {
-                                        env: { ...process.env }
-                                    }, (error, stdout, stderr) => {
-                                        if (!error)
-                                            {
-                                                response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
-                                                response.success = false;
-                                                reject();
-                                            }
-                                        else 
-                                            {
-                                                response.success = true;
-                                                resolve();
-                                            }
-                                    });
+                                    console.log('(3) 🔴 [ functions ] Chromium is NOT running.');
+                                    response.data.message = 'Chromium is NOT running.';
+                                    response.success = false;
+                                    resolve();
+                                    return;
                                 }
+                                const a = `xdotool windowactivate ${stdout.toString().trim()}`;
+                                exec(`xdotool windowactivate ${stdout.toString().trim()}`, {
+                                    env: { ...process.env }
+                                }, (error, stdout, stderr) => {
+                                    if (!error)
+                                    {
+                                        console.log('(4) 🔴 [ functions ] Could NOT activate window:', stderr.toString().trim());
+                                        response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
+                                        response.success = false;
+                                        resolve();
+                                        return;
+                                    }
+                                    else 
+                                    {
+                                        console.log('(5) [ functions ] All Good');
+                                        response.success = true;
+                                        resolve();
+                                        return;
+                                    }
+                                });
+                            }
                         });
                     });
                     response.success = true;
