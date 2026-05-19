@@ -76,9 +76,10 @@
             align-items: start;
             margin: 0.3vh;
             color: rgb(35,35,35);
-            opacity: 0;
             font-family: monospace;
             font-size: 1.1vh;
+            opacity: 0;
+            transition: opacity 800ms ease;
         }
     </style>
     <style>
@@ -158,40 +159,55 @@
     </div>
 
     <script>
-        const svgContainer = document.getElementById('overlay-svg');
 
-        const waitingForServer = (show = true) => { document.getElementById('waiting-for-server-svg').style.opacity = show ? 1 : 0; }
+        const waitingForServer   = (show = true) => { document.getElementById('waiting-for-server-svg').style.opacity = show ? 1 : 0; }
         const connectingToSource = (show = true) => { document.getElementById('attempting-ndi-connection-svg').style.opacity = show ? 1 : 0; }
+        const displayDetails     = (show = true) => { document.getElementById('sys-details').style.opacity = show ? 1 : 0; }
         
-        const showBlank = () => { svgContainer.style.opacity = 0; }
-        const showOverlay = (imagePath = '/assets/Display_Overlay.svg') => {
-            showBlank();
-            setTimeout(() => {
-                svgContainer.src = imagePath;
-                setTimeout(() => {
-                    svgContainer.style.opacity = 1;
-                }, 500);
-            }, 810);
+        const displayOverlay = async (show = true, imagePath = '') => {
+            const svgContainer = document.getElementById('overlay-svg');
+            let overlayImageSrc = imagePath || null;
+            if (show && overlayImageSrc) 
+            {
+                svgContainer.style.opacity = 0; 
+                await new Promise((resolve) => {
+                    setTimeout(() => {
+                        svgContainer.src = overlayImageSrc;
+                        setTimeout(() => { resolve(); }, 200);
+                    }, 810);
+                });
+                svgContainer.style.opacity = 1;
+            }
+            else if (show) 
+            {
+                svgContainer.src = '/assets/Display_Overlay.svg';
+                await new Promise((resolve) => {
+                    setTimeout(() => { resolve(); }, 200);
+                });
+                svgContainer.style.opacity = 1
+            } else
+            {
+                svgContainer.style.opacity = 0;
+            }
         }
 
         const hideAll = () => {
-            showBlank();
+            displayDetails(false);
+            displayOverlay(false);
             connectingToSource(false);
-            waitingForServer(false);
         }
 
 
-        class DisplayServer {
-            constructor(document) {
+        class DeviceSocket {
+            constructor() {
                 
-                this.document = document;
                 this._ws = null;
 
                 this.protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
                 this.host = window.location.host;
 
-                this.timerReconnectDevice = null;
                 this.timerNdpiHubServerPing = null;
+                this.timerReconnectDevice = null;
                 this.timerPageReload = null;
 
                 this.connect();
@@ -228,34 +244,40 @@
                     { console.error('Invalid message:', e); }
                 };
 
-                this._ws.onclose = () => {
-                    this.scheduleDeviceReconnect();
-                }
-
                 this._ws.onerror = (error) => {
                     console.error('WebSocket error:', error);
                 };
+
+                this._ws.onclose = () => {
+                    this.scheduleDeviceReconnect();
+                    this._ws = null;
+                }
             }
 
             scheduleDeviceReconnect(ms = 10000, timeout = 120000) {
                 if (this.timerReconnectDevice) 
                 { clearInterval(this.timerReconnectDevice); this.timerReconnectDevice = null; }
                 this.timerReconnectDevice = setInterval(() => { this.connect(); }, ms);
+
+                if (this.timerPageReload) 
+                { return; }
+                this.timerPageReload = setTimeout(() => { window.navigation.reload(); }, timeout);
             }
 
             // call this when the NDPi Hub Server establishes a connection with the client device.
             hubConnected(timeout = 10000) {
                 waitingForServer(false);
-                if (ndpiServerHeartbeatTimeout) {
-                    clearTimeout(ndpiServerHeartbeatTimeout);
-                    ndpiServerHeartbeatTimeout = null;
+                if (this.timerNdpiHubServerPing)
+                {
+                    clearTimeout(this.timerNdpiHubServerPing);
+                    this.timerNdpiHubServerPing = null;
                 }
-                this.timerNdpiHubServerPing = setTimeout(() => {
-                    waitingForServer(true);
-                }, timeout);
+                this.timerNdpiHubServerPing = setTimeout(() => { waitingForServer(true); }, timeout);
             }
             
         }
+
+        const server = new DeviceSocket();
 
         function handleDisplayCommand(msg) {
             switch (msg.type) {
@@ -263,7 +285,7 @@
                     updateDetails(msg);
                     break;
                 case 'ndpi-server-connected':
-                    pingFromNDPiServer();
+                    server.hubConnected(10000);
                     break;
                 case 'ndi-init':
                     connectingToSource(true);
@@ -307,18 +329,12 @@
                 programVer:  msg.service?.version,
             };
 
-            document.getElementById('sys-details').style.display = 'flex';
-
             for (const [id, value] of Object.entries(fields)) {
                 if (value === undefined) continue;
                 document.getElementById(id).textContent = value;
             }
+            displayDetails();
         }
-
-
-        (() => {
-            const server = new DisplayServer(document);
-        })();
     </script>
 </body>
 
