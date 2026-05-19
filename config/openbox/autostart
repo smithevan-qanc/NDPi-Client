@@ -6,6 +6,8 @@
 # Set display
 export DISPLAY=:0
 
+xcompmgr -d :0 -fF &
+
 # Disable screen blanking and power management
 xset s off
 xset -dpms

@@ -149,7 +149,6 @@ const { exec } = require('node:child_process');
                             }
                         });
                     });
-                    response.success = true;
                     return response;
                     break;
                 case 'focus-ndi':
@@ -200,7 +199,6 @@ const { exec } = require('node:child_process');
                             }
                         });
                     });
-                    response.success = true;
                     return response;
                     break;
                 case '':
