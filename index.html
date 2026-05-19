@@ -70,12 +70,13 @@
             bottom: 0;
             left: 0;
             right: 0;
-            display: none;
+            display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: start;
             margin: 0.3vh;
             color: rgb(35,35,35);
+            opacity: 0;
             font-family: monospace;
             font-size: 1.1vh;
         }
@@ -157,49 +158,101 @@
     </div>
 
     <script>
+        const svgContainer = document.getElementById('overlay-svg');
+
+        const waitingForServer = (show = true) => { document.getElementById('waiting-for-server-svg').style.opacity = show ? 1 : 0; }
+        const connectingToSource = (show = true) => { document.getElementById('attempting-ndi-connection-svg').style.opacity = show ? 1 : 0; }
+        
+        const showBlank = () => { svgContainer.style.opacity = 0; }
+        const showOverlay = (imagePath = '/assets/Display_Overlay.svg') => {
+            showBlank();
+            setTimeout(() => {
+                svgContainer.src = imagePath;
+                setTimeout(() => {
+                    svgContainer.style.opacity = 1;
+                }, 500);
+            }, 810);
+        }
+
+        const hideAll = () => {
+            showBlank();
+            connectingToSource(false);
+            waitingForServer(false);
+        }
+
+
         class DisplayServer {
             constructor(document) {
+                
                 this.document = document;
                 this._ws = null;
+
                 this.protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
                 this.host = window.location.host;
 
-                this.reconnectTimer = null;
+                this.timerReconnectDevice = null;
+                this.timerNdpiHubServerPing = null;
+                this.timerPageReload = null;
+
                 this.connect();
             }
 
             disconnect() {
-                if (this._ws && this._ws.readyState === WebSocket.OPEN) this._ws.close();
+                if (this._ws && this._ws.readyState === WebSocket.OPEN)
+                try { this._ws.close(); } catch {}
                 this._ws = null;
             }
 
             connect() {
-                this.disconnect();
+                if (this._ws && this._ws.readyState === WebSocket.OPEN)
+                try { this._ws.close(); } catch {}
+                this._ws = null;
+
                 this._ws = new WebSocket(`${this.protocol}//${this.host}`);
+
                 this._ws.onopen = () => {
-                    console.log('Connected to display server');
-                    if (this.reconnectTimer) {
-                        clearInterval(this.reconnectTimer);
-                        this.reconnectTimer = null;
-                    }
+                    console.log('Connected to device server');
+                    if (this.timerPageReload) 
+                    { clearTimeout(this.timerPageReload); this.timerPageReload = null; }
+                    if (this.timerReconnectDevice)
+                    { clearInterval(this.timerReconnectDevice); this.timerReconnectDevice = null; }
                 };
+
                 this._ws.onmessage = (message) => {
-                    try {
+                    try
+                    {
                         const msg = JSON.parse(message.data);
                         handleDisplayCommand(msg);
-                    } catch (e) {
-                        console.error('Invalid message:', e);
                     }
+                    catch (e)
+                    { console.error('Invalid message:', e); }
                 };
+
                 this._ws.onclose = () => {
-                    console.log('Disconnected from display server');
-                    setTimeout(() => {
-                        window.navigation.reload();
-                    }, 500);
+                    this.scheduleDeviceReconnect();
                 }
+
                 this._ws.onerror = (error) => {
                     console.error('WebSocket error:', error);
                 };
+            }
+
+            scheduleDeviceReconnect(ms = 10000, timeout = 120000) {
+                if (this.timerReconnectDevice) 
+                { clearInterval(this.timerReconnectDevice); this.timerReconnectDevice = null; }
+                this.timerReconnectDevice = setInterval(() => { this.connect(); }, ms);
+            }
+
+            // call this when the NDPi Hub Server establishes a connection with the client device.
+            hubConnected(timeout = 10000) {
+                waitingForServer(false);
+                if (ndpiServerHeartbeatTimeout) {
+                    clearTimeout(ndpiServerHeartbeatTimeout);
+                    ndpiServerHeartbeatTimeout = null;
+                }
+                this.timerNdpiHubServerPing = setTimeout(() => {
+                    waitingForServer(true);
+                }, timeout);
             }
             
         }
@@ -242,18 +295,6 @@
             }
         }
 
-        let ndpiServerHeartbeatTimeout = null;
-        function pingFromNDPiServer() {
-            waitingForServer(false);
-            if (ndpiServerHeartbeatTimeout) {
-                clearTimeout(ndpiServerHeartbeatTimeout);
-                ndpiServerHeartbeatTimeout = null;
-            }
-            ndpiServerHeartbeatTimeout = setTimeout(() => {
-                waitingForServer(true);
-            }, 10000);
-        }
-
         function updateDetails(msg) {
             const fields = {
                 devName:     msg.thisDevice?.name,
@@ -274,54 +315,9 @@
             }
         }
 
-        const svgContainer = document.getElementById('overlay-svg');
-
-        function showOverlay(source = '/assets/Display_Overlay.svg') {
-            svgContainer.src = source;
-            setTimeout(() => {
-                svgContainer.style.opacity = 1;
-            }, 200);
-        }
-
-        function showBlank() { svgContainer.style.opacity = 0 }
-
-        function hideAll() {
-            showBlank();
-            connectingToSource(false);
-            waitingForServer(false);
-        }
-
-        function waitingForServer(show) {
-            if (show) {
-                document.getElementById('sys-details').style.display = 'none';
-                document.getElementById('waiting-for-server-svg').style.opacity = 1;
-            } else {
-                document.getElementById('waiting-for-server-svg').style.opacity = 0;
-            }
-        }
-
-        function connectingToSource(show) {
-            if (show) {
-                document.getElementById('attempting-ndi-connection-svg').style.opacity = 1;
-            } else {
-                document.getElementById('attempting-ndi-connection-svg').style.opacity = 0;
-            }
-        }
 
         (() => {
-            // Start with overlay visible
-            // Connect to display server
-            setTimeout(() => {
-                showOverlay();
-                const server = new DisplayServer(document);
-            }, 500);
-
-            // Prevent screen from sleeping
-            if ('wakeLock' in navigator)
-            {
-                console.log('Wake lock active.')
-                navigator.wakeLock.request('screen').catch(e => console.log('Wake lock failed:', e));
-            }
+            const server = new DisplayServer(document);
         })();
     </script>
 </body>
