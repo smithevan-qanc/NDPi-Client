@@ -8,7 +8,7 @@ class NDI_Receiver_v2 extends EventEmitter {
         fsData,
         api,
         chromium,
-        receiverName = 'ndi_receiver_v2',
+        receiverName = '',
         libraryPath = `/opt/NDI SDK for Linux/lib/aarch64-rpi4-linux-gnueabi:${(process.env.LD_LIBRARY_PATH || '')}`,
         xAuthority = ''
     ) {
@@ -28,7 +28,7 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.updateFsDebounce = null;
 
         this.receiver = null;
-        this.receiverName = receiverName;
+        this.receiverName = receiverName || 'ndi_receiver_v3';
         this.xAuth = xAuthority || `${this.homeDirectory}/.Xauthority`;
         this.libraryPath = libraryPath;
 
@@ -49,6 +49,7 @@ class NDI_Receiver_v2 extends EventEmitter {
     }
 
     connect() {
+        
         this.receiver = spawn(`${this.parentDirectory}/${this.receiverName}`, [this.ndiSource], {
             env: {
                 ...process.env,

@@ -204,12 +204,6 @@ class NDPi {
                     }
                 }
         });
-
-        // this.server_api.on('start-ndi', (data) => {
-        //     const output = String(data || 'none').trim();
-        //     this.targetSource = output;
-        //     this.startNdiReceiver();
-        // });
     }
 
     startMdns() {
