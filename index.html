@@ -293,26 +293,22 @@
                 case 'ndi-started':
                     hideAll();
                     break;
-                case 'show-overlay':
-                    showOverlay();
-                    updateDetails(msg);
-                    break;
-                case 'show-blank':
-                    showBlank();
-                    updateDetails(msg);
-                    break;
                 case 'show-ndi':
                     hideAll();
                     break;
-                case 'show-custom-overlay':
-                    showBlank();
+                case 'show-overlay':
+                    displayOverlay(true);
                     updateDetails(msg);
-                    setTimeout(() => {
-                        showOverlay(msg.srcPth);
-                    }, 800);
+                    break;
+                case 'show-blank':
+                    displayOverlay(false);
+                    updateDetails(msg);
+                    break;
+                case 'show-custom-overlay':
+                    displayOverlay(true, msg.data);
                     break;
                 default:
-                    console.log("Updated.", msg);
+                    console.log("Message Received from device with unrecognized type.", msg);
                     break;
             }
         }
