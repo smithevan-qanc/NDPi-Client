@@ -30,11 +30,14 @@ class NDPi {
         this.timerRestartNdi = null;
         this.targetSource = 'none';
 
+        this.compMgr = null;
+
         this.initiate();
     }
 
     initiate() {
-        const startup = require('node:child_process').exec(`./sh/startup`);
+        const { exec } = require('node:child_process');
+        const startup = exec(`./sh/startup`);
         startup.stdout.on('data', (data) => {
             data
                 .toString()
@@ -42,6 +45,9 @@ class NDPi {
                 .forEach((line) => { console.log(line) });
         });
         startup.on('exit', () => { this.startFsData(); });
+        try { exec('killall xcompmgr'); } catch {}
+        try { exec('killall picom'); } catch {}
+        this.compMgr = exec('./sh/xcompmgr');
     }
 
     startFsData() {

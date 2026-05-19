@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+
+xcompmgr -d :0 -fF &
