@@ -27,6 +27,7 @@ class NDPi {
         this.wsConnection_ndpiServer = null;
         this.ndpiServerStatusUpdate = null; // Interval Timer
 
+        this.timerRestartNdi = null;
         this.targetSource = 'none';
 
         this.initiate();
@@ -61,7 +62,10 @@ class NDPi {
                     this.targetSource = output;
                     console.log('test 123d', String(this.targetSource).toLowerCase());
                     if (String(this.targetSource).toLowerCase() !== 'none')
-                        { this.startNdiReceiver(); }
+                        {
+                            try { this.ndiReceiver.close(); } catch {}
+                            this.startNdiReceiver();
+                        }
                     else
                         { this.ndiReceiver.close(); }
                 }
@@ -73,7 +77,7 @@ class NDPi {
             this.server_api.updateDisplay();
         });
 
-        //  Server IP
+        //  NDPi Hub Server IP
         this.settings.on('ndpi_command_server_host', (data) => {
             const output = String(data || '').trim() || null;
             if (!output)
@@ -90,7 +94,7 @@ class NDPi {
                 }
         });
 
-        //  Server Port
+        //  NDPi Hub Server Port
         this.settings.on('ndpi_command_server_port', (data) => {
             const output = String(data || '').trim() || null;
             if (!output)
@@ -129,7 +133,7 @@ class NDPi {
             this.service_bonjour._tryPublish();
         });
 
-        //  Device Port Number
+        //  API Port Number
         this.settings.on('local_port_number_api', (data) => {
             const output = String(data || '').trim() || null;
             if (!output)
@@ -172,14 +176,19 @@ class NDPi {
                     this.connectToNDPiServer();
                     this.targetSource = this.settings.get('ndpi_status_ndi_source_target');
                     if (String(this.targetSource || 'none').toLowerCase() !== 'none')
-                        { setTimeout(() => { this.startNdiReceiver(); }, 5000); }
+                        { 
+                            setTimeout(() => {
+                                this.startNdiReceiver();
+                            }, 5000);
+                        }
                     this.isInitialized = true;
                 }
             else 
                 {
                     this.service_bonjour.commandPort = output;
                     this.service_bonjour._tryPublish();
-                    try { this.service_chromium?.close(); }
+                    try 
+                    { this.service_chromium?.close(); }
                     catch {}
                     finally
                     { 
@@ -189,11 +198,11 @@ class NDPi {
                 }
         });
 
-        this.server_api.on('start-ndi', (data) => {
-            const output = String(data || 'none').trim();
-            this.targetSource = output;
-            this.startNdiReceiver();
-        });
+        // this.server_api.on('start-ndi', (data) => {
+        //     const output = String(data || 'none').trim();
+        //     this.targetSource = output;
+        //     this.startNdiReceiver();
+        // });
     }
 
     startMdns() {
@@ -238,21 +247,33 @@ class NDPi {
     }
 
     startNdiReceiver() {
-        if (!this.targetSource)
-            { return }
         if (this.ndiReceiver)
-            { this.ndiReceiver.close() }
+            {
+                this.ndiReceiver.close();
+                return;
+            }
         const NDI_Receiver_v2 = require('./service/client_ndiReceiver.js');
-        this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.service_chromium, this.targetSource, 'ndi_receiver_v2');
+        this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.service_chromium, 'ndi_receiver_v2');
 
         this.ndiReceiver.on('connected', () => {
             console.log('[ index ][ client_ndiReceiver ] Receiver Started');
-            this.service_chromium.close();
+            this.server_api.updateDisplay({ type: `ndi-started` });
+            //this.service_chromium.close();
         });
 
         this.ndiReceiver.on('close', () => {
             this.ndiReceiver = null;
+            this.server_api.broadcastToDisplay();
+            if (String(this.targetSource || 'none').toLowerCase() !== 'none') 
+                { this.__restartNdiReceiver(); }
         });
+    }
+
+    __restartNdiReceiver(wait = 1000) {
+        if (this.timerRestartNdi)
+        this.timerRestartNdi = setTimeout(() => {
+            this.startNdiReceiver();
+        }, wait);
     }
 
     //  TODO: Migrate the server status updates to be triggered like the display status updates.

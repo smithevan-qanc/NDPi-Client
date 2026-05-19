@@ -8,7 +8,6 @@ class NDI_Receiver_v2 extends EventEmitter {
         fsData,
         api,
         chromium,
-        sourceName = 'none',
         receiverName = 'ndi_receiver_v2',
         libraryPath = `/opt/NDI SDK for Linux/lib/aarch64-rpi4-linux-gnueabi:${(process.env.LD_LIBRARY_PATH || '')}`,
         xAuthority = ''
@@ -33,8 +32,8 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.xAuth = xAuthority || `${this.homeDirectory}/.Xauthority`;
         this.libraryPath = libraryPath;
 
-        this.ndiSource = sourceName || 'none';
-        this.settings.put('ndpi_status_ndi_source_target', this.ndiSource);
+        this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
+        // this.settings.put('ndpi_status_ndi_source_target', this.ndiSource);
         this.ndiActiveSource = null;
         this.ndiConnectedAt = null;
         this.ndiFramerate = null;
@@ -43,14 +42,13 @@ class NDI_Receiver_v2 extends EventEmitter {
 
         setTimeout(() => {
             if (sourceName.toLowerCase() === 'none')
-                { this.close() }
+                { this.close(); }
             else
-                { this.connect() }
+                { this.connect(); }
         }, 500);
     }
 
     connect() {
-        this.enabled = true;
         this.receiver = spawn(`${this.parentDirectory}/${this.receiverName}`, [this.ndiSource], {
             env: {
                 ...process.env,
@@ -66,20 +64,22 @@ class NDI_Receiver_v2 extends EventEmitter {
             this.parseInfo(output);
             if (output.includes('Connected to:'))
                 {
-                    this.server.broadcastToDisplay({ type: `ndi-started` });
+                    this.ndiConnectedAt = new Date().toISOString();
                     this.ndiActiveSource = this.ndiSource;
-                    this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
                     this.ndiStatus = 'streaming';
                     this.settings.put('ndpi_status_ndi', this.ndiStatus);
-                    this.ndiConnectedAt = new Date().toISOString();
+                    this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
                     this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
+                    
                     this.settings.put('ndpi_status_ndi_source_framerate', String(this.ndiFramerate || ''));
                     this.settings.put('ndpi_status_ndi_source_resolution', this.ndiResolution || '');
-                    this.emit('connected');
+                    
+                    process.nextTick(() => { this.emit('connected') });
                 }
         });
 
         this.receiver.on('error', (error) => {
+            this.emit('error');
             console.log(`🔴 [ client_ndiReceiver ][ NDI ] --▶ Critical Error:`, error);
         });
 
@@ -87,7 +87,6 @@ class NDI_Receiver_v2 extends EventEmitter {
             const output = data.toString().trim();
             output.split(/\r?\n/).forEach((line) => {
                 console.log(`🔴 [ client_ndiReceiver ][ NDI ] --▶ Error: ${line}`);
-                this.close();
             });
         });
 
@@ -109,38 +108,51 @@ class NDI_Receiver_v2 extends EventEmitter {
             this.ndiResolution = null;
             this.settings.put('ndpi_status_ndi_source_resolution', '');
             
-            this.scheduleReconnect();
             console.log(`[ client_ndiReceiver ][ NDI ] --▶ Terminated - Code:${code}, Signal:${signal}`);
+            //this.server.broadcastToDisplay();
+
+            //this.scheduleReconnect();
+            this.emit('close');
         });
     }
 
+    // close() {
+    //     this.enabled = false;
+    //     if (this.receiver)
+    //         {
+    //             this.chromium.launch();
+    //             this.server.broadcastToDisplay();
+    //         }
+    //     setTimeout(() => {
+    //         try { this.receiver.kill('SIGKILL') } catch {}
+    //         console.log('[ client_ndiReceiver ][ NDI ] --▶ SIGKILL');
+    //         this.receiver = null;
+    //         if (!this.enabled)
+    //             { this.emit('close') }
+    //     }, 1000);
+    // }
+    
     close() {
         this.enabled = false;
-        if (this.receiver)
-            {
-                this.chromium.launch();
-                this.server.broadcastToDisplay();
-            }
-        setTimeout(() => {
+        try
+        {
             this.receiver.kill('SIGKILL');
             console.log('[ client_ndiReceiver ][ NDI ] --▶ SIGKILL');
-            this.receiver = null;
-            if (!this.enabled)
-                { this.emit('close') }
-        }, 1000);
+        } catch {}
+        this.receiver = null;
     }
 
-    scheduleReconnect(ms = 15000) {
-        if (this.enabled)
-            {
-                this.server.broadcastToDisplay({ type: `ndi-init` });
-                this.reconnectTimer = setTimeout(() => {
-                    if (this.enabled && this.ndiSource && this.ndiSource !== 'none' && !this.receiver)
-                        { this.connect() }
-                    this.reconnectTimer = null;
-                }, ms);
-            }
-    }
+    // scheduleReconnect(ms = 15000) {
+    //     if (this.enabled)
+    //         {
+    //             this.server.broadcastToDisplay({ type: `ndi-init` });
+    //             this.reconnectTimer = setTimeout(() => {
+    //                 if (this.enabled && this.ndiSource && this.ndiSource !== 'none' && !this.receiver)
+    //                     { this.connect() }
+    //                 this.reconnectTimer = null;
+    //             }, ms);
+    //         }
+    // }
 
     parseInfo(data) {
         data.split(/\r?\n/).forEach((stdout) => {

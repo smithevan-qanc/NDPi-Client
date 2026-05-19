@@ -83,7 +83,11 @@ const path = require('path');
                             body: JSON.stringify(command)
                         });
                         if (res.ok)
-                            { response.success = true }
+                            {
+                                const data = await res.json();
+                                response.message = data?.message ?? 'OK';
+                                response.success = true
+                            }
                         else
                             { response.success = false }
                     }

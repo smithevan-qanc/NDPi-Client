@@ -68,12 +68,12 @@ class NDPiCommandServer_Client extends EventEmitter {
                 });
                 if (commandRes && commandRes.success)
                     {
-                        res.status(200)
+                        res.status(200);
                         res.json(commandRes);
                     }
                 else
                     {
-                        res.status(400)
+                        res.status(400);
                         res.json(commandRes);
                     }
             })
@@ -86,12 +86,12 @@ class NDPiCommandServer_Client extends EventEmitter {
                 });
                 if (commandRes && commandRes.success)
                     {
-                        res.status(200)
+                        res.status(200);
                         res.json(commandRes);
                     }
                 else
                     {
-                        res.status(400)
+                        res.status(400);
                         res.json(commandRes);
                     }
             });
@@ -107,12 +107,11 @@ class NDPiCommandServer_Client extends EventEmitter {
                 const { id, data } = req.body;
                 const switch_path  = req.params.path;
 
-                console.log('TEST (internal API)', data, 'HOSTNAME:', req.hostname);
-
                 if (req.hostname !== 'localhost')
                     {
-                        res.status(403)
-                        res.json({ status: 403, message: 'forbidden' });
+                        res.status(403);
+                        res.json({ success: false, message: 'forbidden' });
+                        return;
                     }
 
                 let reqValid = false;
@@ -123,12 +122,12 @@ class NDPiCommandServer_Client extends EventEmitter {
                         if (reqValid)
                             {
                                 this.controller_cec.send(data);
-                                res.status(200)
+                                res.status(200);
                                 res.json({ success: true });
                             }
                         else
                             {
-                                res.status(400)
+                                res.status(400);
                                 res.json({ success: false });
                             }
 
@@ -144,15 +143,14 @@ class NDPiCommandServer_Client extends EventEmitter {
                         else
                             { source = String(data); }
 
-                        this.emit('start-ndi', `${source}`);
-                        res.status(200)
+                        this.settings.put('ndpi_status_ndi_source_target', source);
+                        res.status(200);
                         res.json({ success: true, message: `NDI Source Set: ${source}` });
 
                         break;
 
                     default:
-                        res.status(200)
-                        res.end();
+                        res.sendStatus(400);
                         break;
                 }
             });
@@ -199,7 +197,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
     updateDisplay(message = {}) {
         if (!message.type)
-            { return }
+            { return; }
         this.WebSocketConnections.forEach(client => {
             if (client.readyState === WebSocket.OPEN)
                 { client.send(JSON.stringify(message)) }
