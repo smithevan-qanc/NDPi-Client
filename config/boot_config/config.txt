@@ -53,19 +53,19 @@ otg_mode=1
 dtoverlay=dwc2,dr_mode=host
 
 [all]
-dtparam=fan_temp0=46000
+dtparam=fan_temp0=44000
 dtparam=fan_temp0_hyst=1000
-dtparam=fan_temp0_speed=100
+dtparam=fan_temp0_speed=10
 
-dtparam=fan_temp1=47000
+dtparam=fan_temp1=48000
 dtparam=fan_temp1_hyst=1000
 dtparam=fan_temp1_speed=160
 
-dtparam=fan_temp2=48000
+dtparam=fan_temp2=49000
 dtparam=fan_temp2_hyst=1000
 dtparam=fan_temp2_speed=220
 
-dtparam=fan_temp3=49000
+dtparam=fan_temp3=50000
 dtparam=fan_temp3_hyst=1000
 dtparam=fan_temp3_speed=255
 
