@@ -60,7 +60,6 @@ class NDPi {
             if (output !== this.targetSource)
                 {
                     this.targetSource = output;
-                    console.log('test 123d', String(this.targetSource).toLowerCase());
                     if (String(this.targetSource).toLowerCase() !== 'none')
                         {
                             try { this.ndiReceiver.close(); } catch {}

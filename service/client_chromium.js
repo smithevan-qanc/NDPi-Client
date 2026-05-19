@@ -14,8 +14,8 @@ class ChromiumOverlayDisplay extends EventEmitter {
 
     start() {
         if (this.service)
-            { this.close() }
-        setTimeout(() => { this.launch() }, 1000);
+            { this.close(); }
+        setTimeout(() => { this.launch(); }, 1000);
     }
 
     close() {
@@ -30,50 +30,51 @@ class ChromiumOverlayDisplay extends EventEmitter {
 
     launch() {
         if (this.service)
-            { return }
+            { return; }
         const connectionPort = this.settings.get('local_port_number_api');
-        let commandLine = `/usr/bin/chromium \
-            --kiosk \
-            --no-default-browser-check \
-            --aggressive-cache-discard \
-            --disable-pings \
-            --disable-popup-blocking \
-            --hide-crash-restore-bubble \
-            --disable-infobars \
-            --disable-session-crashed-bubble \
-            --disable-component-extensions-with-background-pages \
-            --no-first-run \
-            --disable-default-apps \
-            --disable-translate \
-            --hide-scrollbars \
-            --disable-features=TranslateUI \
-            --noerrdialogs \
-            --touch-events=enabled \
-            --start-fullscreen \
-            --disable-notifications \
-            --disable-logging \
-            --disable-crash-reporter \
-            --user-data-dir=${this.homeDirectory}/.config/chromium/Default \
-            --disable-web-security \
-            http://localhost:${connectionPort}/`;
+        const command = [
+            '/usr/bin/chromium',
+                '--kiosk',
+                '--no-default-browser-check',
+                '--aggressive-cache-discard',
+                '--disable-pings',
+                '--disable-popup-blocking',
+                '--hide-crash-restore-bubble',
+                '--disable-infobars',
+                '--disable-session-crashed-bubble',
+                '--disable-component-extensions-with-background-pages',
+                '--no-first-run',
+                '--disable-default-apps',
+                '--disable-translate',
+                '--hide-scrollbars',
+                '--disable-features=TranslateUI',
+                '--noerrdialogs',
+                '--touch-events=enabled',
+                '--start-fullscreen',
+                '--disable-notifications',
+                '--disable-logging',
+                '--disable-crash-reporter',
+                `--user-data-dir=${this.homeDirectory}/.config/chromium/Default`,
+                '--disable-web-security',
+            `http://localhost:${connectionPort}/`
+        ];
 
-        this.service = exec(commandLine, {
+        this.service = exec(command.join(' '), {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
                 XAUTHORITY: `${this.homeDirectory}/.Xauthority`,
             },
         });
+        
+        this.service.on('error', (err) => {
+            console.log('🔴 [ client_chromium ][ ERROR ]', err);
+        });
 
         this.service.on('close', () => {
             this.service = null;
             console.log('[ client_chromium ] Closed')
             this.emit('close');
-        });
-        
-        this.service.on('error', (err) => {
-            console.log('🔴 [ client_chromium ][ ERROR ]', err);
-
         });
     }
 }
