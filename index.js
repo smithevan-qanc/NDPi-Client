@@ -254,7 +254,7 @@ class NDPi {
                 return;
             }
         const NDI_Receiver_v2 = require('./service/client_ndiReceiver.js');
-        this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.service_chromium, 'ndi_receiver_v2');
+        this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.service_chromium);
 
         this.ndiReceiver.on('connected', () => {
             console.log('[ index ][ client_ndiReceiver ] Receiver Started');
