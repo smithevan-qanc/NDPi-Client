@@ -160,6 +160,14 @@
 
     <script>
 
+        (() => {
+            if ('getDisplayMedia' in navigator.mediaDevices) {
+                console.log('yes');
+            } else {
+                console.error('nope', navigator);
+            }
+        })();
+
         const waitingForServer   = (show = true) => { document.getElementById('waiting-for-server-svg').style.opacity = show ? 1 : 0; }
         const connectingToSource = (show = true) => { document.getElementById('attempting-ndi-connection-svg').style.opacity = show ? 1 : 0; }
         const displayDetails     = (show = true) => { document.getElementById('sys-details').style.opacity = show ? 1 : 0; }

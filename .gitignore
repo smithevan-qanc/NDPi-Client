@@ -54,6 +54,9 @@ coverage/
 tmp/
 temp/
 
+DEP_*
+XYZ_*
+
 *00path
 *NOTES.txt
 
