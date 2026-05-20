@@ -80,7 +80,7 @@ class NDI_Receiver_v2 extends EventEmitter {
         });
 
         this.receiver.on('error', (error) => {
-            this.emit('error');
+            process.nextTick(() => { this.emit('error') });
             console.log(`🔴 [ client_ndiReceiver ][ NDI ] --▶ Critical Error:`, error);
         });
 
