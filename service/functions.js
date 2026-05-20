@@ -10,7 +10,6 @@ const { exec } = require('node:child_process');
     /** TODO */
 
         async function processCommand(message = {}) {
-            console.log('(1) Processing Command', message);
             // ... Reference For Building
             let command = {
                 id:     message?.id,     // UUID of command for tracking
@@ -25,21 +24,19 @@ const { exec } = require('node:child_process');
             };
 
             if (!command.type)
-                {
-                    response.data.message = "Missing 'type'";
-                    return response;
-                }
+            {
+                response.data.message = "Missing 'type'";
+                return response;
+            }
             switch (command.type)
             {
                 case 'ping':
-                    console.log(`PROCESSING: ${command.type}`);
                     response.success = true;
                     return response;
                     break;
 
                 // Visual Display
                 case 'show-blank':
-                    console.log(`PROCESSING: ${command.type}`);
                     try
                     {
                         fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndpi_status_no_source_display_mode'), 'blank', 'utf8');
@@ -52,8 +49,8 @@ const { exec } = require('node:child_process');
                     }
                     return response;
                     break;
+
                 case 'show-overlay':
-                    console.log(`PROCESSING: ${command.type}`);
                     try
                     {
                         fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndpi_status_no_source_display_mode'), 'overlay', 'utf8');
@@ -66,6 +63,7 @@ const { exec } = require('node:child_process');
                     }
                     return response;
                     break;
+
                 case 'set-overlay':
                     console.log(`PROCESSING: ${command.type}`);
                     const imageBase64 = command.data.content;
@@ -74,15 +72,14 @@ const { exec } = require('node:child_process');
                     response.success = true;
                     return response;
                     break;
+                
                 case 'set-source':
-                    console.log(`PROCESSING: ${command.type}`);
                     response = await setNdi(response, command);
                     return response;
                     break;
 
                 // Physical Display
                 case 'send-cec':
-                    console.log(`PROCESSING: ${command.type}`);
                     try
                     {
                         const f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
@@ -90,19 +87,18 @@ const { exec } = require('node:child_process');
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(command)
                         });
-                        if (f.ok)
-                            { response.success = true }
-                        else
-                            { response.success = false }
+                        if (f.ok) { response.success = true }
+                        else { response.success = false }
                     }
-                    catch (error) {
+                    catch (error)
+                    {
                         response.data.message = error;
                         response.success = false;
                     }
                     return response;
                     break;
+                
                 case 'focus-chromium':
-                    console.log(`PROCESSING: ${command.type}`);
                     await new Promise((resolve) => {
                         exec('xdotool search --onlyvisible --class "chromium" | head -n 1', {
                             env: { ...process.env }
@@ -132,7 +128,7 @@ const { exec } = require('node:child_process');
                                 }, (error, stdout, stderr) => {
                                     if (error)
                                     {
-                                        console.log('(4) 🔴 [ functions ] Could NOT activate window:', stderr.toString().trim());
+                                        console.log('(4) 🔴 [ functions ] Could NOT activate window:', stderr.toString().trim() || 'null');
                                         response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
                                         response.success = false;
                                         resolve();
@@ -140,7 +136,6 @@ const { exec } = require('node:child_process');
                                     }
                                     else 
                                     {
-                                        console.log('(5) [ functions ] All Good');
                                         response.success = true;
                                         resolve();
                                         return;
@@ -151,8 +146,8 @@ const { exec } = require('node:child_process');
                     });
                     return response;
                     break;
+                
                 case 'focus-ndi':
-                    console.log(`PROCESSING: ${command.type}`);
                     await new Promise((resolve) => {
                         exec('xdotool search --onlyvisible --class "gstreamer" | head -n 1', {
                             env: { ...process.env }
@@ -167,10 +162,9 @@ const { exec } = require('node:child_process');
                             }
                             else 
                             {
-                                console.log('(2) [ functions ] NDI Visible Window ID:', stdout.toString().trim());
                                 if (!stdout.toString().trim())
                                 {
-                                    console.log('(3) 🔴 [ functions ] NDI is NOT running.');
+                                    console.log('🔴 [ functions ] NDI is NOT running.');
                                     response.data.message = 'NDI is NOT running.';
                                     response.success = false;
                                     resolve();
@@ -182,7 +176,7 @@ const { exec } = require('node:child_process');
                                 }, (error, stdout, stderr) => {
                                     if (error)
                                     {
-                                        console.log('(4) 🔴 [ functions ] Could NOT activate window:', stderr.toString().trim());
+                                        console.log('🔴 [ functions ] Could NOT activate window:', stderr.toString().trim() || 'null');
                                         response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
                                         response.success = false;
                                         resolve();
@@ -190,7 +184,6 @@ const { exec } = require('node:child_process');
                                     }
                                     else 
                                     {
-                                        console.log('(5) [ functions ] All Good');
                                         response.success = true;
                                         resolve();
                                         return;
@@ -201,6 +194,7 @@ const { exec } = require('node:child_process');
                     });
                     return response;
                     break;
+                
                 case '':
                 //     console.log(`PROCESSING: ${command.type}`);
 
@@ -293,8 +287,7 @@ const { exec } = require('node:child_process');
                     response.message = data?.message ?? 'OK';
                     response.success = true
                 }
-                else
-                { response.success = false }
+                else { response.success = false }
             }
             catch (error)
             {
