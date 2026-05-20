@@ -161,11 +161,7 @@
     <script>
 
         (() => {
-            if ('getDisplayMedia' in navigator.mediaDevices) {
-                console.log('yes');
-            } else {
-                console.error('nope', navigator);
-            }
+            console.error('nope', navigator);
         })();
 
         const waitingForServer   = (show = true) => { document.getElementById('waiting-for-server-svg').style.opacity = show ? 1 : 0; }
