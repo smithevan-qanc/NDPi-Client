@@ -125,7 +125,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                         reqValid = (typeof data === 'string' && this.controller_cec.isReady);
                         if (reqValid)
                             {
-                                this.controller_cec.send(data);
+                                this.controller_cec.send(decodeURI(data));
                                 res.status(200);
                                 res.json({ success: true });
                             }
