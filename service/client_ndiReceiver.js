@@ -33,7 +33,30 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.xAuth = xAuthority || `${this.homeDirectory}/.Xauthority`;
 
         this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
-        // this.settings.put('ndpi_status_ndi_source_target', this.ndiSource);
+        
+        /**
+         * 
+         * NDIlib_recv_bandwidth_metadata_only  = -10,          // Receive metadata.
+         * NDIlib_recv_bandwidth_audio_only     = 10,           // Receive metadata, audio.
+         * NDIlib_recv_bandwidth_lowest         = 0,            // Receive metadata, audio, video at a lower bandwidth and resolution.
+         * NDIlib_recv_bandwidth_highest        = 100,          // Receive metadata, audio, video at full resolution.
+         * NDIlib_recv_bandwidth_max            = 0x7fffffff
+         * 
+         */
+        this.ndiBandwidth = this.settings.get('ndi_receiver_bandwidth') || '0';
+        
+        /**
+         * 
+         * NDIlib_recv_color_format_BGRX_BGRA   = 0
+         * NDIlib_recv_color_format_UYVY_BGRA   = 1
+         * NDIlib_recv_color_format_RGBX_RGBA   = 2
+         * NDIlib_recv_color_format_UYVY_RGBA   = 3
+         * NDIlib_recv_color_format_fastest     = 100
+         * NDIlib_recv_color_format_best        = 101
+         * 
+         */
+        this.ndiColorFormat = this.settings.get('ndi_receiver_color_format') || '100';
+
         this.ndiActiveSource = null;
         this.ndiConnectedAt = null;
         this.ndiFramerate = null;
@@ -50,7 +73,7 @@ class NDI_Receiver_v2 extends EventEmitter {
 
     connect() {
 
-        this.receiver = spawn(`${this.parentDirectory}/${this.receiverName}`, [this.ndiSource, 0x7fffffff, 100], {
+        this.receiver = spawn(`${this.parentDirectory}/${this.receiverName}`, [this.ndiSource, this.ndiBandwidth, this.ndiColorFormat], {
             env: {
                 ...process.env,
                 DISPLAY: ':0',

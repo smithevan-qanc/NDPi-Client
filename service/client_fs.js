@@ -131,6 +131,12 @@ class FileSystemMonitor extends EventEmitter {
                 key: "ndpi_status_no_source_display_mode",
                 value: `overlay`
             }, {
+                key: "ndi_receiver_bandwidth",
+                value: `0` // MAX: 0x7fffffff
+            }, {
+                key: "ndi_receiver_color_format",
+                value: `100`
+            }, {
                 key: "output_resolution_current",
                 value: ``
             }, {
