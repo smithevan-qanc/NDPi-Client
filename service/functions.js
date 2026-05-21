@@ -99,51 +99,7 @@ const { exec } = require('node:child_process');
                     break;
                 
                 case 'focus-chromium':
-                    await new Promise((resolve) => {
-                        exec('xdotool search --onlyvisible --class "chromium" | head -n 1', {
-                            env: { ...process.env }
-                        }, (error, stdout, stderr) => {
-                            if (error)
-                            {
-                                console.log('(1) 🔴 [ functions ] Could NOT find window:', stderr.toString().trim());
-                                response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
-                                response.success = false;
-                                resolve();
-                                return;
-                            }
-                            else 
-                            {
-                                console.log('(2) [ functions ] Chromium Visible Window ID:', stdout.toString().trim());
-                                if (!stdout.toString().trim())
-                                {
-                                    console.log('(3) 🔴 [ functions ] Chromium is NOT running.');
-                                    response.data.message = 'Chromium is NOT running.';
-                                    response.success = false;
-                                    resolve();
-                                    return;
-                                }
-                                const a = `xdotool windowactivate ${stdout.toString().trim()}`;
-                                exec(a, {
-                                    env: { ...process.env }
-                                }, (error, stdout, stderr) => {
-                                    if (error)
-                                    {
-                                        console.log('(4) 🔴 [ functions ] Could NOT activate window:', stderr.toString().trim() || 'null');
-                                        response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
-                                        response.success = false;
-                                        resolve();
-                                        return;
-                                    }
-                                    else 
-                                    {
-                                        response.success = true;
-                                        resolve();
-                                        return;
-                                    }
-                                });
-                            }
-                        });
-                    });
+                    await focusWindow('chromium', response);
                     return response;
                     break;
                 
@@ -297,10 +253,61 @@ const { exec } = require('node:child_process');
             return response;
         }
 
+        async function focusWindow(className, res = { data: {} }) {
+            let response = { ...res };
+            await new Promise((resolve) => {
+                exec(`xdotool search --onlyvisible --class "${className}" | head -n 1`, {
+                    env: { ...process.env }
+                }, (error, stdout, stderr) => {
+                    if (error)
+                    {
+                        console.log('🔴 [ functions ] Could NOT find window:', stderr.toString().trim());
+                        response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
+                        response.success = false;
+                        resolve();
+                        return;
+                    }
+                    else 
+                    {
+                        console.log('[ functions ] Focusing Window ID:', stdout.toString().trim());
+                        if (!stdout.toString().trim())
+                        {
+                            console.log(`🔴 [ functions ] ${className} NOT running.`);
+                            response.data.message = `${className} is NOT running.`;
+                            response.success = false;
+                            resolve();
+                            return;
+                        }
+                        const a = `xdotool windowactivate ${stdout.toString().trim()}`;
+                        exec(a, {
+                            env: { ...process.env }
+                        }, (error, stdout, stderr) => {
+                            if (error)
+                            {
+                                console.log('🔴 [ functions ] Could NOT activate window:', stderr.toString().trim() || 'null');
+                                response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
+                                response.success = false;
+                                resolve();
+                                return;
+                            }
+                            else 
+                            {
+                                response.success = true;
+                                resolve();
+                                return;
+                            }
+                        });
+                    }
+                });
+            });
+            return response;
+        }
+
 
 module.exports = {
     getLocalIp,
     processCommand,
+    focusWindow,
 };
 
 

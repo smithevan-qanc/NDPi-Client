@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const func = require('./service/functions.js');
 
 const VERSION_DIR = path.join(__dirname, 'version');
 const NDPi_VERSION = (
@@ -66,16 +67,24 @@ class NDPi {
         this.settings.on('ndpi_status_ndi_source_target', (data) => {
             const output = String(data || 'none');
             if (output !== this.targetSource)
+            {
+                this.targetSource = output;
+                if (String(this.targetSource).toLowerCase() !== 'none')
                 {
-                    this.targetSource = output;
-                    if (String(this.targetSource).toLowerCase() !== 'none')
-                        {
-                            try { this.ndiReceiver.close(); } catch {}
-                            this.startNdiReceiver();
-                        }
-                    else
-                        { this.ndiReceiver.close(); }
+                    func.focusWindow('chromium');
+                    try { this.ndiReceiver.close(); } catch {}
+                    setTimeout(() => {
+                        this.startNdiReceiver();
+                    }, 1000);
                 }
+                else
+                {
+                    func.focusWindow('chromium');
+                    setTimeout(() => {
+                        try { this.ndiReceiver.close(); } catch {}
+                    }, 800);
+                }
+            }
         });
 
         //  No Source Display Mode
@@ -273,10 +282,13 @@ class NDPi {
     }
 
     __restartNdiReceiver(wait = 1000) {
-        if (this.timerRestartNdi)
-        this.timerRestartNdi = setTimeout(() => {
-            this.startNdiReceiver();
-        }, wait);
+        if (!this.timerRestartNdi)
+        {
+            this.timerRestartNdi = setTimeout(() => {
+                this.startNdiReceiver();
+                this.timerRestartNdi = null;
+            }, wait);
+        }
     }
 
     //  TODO: Migrate the server status updates to be triggered like the display status updates.
