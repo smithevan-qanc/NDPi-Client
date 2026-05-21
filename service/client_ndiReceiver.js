@@ -50,7 +50,7 @@ class NDI_Receiver_v2 extends EventEmitter {
 
     connect() {
 
-        this.receiver = spawn(`${this.parentDirectory}/${this.receiverName}`, [this.ndiSource], {
+        this.receiver = spawn(`${this.parentDirectory}/${this.receiverName}`, [this.ndiSource, 0x7fffffff, 100], {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
