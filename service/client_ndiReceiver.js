@@ -25,6 +25,8 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.homeDirectory = path.join(__dirname, '..', '..');
         this.parentDirectory = path.join(__dirname, '..');
 
+        this.secondsInactive = 0;
+
         this.reconnectTimer = null;
         this.updateFsDebounce = null;
 
@@ -95,7 +97,7 @@ class NDI_Receiver_v2 extends EventEmitter {
                 this.settings.put('ndpi_status_ndi', this.ndiStatus);
                 this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
                 this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
-                
+                this.secondsInactive = 0;
                 process.nextTick(() => { this.emit('connected') });
             }
         });
@@ -161,7 +163,8 @@ class NDI_Receiver_v2 extends EventEmitter {
         {
             this.receiver.kill('SIGKILL');
             console.log('[ client_ndiReceiver ][ NDI ] --▶ SIGKILL');
-        } catch {}
+        }
+        catch {}
         this.receiver = null;
     }
 
@@ -178,33 +181,34 @@ class NDI_Receiver_v2 extends EventEmitter {
     // }
 
     parseInfo(data) {
+        const logInfo = (line = '') => { console.log(`[ client_ndiReceiver ][ NDI ] --▶ ${line}`); }
         data.split(/\r?\n/).forEach((stdout) => {
-            console.log(`[ client_ndiReceiver ][ NDI ] --▶ ${stdout}`);
-            
             const str = String(stdout || '');
             if (str && !str.startsWith('- ')) {
                 const KeyValues = str.split('^');
                 switch(KeyValues[0])
                 {
                     case 'Display_Resolution':
-                        // 
+                        logInfo(`${KeyValues[0]} = ${KeyValues[1]}`);
                         break;
                     case 'NDI_Source_Compression':
-                        //
+                        logInfo(`${KeyValues[0]} = ${KeyValues[1]}`);
                         break;
                     case 'NDI_Source_Resolution':
+                        logInfo(`${KeyValues[0]} = ${KeyValues[1]}`);
                         this.ndiResolution = KeyValues[1];
                         this.settings.put('ndpi_status_ndi_source_resolution', this.ndiResolution || '');
                         break;
                     case 'NDI_Source_Framerate':
+                        logInfo(`${KeyValues[0]} = ${KeyValues[1]}`);
                         this.ndiFramerate = KeyValues[1];
                         this.settings.put('ndpi_status_ndi_source_framerate', String(this.ndiFramerate || ''));
                         break;
                     case 'NDI_Source_Not_Active':
-                        //
+                        this.processInactiveStream();
                         break;
                     default:
-                        //
+                        logInfo(`${KeyValues[0]} = ${KeyValues[1]}`);
                         break;
                 }
             }
@@ -228,6 +232,37 @@ class NDI_Receiver_v2 extends EventEmitter {
         //     if (fpsMatch)
         //         { this.ndiFramerate = parseFloat(fpsMatch[1] || fpsMatch[2]) }
         // }
+    }
+
+    processInactiveStream() {
+        switch(this.secondsInactive)
+        {
+            case 5:
+                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                return;
+                break;
+            case 10:
+                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                return;
+                break;
+            case 15:
+                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                return;
+                break;
+            case 20:
+                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                return;
+                break;
+            case 25:
+                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                return;
+                break;
+            default:
+                if (this.secondsInactive >= 30)
+                { console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`); }
+                return;
+                break;
+        }
     }
 }
 
