@@ -55,14 +55,29 @@
     (() => {
         document.getElementById('tv-power-off').addEventListener('click', async (e) => {
             e.preventDefault();
-            const res = await fetch('/api/v1/command?type=send-cec&data=standby%200')
+            sendCommand({
+                type: 'send-cec',
+                data: 'standby 0',
+            });
         });
     })();
     async function sendCommand(command = {}) {
         if (!command.type) return null;
         const searchParams = new URLSearchParams(command).toString();
-        const urlPatern = new URLPattern(window.location.href);
-        const res = await fetch(`${urlPatern.}/api/v1/command?type=${command.type}&data=standby%200`)
+        const url = new URLPattern(window.location.href, { searchParams: searchParams });
+        console.log(`URL: ${url.protocol}://${url.hostname}:${url.port}/api/v1/command?${url.searchParams}`)
+
+        try {
+            const res = await fetch(`${url.protocol}://${url.hostname}:${url.port}/api/v1/command?${url.searchParams}`, {
+                method: 'GET',
+            });
+
+            if (!res.ok) throw new Error(await res.json());
+
+
+        } catch (e) {
+            console.error(e);
+        }
     }
 </script>
 
