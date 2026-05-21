@@ -66,7 +66,7 @@
         const searchParams = new URLSearchParams(command).toString();
 
         const url = new URLPattern(window.location.href);
-        const urlString = `URL: ${url.protocol}://${url.hostname}:${url.port}/api/v1/command?${searchParams}`;
+        const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/command?${searchParams}`;
         console.log(urlString)
 
         try {
