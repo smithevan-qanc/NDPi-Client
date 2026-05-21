@@ -39,13 +39,17 @@
         <div class="flex-column">
             <div>TV Controls (CEC)</div>
             <div class="flex-row">
-                <button id="tv-power-off">Off</button>
-                <button id="tv-power-on">On</button>
+                <button id="tv_power_off">Off</button>
+                <button id="tv_power_on">On</button>
             </div>
             <div>Volume</div>
             <div class="flex-row">
-                <button id="tv-volume-down">-</button>
-                <button id="tv-volume-up">+</button>
+                <button id="tv_volume_down">-</button>
+                <button id="tv_volume_up">+</button>
+            </div>
+            <div class="flex-column">
+                <button id="tv_as">Switch To NDPi</button>
+                <button id="tv_is">Home</button>
             </div>
         </div>
     </div>
@@ -53,11 +57,46 @@
 
 <script>
     (() => {
-        document.getElementById('tv-power-off').addEventListener('click', async (e) => {
+        document.getElementById('tv_power_off').addEventListener('click', async (e) => {
             e.preventDefault();
             sendCommand({
                 type: 'send-cec',
                 data: encodeURI('standby 0'),
+            });
+        });
+        document.getElementById('tv_power_on').addEventListener('click', async (e) => {
+            e.preventDefault();
+            sendCommand({
+                type: 'send-cec',
+                data: encodeURI('on 0'),
+            });
+        });
+        document.getElementById('tv_volume_down').addEventListener('click', async (e) => {
+            e.preventDefault();
+            sendCommand({
+                type: 'send-cec',
+                data: encodeURI('voldown'),
+            });
+        });
+        document.getElementById('tv_volume_up').addEventListener('click', async (e) => {
+            e.preventDefault();
+            sendCommand({
+                type: 'send-cec',
+                data: encodeURI('volup'),
+            });
+        });
+        document.getElementById('tv_as').addEventListener('click', async (e) => {
+            e.preventDefault();
+            sendCommand({
+                type: 'send-cec',
+                data: encodeURI('as'),
+            });
+        });
+        document.getElementById('tv_is').addEventListener('click', async (e) => {
+            e.preventDefault();
+            sendCommand({
+                type: 'send-cec',
+                data: encodeURI('is'),
             });
         });
     })();
