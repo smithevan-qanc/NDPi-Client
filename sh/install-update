@@ -21,8 +21,8 @@ install() {
     echo "    [FROM] $TMP"
     echo "      [TO] $PGM"
     read -rp "Install? (y/n) " confirm
-    if [[ "$confirm" = [yY] ]]; then
-        sudo rsync -rqu --progress "$TMP"/ "$PGM"
+    # if [[ "$confirm" = [yY] ]]; then
+        sudo rsync -ru --progress "$TMP"/ "$PGM"
         sleep 1
         cd $PGM
         echo "$(pwd)"
@@ -31,9 +31,9 @@ install() {
         sudo systemctl restart ndpi.service
         echo "INSTALLATION COMPLETE"
         # sudo reboot
-    else
-        echo "INSTALLATION ABORTED"
-    fi
+    # else
+    #     echo "INSTALLATION ABORTED"
+    # fi
 }
 
 
