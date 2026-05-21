@@ -206,6 +206,7 @@ class NDI_Receiver_v2 extends EventEmitter {
                         this.settings.put('ndpi_status_ndi_source_framerate', String(this.ndiFramerate || ''));
                         break;
                     case 'NDI_Source_Not_Active':
+                        this.secondsInactive++;
                         this.processInactiveStream();
                         break;
                     default:
