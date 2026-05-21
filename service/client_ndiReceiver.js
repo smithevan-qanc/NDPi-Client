@@ -248,8 +248,7 @@ class NDI_Receiver_v2 extends EventEmitter {
     processInactiveStream() {
         switch(this.secondsInactive)
         {
-            case 5:
-                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+            case 1:
                 this.ndiStatus = 'stalled';
                 this.settings.put('ndpi_status_ndi', this.ndiStatus);
                 return;
@@ -258,21 +257,29 @@ class NDI_Receiver_v2 extends EventEmitter {
                 console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
-            case 15:
-                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
-                return;
-                break;
             case 20:
                 console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
-            case 25:
+            case 30:
+                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                return;
+                break;
+            case 40:
+                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                return;
+                break;
+            case 50:
+                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                return;
+                break;
+            case 60:
                 console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             default:
-                if (this.secondsInactive >= 30)
-                { console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`); }
+                if (this.secondsInactive === 61)
+                { console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive longer than 60 seconds. Awaiting reconnection.`); }
                 return;
                 break;
         }
