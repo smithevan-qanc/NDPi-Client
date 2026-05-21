@@ -20,9 +20,9 @@ install() {
     local PGM="$(pwd)/ndpi"
     echo "    [FROM] $TMP"
     echo "      [TO] $PGM"
-    read -rp "Install? (y/n) " confirm
+    # read -rp "Install? (y/n) " confirm
     # if [[ "$confirm" = [yY] ]]; then
-        sudo rsync -ru --progress "$TMP"/ "$PGM"
+        sudo rsync -rvu "$TMP"/ "$PGM"
         sleep 1
         cd $PGM
         echo "$(pwd)"
