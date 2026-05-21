@@ -44,7 +44,7 @@ class FileSystemMonitor extends EventEmitter {
 
         // Create directory if it doesn't exist.
         if (!fs.existsSync(this.dataDir))
-            { fs.mkdirSync(this.dataDir, { recursive: true }) }
+        { fs.mkdirSync(this.dataDir, { recursive: true }) }
 
         // Set the deviceId from either serial-number or machine-id
         let deviceId = '';
@@ -53,25 +53,28 @@ class FileSystemMonitor extends EventEmitter {
             path.join('/etc','machine-id'),
         ];
         if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1]))
+        {
+            try
             {
-                try
-                {
-                    deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
-                    console.log('[ client_fs ][ DEVICE ID ]',  deviceId);
-                }
-                catch 
-                {
-                    deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
-                    console.log('[ client_fs ][ FALLBACK DEVICE ID ] ', deviceId);
-                }
+                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
+                console.log('[ client_fs ][ DEVICE ID ]',  deviceId);
             }
+            catch 
+            {
+                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
+                console.log('[ client_fs ][ FALLBACK DEVICE ID ] ', deviceId);
+            }
+        }
         else // MacOS Compatability
-            { await new Promise((resolve) => {
+        {
+            await new Promise((resolve) => {
                 exec(`ioreg -l | grep IOPlatformSerialNumber | awk '{print $4}' | tr -d '"'`, (error, stdout) => {
-                    if (!error) deviceId = stdout.trim();
+                    if (!error)
+                    { deviceId = stdout.trim(); }
                     resolve();
                 });
-            }) }
+            })
+        }
 
         // Map file names and values with to standard defaults.
         this.#fileMap = new Map();
@@ -173,14 +176,18 @@ class FileSystemMonitor extends EventEmitter {
         ];
         // Files that will NOT initialize with their previously stored values.
         const retainDefaultValue = [
-            'ndpi_status_ndi',
-            'ndpi_status_ndi_source_active',
-            'ndpi_version_date',
             'ndpi_version',
-            'local_port_number_bonjour',
-            'local_port_number_api',
+            'ndpi_version_date',
             'device_id',
             'device_type',
+            'device_ip',
+            'local_port_number_bonjour',
+            'local_port_number_api',
+            'ndpi_status_ndi',
+            'ndpi_status_ndi_source_active',
+            'ndpi_status_ndi_source_connected_time',
+            'ndpi_status_ndi_source_resolution',
+            'ndpi_status_ndi_source_framerate',
             'output_device_cec_enabled',
             'output_device_cec_status_power',
             'output_device_cec_active_source',
@@ -195,27 +202,27 @@ class FileSystemMonitor extends EventEmitter {
          * 
          */
         for (const { key, value } of files)
+        {
+            const filePath = path.join(this.dataDir, key);
+            let getValueFromFile = true;
+            if (retainDefaultValue.includes(key))
+            { getValueFromFile = false }
+            try
             {
-                const filePath = path.join(this.dataDir, key);
-                let getValueFromFile = true;
-                if (retainDefaultValue.includes(key))
-                    { getValueFromFile = false }
-                try
+                if (fs.existsSync(filePath) && getValueFromFile)
                 {
-                    if (fs.existsSync(filePath) && getValueFromFile)
-                        {
-                            const currentValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trimEnd();
-                            this.#fileMap.set(key, currentValue);
-                        }
-                    else
-                        {
-                            fs.writeFileSync(filePath, value, 'utf8');
-                            this.#fileMap.set(key, value);
-                        }
+                    const currentValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trimEnd();
+                    this.#fileMap.set(key, currentValue);
                 }
-                catch (err)
-                { console.log(`🔴 [ client_fs ][ ERROR ] Saving File: Name:${key}, Value: ${value}`, err) }
-            };
+                else
+                {
+                    fs.writeFileSync(filePath, value, 'utf8');
+                    this.#fileMap.set(key, value);
+                }
+            }
+            catch (err)
+            { console.log(`🔴 [ client_fs ][ ERROR ] Saving File: Name:${key}, Value: ${value}`, err) }
+        };
 
         // Call updateLocalIp() right away. It will call poll() after.
         setTimeout(() => { this.updateLocalIp() }, 500);
@@ -224,17 +231,18 @@ class FileSystemMonitor extends EventEmitter {
     start() {
         fs.watch(this.dataDir, async (event, filename) => {
             if (!this.#fileMap.has(filename))
-                { return }
+            { return }
+
             if (event === 'change')
+            {
+                const currentValue = this.#fileMap.get(filename);
+                const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').replace(/\0/g, '').trimEnd();
+                if (currentValue !== fsValue)
                 {
-                    const currentValue = this.#fileMap.get(filename);
-                    const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').replace(/\0/g, '').trimEnd();
-                    if (currentValue !== fsValue)
-                        {
-                            this.#fileMap.set(filename, fsValue);
-                            this.fsEvent(filename, fsValue);
-                        }
+                    this.#fileMap.set(filename, fsValue);
+                    this.fsEvent(filename, fsValue);
                 }
+            }
         });
         this.startDrmMonitor();
     }
@@ -255,13 +263,14 @@ class FileSystemMonitor extends EventEmitter {
 
     get(fileName) {
         if (!fileName || !this.#fileMap.has(fileName))
-            { return null }
+        { return null; }
+
         return this.#fileMap.get(fileName);
     }
 
     put(fileName, data = '') {
         if (!fileName || !this.#fileMap.has(fileName))
-            { return }
+        { return }
         try
         { fs.writeFileSync(path.join(this.dataDir, fileName), data.trimEnd(), 'utf8') }
         catch (error)
@@ -272,7 +281,8 @@ class FileSystemMonitor extends EventEmitter {
         const last = this.debounceMap.get(name) || 0;
         const now = Date.now();
         if (now - last < debounceMs)
-            { return }
+        { return }
+
         this.debounceMap.set(name, now);
         this.queue.push({ name, value });
         this._flushQueue();
@@ -280,29 +290,30 @@ class FileSystemMonitor extends EventEmitter {
 
     _flushQueue() {
         while (this.queue.length > 0)
-            {
-                const { name, value } = this.queue.shift();
-                console.log(`[ client_fs ][ UPDATE ] '${name}' ==> '${value}'`);
-                this.emit(name, value);
-            }
+        {
+            const { name, value } = this.queue.shift();
+            console.log(`[ client_fs ][ UPDATE ] '${name}' ==> '${value}'`);
+            this.emit(name, value);
+        }
     }
 
     async updateLocalIp() {
         const fileName = 'device_ip';
         const updateValue = await getLocalIp(this.firstRun);
         if (updateValue)
+        {
+            const storedValue = this.#fileMap.get(fileName);
+            if (updateValue !== storedValue)
+            { this.put(fileName, updateValue) }
+            
+            if (this.firstRun)
             {
-                const storedValue = this.#fileMap.get(fileName);
-                if (updateValue !== storedValue)
-                    { this.put(fileName, updateValue) }
-                if (this.firstRun)
-                    {
-                        this.poll();
-                        this.emit('ready');
-                        this.firstRun = false;
-                        this.start();
-                    }
+                this.poll();
+                this.emit('ready');
+                this.firstRun = false;
+                this.start();
             }
+        }
     }
 
     startDrmMonitor() {
