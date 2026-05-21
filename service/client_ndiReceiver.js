@@ -3,6 +3,7 @@ const { spawn } = require('node:child_process');
 const { setTimeout, clearTimeout } = require('node:timers');
 const path = require('path');
 const func = require('./functions');
+const { OutgoingMessage } = require('node:http');
 
 class NDI_Receiver_v2 extends EventEmitter {
     constructor(
@@ -97,8 +98,14 @@ class NDI_Receiver_v2 extends EventEmitter {
                 this.settings.put('ndpi_status_ndi', this.ndiStatus);
                 this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
                 this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
-                this.secondsInactive = 0;
                 process.nextTick(() => { this.emit('connected') });
+            }
+            else if (output.includes('Reconnected to:'))
+            {
+                this.secondsInactive = 0;
+                this.ndiStatus = 'streaming';
+                this.settings.put('ndpi_status_ndi', this.ndiStatus);
+                func.focusWindow('gstreamer');
             }
         });
 
@@ -243,6 +250,8 @@ class NDI_Receiver_v2 extends EventEmitter {
         {
             case 5:
                 console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                this.ndiStatus = 'stalled';
+                this.settings.put('ndpi_status_ndi', this.ndiStatus);
                 return;
                 break;
             case 10:

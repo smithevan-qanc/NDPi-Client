@@ -99,55 +99,12 @@ const { exec } = require('node:child_process');
                     break;
                 
                 case 'focus-chromium':
-                    await focusWindow('chromium', response);
+                    response = await focusWindow('chromium', response);
                     return response;
                     break;
                 
                 case 'focus-ndi':
-                    await new Promise((resolve) => {
-                        exec('xdotool search --onlyvisible --class "gstreamer" | head -n 1', {
-                            env: { ...process.env }
-                        }, (error, stdout, stderr) => {
-                            if (error)
-                            {
-                                console.log('(1) 🔴 [ functions ] Could NOT find window:', stderr.toString().trim());
-                                response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
-                                response.success = false;
-                                resolve();
-                                return;
-                            }
-                            else 
-                            {
-                                if (!stdout.toString().trim())
-                                {
-                                    console.log('🔴 [ functions ] NDI is NOT running.');
-                                    response.data.message = 'NDI is NOT running.';
-                                    response.success = false;
-                                    resolve();
-                                    return;
-                                }
-                                const a = `xdotool windowactivate ${stdout.toString().trim()}`;
-                                exec(a, {
-                                    env: { ...process.env }
-                                }, (error, stdout, stderr) => {
-                                    if (error)
-                                    {
-                                        console.log('🔴 [ functions ] Could NOT activate window:', stderr.toString().trim() || 'null');
-                                        response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
-                                        response.success = false;
-                                        resolve();
-                                        return;
-                                    }
-                                    else 
-                                    {
-                                        response.success = true;
-                                        resolve();
-                                        return;
-                                    }
-                                });
-                            }
-                        });
-                    });
+                    response = await focusWindow('gstreamer', response);
                     return response;
                     break;
                 
