@@ -22,6 +22,7 @@ const { exec } = require('node:child_process');
                 ts:         Date.now(),
                 data:       {}
             };
+            console.log(JSON.stringify(command));
 
             if (!command.type)
             {
