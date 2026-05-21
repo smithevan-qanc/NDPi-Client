@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NDPi Monitor Overlay</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html,
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: rgba(100, 100, 100, 1);
+        }
+        .main {
+            height: 100vh;
+            width: 100vw;
+            display: grid;
+
+        }
+        .flex-column {
+            display: flex;
+            flex-direction: column;
+        }
+        .flex-row {
+            display: flex;
+            flex-direction: row;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="flex-column">
+            <div>TV Controls (CEC)</div>
+            <div class="flex-row">
+                <button id="tv-power-off">Off</button>
+                <button id="tv-power-on">On</button>
+            </div>
+            <div>Volume</div>
+            <div class="flex-row">
+                <button id="tv-volume-down">-</button>
+                <button id="tv-volume-up">+</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    (() => {
+        document.getElementById('tv-power-off').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const res = await fetch('/api/v1/command?type=send-cec&data=standby%200')
+        });
+    })();
+    async function sendCommand(command = {}) {
+        if (!command.type) return null;
+        const searchParams = new URLSearchParams(command).toString();
+        const urlPatern = new URLPattern(window.location.href);
+        const res = await fetch(`${urlPatern.}/api/v1/command?type=${command.type}&data=standby%200`)
+    }
+</script>
+
+</html>

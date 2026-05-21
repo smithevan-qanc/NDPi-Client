@@ -80,31 +80,31 @@ class FileSystemMonitor extends EventEmitter {
         this.#fileMap = new Map();
         const files = [
             { 
-                key: "device_name",
+                key: "device_name",                             // Custom device name
                 value: `${this.defaultDeviceName}`
             }, {
-                key: "device_type",
+                key: "device_type",                             // Device type for broadcast on Bonjour
                 value: `NDPi Monitor Client`
             }, {
-                key: "device_id",
+                key: "device_id",                               // Device ID
                 value: deviceId.toUpperCase()
             }, {
-                key: "device_ip",
+                key: "device_ip",                               // Local IP for device
                 value: ``
             }, {
-                key: "local_port_number_api",
+                key: "local_port_number_api",                   // Port number for device API
                 value: `${process.env.PORT_API || 3080}`
             }, {
-                key: "local_port_number_bonjour",
+                key: "local_port_number_bonjour",               // Port number for device Bonjour
                 value: `${process.env.PORT_MDNS || 3053}`
             }, {
-                key: "ndpi_version",
+                key: "ndpi_version",                            // Version of NDPi 
                 value: this.#pgmVersion
             }, {
-                key: "ndpi_version_date",
+                key: "ndpi_version_date",                       // NDPi Version release date.
                 value: this.#pgmVersionDate
             }, {
-                key: "ndpi_command_server_host",
+                key: "ndpi_command_server_host",                // 
                 value: `` 
             }, {
                 key: "ndpi_command_server_port",
