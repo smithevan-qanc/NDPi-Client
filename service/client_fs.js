@@ -174,6 +174,7 @@ class FileSystemMonitor extends EventEmitter {
         // Files that will NOT initialize with their previously stored values.
         const retainDefaultValue = [
             'ndpi_status_ndi',
+            'ndpi_status_ndi_source_active',
             'ndpi_version_date',
             'ndpi_version',
             'local_port_number_bonjour',

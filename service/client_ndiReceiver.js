@@ -184,7 +184,8 @@ class NDI_Receiver_v2 extends EventEmitter {
         const logInfo = (line = '') => { console.log(`[ client_ndiReceiver ][ NDI ] --▶ ${line}`); }
         data.split(/\r?\n/).forEach((stdout) => {
             const str = String(stdout || '');
-            if (str && !str.startsWith('- ')) {
+            if (str && !str.startsWith('- '))
+            {
                 const KeyValues = str.split('^');
                 switch(KeyValues[0])
                 {
@@ -208,10 +209,12 @@ class NDI_Receiver_v2 extends EventEmitter {
                         this.processInactiveStream();
                         break;
                     default:
-                        logInfo(`${KeyValues[0]} = ${KeyValues[1]}`);
+                        //
                         break;
                 }
             }
+            else
+            { logInfo(stdout); }
         });
 
         // const videoMatch = data.match(/(?:Video|Source):\s*(\d+)x(\d+)\s*@\s*(\d+(?:\.\d+)?)/i);
