@@ -2,6 +2,7 @@ const { EventEmitter } = require('events');
 const { spawn } = require('node:child_process');
 const { setTimeout, clearTimeout } = require('node:timers');
 const path = require('path');
+const func = require('./functions');
 
 class NDI_Receiver_v2 extends EventEmitter {
     constructor(
@@ -87,19 +88,16 @@ class NDI_Receiver_v2 extends EventEmitter {
             const output = data.toString().trim();
             this.parseInfo(output);
             if (output.includes('Connected to:'))
-                {
-                    this.ndiConnectedAt = new Date().toISOString();
-                    this.ndiActiveSource = this.ndiSource;
-                    this.ndiStatus = 'streaming';
-                    this.settings.put('ndpi_status_ndi', this.ndiStatus);
-                    this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
-                    this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
-                    
-                    this.settings.put('ndpi_status_ndi_source_framerate', String(this.ndiFramerate || ''));
-                    this.settings.put('ndpi_status_ndi_source_resolution', this.ndiResolution || '');
-                    
-                    process.nextTick(() => { this.emit('connected') });
-                }
+            {
+                this.ndiConnectedAt = new Date().toISOString();
+                this.ndiActiveSource = this.ndiSource;
+                this.ndiStatus = 'streaming';
+                this.settings.put('ndpi_status_ndi', this.ndiStatus);
+                this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
+                this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
+                
+                process.nextTick(() => { this.emit('connected') });
+            }
         });
 
         this.receiver.on('error', (error) => {
@@ -158,6 +156,7 @@ class NDI_Receiver_v2 extends EventEmitter {
     
     close() {
         this.enabled = false;
+        func.focusWindow('chromium');
         try
         {
             this.receiver.kill('SIGKILL');
@@ -181,26 +180,54 @@ class NDI_Receiver_v2 extends EventEmitter {
     parseInfo(data) {
         data.split(/\r?\n/).forEach((stdout) => {
             console.log(`[ client_ndiReceiver ][ NDI ] --▶ ${stdout}`);
+            
+            const str = String(stdout || '');
+            if (str && !str.startsWith('- ')) {
+                const KeyValues = str.split('^');
+                switch(KeyValues[0])
+                {
+                    case 'Display_Resolution':
+                        // 
+                        break;
+                    case 'NDI_Source_Compression':
+                        //
+                        break;
+                    case 'NDI_Source_Resolution':
+                        this.ndiResolution = KeyValues[1];
+                        this.settings.put('ndpi_status_ndi_source_resolution', this.ndiResolution || '');
+                        break;
+                    case 'NDI_Source_Framerate':
+                        this.ndiFramerate = KeyValues[1];
+                        this.settings.put('ndpi_status_ndi_source_framerate', String(this.ndiFramerate || ''));
+                        break;
+                    case 'NDI_Source_Not_Active':
+                        //
+                        break;
+                    default:
+                        //
+                        break;
+                }
+            }
         });
 
-        const videoMatch = data.match(/(?:Video|Source):\s*(\d+)x(\d+)\s*@\s*(\d+(?:\.\d+)?)/i);
-        if (videoMatch)
-            {
-                this.ndiResolution = `${videoMatch[1]}x${videoMatch[2]}`;
-                this.ndiFramerate = parseFloat(videoMatch[3]);
-            }
-        if (!this.ndiResolution)
-            {
-                const resMatch = data.match(/(\d{3,4})x(\d{3,4})/);
-                if (resMatch)
-                    { this.ndiResolution = `${resMatch[1]}x${resMatch[2]}` }
-            }
-        if (!this.ndiFramerate)
-            {
-                const fpsMatch = data.match(/(\d+(?:\.\d+)?)\s*fps|@\s*(\d+(?:\.\d+)?)/i);
-                if (fpsMatch)
-                    { this.ndiFramerate = parseFloat(fpsMatch[1] || fpsMatch[2]) }
-            }
+        // const videoMatch = data.match(/(?:Video|Source):\s*(\d+)x(\d+)\s*@\s*(\d+(?:\.\d+)?)/i);
+        // if (videoMatch)
+        // {
+        //     this.ndiResolution = `${videoMatch[1]}x${videoMatch[2]}`;
+        //     this.ndiFramerate = parseFloat(videoMatch[3]);
+        // }
+        // if (!this.ndiResolution)
+        // {
+        //     const resMatch = data.match(/(\d{3,4})x(\d{3,4})/);
+        //     if (resMatch)
+        //         { this.ndiResolution = `${resMatch[1]}x${resMatch[2]}` }
+        // }
+        // if (!this.ndiFramerate)
+        // {
+        //     const fpsMatch = data.match(/(\d+(?:\.\d+)?)\s*fps|@\s*(\d+(?:\.\d+)?)/i);
+        //     if (fpsMatch)
+        //         { this.ndiFramerate = parseFloat(fpsMatch[1] || fpsMatch[2]) }
+        // }
     }
 }
 
