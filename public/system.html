@@ -111,6 +111,10 @@
         .settings-table {
             border-spacing: 10px;
         }
+        #overlay_preview img {
+            max-height: 108px;
+            max-width: 192px;
+        }
     </style>
 </head>
 
@@ -153,7 +157,7 @@
             <form name="uploadForm">
                 <div>
                     <input id="overlay_upload" type="file" accept=".jpg, .png, .svg"/>
-                    <div id="overlay_preview" style="max-height: 108px; max-width: 192px;"></div>
+                    <div id="overlay_preview" style="display: flex; flex-direction: column;"></div>
                     <label for="fileNum">Selected files:</label>
                     <output id="fileNum">0</output>;
                     <label for="fileSize">Total size:</label>
@@ -171,6 +175,10 @@
         await refreshSources();
         addEvents();
     })();
+
+    // Available sources array.
+    let availableSources = [];
+    const fileUploader = document.getElementById('overlay_upload');
 
     function addEvents() {
         document.getElementById('tv_power_off').addEventListener('click', async (e) => {
@@ -240,45 +248,49 @@
             await refreshSources();
             this.disabled = false;
         });
-        const fileUploader = document.getElementById('overlay_upload');
         fileUploader.addEventListener('change', handleFiles);
         
-        async function handleFiles() {
-            const files = fileUploader.files;
-            const preview = document.getElementById('overlay_preview');
-            for (const file of files)
-            {
-                if (!file.type.startsWith("image/"))
-                { continue; }
+    }
 
-                const img = document.createElement("img");
-                img.classList.add("obj");
-                img.file = file;
-                preview.appendChild(img);
+    async function handleFiles() {
+        const files = fileUploader.files;
+        const preview = document.getElementById('overlay_preview');
 
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
+        for (const file of files)
+        {
+            if (!file.type.startsWith("image/"))
+            { continue; }
+
+            const img = document.createElement("img");
+            img.file = file;
+            preview.appendChild(img);
+            
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
     }
-    
-    // Available sources array.
-    let availableSources = [];
 
     async function sendCommand(command = {}) {
         if (!command.type) return null;
         
-        const searchParams = new URLSearchParams(command).toString();
+        // const searchParams = new URLSearchParams(command).toString();
+        // const url = new URLPattern(window.location.href);
+        // const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/command?${searchParams}`;
+
         const url = new URLPattern(window.location.href);
-        const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/command?${searchParams}`;
+        const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/command`;
+
         let data = null;
         try
         {
             const res = await fetch(urlString, {
-                method: 'GET',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(command)
             });
             if (!res.ok) throw new Error(await res.json());
             data = await res.json();
