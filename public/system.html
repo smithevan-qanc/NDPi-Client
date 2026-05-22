@@ -13,36 +13,59 @@
         }
         html,
         body {
-            width: 100vw;
-            height: 100vh;
-            background: rgba(100, 100, 100, 1);
+            /* width: 100vw;
+            height: 100vh; */
+            background: rgba(50, 50, 50, 1);
+        }
+        input,
+        label {
+            font-weight: 600;
+            color: #eee;
+            font-size: 16px;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+        button {
+            background: rgba(129, 193, 39, 0.9);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 8px 16px;
+            font-size: 16px;
+            cursor: pointer;
+            min-width: 100px;
+        }
+        button:hover {
+            background: rgba(129, 193, 39, 0.8);
         }
         .main {
             height: 100vh;
             width: 100vw;
             display: grid;
-
+            margin: 10px;
         }
         .flex-column {
             display: flex;
             flex-direction: column;
+            gap: 10px;
         }
         .flex-row {
             display: flex;
             flex-direction: row;
+            gap: 10px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 
 <body>
     <div class="main">
-        <div class="flex-column">
-            <div>TV Controls (CEC)</div>
+        <div class="card">
+            <label>TV Controls (CEC)</label>
             <div class="flex-row">
                 <button id="tv_power_off">Off</button>
                 <button id="tv_power_on">On</button>
             </div>
-            <div>Volume</div>
+            <label>Volume</label>
             <div class="flex-row">
                 <button id="tv_volume_down">-</button>
                 <button id="tv_volume_up">+</button>
