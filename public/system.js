@@ -38,18 +38,18 @@ class DeviceSocket {
             try
             {
                 const msg = JSON.parse(message.data);
-                for (const [id, value] of msg)
+                for (const [id, object] of msg)
                 {
                     // const settingInnerHTML = `<label style="text-transform: capitalize;" for="${id}">${String(id.split('_').join(' '))}:</label><input type="text" id="${id}" value="${value}">`;
 
                     const settingInnerHTML = `
                         <td style="text-transform: capitalize; min-width: 200px; text-align: right;">${String(id.split('_').join(' '))}:</td>
                         <td style="width: 70%;">
-                            <input type="text" id="${id}" value="${value}">
+                            <input type="text" id="${id}" value="${object.value}">
                         </td>`;
 
                     if (id === 'ndpi_status_ndi_source_target') 
-                    { document.getElementById('source_selection').value = value || 'none'; }
+                    { document.getElementById('source_selection').value = object.value || 'none'; }
 
                     let settingEl = document.getElementById(`__${id}`);
                     if (!settingEl)
