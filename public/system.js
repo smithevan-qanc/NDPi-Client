@@ -53,7 +53,6 @@ class DeviceSocket {
                         settingEl.innerHTML = settingInnerHTML;
                     }
                 }
-                document.getElementById('system-details').textContent = JSON.stringify(msg, null, 2);
             }
             catch (e)
             { console.error('Invalid message:', e); }
