@@ -157,9 +157,11 @@
 
 <script src="/system.js"></script>
 <script>
-    (() => {
-        refreshSources();
+    (async () => {
+        await refreshSources();
+        addEvents();
     })();
+
     function addEvents() {
         document.getElementById('tv_power_off').addEventListener('click', async (e) => {
             e.preventDefault();
