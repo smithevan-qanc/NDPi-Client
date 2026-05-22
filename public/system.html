@@ -152,7 +152,8 @@
             <h2>Overlay Image</h2>
             <form name="uploadForm">
                 <div>
-                    <input id="overlay_upload" type="file" multiple accept=".jpg, .png, .svg"/>
+                    <input id="overlay_upload" type="file" accept=".jpg, .png, .svg"/>
+                    <div id="overlay_preview" style="max-height: 108px; max-width: 192px;"></div>
                     <label for="fileNum">Selected files:</label>
                     <output id="fileNum">0</output>;
                     <label for="fileSize">Total size:</label>
@@ -243,9 +244,24 @@
         fileUploader.addEventListener('change', handleFiles)
         
         async function handleFiles() {
-            const file = this.files;
-            console.log(file);
-        };
+            const preview = document.getElementById('overlay_preview');
+            for (const file of files)
+            {
+                if (!file.type.startsWith("image/"))
+                { continue; }
+
+                const img = document.createElement("img");
+                img.classList.add("obj");
+                img.file = file;
+                preview.appendChild(img);
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
     }
     
     // Available sources array.
@@ -256,22 +272,18 @@
         
         const searchParams = new URLSearchParams(command).toString();
         const url = new URLPattern(window.location.href);
-
         const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/command?${searchParams}`;
-        console.log(urlString)
-
         let data = null;
-        try {
+        try
+        {
             const res = await fetch(urlString, {
                 method: 'GET',
             });
-
             if (!res.ok) throw new Error(await res.json());
             data = await res.json();
-
-        } catch (e) {
-            console.error(e);
         }
+        catch (e) 
+        { console.error(e); }
         return data;
     }
    
