@@ -23,7 +23,6 @@ const { exec } = require('node:child_process');
                 data:       {}
             };
             let arry = [];
-            console.log(JSON.stringify(command));
 
             if (!command.type)
             {
@@ -99,7 +98,7 @@ const { exec } = require('node:child_process');
 
                                 for (const line of stdoutArray)
                                 {
-                                    const splitLine = line.trim().split('^');
+                                    const splitLine = line.split('^');
                                     response.data.sources.push({
                                         name: splitLine[1],
                                         url: splitLine[0],
@@ -297,7 +296,7 @@ const { exec } = require('node:child_process');
 
         function stdoutToArray(stdout) {
             let a = [];
-            let stdin = stdout || '';
+            let stdin = stdout.trim() || '';
             stdin.split(/\r?\n/).forEach((line) => {
                 a.push(line);
             });
