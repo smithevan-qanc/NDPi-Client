@@ -83,7 +83,7 @@ const { exec } = require('node:child_process');
                 case 'get-sources':
                     const ndiDiscoverPath = `./${fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndi_source_discovery_exec'), 'utf8')}`;
                     await new Promise((resolve) => {
-                        exec('./../ndi_discover_v2', (error, stdout, stderr) => {
+                        exec(ndiDiscoverPath, (error, stdout, stderr) => {
                             if (error)
                             {
                                 console.error(`[ functions ] NDI Discovery Error`, stderr.toString());
