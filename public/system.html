@@ -383,6 +383,7 @@
             availableSources.forEach((source) => {
                 if (!source.name)
                 { return; }
+
                 const sourceOpt = document.createElement('option');
                 sourceOpt.value = source.name;
                 sourceOpt.dataset.url = source.url || '';
@@ -391,6 +392,7 @@
             });
         }
         const currentSourceEl = document.getElementById('ndpi_status_ndi_source_target');
+        
         if (currentSourceEl)
         { sourceSelectorEl.value = currentSourceEl.value || 'none'; }
     }
