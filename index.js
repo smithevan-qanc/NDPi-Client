@@ -14,6 +14,23 @@ const NDPi_VERSION_DATE = (
     : '2026-02-04'
 );
 
+const spi = require('spi-device');
+
+const device = spi.openSync(0, 0);
+
+const message = [{
+    sendBuffer: Buffer.from([0x01, 0x02, 0x03]),
+    receiveBuffer: Buffer.alloc(3),
+    byteLength: 3,
+    speedHz: 1000000
+}];
+
+device.transfer(message, (err, messages) => {
+    if (err) throw err;
+
+    console.log(messages[0].receiveBuffer);
+});
+
 
 class NDPi {
     constructor() {
