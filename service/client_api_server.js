@@ -14,13 +14,12 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         this.settings = fsData;
         this.port = fsData.get('local_port_number_api') || process.env.PORT_API || 3080
+
         fsData.on('update', (data) => {
-            console.log('FS Update Event Received In API');
-            console.log(data);
-            // this.ws_conn_system.forEach(client => {
-            //     if (client.readyState === WebSocket.OPEN)
-            //         { client.send(JSON.stringify(updateData)) }
-            // });
+            this.ws_conn_system.forEach(client => {
+                if (client.readyState === WebSocket.OPEN)
+                    { client.send(data) }
+            });
         });
         
         this.ws_serv_display = new WebSocket.Server({ noServer: true });
@@ -193,12 +192,12 @@ class NDPiCommandServer_Client extends EventEmitter {
     close() {
         this.ws_conn_display.forEach(client => {
             if (client.readyState === WebSocket.OPEN)
-                { client.close() }
+                { try { client.close() } catch {} }
             this.ws_conn_display.delete(client);
         });
         this.ws_conn_system.forEach(client => {
             if (client.readyState === WebSocket.OPEN)
-                { client.close() }
+                { try { client.close() } catch {} }
             this.ws_conn_system.delete(client);
         });
         this.Server.closeAllConnections();
