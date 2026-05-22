@@ -35,12 +35,12 @@ class NDPiCommandServer_Client extends EventEmitter {
                 console.log(`[ client_api_server ] PORT: ${this.port}`);
                 process.nextTick(() => { this.emit('online'); });
             })
-            .on('upgrade', (req, socket, head) => {
+            .on('upgrade', (request, socket, head) => {
                 const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
                 
                 if (pathname === '/ws/display') {
-                    this.WebSocket.handleUpgrade(req, socket, head, (ws) => {
-                        this.WebSocket.emit('connection', ws, req);
+                    this.WebSocket.handleUpgrade(request, socket, head, (ws) => {
+                        this.WebSocket.emit('connection', ws, request);
                     });
                 } else if (pathname === '/ws/sources') {
                     wsDevice.handleUpgrade(request, socket, head, (ws) => {
