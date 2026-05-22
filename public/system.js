@@ -50,6 +50,7 @@ class DeviceSocket {
                     {
                         settingEl = document.createElement('div');
                         settingEl.id = id;
+                        settingEl.dataset.currentValue = value;
                         settingEl.innerHTML = settingInnerHTML;
                         document.getElementById('settings').appendChild(settingEl);
                     } else

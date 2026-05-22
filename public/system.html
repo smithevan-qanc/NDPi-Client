@@ -31,7 +31,7 @@
             padding: 10px 16px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
+            border-radius: 10px;
             color: #eee;
             font-size: 16px;
             letter-spacing: 0.5px;
@@ -41,7 +41,7 @@
         button {
             background: rgba(129, 193, 39, 1);
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             color: white;
             padding: 10px 16px;
             font-size: 16px;
@@ -244,6 +244,9 @@
     
     function renderSources() {
         const sourceSelectorEl = document.getElementById('source_selection');
+        if (!sourceSelectorEl)
+        { return; }
+
         sourceSelectorEl.innerHTML = '';
 
         const noSourceOpt = document.createElement('option');
@@ -263,6 +266,9 @@
                 sourceSelectorEl.appendChild(sourceOpt);
             });
         }
+        const currentSourceEl = document.getElementById('ndpi_status_ndi_source_target');
+        if (currentSourceEl)
+        { sourceSelectorEl.value = currentSourceEl.dataset.currentValue || 'none'; }
     }
 </script>
 
