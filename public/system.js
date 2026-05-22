@@ -40,18 +40,17 @@ class DeviceSocket {
                 const msg = JSON.parse(message.data);
                 for (const [id, value] of msg)
                 {
-                    const settingInnerHTML = `${String(id.split('_').join(' ')).toWellFormed()}: <strong>${value}</strong>`;
+                    const settingInnerHTML = `<label style="text-transform: capitalize;" for="${id}">${String(id.split('_').join(' '))}:</label><input id="${id}">${value}</input>`;
 
                     if (id === 'ndpi_status_ndi_source_target') 
                     { document.getElementById('source_selection').value = value || 'none'; }
 
-                    let settingEl = document.getElementById(id);
+                    let settingEl = document.getElementById(`__${id}`);
                     if (!settingEl)
                     {
                         settingEl = document.createElement('div');
-                        settingEl.id = id;
-                        settingEl.dataset.currentValue = value;
-                        settingEl.style.color = 'white';
+                        settingEl.id = `__${id}`;
+                        settingEl.className = 'flex-row';
                         settingEl.innerHTML = settingInnerHTML;
                         document.getElementById('settings').appendChild(settingEl);
                     } else
