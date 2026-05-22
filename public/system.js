@@ -42,6 +42,9 @@ class DeviceSocket {
                 {
                     const settingInnerHTML = `${id}: <strong>${value}</strong>`;
 
+                    if (id === 'ndpi_status_ndi_source_target') 
+                    { document.getElementById('source_selection').value = value || 'none'; }
+
                     let settingEl = document.getElementById(id);
                     if (!settingEl)
                     {

@@ -24,6 +24,7 @@
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             margin-block-end: 6px;
         }
+        select,
         input {
             font-family: 'Courier New', Courier, monospace;
             width: 100%;
@@ -38,7 +39,7 @@
             outline: none;
         }
         button {
-            background: rgba(129, 193, 39, 0.9);
+            background: rgba(129, 193, 39, 1);
             border: none;
             border-radius: 8px;
             color: white;
@@ -46,9 +47,20 @@
             font-size: 16px;
             cursor: pointer;
             min-width: 200px;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: center;
+            text-shadow: 1px 1px 3px #000;
+            border-color: rgb(112, 177, 20);
         }
         button:hover {
-            background: rgba(129, 193, 39, 0.8);
+            background: rgb(103, 167, 14);
+            box-shadow: 0px 0px 5px rgba(200, 200, 200, 0.2);
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
         }
         .main {
             /* height: 100vh;
@@ -76,6 +88,15 @@
             width: 100%;
             justify-content: center;
         }
+        .red {
+            background: rgba(220, 80, 80, 0.8);
+            color: #fff;
+            border-color: rgba(220, 80, 80, 0.9);
+        }
+        .red:hover {
+            background: rgba(220, 80, 80, 1);
+            box-shadow: 0px 0px 5px rgba(200, 200, 200, 0.2);
+        }
     </style>
 </head>
 
@@ -84,7 +105,7 @@
         <div class="card">
             <label>Connected TV Controls</label>
             <div class="flex-row">
-                <button id="tv_power_off">Off</button>
+                <button class="red" id="tv_power_off">Off</button>
                 <button id="tv_power_on">On</button>
             </div>
             <label>Volume</label>
@@ -95,7 +116,7 @@
             <label>Input</label>
             <div class="flex-column">
                 <button id="tv_as">Switch To NDPi</button>
-                <button id="tv_is">Home</button>
+                <button class="red" id="tv_is">Home</button>
             </div>
             <label>Custom CEC Command</label>
             <input type="text" value="" id="send_bytes">
@@ -103,7 +124,10 @@
         <div class="card">
             <label>NDI Source</label>
             <div class="flex-row">
-                <select id="source_selection"></select>
+                <select id="source_selection">
+                    <option value="none">None</option>
+                </select>
+                <button id="refresh_sources">Refresh</button>
             </div>
         </div>
         <div class="card" id="settings"></div>
@@ -158,11 +182,28 @@
         });
         document.getElementById('send_bytes').addEventListener('change', async function(e) {
             e.preventDefault();
+            this.disabled = true;
             await sendCommand({
                 type: 'send-cec',
                 data: encodeURI(`${this.value}`),
             });
             this.value = '';
+            this.disabled = false;
+        });
+        document.getElementById('source_selection').addEventListener('change', async function(e) {
+            e.preventDefault();
+            this.disabled = true;
+            await sendCommand({
+                type: 'set-source',
+                data: this.value,
+            });
+            this.disabled = false;
+        });
+        document.getElementById('refresh_sources').addEventListener('click', async function(e) {
+            e.preventDefault();
+            this.disabled = true;
+            await refreshSources();
+            this.disabled = false;
         });
     })();
     
@@ -192,20 +233,36 @@
         }
         return data;
     }
+   
     async function refreshSources() {
         const response = await sendCommand({ type: 'get-sources' });
         console.log(response);
-        // availableSources.push({});
-        // renderSources();
+        if (response.success)
+        { availableSources = response.data.sources || []; }
+        renderSources();
     }
+    
     function renderSources() {
         const sourceSelectorEl = document.getElementById('source_selection');
+        sourceSelectorEl.innerHTML = '';
+
+        const noSourceOpt = document.createElement('option');
+        noSourceOpt.value = 'none';
+        noSourceOpt.textContent = 'Clear Source';
+        sourceSelectorEl.appendChild(noSourceOpt);
+
         if (availableSources.length >= 1)
         {
-            // do this
+            availableSources.forEach((source) => {
+                if (!source.name)
+                { return; }
+                const sourceOpt = document.createElement('option');
+                sourceOpt.value = source.name;
+                sourceOpt.dataset.url = source.url || '';
+                sourceOpt.textContent = source.name;
+                sourceSelectorEl.appendChild(sourceOpt);
+            });
         }
-        
-        //<option value="none">None</option>
     }
 </script>
 
