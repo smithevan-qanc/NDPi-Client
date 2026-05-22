@@ -366,7 +366,7 @@ class FileSystemMonitor extends EventEmitter {
         {
             let setting = file;
             let getValueFromFile = true;
-            
+
             const filePath = path.join(this.dataDir, setting.key);
 
             if (retainDefaultValue.includes(setting.key))
@@ -450,7 +450,7 @@ class FileSystemMonitor extends EventEmitter {
         if (!fileName || !this.fileMap.has(fileName))
         { return null; }
 
-        return this.fileMap.get(fileName);
+        return this.fileMap.get(fileName).value;
     }
 
     put(fileName, data = '') {
