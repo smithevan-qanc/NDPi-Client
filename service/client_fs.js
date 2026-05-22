@@ -295,7 +295,7 @@ class FileSystemMonitor extends EventEmitter {
             console.log(`[ client_fs ][ UPDATE ] '${name}' ==> '${value}'`);
             this.emit(name, value);
         }
-        this.emit('update');
+        this.emit('update', JSON.stringify(Array.from(this.#fileMap)));
     }
 
     async updateLocalIp() {

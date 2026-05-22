@@ -14,12 +14,19 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         this.settings = fsData;
         this.port = fsData.get('local_port_number_api') || process.env.PORT_API || 3080
-        fsData.on('update', () => {
+        fsData.on('update', (data) => {
             console.log('FS Update Event Received In API');
+            console.log(data);
+            // this.ws_conn_system.forEach(client => {
+            //     if (client.readyState === WebSocket.OPEN)
+            //         { client.send(JSON.stringify(updateData)) }
+            // });
         });
         
-        this.WebSocket = new WebSocket.Server({ noServer: true });
-        this.WebSocketConnections = new Set();
+        this.ws_serv_display = new WebSocket.Server({ noServer: true });
+        this.ws_conn_display = new Set();
+        this.ws_serv_system = new WebSocket.Server({ noServer: true });
+        this.ws_conn_system = new Set();
 
         this.App = express();
         this.App.use(express.json());
@@ -39,30 +46,36 @@ class NDPiCommandServer_Client extends EventEmitter {
                 const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
                 
                 if (pathname === '/ws/display') {
-                    this.WebSocket.handleUpgrade(request, socket, head, (ws) => {
-                        this.WebSocket.emit('connection', ws, request);
+                    this.ws_serv_display.handleUpgrade(request, socket, head, (ws) => {
+                        this.ws_serv_display.emit('connection', ws, request);
                     });
-                } else if (pathname === '/ws/sources') {
-                    wsDevice.handleUpgrade(request, socket, head, (ws) => {
-                        wsDevice.emit('connection', ws, request);
-                    });
-                } else if (pathname === '/ws/console') {
-                    wsConsole.handleUpgrade(request, socket, head, (ws) => {
-                        wsConsole.emit('connection', ws, request);
+                } else if (pathname === '/ws/system') {
+                    this.ws_serv_system.handleUpgrade(request, socket, head, (ws) => {
+                        this.ws_serv_system.emit('connection', ws, request);
                     });
                 } else {
                     socket.destroy();
                 }
             });
 
-        this.WebSocket.on('connection', (ws) =>{
+        this.ws_serv_display.on('connection', (ws) =>{
             console.log('[ client_api_server ] Display WebSocket connection started.');
             
-            this.WebSocketConnections.add(ws);
+            this.ws_conn_display.add(ws);
             
             setTimeout(() => { this.broadcastToDisplay(undefined, true, { ws }); }, 1000);
             
-            ws.on('close', () => { this.WebSocketConnections.delete(ws); });
+            ws.on('close', () => { this.ws_conn_display.delete(ws); });
+
+            ws.on('error', (error) => { console.log('🔴 [ client_api_server ][ ERROR ] WebSocket GUI Connection', error); });
+        });
+        
+        this.ws_serv_system.on('connection', (ws) =>{
+            console.log('[ client_api_server ] System WebSocket connection started.');
+            
+            this.ws_conn_system.add(ws);
+            
+            ws.on('close', () => { this.ws_conn_system.delete(ws); });
 
             ws.on('error', (error) => { console.log('🔴 [ client_api_server ][ ERROR ] WebSocket GUI Connection', error); });
         });
@@ -178,10 +191,15 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     close() {
-        this.WebSocketConnections.forEach(client => {
+        this.ws_conn_display.forEach(client => {
             if (client.readyState === WebSocket.OPEN)
                 { client.close() }
-            this.WebSocketConnections.delete(client);
+            this.ws_conn_display.delete(client);
+        });
+        this.ws_conn_system.forEach(client => {
+            if (client.readyState === WebSocket.OPEN)
+                { client.close() }
+            this.ws_conn_system.delete(client);
         });
         this.Server.closeAllConnections();
         this.Server.close();
@@ -221,7 +239,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             }
         }
 
-        this.WebSocketConnections.forEach(client => {
+        this.ws_conn_display.forEach(client => {
             if (client.readyState === WebSocket.OPEN)
                 { client.send(JSON.stringify(updateData)) }
         });
@@ -230,7 +248,7 @@ class NDPiCommandServer_Client extends EventEmitter {
     updateDisplay(message = {}) {
         if (!message.type)
             { return; }
-        this.WebSocketConnections.forEach(client => {
+        this.ws_conn_display.forEach(client => {
             if (client.readyState === WebSocket.OPEN)
                 { client.send(JSON.stringify(message)) }
         });
