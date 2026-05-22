@@ -158,12 +158,7 @@
                 <div>
                     <input id="overlay_upload" type="file" accept=".jpg, .png, .svg"/>
                     <div id="overlay_preview" style="display: flex; flex-direction: column;"></div>
-                    <label for="fileNum">Selected files:</label>
-                    <output id="fileNum">0</output>;
-                    <label for="fileSize">Total size:</label>
-                    <output id="fileSize">0</output>
                 </div>
-                <div><input type="submit" value="Send file" /></div>
             </form>
         </div>
     </div>
@@ -179,6 +174,14 @@
     // Available sources array.
     let availableSources = [];
     const fileUploader = document.getElementById('overlay_upload');
+    let overlayUploadCommand = {
+        type: 'set-overlay',
+        data: {
+            name: '',
+            mime: '',
+            src: '',
+        }
+    }
 
     function addEvents() {
         document.getElementById('tv_power_off').addEventListener('click', async (e) => {
@@ -253,26 +256,23 @@
     }
 
     async function handleFiles() {
-        const files = fileUploader.files;
+        const file = fileUploader.files[0];
         const preview = document.getElementById('overlay_preview');
+        console.log(file);
+        if (!file.type.startsWith("image/"))
+        { return; }
 
-        for (const file of files)
-        {
-            if (!file.type.startsWith("image/"))
-            { continue; }
+        const img = document.createElement("img");
+        img.file = file;
+        preview.appendChild(img);
 
-            const img = document.createElement("img");
-            img.file = file;
-            preview.appendChild(img);
-            
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                img.src = e.target.result;
-                console.log(e.target);
-            };
-            reader.readAsDataURL(file);
-        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            overlayUploadCommand.data.mime = file.type || '';
+            // overlayUploadCommand.data.name = file.
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
     }
 
     async function sendCommand(command = {}) {
