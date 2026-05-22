@@ -40,7 +40,7 @@ class DeviceSocket {
                 const msg = JSON.parse(message.data);
                 for (const [id, value] of msg)
                 {
-                    const settingInnerHTML = `<label style="text-transform: capitalize;" for="${id}">${String(id.split('_').join(' '))}:</label><input id="${id}">${value}</input>`;
+                    const settingInnerHTML = `<label style="text-transform: capitalize;" for="${id}">${String(id.split('_').join(' '))}:</label><input type="text" id="${id}" value="${value}">`;
 
                     if (id === 'ndpi_status_ndi_source_target') 
                     { document.getElementById('source_selection').value = value || 'none'; }
