@@ -113,6 +113,7 @@
 <script src="/system.js"></script>
 <script>
     (() => {
+        refreshSources();
         document.getElementById('tv_power_off').addEventListener('click', async (e) => {
             e.preventDefault();
             await sendCommand({
