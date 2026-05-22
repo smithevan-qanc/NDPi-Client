@@ -362,27 +362,32 @@ class FileSystemMonitor extends EventEmitter {
          *  This is used to prevent reading value from file.
          * 
          */
-        for (const { key, value } of files)
+        for (const file of files)
         {
-            const filePath = path.join(this.dataDir, key);
+            let setting = file;
             let getValueFromFile = true;
-            if (retainDefaultValue.includes(key))
+            
+            const filePath = path.join(this.dataDir, setting.key);
+
+            if (retainDefaultValue.includes(setting.key))
             { getValueFromFile = false }
+
             try
             {
                 if (fs.existsSync(filePath) && getValueFromFile)
                 {
                     const currentValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trimEnd();
-                    this.fileMap.set(key, currentValue);
+                    setting.value = currentValue;
+                    this.fileMap.set(setting.key, setting);
                 }
                 else
                 {
-                    fs.writeFileSync(filePath, value, 'utf8');
-                    this.fileMap.set(key, value);
+                    fs.writeFileSync(filePath, setting.value, 'utf8');
+                    this.fileMap.set(setting.key, setting);
                 }
             }
             catch (err)
-            { console.log(`🔴 [ client_fs ][ ERROR ] Saving File: Name:${key}, Value: ${value}`, err) }
+            { console.log(`🔴 [ client_fs ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err) }
         };
 
         // Call updateLocalIp() right away. It will call poll() after.

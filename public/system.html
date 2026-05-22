@@ -52,7 +52,7 @@
         button {
             background: rgba(129, 193, 39, 1);
             border-color: rgb(112, 177, 20);
-            /* border: none; */
+            border: none;
             border-radius: 10px;
             color: white;
             text-shadow: 1px 1px 3px #000;
@@ -75,8 +75,6 @@
             cursor: not-allowed;
         }
         .main {
-            /* height: 100vh;
-            width: 100vw; */
             display: grid;
             margin: 10px;
         }
@@ -296,7 +294,7 @@
     }
 
     async function handleFiles() {
-        uploaderEl.scrollIntoView({behavior: 'smooth'});
+        uploaderEl.scroll({behavior: 'smooth'});
         const file = uploaderEl.files[0];
 
         if (!file.type.startsWith("image/"))
@@ -325,6 +323,17 @@
 
     async function sendCommand(command = {}) {
         if (!command.type) return null;
+        
+        if (server?._ws && server?._ws.readyState === WebSocket.OPEN) 
+        {
+            try
+            {
+                server._ws.send(JSON.stringify(command));
+                return;
+            }
+            catch (err)
+            { console.error(err); }
+        }
         
         // const searchParams = new URLSearchParams(command).toString();
         // const url = new URLPattern(window.location.href);
