@@ -99,7 +99,7 @@ class CecController extends EventEmitter {
             if (this.showAllOut)
             {
                 console.log(`[ client_cec ][ MESSAGE ] ${line}`);
-                continue;
+                return;
             }
 
             if (!line.includes('TRAFFIC') && lineCheck && lineCheck !== "'")
