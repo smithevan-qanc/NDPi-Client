@@ -159,12 +159,12 @@
         <div class="card">
             <h2>Overlay Image</h2>
             <div class="flex-row">
-                <input id="overlay_upload" type="file" accept=".jpg, .png, .svg"/>
+                <div id="overlay_preview"></div>
             </div>
             <div class="flex-row">
+                <input id="overlay_upload" type="file" accept=".jpg, .png, .svg"/>
                 <button id="save_overlay" disabled>Set Overlay</button>
                 <button class="red" id="reset_overlay_upload">Reset</button>
-                <div id="overlay_preview"></div>
             </div>
         </div>
     </div>
@@ -280,6 +280,7 @@
 
     function resetOverlayUpload() {
         document.getElementById('save_overlay').disabled = true;
+        uploaderEl.value = '';
         uploaderPreviewEl.innerHTML = '';
         overlayUploadCommand = {
             type: 'set-overlay',
@@ -295,6 +296,7 @@
     }
 
     async function handleFiles() {
+        uploaderEl.scrollIntoView({behavior: 'smooth'});
         const file = uploaderEl.files[0];
 
         if (!file.type.startsWith("image/"))
