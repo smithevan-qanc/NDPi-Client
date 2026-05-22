@@ -18,7 +18,7 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     #     [ -f $file ] && chmod +x $file
     # done
 
-    chbod +x ./sh/*
+    chmod +x ./sh/*
 
     # chmod +x sh/git-update
     # chmod +x sh/install-update
