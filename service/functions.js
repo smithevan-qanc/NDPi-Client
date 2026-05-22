@@ -16,12 +16,14 @@ const { exec } = require('node:child_process');
                 type:   message?.type,
                 data:   message?.data,  // data can be of any type
             };
+
             let response = {
                 id:         command.id,
                 success:    false,
                 ts:         Date.now(),
                 data:       {}
             };
+
             let arry = [];
 
             if (!command.type)
@@ -29,6 +31,7 @@ const { exec } = require('node:child_process');
                 response.data.message = "Missing 'type'";
                 return response;
             }
+
             switch (command.type)
             {
                 case 'ping':
@@ -40,7 +43,11 @@ const { exec } = require('node:child_process');
                 case 'show-blank':
                     try
                     {
-                        fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndpi_status_no_source_display_mode'), 'blank', 'utf8');
+                        fs.writeFileSync(
+                            path.join(process.env.DATA_NDPI_PATH, 'ndpi_status_no_source_display_mode'),
+                            'blank',
+                            'utf8'
+                        );
                         response = await setNdi(response, command);
                     }
                     catch (error)
@@ -54,7 +61,11 @@ const { exec } = require('node:child_process');
                 case 'show-overlay':
                     try
                     {
-                        fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndpi_status_no_source_display_mode'), 'overlay', 'utf8');
+                        fs.writeFileSync(
+                            path.join(process.env.DATA_NDPI_PATH, 'ndpi_status_no_source_display_mode'),
+                            'overlay',
+                            'utf8'
+                        );
                         response = await setNdi(response, command);
                     }
                     catch (error)
@@ -66,11 +77,19 @@ const { exec } = require('node:child_process');
                     break;
 
                 case 'set-overlay':
-                    console.log(`PROCESSING: ${command.type}`);
-                    const imageBase64 = command.data.content;
-                    updateOverlay(imageBase64);
-
-                    response.success = true;
+                    try
+                    {
+                        fs.writeFileSync(
+                            path.join(process.env.DATA_NDPI_PATH, 'media_overlay_image'),
+                            JSON.stringify(command.data),
+                            'utf8'
+                        );
+                    }
+                    catch (error)
+                    {
+                        response.data.message = error;
+                        response.success = false;
+                    }
                     return response;
                     break;
                 

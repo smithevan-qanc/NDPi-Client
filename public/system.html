@@ -155,10 +155,12 @@
         <div class="card">
             <h2>Overlay Image</h2>
             <form name="uploadForm">
-                <div>
+                <div class="flex-row">
                     <input id="overlay_upload" type="file" accept=".jpg, .png, .svg"/>
-                    <div id="overlay_preview" style="display: flex; flex-direction: column;"></div>
+                    <button class="red" id="reset_overlay_upload">Reset</button>
+                    <button id="save_overlay" disabled>Set Overlay</button>
                 </div>
+                <div id="overlay_preview" class="flex-column"></div>
             </form>
         </div>
     </div>
@@ -173,15 +175,19 @@
 
     // Available sources array.
     let availableSources = [];
-    const fileUploader = document.getElementById('overlay_upload');
+    const uploaderEl = document.getElementById('overlay_upload');
+    const uploaderPreviewEl = document.getElementById('overlay_preview');
     let overlayUploadCommand = {
         type: 'set-overlay',
         data: {
             name: '',
-            mime: '',
+            type: '',
+            size: 0,
+            dateLastModified: '',
+            dateUploaded: '',
             src: '',
         }
-    }
+    };
 
     function addEvents() {
         document.getElementById('tv_power_off').addEventListener('click', async (e) => {
@@ -251,26 +257,62 @@
             await refreshSources();
             this.disabled = false;
         });
-        fileUploader.addEventListener('change', handleFiles);
+        uploaderEl.addEventListener('change', handleFiles);
+        document.getElementById('reset_overlay_upload').addEventListener('click', (e) => {
+            e.preventDefault();
+            resetOverlayUpload();
+        });
+        document.getElementById('save_overlay').addEventListener('click', async function(e) {
+            e.preventDefault();
+            this.disabled = true;
+            const res = await sendCommand(overlayUploadCommand);
+            if (res?.success)
+            { resetOverlayUpload(); }
+            else
+            { console.error('Failed to upload overlay.', res) }
+        });
         
     }
 
+    function resetOverlayUpload() {
+        document.getElementById('save_overlay').disabled = true;
+        uploaderPreviewEl.innerHTML = '';
+        overlayUploadCommand = {
+            type: 'set-overlay',
+            data: {
+                name: '',
+                type: '',
+                size: 0,
+                dateLastModified: '',
+                dateUploaded: '',
+                src: '',
+            }
+        };
+    }
+
     async function handleFiles() {
-        const file = fileUploader.files[0];
-        const preview = document.getElementById('overlay_preview');
-        console.log(file);
+        const file = uploaderEl.files[0];
+
         if (!file.type.startsWith("image/"))
         { return; }
 
         const img = document.createElement("img");
         img.file = file;
-        preview.appendChild(img);
+        uploaderPreviewEl.appendChild(img);
+
+        overlayUploadCommand.data.name = file.name || '';
+        overlayUploadCommand.data.type = file.type || '';
+        overlayUploadCommand.data.size = file.size || 0;
+        overlayUploadCommand.data.dateLastModified = file.lastModified;
+        overlayUploadCommand.data.dateUploaded = Date.now();
+
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            overlayUploadCommand.data.mime = file.type || '';
-            // overlayUploadCommand.data.name = file.
             img.src = e.target.result;
+            overlayUploadCommand.data.src = e.target.result;
+            if (overlayUploadCommand.data.src)
+            { document.getElementById('save_overlay').disabled = false; }
         };
         reader.readAsDataURL(file);
     }
