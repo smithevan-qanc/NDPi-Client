@@ -40,7 +40,9 @@ class DeviceSocket {
                 const msg = JSON.parse(message.data);
                 for (const [id, value] of msg)
                 {
-                    const settingInnerHTML = `<label style="text-transform: capitalize;" for="${id}">${String(id.split('_').join(' '))}:</label><input type="text" id="${id}" value="${value}">`;
+                    // const settingInnerHTML = `<label style="text-transform: capitalize;" for="${id}">${String(id.split('_').join(' '))}:</label><input type="text" id="${id}" value="${value}">`;
+
+                    const settingInnerHTML = `<td style="text-transform: capitalize;">${String(id.split('_').join(' '))}:</td><td><input type="text" id="${id}" value="${value}"></td>`;
 
                     if (id === 'ndpi_status_ndi_source_target') 
                     { document.getElementById('source_selection').value = value || 'none'; }
@@ -48,9 +50,9 @@ class DeviceSocket {
                     let settingEl = document.getElementById(`__${id}`);
                     if (!settingEl)
                     {
-                        settingEl = document.createElement('div');
+                        settingEl = document.createElement('tr');
                         settingEl.id = `__${id}`;
-                        settingEl.className = 'flex-row';
+                        // settingEl.className = 'flex-row';
                         settingEl.innerHTML = settingInnerHTML;
                         document.getElementById('settings').appendChild(settingEl);
                     } else
