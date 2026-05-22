@@ -241,9 +241,10 @@
             this.disabled = false;
         });
         const fileUploader = document.getElementById('overlay_upload');
-        fileUploader.addEventListener('change', handleFiles)
+        fileUploader.addEventListener('change', handleFiles);
         
         async function handleFiles() {
+            const files = fileUploader.files;
             const preview = document.getElementById('overlay_preview');
             for (const file of files)
             {
