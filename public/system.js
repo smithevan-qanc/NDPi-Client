@@ -40,7 +40,7 @@ class DeviceSocket {
                 const msg = JSON.parse(message.data);
                 for (const [id, value] of msg)
                 {
-                    const settingInnerHTML = `${id}: <strong>${value}</strong>`;
+                    const settingInnerHTML = `${String(id.split('_').join(' ')).toWellFormed()}: <strong>${value}</strong>`;
 
                     if (id === 'ndpi_status_ndi_source_target') 
                     { document.getElementById('source_selection').value = value || 'none'; }
@@ -51,6 +51,7 @@ class DeviceSocket {
                         settingEl = document.createElement('div');
                         settingEl.id = id;
                         settingEl.dataset.currentValue = value;
+                        settingEl.style.color = 'white';
                         settingEl.innerHTML = settingInnerHTML;
                         document.getElementById('settings').appendChild(settingEl);
                     } else
