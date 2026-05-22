@@ -16,6 +16,7 @@ class CecController extends EventEmitter {
 
         this.enabled = true;
         this.isReady = false;
+        this.showAllOut = false;
 
         this.restartDelay = 1000;
         this.restartTimer = null;
@@ -95,48 +96,54 @@ class CecController extends EventEmitter {
         const thisLine = String(data).split(/\r?\n/);
         thisLine.forEach((line) => {
             const lineCheck = line.trim() || null;
+            if (this.showAllOut)
+            {
+                console.log(`[ client_cec ][ MESSAGE ] ${line}`);
+                continue;
+            }
+
             if (!line.includes('TRAFFIC') && lineCheck && lineCheck !== "'")
+            {
+                if (!line.includes(']'))
+                { console.log(`[ client_cec ][ MESSAGE ] ${line}`) }
+                else
                 {
-                    if (!line.includes(']'))
-                        { console.log(`[ client_cec ][ MESSAGE ] ${line}`) }
-                    else
-                        {
-                            let lineSplit = line.split(']')[1].trim();
-                            let lineSendReceive = `${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`;
-                            if (lineSplit.includes('<<'))
-                                { console.log(`[ client_cec ][    SEND ] ${lineSendReceive}`); }
-                            else if (lineSplit.includes('>>'))
-                                { console.log(`[ client_cec ][ RECEIVE ] ${lineSendReceive}`) }
-                            else if (lineSplit.includes('(0):') || lineSplit.includes('(1):'))
-                                {
-                                    console.log(`[ client_cec ][  UPDATE ] ${lineSplit}`);
-                                    if (lineSplit.includes('TV') && lineSplit.includes('power status'))
-                                        { this.settings.put('output_device_cec_status_power', lineSplit.split("'")[3]) }
-                                }
-                            else if (line.includes('ERROR'))
-                                { console.log(`🔴 [ client_cec ][ ERROR ] ${lineSplit}`) }
-                        }
+                    let lineSplit = line.split(']')[1].trim();
+                    let lineSendReceive = `${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`;
+                    if (lineSplit.includes('<<'))
+                    { console.log(`[ client_cec ][    SEND ] ${lineSendReceive}`); }
+                    else if (lineSplit.includes('>>'))
+                    { console.log(`[ client_cec ][ RECEIVE ] ${lineSendReceive}`) }
+                    else if (lineSplit.includes('(0):') || lineSplit.includes('(1):'))
+                    {
+                        console.log(`[ client_cec ][  UPDATE ] ${lineSplit}`);
+                        if (lineSplit.includes('TV') && lineSplit.includes('power status'))
+                            { this.settings.put('output_device_cec_status_power', lineSplit.split("'")[3]) }
+                    }
+                    else if (line.includes('ERROR'))
+                    { console.log(`🔴 [ client_cec ][ ERROR ] ${lineSplit}`) }
                 }
+            }
         });
 
         for (const line of lines)
+        {
+            const parsed = this._parseLine(line.trim());
+            if (line.includes('waiting for input'))
             {
-                const parsed = this._parseLine(line.trim());
-                if (line.includes('waiting for input'))
-                    {
-                        this.isReady = true;
-                        if (this.timeoutTimer)
-                            {
-                                clearTimeout(this.timeoutTimer);
-                                this.timeoutTimer = null;
-                            }
-                        this.emit('ready');
-                        console.log('[ client_cec ] CEC Ready');
-                        this.settings.put('output_device_cec_enabled', 'true');
-                        this.restartDelay = 1000;
-                        this._flushQueue();
-                    }
+                this.isReady = true;
+                if (this.timeoutTimer)
+                {
+                    clearTimeout(this.timeoutTimer);
+                    this.timeoutTimer = null;
+                }
+                this.emit('ready');
+                console.log('[ client_cec ] CEC Ready');
+                this.settings.put('output_device_cec_enabled', 'true');
+                this.restartDelay = 1000;
+                this._flushQueue();
             }
+        }
     }
 
     _handleStderr(data) {
@@ -164,13 +171,13 @@ class CecController extends EventEmitter {
 
     send(command, { debounceKey = null, debounceMs = 300 } = {}) {
         if (debounceKey)
-            {
-                const last = this.debounceMap.get(debounceKey) || 0;
-                const now = Date.now();
-                if (now - last < debounceMs)
-                    { return }
-                this.debounceMap.set(debounceKey, now);
-            }
+        {
+            const last = this.debounceMap.get(debounceKey) || 0;
+            const now = Date.now();
+            if (now - last < debounceMs)
+                { return }
+            this.debounceMap.set(debounceKey, now);
+        }
         this.queue.push(command);
         this._flushQueue();
     }
@@ -179,10 +186,14 @@ class CecController extends EventEmitter {
         if (!this.isReady || !this.proc)
             { return }
         while (this.queue.length > 0)
-            {
-                const cmd = this.queue.shift();
-                this.proc.stdin.write(cmd + '\n');
-            }
+        {
+            const cmd = this.queue.shift();
+            if (cmd === 'h')
+            { this.showAllOut = true; }
+            else 
+            { this.showAllOut = false; }
+            this.proc.stdin.write(cmd + '\n');
+        }
     }
 }
 
