@@ -230,14 +230,16 @@
             await refreshSources();
             this.disabled = false;
         });
-        document.getElementById('overlay_upload').addEventListener('change', async function(e) {
-            e.preventDefault();
-            const file = e.target.files[0];
+        const fileUploader = document.getElementById('overlay_upload');
+        fileUploader.addEventListener('change', handleFiles)
+        
+        async function handleFiles() {
+            const file = this.files[0]
             if (!file) return;
             const formData = new FormData();
             formData.append('uploaded_file', file);
             console.log(formData);
-        });
+        };
     }
     
     // Available sources array.
