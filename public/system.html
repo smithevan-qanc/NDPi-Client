@@ -17,12 +17,24 @@
             height: 100vh;
             background: rgba(50, 50, 50, 1);
         }
-        input,
         label {
             font-weight: 600;
             color: #eee;
             font-size: 16px;
             font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+        input {
+            font-family: 'Courier New', Courier, monospace;
+            width: 100%;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: #eee;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            box-sizing: border-box;
+            outline: none;
         }
         button {
             background: rgba(129, 193, 39, 0.9);
@@ -75,6 +87,7 @@
                 <button id="tv_as">Switch To NDPi</button>
                 <button id="tv_is">Home</button>
             </div>
+            <input type="text" value="txn " id="send_bytes">
         </div>
     </div>
 </body>
@@ -83,45 +96,53 @@
     (() => {
         document.getElementById('tv_power_off').addEventListener('click', async (e) => {
             e.preventDefault();
-            sendCommand({
+            await sendCommand({
                 type: 'send-cec',
                 data: 'standby%200',
             });
         });
         document.getElementById('tv_power_on').addEventListener('click', async (e) => {
             e.preventDefault();
-            sendCommand({
+            await sendCommand({
                 type: 'send-cec',
                 data: encodeURI('on 0'),
             });
         });
         document.getElementById('tv_volume_down').addEventListener('click', async (e) => {
             e.preventDefault();
-            sendCommand({
+            await sendCommand({
                 type: 'send-cec',
                 data: encodeURI('voldown'),
             });
         });
         document.getElementById('tv_volume_up').addEventListener('click', async (e) => {
             e.preventDefault();
-            sendCommand({
+            await sendCommand({
                 type: 'send-cec',
                 data: encodeURI('volup'),
             });
         });
         document.getElementById('tv_as').addEventListener('click', async (e) => {
             e.preventDefault();
-            sendCommand({
+            await sendCommand({
                 type: 'send-cec',
                 data: encodeURI('as'),
             });
         });
         document.getElementById('tv_is').addEventListener('click', async (e) => {
             e.preventDefault();
-            sendCommand({
+            await sendCommand({
                 type: 'send-cec',
                 data: encodeURI('is'),
             });
+        });
+        document.getElementById('send_bytes').addEventListener('change', async function(e) {
+            e.preventDefault();
+            await sendCommand({
+                type: 'send-cec',
+                data: encodeURI(`${this.value}`),
+            });
+            this.value = 'txn ';
         });
     })();
     async function sendCommand(command = {}) {
