@@ -269,9 +269,9 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 img.src = e.target.result;
+                console.log(e.target);
             };
             reader.readAsDataURL(file);
-            console.log(reader);
         }
     }
 
