@@ -14,6 +14,9 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         this.settings = fsData;
         this.port = fsData.get('local_port_number_api') || process.env.PORT_API || 3080
+        fsData.on('update', () => {
+            console.log('FS Update Event Received In API');
+        });
         
         this.WebSocket = new WebSocket.Server({ noServer: true });
         this.WebSocketConnections = new Set();
@@ -33,9 +36,23 @@ class NDPiCommandServer_Client extends EventEmitter {
                 process.nextTick(() => { this.emit('online'); });
             })
             .on('upgrade', (req, socket, head) => {
-                this.WebSocket.handleUpgrade(req, socket, head, (ws) => {
-                    this.WebSocket.emit('connection', ws, req);
-                });
+                const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
+                
+                if (pathname === '/ws/display') {
+                    this.WebSocket.handleUpgrade(req, socket, head, (ws) => {
+                        this.WebSocket.emit('connection', ws, req);
+                    });
+                } else if (pathname === '/ws/sources') {
+                    wsDevice.handleUpgrade(request, socket, head, (ws) => {
+                        wsDevice.emit('connection', ws, request);
+                    });
+                } else if (pathname === '/ws/console') {
+                    wsConsole.handleUpgrade(request, socket, head, (ws) => {
+                        wsConsole.emit('connection', ws, request);
+                    });
+                } else {
+                    socket.destroy();
+                }
             });
 
         this.WebSocket.on('connection', (ws) =>{
@@ -166,7 +183,6 @@ class NDPiCommandServer_Client extends EventEmitter {
                 { client.close() }
             this.WebSocketConnections.delete(client);
         });
-        this.WebSocket.close();
         this.Server.closeAllConnections();
         this.Server.close();
     }
