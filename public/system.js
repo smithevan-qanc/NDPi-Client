@@ -42,7 +42,12 @@ class DeviceSocket {
                 {
                     // const settingInnerHTML = `<label style="text-transform: capitalize;" for="${id}">${String(id.split('_').join(' '))}:</label><input type="text" id="${id}" value="${value}">`;
 
-                    const settingInnerHTML = `<td style="text-transform: capitalize;">${String(id.split('_').join(' '))}:</td><td><input type="text" id="${id}" value="${value}"></td>`;
+                    const settingInnerHTML = `
+                        <td style="text-transform: capitalize; min-width: 200px; text-align: right;">${String(id.split('_').join(' '))}:</td>
+                        <td style="width: 10px;"></td>
+                        <td style="width: 70%;">
+                            <input type="text" id="${id}" value="${value}">
+                        </td>`;
 
                     if (id === 'ndpi_status_ndi_source_target') 
                     { document.getElementById('source_selection').value = value || 'none'; }
