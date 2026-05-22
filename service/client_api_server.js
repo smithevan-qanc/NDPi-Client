@@ -73,6 +73,8 @@ class NDPiCommandServer_Client extends EventEmitter {
             console.log('[ client_api_server ] System WebSocket connection started.');
             
             this.ws_conn_system.add(ws);
+
+            ws.send(JSON.stringify(Array.from(this.settings.fileMap)));
             
             ws.on('close', () => { this.ws_conn_system.delete(ws); });
 

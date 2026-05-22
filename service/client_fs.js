@@ -10,7 +10,6 @@ const { setTimeout } = require('node:timers');
 class FileSystemMonitor extends EventEmitter {
     #pgmVersion;
     #pgmVersionDate;
-    #fileMap;
     #fsPoll;
     constructor(version = '1.0.0', versionDate = '1970-01-01') {
         super();
@@ -22,7 +21,7 @@ class FileSystemMonitor extends EventEmitter {
         this.#fsPoll = null;
 
         this.dataDir = process.env.DATA_NDPI_PATH;
-        this.#fileMap = null;
+        this.fileMap = null;
 
         this.debounceMap = new Map();
         this.queue = [];
@@ -77,7 +76,7 @@ class FileSystemMonitor extends EventEmitter {
         }
 
         // Map file names and values with to standard defaults.
-        this.#fileMap = new Map();
+        this.fileMap = new Map();
         const files = [
             { 
                 key: "device_name",                             // Custom device name
@@ -212,12 +211,12 @@ class FileSystemMonitor extends EventEmitter {
                 if (fs.existsSync(filePath) && getValueFromFile)
                 {
                     const currentValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trimEnd();
-                    this.#fileMap.set(key, currentValue);
+                    this.fileMap.set(key, currentValue);
                 }
                 else
                 {
                     fs.writeFileSync(filePath, value, 'utf8');
-                    this.#fileMap.set(key, value);
+                    this.fileMap.set(key, value);
                 }
             }
             catch (err)
@@ -230,16 +229,16 @@ class FileSystemMonitor extends EventEmitter {
 
     start() {
         fs.watch(this.dataDir, async (event, filename) => {
-            if (!this.#fileMap.has(filename))
+            if (!this.fileMap.has(filename))
             { return }
 
             if (event === 'change')
             {
-                const currentValue = this.#fileMap.get(filename);
+                const currentValue = this.fileMap.get(filename);
                 const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').replace(/\0/g, '').trimEnd();
                 if (currentValue !== fsValue)
                 {
-                    this.#fileMap.set(filename, fsValue);
+                    this.fileMap.set(filename, fsValue);
                     this.fsEvent(filename, fsValue);
                 }
             }
@@ -262,14 +261,14 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     get(fileName) {
-        if (!fileName || !this.#fileMap.has(fileName))
+        if (!fileName || !this.fileMap.has(fileName))
         { return null; }
 
-        return this.#fileMap.get(fileName);
+        return this.fileMap.get(fileName);
     }
 
     put(fileName, data = '') {
-        if (!fileName || !this.#fileMap.has(fileName))
+        if (!fileName || !this.fileMap.has(fileName))
         { return }
         try
         { fs.writeFileSync(path.join(this.dataDir, fileName), data.trimEnd(), 'utf8') }
@@ -295,7 +294,7 @@ class FileSystemMonitor extends EventEmitter {
             console.log(`[ client_fs ][ UPDATE ] '${name}' ==> '${value}'`);
             this.emit(name, value);
         }
-        this.emit('update', JSON.stringify(Array.from(this.#fileMap)));
+        this.emit('update', JSON.stringify(Array.from(this.fileMap)));
     }
 
     async updateLocalIp() {
@@ -303,7 +302,7 @@ class FileSystemMonitor extends EventEmitter {
         const updateValue = await getLocalIp(this.firstRun);
         if (updateValue)
         {
-            const storedValue = this.#fileMap.get(fileName);
+            const storedValue = this.fileMap.get(fileName);
             if (updateValue !== storedValue)
             { this.put(fileName, updateValue) }
             
