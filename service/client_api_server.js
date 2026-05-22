@@ -102,15 +102,15 @@ class NDPiCommandServer_Client extends EventEmitter {
                     id: randomUUID(),
                 });
                 if (commandRes && commandRes.success)
-                    {
-                        res.status(200);
-                        res.json(commandRes);
-                    }
+                {
+                    res.status(200);
+                    res.json(commandRes);
+                }
                 else
-                    {
-                        res.status(400);
-                        res.json(commandRes);
-                    }
+                {
+                    res.status(400);
+                    res.json(commandRes);
+                }
             })
             .post(async (req, res) => {
                 console.log('[ client_api_server ] POST:', req.url);
@@ -120,15 +120,15 @@ class NDPiCommandServer_Client extends EventEmitter {
                     id: randomUUID(),
                 });
                 if (commandRes && commandRes.success)
-                    {
-                        res.status(200);
-                        res.json(commandRes);
-                    }
+                {
+                    res.status(200);
+                    res.json(commandRes);
+                }
                 else
-                    {
-                        res.status(400);
-                        res.json(commandRes);
-                    }
+                {
+                    res.status(400);
+                    res.json(commandRes);
+                }
             });
 
         //  Internal API (v1)
@@ -143,11 +143,11 @@ class NDPiCommandServer_Client extends EventEmitter {
                 const switch_path  = req.params.path;
 
                 if (req.hostname !== 'localhost')
-                    {
-                        res.status(403);
-                        res.json({ success: false, message: 'forbidden' });
-                        return;
-                    }
+                {
+                    res.status(403);
+                    res.json({ success: false, message: 'forbidden' });
+                    return;
+                }
 
                 let reqValid = false;
                 switch (switch_path) {
@@ -155,16 +155,16 @@ class NDPiCommandServer_Client extends EventEmitter {
                     case 'cec':
                         reqValid = (typeof data === 'string' && this.controller_cec.isReady);
                         if (reqValid)
-                            {
-                                this.controller_cec.send(decodeURI(data));
-                                res.status(200);
-                                res.json({ success: true });
-                            }
+                        {
+                            this.controller_cec.send(decodeURI(data));
+                            res.status(200);
+                            res.json({ success: true });
+                        }
                         else
-                            {
-                                res.status(400);
-                                res.json({ success: false });
-                            }
+                        {
+                            res.status(400);
+                            res.json({ success: false });
+                        }
 
                         break;
 
@@ -172,11 +172,11 @@ class NDPiCommandServer_Client extends EventEmitter {
                         let source;
 
                         if (!data)
-                            { source = 'none'; }
+                        { source = 'none'; }
                         else if (String(data).toLowerCase() === 'none')
-                            { source = 'none'; }
+                        { source = 'none'; }
                         else
-                            { source = String(data); }
+                        { source = String(data); }
 
                         this.settings.put('ndpi_status_ndi_source_target', source);
                         res.status(200);

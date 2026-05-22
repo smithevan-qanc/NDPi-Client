@@ -38,6 +38,21 @@ class DeviceSocket {
             try
             {
                 const msg = JSON.parse(message.data);
+                for (const [id, value] of msg)
+                {
+                    const settingInnerHTML = `${id}: <strong>${value}</strong>`;
+
+                    let settingEl = document.getElementById(id);
+                    if (!settingEl)
+                    {
+                        settingEl = document.createElement('div');
+                        settingEl.innerHTML = settingInnerHTML;
+                        document.getElementById('settings').appendChild(settingEl);
+                    } else
+                    {
+                        settingEl.innerHTML = settingInnerHTML;
+                    }
+                }
                 document.getElementById('system-details').textContent = JSON.stringify(msg, null, 2);
             }
             catch (e)
