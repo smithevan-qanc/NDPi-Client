@@ -376,7 +376,7 @@ class FileSystemMonitor extends EventEmitter {
             {
                 if (fs.existsSync(filePath) && getValueFromFile)
                 {
-                    const currentValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trimEnd();
+                    const currentValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trim();
                     setting.value = currentValue;
                     this.fileMap.set(setting.key, setting);
                 }
@@ -399,13 +399,16 @@ class FileSystemMonitor extends EventEmitter {
             if (!this.fileMap.has(filename))
             { return; }
 
+            const filePath = path.join(this.dataDir, filename);
+
             if (event === 'change')
             {
-                const currentValue = this.fileMap.get(filename);
-                const fsValue = fs.readFileSync(path.join(this.dataDir, filename), 'utf8').replace(/\0/g, '').trimEnd();
-                if (currentValue !== fsValue)
+                let currentValue = this.fileMap.get(filename);
+                const fsValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trim();
+                if (currentValue.value !== fsValue)
                 {
-                    this.fileMap.set(filename, fsValue);
+                    currentValue.value = fsValue;
+                    this.fileMap.set(filename, currentValue);
                     this._fsEvent(filename, fsValue);
                 }
             }
@@ -478,7 +481,7 @@ class FileSystemMonitor extends EventEmitter {
         const updateValue = await getLocalIp(this.firstRun);
         if (updateValue)
         {
-            const storedValue = this.fileMap.get(fileName);
+            const storedValue = this.fileMap.get(fileName).value;
             if (updateValue !== storedValue)
             { this.put(fileName, updateValue) }
             
