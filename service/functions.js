@@ -81,7 +81,7 @@ const { exec } = require('node:child_process');
                     {
                         fs.writeFileSync(
                             path.join(process.env.DATA_NDPI_PATH, 'media_overlay_image'),
-                            JSON.stringify(command.data),
+                            JSON.stringify(command.data, null, 2),
                             'utf8'
                         );
                     }

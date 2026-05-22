@@ -392,7 +392,7 @@ class FileSystemMonitor extends EventEmitter {
     start() {
         fs.watch(this.dataDir, async (event, filename) => {
             if (!this.fileMap.has(filename))
-            { return }
+            { return; }
 
             if (event === 'change')
             {
@@ -401,18 +401,37 @@ class FileSystemMonitor extends EventEmitter {
                 if (currentValue !== fsValue)
                 {
                     this.fileMap.set(filename, fsValue);
-                    this.fsEvent(filename, fsValue);
+                    this._fsEvent(filename, fsValue);
                 }
             }
         });
         this.startDrmMonitor();
     }
+    
+    _fsEvent(name, value, debounceMs = 500) {
+        const last = this.debounceMap.get(name) || 0;
+        const now = Date.now();
+        if (now - last < debounceMs)
+        { return }
 
-    close() {
-        clearInterval(this.#fsPoll);
-        this.#fsPoll = null;
-        this.drmMonitor.kill();
-        this.drmMonitor = null;
+        this.debounceMap.set(name, now);
+        this.queue.push({ name, value });
+        this.__flushQueue();
+    }
+
+    __flushQueue() {
+        while (this.queue.length > 0)
+        {
+            const { name, value } = this.queue.shift();
+
+            if (name === 'media_overlay_image')
+            { console.log(`[ client_fs ][ UPDATE ] '${name}'`); }
+            else
+            { console.log(`[ client_fs ][ UPDATE ] '${name}' ==> '${value}'`); }
+
+            this.emit(name, value);
+        }
+        this.emit('update', JSON.stringify(Array.from(this.fileMap)));
     }
 
     poll(interval = 10000) {
@@ -437,27 +456,17 @@ class FileSystemMonitor extends EventEmitter {
         catch (error)
         { console.error('🔴 [ client_fs ][ ERROR ] Saving to FileSystem') }
     }
-    
-    fsEvent(name, value, debounceMs = 500) {
-        const last = this.debounceMap.get(name) || 0;
-        const now = Date.now();
-        if (now - last < debounceMs)
-        { return }
 
-        this.debounceMap.set(name, now);
-        this.queue.push({ name, value });
-        this._flushQueue();
+    close() {
+        clearInterval(this.#fsPoll);
+        this.#fsPoll = null;
+        this.drmMonitor.kill();
+        this.drmMonitor = null;
     }
 
-    _flushQueue() {
-        while (this.queue.length > 0)
-        {
-            const { name, value } = this.queue.shift();
-            console.log(`[ client_fs ][ UPDATE ] '${name}' ==> '${value}'`);
-            this.emit(name, value);
-        }
-        this.emit('update', JSON.stringify(Array.from(this.fileMap)));
-    }
+    /**
+     *  Helper Functions
+     */
 
     async updateLocalIp() {
         const fileName = 'device_ip';
