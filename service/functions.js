@@ -22,6 +22,7 @@ const { exec } = require('node:child_process');
                 ts:         Date.now(),
                 data:       {}
             };
+            let arry = [];
             console.log(JSON.stringify(command));
 
             if (!command.type)
@@ -76,6 +77,39 @@ const { exec } = require('node:child_process');
                 
                 case 'set-source':
                     response = await setNdi(response, command);
+                    return response;
+                    break;
+                
+                case 'get-sources':
+                    const ndiDiscoverPath = `./${fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndi_source_discovery_exec'), 'utf8')}`;
+                    await new Promise((resolve) => {
+                        exec('./../ndi_discover_v2', (error, stdout, stderr) => {
+                            if (error)
+                            {
+                                console.error(`[ functions ] NDI Discovery Error`, stderr.toString());
+                                arry.push(stdoutToArray(stderr));
+                                response.data.message = arry.join(' << ');
+                                response.success = false;
+                                resolve();
+                            }
+                            else
+                            {
+                                response.data.sources = [];
+                                const stdoutArray = stdoutToArray(stdout);
+
+                                for (const line of stdoutArray)
+                                {
+                                    const splitLine = line.split('^');
+                                    response.data.sources.push({
+                                        name: splitLine[1],
+                                        url: splitLine[0],
+                                    });
+                                }
+                                response.success = true;
+                                resolve();
+                            }
+                        });
+                    });
                     return response;
                     break;
 
@@ -261,11 +295,21 @@ const { exec } = require('node:child_process');
             return response;
         }
 
+        function stdoutToArray(stdout) {
+            let a = [];
+            let stdin = stdout || '';
+            stdin.split(/\r?\n/).forEach((line) => {
+                a.push(line);
+            });
+            return a;
+        }
+
 
 module.exports = {
     getLocalIp,
     processCommand,
     focusWindow,
+    stdoutToArray,
 };
 
 

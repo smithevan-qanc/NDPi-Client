@@ -13,9 +13,13 @@ REMOTE=$(git rev-parse origin/$BRANCH)
 
 if [ "$LOCAL" != "$REMOTE" ]; then
     git reset --hard origin/$BRANCH
-    for file in sh/*; do
-        [ -f $file ] && chmod +x $file
-    done
+    
+    # for file in sh/*; do
+    #     [ -f $file ] && chmod +x $file
+    # done
+
+    chbod +x ./sh/*
+
     # chmod +x sh/git-update
     # chmod +x sh/install-update
     # chmod +x sh/machine-info

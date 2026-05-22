@@ -82,7 +82,7 @@
 <body>
     <div class="main">
         <div class="card">
-            <label>TV Controls (CEC)</label>
+            <label>Connected TV Controls</label>
             <div class="flex-row">
                 <button id="tv_power_off">Off</button>
                 <button id="tv_power_on">On</button>
@@ -97,8 +97,14 @@
                 <button id="tv_as">Switch To NDPi</button>
                 <button id="tv_is">Home</button>
             </div>
-            <label>Custom Command</label>
-            <input type="text" value="txn " id="send_bytes">
+            <label>Custom CEC Command</label>
+            <input type="text" value="" id="send_bytes">
+        </div>
+        <div class="card">
+            <label>NDI Source</label>
+            <div class="flex-row">
+                <select id="source_selection"></select>
+            </div>
         </div>
         <div class="card" id="settings"></div>
     </div>
@@ -155,9 +161,13 @@
                 type: 'send-cec',
                 data: encodeURI(`${this.value}`),
             });
-            this.value = 'txn ';
+            this.value = '';
         });
     })();
+    
+    // Available sources array.
+    let availableSources = [];
+
     async function sendCommand(command = {}) {
         if (!command.type) return null;
         
@@ -167,17 +177,34 @@
         const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/command?${searchParams}`;
         console.log(urlString)
 
+        let data = null;
         try {
             const res = await fetch(urlString, {
                 method: 'GET',
             });
 
             if (!res.ok) throw new Error(await res.json());
-
+            data = await res.json();
 
         } catch (e) {
             console.error(e);
         }
+        return data;
+    }
+    async function refreshSources() {
+        const response = await sendCommand({ type: 'get-sources' });
+        console.log(response);
+        // availableSources.push({});
+        // renderSources();
+    }
+    function renderSources() {
+        const sourceSelectorEl = document.getElementById('source_selection');
+        if (availableSources.length >= 1)
+        {
+            // do this
+        }
+        
+        //<option value="none">None</option>
     }
 </script>
 

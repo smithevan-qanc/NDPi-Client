@@ -133,6 +133,12 @@ class FileSystemMonitor extends EventEmitter {
                 key: "ndpi_status_no_source_display_mode",
                 value: `overlay`
             }, {
+                key: "ndi_source_discovery_exec",
+                value: `ndi_discover_v2`
+            }, {
+                key: "ndi_receiver_exec",
+                value: `ndi_receiver_v3`
+            }, {
                 key: "ndi_receiver_bandwidth",
                 value: `0` // MAX: 0x7fffffff
             }, {
@@ -180,6 +186,8 @@ class FileSystemMonitor extends EventEmitter {
             'device_id',
             'device_type',
             'device_ip',
+            'exec_ndi_source_discovery',
+            'ndi_receiver_exec',
             'local_port_number_bonjour',
             'local_port_number_api',
             'ndpi_status_ndi',

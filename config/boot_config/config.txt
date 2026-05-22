@@ -26,6 +26,10 @@ auto_initramfs=1
 dtoverlay=vc4-kms-v3d
 max_framebuffers=1
 
+# Enable SPI for LCD Screen
+dtparam=spi=on
+dtoverlay=piscreen,speed=40000000,rotate=90
+
 # Don't have the firmware create an initial video= setting in cmdline.txt.
 # Use the kernel's default instead.
 disable_fw_kms_setup=1

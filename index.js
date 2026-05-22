@@ -239,15 +239,15 @@ class NDPi {
 
     startChromium() {
         if (fs.existsSync('/usr/bin/chromium'))
-            {
-                const ChromiumOverlayDisplay = require('./service/client_chromium.js');
-                this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
-            } 
+        {
+            const ChromiumOverlayDisplay = require('./service/client_chromium.js');
+            this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
+        } 
         else
-            {
-                console.log('[ index ][ client_chromium ] Skipping Chromium display launch.');
-                console.log('[ index ][ client_chromium ] -- Missing binary: /usr/bin/chromium');
-            }
+        {
+            console.log('[ index ][ client_chromium ] Skipping Chromium display launch.');
+            console.log('[ index ][ client_chromium ] -- Missing binary: /usr/bin/chromium');
+        }
     }
 
     openCecController() {
@@ -275,10 +275,10 @@ class NDPi {
 
     startNdiReceiver() {
         if (this.ndiReceiver)
-            {
-                this.ndiReceiver.close();
-                return;
-            }
+        {
+            this.ndiReceiver.close();
+            return;
+        }
         const NDI_Receiver_v2 = require('./service/client_ndiReceiver.js');
         this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.service_chromium);
 
