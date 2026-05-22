@@ -66,7 +66,7 @@ class DeviceSocket {
         try { this._ws.close(); } catch {}
         this._ws = null;
 
-        this._ws = new WebSocket(`${this.protocol}//${this.host}`);
+        this._ws = new WebSocket(`${this.protocol}//${this.host}/ws/display`);
 
         this._ws.onopen = () => {
             console.log('Connected to device server');
