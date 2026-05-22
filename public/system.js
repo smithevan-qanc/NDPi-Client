@@ -46,6 +46,7 @@ class DeviceSocket {
                     if (!settingEl)
                     {
                         settingEl = document.createElement('div');
+                        settingEl.id = id;
                         settingEl.innerHTML = settingInnerHTML;
                         document.getElementById('settings').appendChild(settingEl);
                     } else
