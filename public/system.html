@@ -150,7 +150,16 @@
         </div>
         <div class="card">
             <h2>Overlay Image</h2>
-            <input type="file" id="overlay_upload" multiple accept=".jpg, .png, .svg">
+            <form name="uploadForm">
+                <div>
+                    <input id="overlay_upload" type="file" multiple accept=".jpg, .png, .svg"/>
+                    <label for="fileNum">Selected files:</label>
+                    <output id="fileNum">0</output>;
+                    <label for="fileSize">Total size:</label>
+                    <output id="fileSize">0</output>
+                </div>
+                <div><input type="submit" value="Send file" /></div>
+            </form>
         </div>
     </div>
 </body>
@@ -234,11 +243,8 @@
         fileUploader.addEventListener('change', handleFiles)
         
         async function handleFiles() {
-            const file = this.files[0]
-            if (!file) return;
-            const formData = new FormData();
-            formData.append('uploaded_file', file);
-            console.log(formData);
+            const file = this.files;
+            console.log(file);
         };
     }
     
