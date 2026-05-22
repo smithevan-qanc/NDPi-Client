@@ -80,106 +80,260 @@ class FileSystemMonitor extends EventEmitter {
         const files = [
             { 
                 key: "device_name",                             // Custom device name
-                value: `${this.defaultDeviceName}`
-            }, {
-                key: "device_type",                             // Device type for broadcast on Bonjour
-                value: `NDPi Monitor Client`
-            }, {
-                key: "device_id",                               // Device ID
-                value: deviceId.toUpperCase()
-            }, {
-                key: "device_ip",                               // Local IP for device
-                value: ``
-            }, {
-                key: "local_port_number_api",                   // Port number for device API
-                value: `${process.env.PORT_API || 3080}`
-            }, {
-                key: "local_port_number_bonjour",               // Port number for device Bonjour
-                value: `${process.env.PORT_MDNS || 3053}`
-            }, {
-                key: "ndpi_version",                            // Version of NDPi 
-                value: this.#pgmVersion
-            }, {
-                key: "ndpi_version_date",                       // NDPi Version release date.
-                value: this.#pgmVersionDate
-            }, {
-                key: "ndpi_command_server_host",                // 
-                value: `` 
-            }, {
-                key: "ndpi_command_server_port",
-                value: ``
-            }, {
-                key: "ndpi_command_log",
-                value: `System Initial Run: v${this.#pgmVersion} ${this.#pgmVersionDate}`
-            }, {
-                key: "ndpi_status_ndi", 
-                value: `idle`
-            }, {
-                key: "ndpi_status_ndi_source_target",
-                value: ``
-            }, {
-                key: "ndpi_status_ndi_source_active",
-                value: ``
-            }, {
-                key: "ndpi_status_ndi_source_resolution",
-                value: ``
-            }, {
-                key: "ndpi_status_ndi_source_framerate",
-                value: ``
-            }, {
-                key: "ndpi_status_ndi_source_connected_time", 
-                value: ``
-            }, {
-                key: "ndpi_status_no_source_display_mode",
-                value: `overlay`
-            }, {
-                key: "ndi_source_discovery_exec",
-                value: `ndi_discover_v2`
-            }, {
-                key: "ndi_receiver_exec",
-                value: `ndi_receiver_v3`
-            }, {
-                key: "ndi_receiver_bandwidth",
-                value: `0` // MAX: 0x7fffffff
-            }, {
-                key: "ndi_receiver_color_format",
-                value: `100`
-            }, {
-                key: "output_resolution_current",
-                value: ``
-            }, {
-                key: "output_framerate_current",
-                value: ``
-            }, {
-                key: "output_device_resolution_preferred",
-                value: ``
-            }, {
-                key: "output_device_framerate_preferred",
-                value: ``
-            }, {
-                key: "output_device_port",
-                value: ``
-            }, {
-                key: "output_device_manufacturer",
-                value: ``
-            }, {
-                key: "output_device_model",
-                value: ``
-            }, {
-                key: "output_device_cec_enabled",
-                value: `false`
-            }, {
-                key: "output_device_cec_status_power",
-                value: `unknown`
-            }, {
-                key: "output_device_cec_active_source",
-                value: ``
-            }, {
-                key: "media_overlay_image",
-                value: ``
+                value: `${this.defaultDeviceName}`,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
             },
+            {
+                key: "device_type",                             // Device type for broadcast over Bonjour
+                value: `NDPi Monitor Client`,
+                group: ``,
+                allowEditInternal: false,
+                allowEditExternal: false,
+            },
+            {
+                key: "device_id",                               // Device ID
+                value: deviceId.toUpperCase(),
+                group: ``,
+                allowEditInternal: false,
+                allowEditExternal: false,
+            },
+            {
+                key: "device_ip",                               // Local IP for device
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "local_port_number_api",                   // Port number for device API
+                value: `${process.env.PORT_API || 3080}`,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "local_port_number_bonjour",               // Port number for device Bonjour
+                value: `${process.env.PORT_MDNS || 3053}`,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "ndpi_version",                            // Version of NDPi 
+                value: this.#pgmVersion,
+                group: ``,
+                allowEditInternal: false,
+                allowEditExternal: false,
+            },
+            {
+                key: "ndpi_version_date",                       // NDPi Version release date.
+                value: this.#pgmVersionDate,
+                group: ``,
+                allowEditInternal: false,
+                allowEditExternal: false,
+            },
+            {
+                key: "ndpi_command_server_host",                // 
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "ndpi_command_server_port",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "ndpi_command_log",
+                value: `System Initial Run: v${this.#pgmVersion} ${this.#pgmVersionDate}`,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "ndpi_status_ndi", 
+                value: `idle`,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "ndpi_status_ndi_source_target",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "ndpi_status_ndi_source_active",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "ndpi_status_ndi_source_resolution",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "ndpi_status_ndi_source_framerate",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "ndpi_status_ndi_source_connected_time", 
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "ndpi_status_no_source_display_mode",
+                value: `overlay`,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "ndi_source_discovery_exec",
+                value: `ndi_discover_v2`,
+                group: ``,
+                allowEditInternal: false,
+                allowEditExternal: false,
+            },
+            {
+                key: "ndi_receiver_exec",
+                value: `ndi_receiver_v3`,
+                group: ``,
+                allowEditInternal: false,
+                allowEditExternal: false,
+            },
+            {
+                key: "ndi_receiver_bandwidth",
+                value: `0`,
+                options: [
+                    ['Metadata Only', '-10'],
+                    ['Audio Only',    '10'],
+                    ['Lowest',        '0'],
+                    ['Highest',       '100'],
+                    ['Max',           '0x7fffffff']
+                ],
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "ndi_receiver_color_format",
+                value: `100`,
+                options: [
+                    ['BGRx_BGRa', '0'],
+                    ['UYVY_BGRa', '1'],
+                    ['RGBx_RGBa', '2'],
+                    ['UYVY_RGBa', '3'],
+                    ['Fastest',   '100'],
+                    ['Best',      '101'],
+                    ['Max',       '0x7fffffff']
+                ],
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "output_resolution_current",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "output_framerate_current",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "output_device_resolution_preferred",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_device_framerate_preferred",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_device_port",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_device_manufacturer",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_device_model",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_device_cec_enabled",
+                value: `false`,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_device_cec_status_power",
+                value: `unknown`,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_device_cec_active_source",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "media_overlay_image",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            // {
+            //     key: "",
+            //     value: ``,
+            //     group: ``,
+            //     allowEditInternal: true,
+            //     allowEditExternal: true,
+            // },
         ];
-        // Files that will NOT initialize with their previously stored values.
+        // Files that will NOT initialize with the previously stored value.
         const retainDefaultValue = [
             'ndpi_version',
             'ndpi_version_date',

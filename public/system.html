@@ -148,6 +148,10 @@
             <h2>System Settings</h2>
             <table class="settings-table" id="settings"></table>
         </div>
+        <div class="card">
+            <h2>Overlay Image</h2>
+            <input type="file" id="overlay_upload" multiple accept=".jpg, .png, .svg">
+        </div>
     </div>
 </body>
 
@@ -155,6 +159,8 @@
 <script>
     (() => {
         refreshSources();
+    })();
+    function addEvents() {
         document.getElementById('tv_power_off').addEventListener('click', async (e) => {
             e.preventDefault();
             await sendCommand({
@@ -222,7 +228,15 @@
             await refreshSources();
             this.disabled = false;
         });
-    })();
+        document.getElementById('overlay_upload').addEventListener('change', async function(e) {
+            e.preventDefault();
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('uploaded_file', file);
+            console.log(formData);
+        });
+    }
     
     // Available sources array.
     let availableSources = [];
