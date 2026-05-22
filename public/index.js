@@ -160,9 +160,9 @@ function updateDetails(msg) {
         devName:     msg.thisDevice?.name,
         devId:       msg.thisDevice?.id,
         devIp:       msg.thisDevice?.address === undefined ? undefined
-                        : msg.thisDevice.address === 'localhost' ? 'Obtaining...'
+                        : msg.thisDevice.address === '' ? 'Obtaining...'
                         : msg.thisDevice.address,
-        servIp:      msg.serverIp || '-.-.-.-',
+        servIp:      msg.serverIp || 'No NDPi Hub',
         programName: msg.service?.name,
         programVer:  msg.service?.version,
     };

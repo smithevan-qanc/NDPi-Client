@@ -54,7 +54,7 @@ class NDPiBonjourService {
         }
 
         const options = this._buildOptions();
-        console.log('[ client_bonjour ] Publishing');//, options
+        console.log('[ client_bonjour ] Publishing Service');//, options
 
         this.service = bonjour.publish(options);
         this.service.on('error', (err) => {
