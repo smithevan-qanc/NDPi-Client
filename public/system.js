@@ -34,15 +34,15 @@ class DeviceSocket {
             { clearInterval(this.timerReconnectDevice); this.timerReconnectDevice = null; }
         };
 
-        // this._ws.onmessage = (message) => {
-        //     try
-        //     {
-        //         const msg = JSON.parse(message.data);
-        //         handleDisplayCommand(msg);
-        //     }
-        //     catch (e)
-        //     { console.error('Invalid message:', e); }
-        // };
+        this._ws.onmessage = (message) => {
+            try
+            {
+                const msg = JSON.parse(message.data);
+                document.getElementById('system-details').textContent = JSON.stringify(msg, null, 2);
+            }
+            catch (e)
+            { console.error('Invalid message:', e); }
+        };
 
         this._ws.onerror = (error) => {
             console.error('WebSocket error:', error);
