@@ -99,7 +99,7 @@ const { exec } = require('node:child_process');
 
                                 for (const line of stdoutArray)
                                 {
-                                    const splitLine = line.split('^');
+                                    const splitLine = line.trim().split('^');
                                     response.data.sources.push({
                                         name: splitLine[1],
                                         url: splitLine[0],
