@@ -10,6 +10,8 @@
 *
 ******************************************************************************/
 #include "DEV_Config.h"
+#include <stdlib.h>
+#include <pthread.h>
 
 #if USE_DEV_LIB
 int GPIO_Handle;

@@ -44,14 +44,24 @@ lcd_display/
 
 ### Prerequisites (Raspberry Pi)
 
-1. **GPIO library:** `lgpio` (modern, recommended)
+1. **GPIO library:** Install libbcm2835 (most reliably available)
    ```bash
-   sudo apt-get install libgpio-dev
+   sudo apt-get install libbcm2835-dev
    ```
    
-   **Alternative GPIO libraries:**
-   - `libbcm2835-dev` – direct Broadcom register access
-   - `wiringpi` – older but widely supported
+   **Alternative options:**
+   
+   - **WiringPi** (if available in your repos):
+     ```bash
+     sudo apt-get install wiringpi
+     # Then edit Makefile: USELIB = USE_WIRINGPI_LIB
+     ```
+   
+   - **lgpio** (modern, requires building from source):
+     ```bash
+     # See: https://github.com/joan2937/lg
+     # Then edit Makefile: USELIB = USE_DEV_LIB
+     ```
 
 2. **Build tools:**
    ```bash
