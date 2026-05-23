@@ -38,8 +38,8 @@ extern "C" {
 #define BACKLIGHT_BRIGHTNESS 1023
 
 /* Color definitions */
-#define COLOR_BG       WHITE
-#define COLOR_TEXT     BLACK
+#define COLOR_BG       BLACK
+#define COLOR_TEXT     WHITE
 #define COLOR_HEADER   0x001F  /* Blue */
 #define COLOR_NDI_OK   0x07E0  /* Green */
 #define COLOR_NDI_IDLE 0xFFC0  /* Yellow */
