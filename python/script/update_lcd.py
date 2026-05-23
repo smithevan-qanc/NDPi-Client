@@ -47,7 +47,7 @@ try:
     while True:
         # Read files
         device_name = read_file('device_name')
-        dev_nam_x = get_centered_x(device_name)
+        dev_nam_x = get_centered_x(device_name, 30)
 
         device_id = read_file('device_id')
         device_ip = read_file('device_ip')
@@ -68,8 +68,8 @@ try:
         except IndexError:
             src_line_2 = ""
         
-        src_x_1 = get_centered_x(src_line_1, 25, 280)
-        src_x_2 = get_centered_x(src_line_2, 25, 280)
+        src_x_1 = get_centered_x(src_line_1, 25)
+        src_x_2 = get_centered_x(src_line_2, 25)
 
         # Draw on display
         image1 = Image.new("RGB", (disp.height, disp.width), "BLACK")
