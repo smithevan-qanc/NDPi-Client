@@ -51,7 +51,7 @@ try:
         draw = ImageDraw.Draw(image1)
         
         # logging.info(f"Updating: {device_name} | {device_ip} | {ndi_status}")
-        draw.text((20, 20),     device_name,     fill="GREEN", font=Font1)
+        draw.text((55, 17),     device_name,     fill="GREEN", font=Font1)
         draw.text((25, 69),     "ID:",           fill="GRAY", font=Font4)
         draw.text((55, 68),     device_id,       fill="GREEN", font=Font3)
         draw.text((25, 114),    "IP:",           fill="GRAY", font=Font4)
