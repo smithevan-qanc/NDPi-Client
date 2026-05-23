@@ -47,7 +47,7 @@ try:
         ndpi_version = read_file('ndpi_version')
         ndpi_status_ndi = read_file('ndpi_status_ndi').upper()
 
-        sys_temp = round(read_file('../../../../../sys/class/thermal/thermal_zone0/temp')/1000)
+        sys_temp = read_file('../../../../../sys/class/thermal/thermal_zone0/temp')
 
         target_source = read_file('ndpi_status_ndi_source_target').upper()
         target_src = "\n(".join(target_source.split('('))
