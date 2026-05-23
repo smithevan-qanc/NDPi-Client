@@ -41,8 +41,8 @@ try:
     Font3 = ImageFont.truetype("../Font/Font02.ttf", 32)
 
     # Create blank image for drawing.
-    # image1 = Image.new("RGB", (disp.height, disp.width), "WHITE")
-    image1 = Image.open('../../assets/misc/wallpaper.png')
+    image1 = Image.new("RGB", (disp.height, disp.width), "BLACK")
+    
     draw = ImageDraw.Draw(image1)
     
     # image1=image1.rotate(0)
