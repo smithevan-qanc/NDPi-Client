@@ -33,6 +33,7 @@ try:
     Font1 = ImageFont.truetype("../Font/Font02.ttf", 35)
     Font2 = ImageFont.truetype("../Font/Font02.ttf", 30)
     Font3 = ImageFont.truetype("../Font/Font02.ttf", 25)
+    Font4 = ImageFont.truetype("../Font/Font02.ttf", 20)
     
     print("Display initialized. Starting loop...")
     
@@ -51,14 +52,14 @@ try:
         
         # logging.info(f"Updating: {device_name} | {device_ip} | {ndi_status}")
         draw.text((20, 20),     device_name,     fill="GREEN", font=Font1)
-        draw.text((20, 68),     "ID:",           fill="WHITE", font=Font2)
-        draw.text((50, 68),     device_id,       fill="GREEN", font=Font2)
-        draw.text((20, 113),    "IP:",           fill="WHITE", font=Font2)
-        draw.text((50, 113),    device_ip,       fill="GREEN", font=Font2)
-        draw.text((15, 156),    "Status:",       fill="WHITE", font=Font2)
-        draw.text((90, 156),    ndpi_status_ndi, fill="GREEN", font=Font2)
-        draw.text((15, 210),    "VER:",          fill="WHITE", font=Font3)
-        draw.text((50, 210),    ndpi_version,    fill="GREEN", font=Font3)
+        draw.text((20, 68),     "ID:",           fill="WHITE", font=Font4)
+        draw.text((55, 68),     device_id,       fill="GREEN", font=Font3)
+        draw.text((20, 113),    "IP:",           fill="WHITE", font=Font4)
+        draw.text((55, 113),    device_ip,       fill="GREEN", font=Font2)
+        draw.text((20, 156),    "NDI:",          fill="WHITE", font=Font4)
+        draw.text((55, 156),    ndpi_status_ndi, fill="GREEN", font=Font2)
+        draw.text((20, 210),    "VER:",          fill="WHITE", font=Font4)
+        draw.text((55, 210),    ndpi_version,    fill="GREEN", font=Font3)
         
         disp.ShowImage(image1)
         
