@@ -77,6 +77,15 @@ const { exec } = require('node:child_process');
                     break;
 
                 case 'set-overlay':
+                    // const base64String = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...";
+                    // // Remove the header (e.g., "data:image/png;base64,")
+                    // const base64Data = base64String.replace(/^data:image\/\w+;base64,/, "");
+                    // const buffer = Buffer.from(base64Data, 'base64'); // Create buffer from base64
+
+                    // fs.writeFile('output.png', buffer, (err) => {
+                    // if (err) console.error(err);
+                    // else console.log('Saved Base64 image!');
+                    // });
                     try
                     {
                         fs.writeFileSync(
