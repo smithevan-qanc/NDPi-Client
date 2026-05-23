@@ -45,7 +45,7 @@ try:
         device_ip = read_file('device_ip')
         ndpi_version = read_file('ndpi_version')
         ndpi_status_ndi = read_file('ndpi_status_ndi').upper()
-        target_source = read_file('ndpi_status_ndi_source_target')
+        target_source = read_file('ndpi_status_ndi_source_target').upper()
         
         target_src = "\n(".join(target_source.split('('))
 
@@ -61,17 +61,17 @@ try:
         draw.text((10, 62),     "Status",           fill="GRAY", font=Font4)
         draw.text((80, 60),     ndpi_status_ndi, fill="GREEN", font=Font3)
 
-        draw.text((20, 115),    target_src,      fill="GREEN", font=Font2)
+        draw.text((20, 100),    target_src,      fill="GREEN", font=Font2)
 
         # draw.text((50, 60),     device_ip,       fill="GREEN", font=Font3)
 
         draw.line([(0, 190), (280, 190)], fill = "GRAY", width = 1)
 
         # draw.text((10, 183),    "VER",           fill="GRAY", font=Font4)
-        draw.text((20, 195),    ndpi_version + " " + device_ip,    fill="GREEN", font=Font4)
+        draw.text((15, 195),    ndpi_version + " - " + device_ip,    fill="GREEN", font=Font4)
 
         # draw.text((10, 205),    "ID",            fill="GRAY", font=Font4)
-        draw.text((50, 215),    device_id,       fill="GREEN", font=Font4)
+        draw.text((65, 215),    device_id,       fill="GREEN", font=Font4)
         
         disp.ShowImage(image1)
         
