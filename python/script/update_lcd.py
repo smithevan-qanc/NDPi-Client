@@ -24,7 +24,7 @@ def read_file(filepath):
     
 device_name = read_file('device_name')
 device_ip = read_file('device_ip')
-ndi_status = read_file('ndpi_status_ndi')
+ndi_status = read_file('../../../DATA_ndpi/ndpi_status_ndi')
 
 try:
     # display with hardware SPI:
@@ -68,9 +68,9 @@ try:
 
     logging.info("draw text")
     # draw.rectangle([(20, 120), (160, 153)], fill = "BLUE")
-    draw.text((25, 120), device_name, fill = "WHITE", font=Font1)
+    draw.text((25, 120), device_name, fill = "WHITE", font=Font3)
     # draw.rectangle([(20,155), (192, 195)], fill = "RED")
-    draw.text((21, 155), device_ip, fill = "WHITE", font=Font2)
+    draw.text((21, 155), device_ip, fill = "WHITE", font=Font3)
     draw.text((25, 190), ndi_status, fill = "WHITE", font=Font3)
     # text= u"微雪电子"
     # draw.text((25, 230),text, fill = "BLUE", font=Font3)
