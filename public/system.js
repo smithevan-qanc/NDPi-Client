@@ -43,7 +43,7 @@ class DeviceSocket {
                     // const settingInnerHTML = `<label style="text-transform: capitalize;" for="${id}">${String(id.split('_').join(' '))}:</label><input type="text" id="${id}" value="${value}">`;
 
                     const settingInnerHTML = `
-                        <td style="text-transform: capitalize; min-width: 200px; text-align: right;">${String(id.split('_').join(' '))}:</td>
+                        <td style="text-transform: uppercase; min-width: 120px; text-align: right;">${String(id.split('_').join(' '))}:</td>
                         <td style="width: 60%;">
                             <input type="text" id="${id}" value="${object.value}" ${object.allowEditExternal ? '' : 'disabled'}>
                         </td>`;
