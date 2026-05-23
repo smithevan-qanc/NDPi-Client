@@ -37,7 +37,7 @@ pids/
 
 # Build outputs
 dist/
-build/
+#build/
 *.tgz
 
 # Optional npm cache directory
