@@ -33,7 +33,7 @@ try:
     Font1 = ImageFont.truetype("../Font/ConsolasBold.ttf", 30)
     Font2 = ImageFont.truetype("../Font/Consolas.ttf", 30)
     Font3 = ImageFont.truetype("../Font/Consolas.ttf", 25)
-    Font4 = ImageFont.truetype("../Font/Consolas.ttf", 20)
+    Font4 = ImageFont.truetype("../Font/ConsolasBold.ttf", 20)
     
     print("Display initialized. Starting loop...")
     
@@ -52,12 +52,12 @@ try:
         
         # logging.info(f"Updating: {device_name} | {device_ip} | {ndi_status}")
         draw.text((25, 15),     device_name,     fill="GREEN", font=Font1)
-        draw.text((25, 35),     "ID:",           fill="GRAY", font=Font4)
-        draw.text((55, 68),     device_id,       fill="GREEN", font=Font3)
+        draw.text((25, 40),     "ID:",           fill="GRAY", font=Font4)
+        draw.text((55, 40),     device_id,       fill="GREEN", font=Font3)
         draw.text((25, 114),    "IP:",           fill="GRAY", font=Font4)
-        draw.text((57, 110),    device_ip,       fill="GREEN", font=Font2)
+        draw.text((57, 110),    device_ip,       fill="GREEN", font=Font3)
         draw.text((20, 157),    "NDI:",          fill="GRAY", font=Font4)
-        draw.text((60, 150),    ndpi_status_ndi, fill="GREEN", font=Font2)
+        draw.text((60, 150),    ndpi_status_ndi, fill="GREEN", font=Font3)
         draw.text((20, 198),    "VER:",          fill="GRAY", font=Font4)
         draw.text((60, 195),    ndpi_version,    fill="GREEN", font=Font3)
         
