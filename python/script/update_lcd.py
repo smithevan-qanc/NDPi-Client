@@ -50,15 +50,14 @@ try:
         dev_nam_x = get_centered_x(device_name.strip(), 30)
 
         device_id = read_file('device_id')
+        dev_id_x = get_centered_x(device_id, 20)
+
         device_ip = read_file('device_ip')
         ndpi_version = read_file('ndpi_version')
         ndpi_status_ndi = read_file('ndpi_status_ndi').upper()
 
-        sys_temp = str(round(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000))
-
         target_source = read_file('ndpi_status_ndi_source_target').upper()
         target_src = target_source.split('(')
-
         try:
             src_line_1 = target_src[0].strip()
         except IndexError:
@@ -68,8 +67,6 @@ try:
         except IndexError:
             src_line_2 = ""
         
-        src_x_1 = get_centered_x(src_line_1, 25)
-        src_x_2 = get_centered_x(src_line_2, 25)
 
         # Draw on display
         image1 = Image.new("RGB", (disp.height, disp.width), "BLACK")
@@ -82,20 +79,23 @@ try:
         draw.text((10, 62),     "Status",           fill="GRAY", font=Font4)
         draw.text((80, 60),     ndpi_status_ndi, fill="GREEN", font=Font3)
 
+
+        src_x_1 = get_centered_x(src_line_1, 25)
+        src_x_2 = get_centered_x(src_line_2, 25)
         draw.text((src_x_1, 100),    src_line_1,      fill="GREEN", font=Font2)
         draw.text((src_x_2, 128),    src_line_2,      fill="GREEN", font=Font2)
 
-        # draw.text((50, 60),     device_ip,       fill="GREEN", font=Font3)
-
         draw.line([(0, 190), (280, 190)], fill = "GRAY", width = 1)
 
-        draw.text((65, 165),    sys_temp,        fill="GREEN", font=Font4)
+        sys_temp = f"{str(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000)}°C"
+        draw.text((65, 165), sys_temp, fill="GREEN", font=Font4)
 
-        # draw.text((10, 183),    "VER",           fill="GRAY", font=Font4)
-        draw.text((15, 195),    ndpi_version + " - " + device_ip,    fill="GREEN", font=Font4)
+        line_dev_info = f"{ndpi_version} - {device_ip}"
+        line_dev_info_x = get_centered_x(line_dev_info, 20)
+        draw.text((line_dev_info_x, 195), line_dev_info, fill="GREEN", font=Font4)
 
         # draw.text((10, 205),    "ID",            fill="GRAY", font=Font4)
-        draw.text((65, 215),    device_id,       fill="GREEN", font=Font4)
+        draw.text((dev_id_x, 215),    device_id,       fill="GREEN", font=Font4)
         
         disp.ShowImage(image1)
         
