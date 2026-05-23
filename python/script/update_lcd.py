@@ -56,11 +56,11 @@ try:
         
         # logging.info(f"Updating: {device_name} | {device_ip} | {ndi_status}")
         draw.text((25, 15),     device_name,     fill="GREEN", font=Font1)
-        draw.text((20, 52),     "IP:",           fill="GRAY", font=Font4)
+        draw.text((21, 52),     "IP:",           fill="GRAY", font=Font4)
         draw.text((10, 82),     "NDI:",          fill="GRAY", font=Font4)
         draw.text((60, 50),     device_ip,       fill="GREEN", font=Font3)
         draw.text((60, 80),     ndpi_status_ndi, fill="GREEN", font=Font3)
-        draw.text((20, 115),    target_src,      fill="GREEN", font=Font1)
+        draw.text((20, 115),    target_src,      fill="GREEN", font=Font2)
         draw.text((15, 182),    "ID",            fill="GRAY", font=Font4)
         draw.text((45, 180),    device_id,       fill="GREEN", font=Font3)
         draw.text((70, 207),    "VER",           fill="GRAY", font=Font4)
