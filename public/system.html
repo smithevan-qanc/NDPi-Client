@@ -145,22 +145,36 @@
             <h2>Connected TV Controls</h2>
             <div class="flex-row">
                 <div class="flex-column">
-                    <button id="tv_power_on">On</button>
-                    <button class="red" id="tv_power_off">Off</button>
+                    <button id="tv_power_on">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30" fill="currentColor" style="stroke-width: 0.75px; stroke: rgba(20, 100, 20, 1); paint-order: stroke; stroke-linejoin: round;" viewBox="0 0 16 16">
+                            <path d="M7.5 1v7h1V1z"/>
+                            <path d="M3 8.812a5 5 0 0 1 2.578-4.375l-.485-.874A6 6 0 1 0 11 3.616l-.501.865A5 5 0 1 1 3 8.812"/>
+                        </svg>
+                    </button>
+                    <button class="red" id="tv_power_off">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30" fill="currentColor" style="stroke-width: 0.75px; stroke: rgba(20, 20, 20, 0.7); paint-order: stroke; stroke-linejoin: round;" viewBox="0 0 16 16">
+                            <path d="M7.5 1v7h1V1z"/>
+                            <path d="M3 8.812a5 5 0 0 1 2.578-4.375l-.485-.874A6 6 0 1 0 11 3.616l-.501.865A5 5 0 1 1 3 8.812"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex-column">
+                    <button id="tv_as">NDPi Monitor</button>
+                    <button class="red" id="tv_is">Home</button>
                 </div>
                 <div class="flex-column">
                     <button id="tv_volume_up">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="30" fill="currentColor" style="box-shadow: #000;" viewBox="0 0 16 16">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30" fill="currentColor" style="stroke-width: 0.75px; stroke: rgba(20, 100, 20, 1); paint-order: stroke; stroke-linejoin: round;" viewBox="0 0 16 16">
                             <path d="M11.536 14.01A8.47 8.47 0 0 0 14.026 8a8.47 8.47 0 0 0-2.49-6.01l-.708.707A7.48 7.48 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303z"/>
                             <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.48 5.48 0 0 1 11.025 8a5.48 5.48 0 0 1-1.61 3.89z"/>
                             <path d="M8.707 11.182A4.5 4.5 0 0 0 10.025 8a4.5 4.5 0 0 0-1.318-3.182L8 5.525A3.5 3.5 0 0 1 9.025 8 3.5 3.5 0 0 1 8 10.475zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06"/>
                         </svg>
                     </button>
-                    <button id="tv_volume_down">Volume <strong>-</strong></button>
-                </div>
-                <div class="flex-column">
-                    <button id="tv_as">NDPi Monitor</button>
-                    <button class="red" id="tv_is">Home</button>
+                    <button id="tv_volume_down">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" style="stroke-width: 0.75px; stroke: rgba(20, 100, 20, 1); paint-order: stroke; stroke-linejoin: round;" viewBox="0 0 16 16">
+                            <path d="M9 4a.5.5 0 0 0-.812-.39L5.825 5.5H3.5A.5.5 0 0 0 3 6v4a.5.5 0 0 0 .5.5h2.325l2.363 1.89A.5.5 0 0 0 9 12zm3.025 4a4.5 4.5 0 0 1-1.318 3.182L10 10.475A3.5 3.5 0 0 0 11.025 8 3.5 3.5 0 0 0 10 5.525l.707-.707A4.5 4.5 0 0 1 12.025 8"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
             <label>Custom CEC Command</label>
