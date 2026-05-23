@@ -64,13 +64,13 @@ try:
 
         draw.text((20, 115),    target_src,      fill="GREEN", font=Font2)
 
-        draw.line([(40, 10), (90, 60)], fill = "RED", width = 1)
+        draw.line([(0, 190), (280, 190)], fill = "GRAY", width = 2)
 
-        draw.text((10, 183),    "VER",           fill="GRAY", font=Font4)
-        draw.text((50, 183),    ndpi_version,    fill="GREEN", font=Font4)
+        # draw.text((10, 183),    "VER",           fill="GRAY", font=Font4)
+        draw.text((50, 195),    ndpi_version,    fill="GREEN", font=Font4)
 
-        draw.text((10, 205),    "ID",            fill="GRAY", font=Font4)
-        draw.text((50, 205),    device_id,       fill="GREEN", font=Font4)
+        # draw.text((10, 205),    "ID",            fill="GRAY", font=Font4)
+        draw.text((50, 210),    device_id,       fill="GREEN", font=Font4)
         
         disp.ShowImage(image1)
         
