@@ -18,6 +18,14 @@ bus = 0
 device = 0 
 logging.basicConfig(level = logging.DEBUG)
 
+def read_file(filepath):
+    with open(filepath, 'r') as f:
+        return f.read().strip()
+    
+device_name = read_file('/device_name')
+device_ip = read_file('/device_ip')
+ndi_status = read_file('/ndpi_status_ndi')
+
 try:
     # display with hardware SPI:
     ''' Warning!!!Don't  creation of multiple displayer objects!!! '''
@@ -60,15 +68,15 @@ try:
 
     logging.info("draw text")
     draw.rectangle([(20, 120), (160, 153)], fill = "BLUE")
-    draw.text((25, 120), 'Hello world', fill = "RED", font=Font1)
+    draw.text((25, 120), device_name, fill = "RED", font=Font1)
     draw.rectangle([(20,155), (192, 195)], fill = "RED")
-    draw.text((21, 155), 'WaveShare', fill = "WHITE", font=Font2)
-    draw.text((25, 190), '1234567890', fill = "GREEN", font=Font3)
+    draw.text((21, 155), device_ip, fill = "WHITE", font=Font2)
+    draw.text((25, 190), ndi_status, fill = "GREEN", font=Font3)
     text= u"微雪电子"
     draw.text((25, 230),text, fill = "BLUE", font=Font3)
     image1=image1.rotate(0)
     disp.ShowImage(image1)
-    time.sleep(2)
+    time.sleep(12)
     
     image2 = Image.new("RGB", (disp.height,disp.width ), "WHITE")
     draw = ImageDraw.Draw(image2)
