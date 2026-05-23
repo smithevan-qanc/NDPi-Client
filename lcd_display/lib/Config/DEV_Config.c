@@ -188,31 +188,31 @@ UBYTE DEV_ModuleInit(void)
     pwmWrite(LCD_BL,512);
 
 #elif  USE_DEV_LIB
-    char buffer[NUM_MAXBUF];
-    FILE* fp = "Model		: Raspberry Pi 5 Model B Rev 1.1" // popen("cat /proc/cpuinfo | grep 'Raspberry Pi 5'", "r");
-    if (fp == NULL) {
-        DEBUG("It is not possible to determine the model of the Raspberry PI\n");
-        return -1;
-    }
+    // char buffer[NUM_MAXBUF];
+    // FILE* fp = popen("cat /proc/cpuinfo | grep 'Raspberry Pi 5'", "r");
+    // if (fp == NULL) {
+    //     DEBUG("It is not possible to determine the model of the Raspberry PI\n");
+    //     return -1;
+    // }
 
-    if(fgets(buffer, sizeof(buffer), fp) != NULL)  
-    {
+    // if(fgets(buffer, sizeof(buffer), fp) != NULL)  
+    // {
         GPIO_Handle = lgGpiochipOpen(4);
         if (GPIO_Handle < 0)
         {
             DEBUG( "gpiochip4 Export Failed\n");
             return -1;
         }
-    }
-    else
-    {
-        GPIO_Handle = lgGpiochipOpen(0);
-        if (GPIO_Handle < 0)
-        {
-            DEBUG( "gpiochip0 Export Failed\n");
-            return -1;
-        }
-    }
+    // }
+    // else
+    // {
+    //     GPIO_Handle = lgGpiochipOpen(0);
+    //     if (GPIO_Handle < 0)
+    //     {
+    //         DEBUG( "gpiochip0 Export Failed\n");
+    //         return -1;
+    //     }
+    // }
     SPI_Handle = lgSpiOpen(0, 0, 25000000, 0);
     DEV_GPIO_Init();
     t1 = lgThreadStart(BL_PWM, "thread 1");
