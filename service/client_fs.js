@@ -406,7 +406,6 @@ class FileSystemMonitor extends EventEmitter {
         // Call updateLocalIp() right away. It will call poll() after.
         setTimeout(() => {
             this.updateLocalIp();
-
         }, 500);
     }
 
@@ -457,7 +456,6 @@ class FileSystemMonitor extends EventEmitter {
 
             if (this.sendToLCD.includes(name))
             {
-                const modifiedName = (name === 'ndpi_status_ndi') ? String(value).toUpperCase() : value;
                 fs.writeFileSync(path.join(this.lcdDisplayScriptPath, name), modifiedName, 'utf8');
             }
         }

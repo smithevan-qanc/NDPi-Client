@@ -31,7 +31,7 @@ try:
     disp.bl_DutyCycle(100)
     
     Font1 = ImageFont.truetype("../Font/ConsolasBold.ttf", 30)
-    Font2 = ImageFont.truetype("../Font/Consolas.ttf", 30)
+    Font2 = ImageFont.truetype("../Font/ConsolasBold.ttf", 25)
     Font3 = ImageFont.truetype("../Font/Consolas.ttf", 25)
     Font4 = ImageFont.truetype("../Font/ConsolasBold.ttf", 20)
     
@@ -44,7 +44,7 @@ try:
         device_id = read_file('device_id')
         device_ip = read_file('device_ip')
         ndpi_version = read_file('ndpi_version')
-        ndpi_status_ndi = read_file('ndpi_status_ndi')
+        ndpi_status_ndi = read_file('ndpi_status_ndi').upper()
         target_source = read_file('ndpi_status_ndi_source_target')
         
         target_src = "\n(".join(target_source.split('('))
@@ -60,11 +60,11 @@ try:
         draw.text((10, 82),     "NDI:",          fill="GRAY", font=Font4)
         draw.text((60, 50),     device_ip,       fill="GREEN", font=Font3)
         draw.text((60, 80),     ndpi_status_ndi, fill="GREEN", font=Font3)
-        draw.text((60, 115),    target_src,      fill="GREEN", font=Font4)
-        draw.text((15, 182),    "ID",           fill="GRAY", font=Font4)
-        draw.text((50, 180),    device_id,       fill="GREEN", font=Font3)
-        draw.text((50, 207),    "VER",          fill="GRAY", font=Font4)
-        draw.text((100, 205),    ndpi_version,    fill="GREEN", font=Font3)
+        draw.text((20, 115),    target_src,      fill="GREEN", font=Font1)
+        draw.text((15, 182),    "ID",            fill="GRAY", font=Font4)
+        draw.text((45, 180),    device_id,       fill="GREEN", font=Font3)
+        draw.text((70, 207),    "VER",           fill="GRAY", font=Font4)
+        draw.text((110, 205),    ndpi_version,    fill="GREEN", font=Font3)
         
         disp.ShowImage(image1)
         
