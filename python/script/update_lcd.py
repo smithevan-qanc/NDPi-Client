@@ -52,12 +52,12 @@ try:
         
         # logging.info(f"Updating: {device_name} | {device_ip} | {ndi_status}")
         draw.text((25, 15),     device_name,     fill="GREEN", font=Font1)
-        draw.text((20, 50),     "ID:",           fill="GRAY", font=Font4)
-        draw.text((55, 50),     device_id,       fill="GREEN", font=Font3)
-        draw.text((20, 80),     "IP:",           fill="GRAY", font=Font4)
-        draw.text((55, 80),     device_ip,       fill="GREEN", font=Font3)
-        draw.text((20, 157),    "NDI:",          fill="GRAY", font=Font4)
-        draw.text((60, 150),    ndpi_status_ndi, fill="GREEN", font=Font3)
+        draw.text((15, 52),     "ID:",           fill="GRAY", font=Font4)
+        draw.text((50, 50),     device_id,       fill="GREEN", font=Font3)
+        draw.text((15, 82),     "IP:",           fill="GRAY", font=Font4)
+        draw.text((50, 80),     device_ip,       fill="GREEN", font=Font3)
+        draw.text((5,  112),    "NDI:",          fill="GRAY", font=Font4)
+        draw.text((50, 110),    ndpi_status_ndi, fill="GREEN", font=Font3)
         draw.text((20, 198),    "VER:",          fill="GRAY", font=Font4)
         draw.text((60, 195),    ndpi_version,    fill="GREEN", font=Font3)
         
