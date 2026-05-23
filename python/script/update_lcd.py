@@ -52,14 +52,14 @@ try:
         
         # logging.info(f"Updating: {device_name} | {device_ip} | {ndi_status}")
         draw.text((20, 20),     device_name,     fill="GREEN", font=Font1)
-        draw.text((23, 69),     "ID:",           fill="GRAY", font=Font4)
+        draw.text((25, 69),     "ID:",           fill="GRAY", font=Font4)
         draw.text((55, 68),     device_id,       fill="GREEN", font=Font3)
-        draw.text((23, 114),    "IP:",           fill="GRAY", font=Font4)
+        draw.text((25, 114),    "IP:",           fill="GRAY", font=Font4)
         draw.text((57, 110),    device_ip,       fill="GREEN", font=Font2)
-        draw.text((20, 160),    "NDI:",          fill="GRAY", font=Font4)
-        draw.text((60, 153),    ndpi_status_ndi, fill="GREEN", font=Font2)
-        draw.text((20, 202),    "VER:",          fill="GRAY", font=Font4)
-        draw.text((60, 200),    ndpi_version,    fill="GREEN", font=Font3)
+        draw.text((20, 157),    "NDI:",          fill="GRAY", font=Font4)
+        draw.text((60, 150),    ndpi_status_ndi, fill="GREEN", font=Font2)
+        draw.text((20, 198),    "VER:",          fill="GRAY", font=Font4)
+        draw.text((60, 195),    ndpi_version,    fill="GREEN", font=Font3)
         
         disp.ShowImage(image1)
         
