@@ -456,7 +456,7 @@ class FileSystemMonitor extends EventEmitter {
 
             if (this.sendToLCD.includes(name))
             {
-                fs.writeFileSync(path.join(this.lcdDisplayScriptPath, name), modifiedName, 'utf8');
+                fs.writeFileSync(path.join(this.lcdDisplayScriptPath, name), value, 'utf8');
             }
         }
         this.emit('update', JSON.stringify(Array.from(this.fileMap)));
