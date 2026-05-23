@@ -201,6 +201,7 @@ class NDPi {
         if (this.lcdDisplay)
         { try { this.lcdDisplay.kill(); } catch {} }
         const scriptPath = path.join(this.settings.lcdDisplayScriptPath, 'update_lcd.py');
+        console.log(scriptPath);
         this.lcdDisplay = spawn('python3', [scriptPath]);
     }
 
