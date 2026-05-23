@@ -251,18 +251,20 @@ static void render_display(void)
     /* ---- HEADER: Device Name (truncate to ~20 chars for Font12) ---- */
     truncate_string(truncated, g_display_data.device_name, 20);
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Device:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, g_display_data.device_name, &Font12, COLOR_TEXT, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, truncated, &Font12, COLOR_TEXT, COLOR_BG);
     y_pos += 30;
     
     /* ---- SECTION 1: NDI Status ---- */
-    uint16_t ndi_color = get_ndi_status_color(g_display_data.ndpi_status_ndi);
+    truncate_string(truncated, g_display_data.ndpi_status_ndi, 18);
+    uint16_t ndi_color = get_ndi_status_color(truncated);
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, "NDI:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, g_display_data.ndpi_status_ndi, &Font12, ndi_color, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, truncated, &Font12, ndi_color, COLOR_BG);
     y_pos += 30;
     
     /* ---- SECTION 2: IP Address ---- */
+    truncate_string(truncated, g_display_data.device_ip, 18);
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, "IP:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, g_display_data.device_ip, &Font12, COLOR_TEXT, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, truncated, &Font12, COLOR_TEXT, COLOR_BG);
     y_pos += 30;
     
     /* ---- SECTION 3: Resolutions (truncate to ~15 chars for Font8) ---- */
@@ -282,7 +284,7 @@ static void render_display(void)
     uint32_t now_ms = get_time_ms();
     snprintf(status_text, sizeof(status_text), "Last: %lums ago", 
              (unsigned long)(now_ms - g_display_data.last_update_ms));
-    Paint_DrawString_EN(MARGIN_LEFT, DISPLAY_HEIGHT - 20, status_text, &Font8, COLOR_TEXT, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT, DISPLAY_HEIGHT - 25, status_text, &Font8, COLOR_TEXT, COLOR_BG);
     
     /* Refresh display with new framebuffer */
     LCD_1IN69_Display(g_framebuffer);
