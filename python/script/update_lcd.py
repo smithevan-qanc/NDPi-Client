@@ -64,7 +64,7 @@ try:
         except IndexError:
             src_line_1 = ""
         try:
-            src_line_2 = "(" + target_src[1]
+            src_line_2 = "(" + str(target_src[1])
         except IndexError:
             src_line_2 = ""
         
