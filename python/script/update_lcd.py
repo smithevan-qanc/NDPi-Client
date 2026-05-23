@@ -63,12 +63,12 @@ try:
 
         draw.text((20, 115),    target_src,      fill="GREEN", font=Font2)
 
-        draw.text((50, 60),     device_ip,       fill="GREEN", font=Font3)
+        # draw.text((50, 60),     device_ip,       fill="GREEN", font=Font3)
 
         draw.line([(0, 190), (280, 190)], fill = "GRAY", width = 1)
 
         # draw.text((10, 183),    "VER",           fill="GRAY", font=Font4)
-        draw.text((50, 195),    ndpi_version + " " + ndpi_status_ndi,    fill="GREEN", font=Font4)
+        draw.text((20, 195),    ndpi_version + " " + device_ip,    fill="GREEN", font=Font4)
 
         # draw.text((10, 205),    "ID",            fill="GRAY", font=Font4)
         draw.text((50, 215),    device_id,       fill="GREEN", font=Font4)
