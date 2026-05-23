@@ -33,8 +33,6 @@ try:
     disp = LCD_1inch69.LCD_1inch69()
     # Initialize library.
     disp.Init()
-    # Clear display.
-    disp.clear()
     #Set the backlight to 100
     disp.bl_DutyCycle(100)
 
@@ -43,7 +41,8 @@ try:
     Font3 = ImageFont.truetype("../Font/Font02.ttf", 32)
 
     # Create blank image for drawing.
-    image1 = Image.new("RGB", (disp.height, disp.width), "WHITE")
+    # image1 = Image.new("RGB", (disp.height, disp.width), "WHITE")
+    image1 = Image.open('../../assets/misc/wallpaper.png')
     draw = ImageDraw.Draw(image1)
     
     # image1=image1.rotate(0)
