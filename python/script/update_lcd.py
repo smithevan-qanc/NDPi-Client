@@ -25,7 +25,6 @@ def read_file(filepath):
 device_name = read_file('../../../DATA_ndpi/device_name')
 device_ip = read_file('../../../DATA_ndpi/device_ip')
 ndi_status = read_file('../../../DATA_ndpi/ndpi_status_ndi')
-ndi_status = read_file('../../../DATA_ndpi/ndpi_status_ndi')
 
 try:
     # display with hardware SPI:
@@ -44,8 +43,10 @@ try:
     Font3 = ImageFont.truetype("../Font/Font02.ttf", 32)
 
     # Create blank image for drawing.
-    image1 = Image.new("RGB", (disp.width,disp.height ), "WHITE")
+    image1 = Image.new("RGB", (disp.height, disp.width), "WHITE")
     draw = ImageDraw.Draw(image1)
+    
+    # image1=image1.rotate(0)
 
     # logging.info("draw point")
     # draw.rectangle((25, 10, 26, 11), fill = "BLACK")
@@ -75,7 +76,6 @@ try:
     draw.text((25, 190), ndi_status, fill = "GREEN", font=Font3)
     # text= u"微雪电子"
     # draw.text((25, 230),text, fill = "BLUE", font=Font3)
-    image1=image1.rotate(90)
     disp.ShowImage(image1)
     # time.sleep(12)
     
