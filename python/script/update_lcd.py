@@ -14,7 +14,7 @@ DC = 25
 BL = 18
 bus = 0 
 device = 0 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 def read_file(filepath):
     try:
