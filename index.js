@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const func = require('./service/functions.js');
+const { spawn } = require('node:child_process');
 
 const VERSION_DIR = path.join(__dirname, 'version');
 const NDPi_VERSION = (
@@ -14,22 +15,21 @@ const NDPi_VERSION_DATE = (
     : '2026-02-04'
 );
 
-const spi = require('spi-device');
+// const spi = require('spi-device');
 
-const device = spi.openSync(0, 0);
+// const device = spi.openSync(0, 0);
 
-const message = [{
-    sendBuffer: Buffer.from([0x01, 0x02, 0x03]),
-    receiveBuffer: Buffer.alloc(3),
-    byteLength: 3,
-    speedHz: 1000000
-}];
+// const message = [{
+//     sendBuffer: Buffer.from([0x01, 0x02, 0x03]),
+//     receiveBuffer: Buffer.alloc(3),
+//     byteLength: 3,
+//     speedHz: 1000000
+// }];
 
-device.transfer(message, (err, messages) => {
-    if (err) throw err;
-
-    console.log(messages[0].receiveBuffer);
-});
+// device.transfer(message, (err, messages) => {
+//     if (err) throw err;
+//     console.log(messages[0].receiveBuffer);
+// });
 
 
 class NDPi {
@@ -41,6 +41,7 @@ class NDPi {
         this.service_bonjour = null;
         this.service_chromium = null;
         this.controller_cec = null;
+        this.lcdDisplay = null;
 
         this.wsConnection_ndpiServer = null;
         this.ndpiServerStatusUpdate = null; // Interval Timer
@@ -54,7 +55,7 @@ class NDPi {
     }
 
     initiate() {
-        const { exec } = require('node:child_process');
+        const { exec, spawn } = require('node:child_process');
         const startup = exec(`./sh/startup`);
         startup.stdout.on('data', (data) => {
             data
@@ -65,9 +66,8 @@ class NDPi {
         startup.on('exit', () => { this.startFsData(); });
         try { exec('killall xcompmgr'); } catch {}
         try { exec('killall picom'); } catch {}
-        setTimeout(() => {
-            this.compMgr = exec('./sh/xcompmgr');
-        }, 1000);
+        
+        this.compMgr = exec('./sh/xcompmgr');
     }
 
     startFsData() {
@@ -78,6 +78,7 @@ class NDPi {
         this.settings.on('ready', () => {
             this.setDisplayResolution();
             this.startApi();
+            this.startLcdDisplay();
         });
 
         //  NDI Source Target
@@ -194,6 +195,13 @@ class NDPi {
             setTimeout(() => { this.setDisplayResolution(); }, 500);
         });
 
+    }
+
+    startLcdDisplay() {
+        if (this.lcdDisplay)
+        { try { this.lcdDisplay.kill(); } catch {} }
+        const scriptPath = path.join(this.settings.lcdDisplayScriptPath, 'update_lcd.py');
+        this.lcdDisplay = spawn('python3', [scriptPath]);
     }
 
     startApi() {
