@@ -47,6 +47,8 @@ try:
     while True:
         # Read files
         device_name = read_file('device_name')
+        dev_nam_x = get_centered_x(device_name)
+
         device_id = read_file('device_id')
         device_ip = read_file('device_ip')
         ndpi_version = read_file('ndpi_version')
@@ -62,7 +64,7 @@ try:
         except IndexError:
             src_line_1 = ""
         try:
-            src_line_2 = target_src[1]
+            src_line_2 = "(" + target_src[1]
         except IndexError:
             src_line_2 = ""
         
@@ -74,14 +76,14 @@ try:
         draw = ImageDraw.Draw(image1)
         
         # logging.info(f"Updating: {device_name} | {device_ip} | {ndi_status}")
-        draw.text((25, 15),     device_name,     fill="GREEN", font=Font1)
+        draw.text((dev_nam_x, 15),     device_name,     fill="GREEN", font=Font1)
         draw.line([(0, 52), (280, 52)], fill = "GRAY", width = 1)
 
         draw.text((10, 62),     "Status",           fill="GRAY", font=Font4)
         draw.text((80, 60),     ndpi_status_ndi, fill="GREEN", font=Font3)
 
         draw.text((src_x_1, 100),    src_line_1,      fill="GREEN", font=Font2)
-        draw.text((src_x_2, 130),    src_line_2,      fill="GREEN", font=Font2)
+        draw.text((src_x_2, 128),    src_line_2,      fill="GREEN", font=Font2)
 
         # draw.text((50, 60),     device_ip,       fill="GREEN", font=Font3)
 
