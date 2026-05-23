@@ -248,35 +248,34 @@ static void render_display(void)
     
     display_clear();
     
-    /* ---- HEADER: Device Name (truncate to ~20 chars for Font12) ---- */
-    truncate_string(truncated, g_display_data.device_name, 20);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Device:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, truncated, &Font12, COLOR_TEXT, COLOR_BG);
+    /* ---- HEADER: Device Name (truncate to 15 chars max for Font12 @ 12px/char) ---- */
+    truncate_string(truncated, g_display_data.device_name, 15);
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Dev:", &Font12, COLOR_HEADER, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT + 35, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
     y_pos += 30;
     
     /* ---- SECTION 1: NDI Status ---- */
-    truncate_string(truncated, g_display_data.ndpi_status_ndi, 18);
+    truncate_string(truncated, g_display_data.ndpi_status_ndi, 14);
     uint16_t ndi_color = get_ndi_status_color(truncated);
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, "NDI:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, truncated, &Font12, ndi_color, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT + 35, y_pos, truncated, &Font8, ndi_color, COLOR_BG);
     y_pos += 30;
     
     /* ---- SECTION 2: IP Address ---- */
-    truncate_string(truncated, g_display_data.device_ip, 18);
+    truncate_string(truncated, g_display_data.device_ip, 16);
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, "IP:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, truncated, &Font12, COLOR_TEXT, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT + 30, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
     y_pos += 30;
     
-    /* ---- SECTION 3: Resolutions (truncate to ~15 chars for Font8) ---- */
-    truncate_string(truncated, g_display_data.ndpi_status_ndi_source_resolution, 15);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "NDI Res:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, truncated, &Font8, COLOR_TEXT, COLOR_BG);
-    y_pos += 25;
+    /* ---- SECTION 3: Resolutions (Font8 to fit more data) ---- */
+    truncate_string(truncated, g_display_data.ndpi_status_ndi_source_resolution, 18);
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Src:", &Font8, COLOR_HEADER, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT + 30, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
+    y_pos += 18;
     
-    truncate_string(truncated, g_display_data.output_resolution_current, 15);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Out Res:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, truncated, &Font8, COLOR_TEXT, COLOR_BG);
-    y_pos += 25;
+    truncate_string(truncated, g_display_data.output_resolution_current, 18);
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Out:", &Font8, COLOR_HEADER, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT + 30, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
     
     /* ---- FOOTER: Status Indicator ---- */
     /* Draw a simple status bar at bottom */
