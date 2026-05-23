@@ -200,7 +200,7 @@ class NDPi {
     startLcdDisplay() {
         if (this.lcdDisplay)
         { try { this.lcdDisplay.kill(); } catch {} }
-        const scriptPath = `sudo python3 ${path.join(this.settings.lcdDisplayScriptPath, 'update_lcd.py')}`;
+        const scriptPath = `sudo python3 ${path.join(__dirname, '..', 'python', 'script', 'update_lcd.py')}`;
         console.log(scriptPath);
         this.lcdDisplay = spawn(scriptPath);
 
