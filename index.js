@@ -198,14 +198,14 @@ class NDPi {
     }
 
     startLcdDisplay() {
-        if (this.lcdDisplay)
-        { try { this.lcdDisplay.kill(); } catch {} }
-        
-        this.lcdDisplay = spawn('python3', ['update_lcd.py'], { cwd: this.settings.lcdDisplayScriptPath });
+        // if (this.lcdDisplay)
+        // { try { this.lcdDisplay.kill(); } catch {} }
 
-        this.lcdDisplay.on('error', (error) => {
-            console.error(`🔴 [ python ][ ERROR ] ${error.toString()}`);
-        });
+        // this.lcdDisplay = spawn('python3', ['update_lcd.py'], { cwd: this.settings.lcdDisplayScriptPath });
+
+        // this.lcdDisplay.on('error', (error) => {
+        //     console.error(`🔴 [ python ][ ERROR ] ${error.toString()}`);
+        // });
     }
 
     startApi() {
