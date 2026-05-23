@@ -32,7 +32,7 @@ extern "C" {
  * Configuration & Constants
  * ============================================================================ */
 
-#define MAX_STRING_LEN 256
+#define MAX_STRING_LEN 100
 #define STDIN_BUFFER_SIZE 1024
 #define UPDATE_DEBOUNCE_MS 500
 #define BACKLIGHT_BRIGHTNESS 1023
