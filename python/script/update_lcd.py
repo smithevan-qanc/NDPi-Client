@@ -90,7 +90,7 @@ try:
         sys_temp = f"{str(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000)}°C"
         draw.text((65, 165), sys_temp, fill="GREEN", font=Font4)
 
-        line_dev_info = f"{ndpi_version} - {device_ip}"
+        line_dev_info = f"({ndpi_version})  {device_ip}".strip()
         line_dev_info_x = get_centered_x(line_dev_info, 20)
         draw.text((line_dev_info_x, 195), line_dev_info, fill="GREEN", font=Font4)
 
