@@ -29,9 +29,8 @@ install() {
         customInstallInstructions
         sleep 1
         # sudo systemctl restart ndpi.service
-        sudo reboot
         echo "INSTALLATION COMPLETE"
-        # sudo reboot
+        sudo reboot
     # else
     #     echo "INSTALLATION ABORTED"
     # fi
