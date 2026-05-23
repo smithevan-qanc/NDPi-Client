@@ -79,7 +79,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             ws.on('message', (data) => {
                 const message = JSON.parse(data.toString());
                 console.log('*** New Message', message);
-                processCommand(message.data);
+                processCommand(message);
             });
             
             ws.on('close', () => { this.ws_conn_system.delete(ws); });
