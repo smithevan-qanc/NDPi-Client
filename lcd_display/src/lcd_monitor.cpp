@@ -224,15 +224,32 @@ static void display_clear(void)
 }
 
 /**
+ * Truncate string to fit display width (roughly)
+ */
+static void truncate_string(char *dest, const char *src, int max_chars)
+{
+    int len = strlen(src);
+    if (len > max_chars) {
+        strncpy(dest, src, max_chars - 3);
+        strcpy(dest + max_chars - 3, "...");
+    } else {
+        strcpy(dest, src);
+    }
+}
+
+
+/**
  * Render the complete display layout
  */
 static void render_display(void)
 {
     uint16_t y_pos = MARGIN_TOP;
+    char truncated[MAX_STRING_LEN];
     
     display_clear();
     
-    /* ---- HEADER: Device Name ---- */
+    /* ---- HEADER: Device Name (truncate to ~20 chars for Font12) ---- */
+    truncate_string(truncated, g_display_data.device_name, 20);
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Device:", &Font12, COLOR_HEADER, COLOR_BG);
     Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, g_display_data.device_name, &Font12, COLOR_TEXT, COLOR_BG);
     y_pos += 30;
@@ -248,15 +265,15 @@ static void render_display(void)
     Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, g_display_data.device_ip, &Font12, COLOR_TEXT, COLOR_BG);
     y_pos += 30;
     
-    /* ---- SECTION 3: Resolutions ---- */
+    /* ---- SECTION 3: Resolutions (truncate to ~15 chars for Font8) ---- */
+    truncate_string(truncated, g_display_data.ndpi_status_ndi_source_resolution, 15);
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, "NDI Res:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, g_display_data.ndpi_status_ndi_source_resolution, 
-                        &Font8, COLOR_TEXT, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, truncated, &Font8, COLOR_TEXT, COLOR_BG);
     y_pos += 25;
     
+    truncate_string(truncated, g_display_data.output_resolution_current, 15);
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Out Res:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, g_display_data.output_resolution_current, 
-                        &Font8, COLOR_TEXT, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos + 12, truncated, &Font8, COLOR_TEXT, COLOR_BG);
     y_pos += 25;
     
     /* ---- FOOTER: Status Indicator ---- */
