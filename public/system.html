@@ -361,15 +361,15 @@
         reader.readAsDataURL(file);
     }
 
-    async function sendCommand(command = {}) {
+    async function sendCommand(command = {}, viaWebSocket = true) {
         if (!command.type) return null;
         
-        if (server?._ws && server?._ws.readyState === WebSocket.OPEN) 
+        if (viaWebSocket && server?._ws && server?._ws.readyState === WebSocket.OPEN) 
         {
             try
             {
                 server._ws.send(JSON.stringify(command));
-                return { success: true };
+                return;
             }
             catch (err)
             { console.error(err); }
@@ -399,7 +399,7 @@
     }
    
     async function refreshSources() {
-        const response = await sendCommand({ type: 'get-sources' });
+        const response = await sendCommand({ type: 'get-sources' }, false);
         console.log(response);
         if (response?.success)
         { availableSources = response.data.sources || []; }
