@@ -39,6 +39,7 @@ class FileSystemMonitor extends EventEmitter {
             'device_ip',
             'ndpi_version',
             'ndpi_status_ndi',
+            'ndpi_status_ndi_source_target',
         ];
 
         // First run is used as a flag for getLocalIp();
@@ -455,7 +456,10 @@ class FileSystemMonitor extends EventEmitter {
             this.emit(name, value);
 
             if (this.sendToLCD.includes(name))
-            { fs.writeFileSync(path.join(this.lcdDisplayScriptPath, name), value, 'utf8'); }
+            {
+                const modifiedName = (name === 'ndpi_status_ndi') ? String(value).toUpperCase() : value;
+                fs.writeFileSync(path.join(this.lcdDisplayScriptPath, name), modifiedName, 'utf8');
+            }
         }
         this.emit('update', JSON.stringify(Array.from(this.fileMap)));
     }
