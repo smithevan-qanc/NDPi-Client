@@ -30,9 +30,9 @@ try:
     disp.clear()
     disp.bl_DutyCycle(100)
     
-    Font1 = ImageFont.truetype("../Font/Font02.ttf", 30)
-    Font2 = ImageFont.truetype("../Font/Font02.ttf", 25)
-    Font3 = ImageFont.truetype("../Font/Font02.ttf", 20)
+    Font1 = ImageFont.truetype("../Font/Font02.ttf", 35)
+    Font2 = ImageFont.truetype("../Font/Font02.ttf", 30)
+    Font3 = ImageFont.truetype("../Font/Font02.ttf", 25)
     
     print("Display initialized. Starting loop...")
     
@@ -50,16 +50,20 @@ try:
         draw = ImageDraw.Draw(image1)
         
         # logging.info(f"Updating: {device_name} | {device_ip} | {ndi_status}")
-        draw.text((15, 15),     device_name,     fill="GREEN", font=Font1)
-        draw.text((15, 66),     device_id,       fill="GREEN", font=Font2)
-        draw.text((21, 113),    device_ip,       fill="GREEN", font=Font2)
-        draw.text((25, 159),    ndpi_status_ndi, fill="GREEN", font=Font2)
-        draw.text((25, 205),    ndpi_version,    fill="GREEN", font=Font3)
+        draw.text((20, 20),     device_name,     fill="GREEN", font=Font1)
+        draw.text((20, 68),     "ID:",           fill="WHITE", font=Font2)
+        draw.text((50, 68),     device_id,       fill="GREEN", font=Font2)
+        draw.text((20, 113),    "IP:",           fill="WHITE", font=Font2)
+        draw.text((50, 113),    device_ip,       fill="GREEN", font=Font2)
+        draw.text((15, 156),    "Status:",       fill="WHITE", font=Font2)
+        draw.text((90, 156),    ndpi_status_ndi, fill="GREEN", font=Font2)
+        draw.text((15, 210),    "VER:",          fill="WHITE", font=Font3)
+        draw.text((50, 210),    ndpi_version,    fill="GREEN", font=Font3)
         
         disp.ShowImage(image1)
         
         # Wait 5 seconds before next update
-        time.sleep(5)
+        time.sleep(1)
 
 except KeyboardInterrupt:
     print("\nStopping...")
