@@ -62,7 +62,7 @@ try:
         draw.text((50, 80),     device_ip,       fill="GREEN", font=Font3)
         draw.text((5,  112),    "NDI:",          fill="GRAY", font=Font4)
         draw.text((50, 110),    ndpi_status_ndi, fill="GREEN", font=Font3)
-        draw.text((20, 135),    target_source[0],fill="GREEN", font=Font4)
+        draw.text((20, 135),    target_src,      fill="GREEN", font=Font4)
         draw.text((5,  192),    "VER:",          fill="GRAY", font=Font4)
         draw.text((50, 190),    ndpi_version,    fill="GREEN", font=Font3)
         
