@@ -32,6 +32,15 @@ class FileSystemMonitor extends EventEmitter {
         this.serverCommunicationWebSocket = null;
         this.drmMonitor = null;
 
+        this.sendToLCD_path = path.join(__dirname, '..', 'python', 'script');
+        this.sendToLCD = [
+            'device_name',
+            'device_id',
+            'device_ip',
+            'ndpi_version',
+            'ndpi_status_ndi',
+        ];
+
         // First run is used as a flag for getLocalIp();
         this.firstRun = true;
 
@@ -388,6 +397,9 @@ class FileSystemMonitor extends EventEmitter {
             }
             catch (err)
             { console.log(`🔴 [ client_fs ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err) }
+            
+            if (this.sendToLCD.includes(setting.key))
+            { fs.writeFileSync(path.join(__dirname, '..', 'python', 'script', setting.key), setting.value, 'utf8'); }
         };
 
         // Call updateLocalIp() right away. It will call poll() after.
@@ -438,6 +450,9 @@ class FileSystemMonitor extends EventEmitter {
             { console.log(`[ client_fs ][ UPDATE ] '${name}' ==> '${value}'`); }
 
             this.emit(name, value);
+            
+            if (this.sendToLCD.includes(name))
+            { fs.writeFileSync(path.join(this.sendToLCD_path, name), value, 'utf8'); }
         }
         this.emit('update', JSON.stringify(Array.from(this.fileMap)));
     }
