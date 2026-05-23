@@ -47,7 +47,7 @@ try:
     while True:
         # Read files
         device_name = read_file('device_name')
-        dev_nam_x = get_centered_x(device_name, 30)
+        dev_nam_x = get_centered_x(device_name.strip(), 30)
 
         device_id = read_file('device_id')
         device_ip = read_file('device_ip')
@@ -60,11 +60,11 @@ try:
         target_src = target_source.split('(')
 
         try:
-            src_line_1 = target_src[0]
+            src_line_1 = target_src[0].strip()
         except IndexError:
             src_line_1 = ""
         try:
-            src_line_2 = f"({target_src[1]}"
+            src_line_2 = f"({target_src[1].strip()}"
         except IndexError:
             src_line_2 = ""
         
