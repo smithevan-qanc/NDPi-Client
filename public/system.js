@@ -45,7 +45,7 @@ class DeviceSocket {
                     const settingInnerHTML = `
                         <td style="text-transform: capitalize; min-width: 200px; text-align: right;">${String(id.split('_').join(' '))}:</td>
                         <td style="width: 60%;">
-                            <input type="text" id="${id}" value="${object.value}">
+                            <input type="text" id="${id}" value="${object.value}" ${object.allowEditExternal ? '' : 'disabled'}>
                         </td>`;
 
                     if (id === 'ndpi_status_ndi_source_target') 
