@@ -52,7 +52,8 @@
         button {
             background: rgba(129, 193, 39, 1);
             border-color: rgb(112, 177, 20);
-            border: none;
+            border-width: 1px 1px 1px 2px;
+            /* border: none; */
             border-radius: 10px;
             color: white;
             text-shadow: 1px 1px 3px #000;
@@ -392,7 +393,7 @@
             });
         }
         const currentSourceEl = document.getElementById('ndpi_status_ndi_source_target');
-        
+
         if (currentSourceEl)
         { sourceSelectorEl.value = currentSourceEl.value || 'none'; }
     }
