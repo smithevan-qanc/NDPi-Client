@@ -30,7 +30,7 @@ try:
     disp.clear()
     disp.bl_DutyCycle(100)
     
-    Font1 = ImageFont.truetype("../Font/Consolas.ttf", 25)
+    Font1 = ImageFont.truetype("../Font/ConsolasBold.ttf", 30)
     Font2 = ImageFont.truetype("../Font/Consolas.ttf", 30)
     Font3 = ImageFont.truetype("../Font/Consolas.ttf", 25)
     Font4 = ImageFont.truetype("../Font/Consolas.ttf", 20)
@@ -51,7 +51,7 @@ try:
         draw = ImageDraw.Draw(image1)
         
         # logging.info(f"Updating: {device_name} | {device_ip} | {ndi_status}")
-        draw.text((20, 10),     device_name,     fill="GREEN", font=Font1)
+        draw.text((25, 15),     device_name,     fill="GREEN", font=Font1)
         draw.text((25, 35),     "ID:",           fill="GRAY", font=Font4)
         draw.text((55, 68),     device_id,       fill="GREEN", font=Font3)
         draw.text((25, 114),    "IP:",           fill="GRAY", font=Font4)
