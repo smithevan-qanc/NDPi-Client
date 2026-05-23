@@ -12,11 +12,13 @@
  *   - Optional: Images from assets
  */
 
+extern "C" {
 #include "DEV_Config.h"
 #include "LCD_1in69.h"
 #include "GUI_Paint.h"
 #include "GUI_BMP.h"
 #include "../lib/Fonts/fonts.h"
+}
 
 #include <stdio.h>
 #include <stdlib.h>
