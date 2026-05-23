@@ -22,8 +22,9 @@ def read_file(filepath):
     with open(filepath, 'r') as f:
         return f.read().strip()
     
-device_name = read_file('device_name')
-device_ip = read_file('device_ip')
+device_name = read_file('../../../DATA_ndpi/device_name')
+device_ip = read_file('../../../DATA_ndpi/device_ip')
+ndi_status = read_file('../../../DATA_ndpi/ndpi_status_ndi')
 ndi_status = read_file('../../../DATA_ndpi/ndpi_status_ndi')
 
 try:
@@ -43,7 +44,7 @@ try:
     Font3 = ImageFont.truetype("../Font/Font02.ttf", 32)
 
     # Create blank image for drawing.
-    image1 = Image.new("RGB", (disp.width,disp.height ), "BLACK")
+    image1 = Image.new("RGB", (disp.width,disp.height ), "WHITE")
     draw = ImageDraw.Draw(image1)
 
     # logging.info("draw point")
@@ -68,15 +69,15 @@ try:
 
     logging.info("draw text")
     # draw.rectangle([(20, 120), (160, 153)], fill = "BLUE")
-    draw.text((25, 120), device_name, fill = "WHITE", font=Font3)
+    draw.text((25, 120), device_name, fill = "GREEN", font=Font3)
     # draw.rectangle([(20,155), (192, 195)], fill = "RED")
-    draw.text((21, 155), device_ip, fill = "WHITE", font=Font3)
-    draw.text((25, 190), ndi_status, fill = "WHITE", font=Font3)
+    draw.text((21, 155), device_ip, fill = "GREEN", font=Font3)
+    draw.text((25, 190), ndi_status, fill = "GREEN", font=Font3)
     # text= u"微雪电子"
     # draw.text((25, 230),text, fill = "BLUE", font=Font3)
-    # image1=image1.rotate(0)
+    image1=image1.rotate(90)
     disp.ShowImage(image1)
-    time.sleep(12)
+    # time.sleep(12)
     
     # image2 = Image.new("RGB", (disp.height,disp.width ), "WHITE")
     # draw = ImageDraw.Draw(image2)
