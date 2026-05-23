@@ -4,6 +4,7 @@ import os
 import sys 
 import time
 import logging
+import math
 sys.path.append("..")
 from lib import LCD_1inch69
 from PIL import Image, ImageDraw, ImageFont
@@ -45,8 +46,10 @@ try:
         device_ip = read_file('device_ip')
         ndpi_version = read_file('ndpi_version')
         ndpi_status_ndi = read_file('ndpi_status_ndi').upper()
+
+        sys_temp = round(read_file('/sys/class/thermal/thermal_zone0/temp')/1000)
+
         target_source = read_file('ndpi_status_ndi_source_target').upper()
-        
         target_src = "\n(".join(target_source.split('('))
 
 
@@ -66,6 +69,8 @@ try:
         # draw.text((50, 60),     device_ip,       fill="GREEN", font=Font3)
 
         draw.line([(0, 190), (280, 190)], fill = "GRAY", width = 1)
+
+        draw.text((65, 165),    sys_temp,        fill="GREEN", font=Font4)
 
         # draw.text((10, 183),    "VER",           fill="GRAY", font=Font4)
         draw.text((15, 195),    ndpi_version + " - " + device_ip,    fill="GREEN", font=Font4)
