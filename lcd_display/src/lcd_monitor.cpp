@@ -248,42 +248,47 @@ static void render_display(void)
     
     display_clear();
     
-    /* ---- HEADER: Device Name (truncate to 15 chars max for Font12 @ 12px/char) ---- */
-    truncate_string(truncated, g_display_data.device_name, 15);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Dev:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT + 35, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
-    y_pos += 30;
+    /* ---- HEADER: Device Name (max 20 chars Font8 = 160px max) ---- */
+    truncate_string(truncated, g_display_data.device_name, 20);
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Device:", &Font8, COLOR_HEADER, COLOR_BG);
+    y_pos += 10;
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
+    y_pos += 15;
     
-    /* ---- SECTION 1: NDI Status ---- */
-    truncate_string(truncated, g_display_data.ndpi_status_ndi, 14);
+    /* ---- SECTION 1: NDI Status (max 20 chars Font8) ---- */
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "NDI Status:", &Font8, COLOR_HEADER, COLOR_BG);
+    y_pos += 10;
+    truncate_string(truncated, g_display_data.ndpi_status_ndi, 20);
     uint16_t ndi_color = get_ndi_status_color(truncated);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "NDI:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT + 35, y_pos, truncated, &Font8, ndi_color, COLOR_BG);
-    y_pos += 30;
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, truncated, &Font8, ndi_color, COLOR_BG);
+    y_pos += 15;
     
-    /* ---- SECTION 2: IP Address ---- */
-    truncate_string(truncated, g_display_data.device_ip, 16);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "IP:", &Font12, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT + 30, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
-    y_pos += 30;
+    /* ---- SECTION 2: IP Address (max 20 chars Font8) ---- */
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "IP Address:", &Font8, COLOR_HEADER, COLOR_BG);
+    y_pos += 10;
+    truncate_string(truncated, g_display_data.device_ip, 20);
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
+    y_pos += 15;
     
-    /* ---- SECTION 3: Resolutions (Font8 to fit more data) ---- */
+    /* ---- SECTION 3: NDI Source Resolution (max 18 chars Font8) ---- */
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "NDI Res:", &Font8, COLOR_HEADER, COLOR_BG);
+    y_pos += 10;
     truncate_string(truncated, g_display_data.ndpi_status_ndi_source_resolution, 18);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Src:", &Font8, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT + 30, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
-    y_pos += 18;
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
+    y_pos += 15;
     
+    /* ---- SECTION 4: Output Resolution (max 18 chars Font8) ---- */
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Out Res:", &Font8, COLOR_HEADER, COLOR_BG);
+    y_pos += 10;
     truncate_string(truncated, g_display_data.output_resolution_current, 18);
-    Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Out:", &Font8, COLOR_HEADER, COLOR_BG);
-    Paint_DrawString_EN(MARGIN_LEFT + 30, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
     
     /* ---- FOOTER: Status Indicator ---- */
-    /* Draw a simple status bar at bottom */
     char status_text[32];
     uint32_t now_ms = get_time_ms();
     snprintf(status_text, sizeof(status_text), "Last: %lums ago", 
              (unsigned long)(now_ms - g_display_data.last_update_ms));
-    Paint_DrawString_EN(MARGIN_LEFT, DISPLAY_HEIGHT - 25, status_text, &Font8, COLOR_TEXT, COLOR_BG);
+    Paint_DrawString_EN(MARGIN_LEFT, DISPLAY_HEIGHT - 15, status_text, &Font8, COLOR_TEXT, COLOR_BG);
     
     /* Refresh display with new framebuffer */
     LCD_1IN69_Display(g_framebuffer);
