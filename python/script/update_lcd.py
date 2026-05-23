@@ -30,10 +30,10 @@ try:
     disp.clear()
     disp.bl_DutyCycle(100)
     
-    Font1 = ImageFont.truetype("../Font/Font02.ttf", 35)
-    Font2 = ImageFont.truetype("../Font/Font02.ttf", 30)
-    Font3 = ImageFont.truetype("../Font/Font02.ttf", 25)
-    Font4 = ImageFont.truetype("../Font/Font02.ttf", 20)
+    Font1 = ImageFont.truetype("../Font/Consolas.ttf", 35)
+    Font2 = ImageFont.truetype("../Font/Consolas.ttf", 30)
+    Font3 = ImageFont.truetype("../Font/Consolas.ttf", 25)
+    Font4 = ImageFont.truetype("../Font/Consolas.ttf", 20)
     
     print("Display initialized. Starting loop...")
     
