@@ -23,6 +23,11 @@ def read_file(filepath):
             return f.read().strip()
     except:
         return "N/A"
+    
+def get_centered_x(text, font_size, display_width=280):
+    text_width = len(text) * (font_size * 0.55)
+    x_coordinate = (display_width - text_width) / 2
+    return max(0, int(round(x_coordinate)))
 
 try:
     # Initialize display ONCE at startup
@@ -50,8 +55,19 @@ try:
         sys_temp = str(round(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000))
 
         target_source = read_file('ndpi_status_ndi_source_target').upper()
-        target_src = "\n(".join(target_source.split('('))
+        target_src = target_source.split('(')
 
+        try:
+            src_line_1 = target_src[0]
+        except IndexError:
+            src_line_1 = ""
+        try:
+            src_line_2 = target_src[1]
+        except IndexError:
+            src_line_2 = ""
+        
+        src_x_1 = get_centered_x(src_line_1, 25, 280)
+        src_x_2 = get_centered_x(src_line_2, 25, 280)
 
         # Draw on display
         image1 = Image.new("RGB", (disp.height, disp.width), "BLACK")
@@ -64,7 +80,8 @@ try:
         draw.text((10, 62),     "Status",           fill="GRAY", font=Font4)
         draw.text((80, 60),     ndpi_status_ndi, fill="GREEN", font=Font3)
 
-        draw.text((20, 100),    target_src,      fill="GREEN", font=Font2)
+        draw.text((src_x_1, 100),    src_line_1,      fill="GREEN", font=Font2)
+        draw.text((src_x_2, 130),    src_line_2,      fill="GREEN", font=Font2)
 
         # draw.text((50, 60),     device_ip,       fill="GREEN", font=Font3)
 

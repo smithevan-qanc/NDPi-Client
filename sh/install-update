@@ -28,9 +28,9 @@ install() {
         echo "$(pwd)"
         customInstallInstructions
         sleep 1
-        # sudo systemctl restart ndpi.service
+        sudo systemctl restart ndpi-lcd.service
         echo "INSTALLATION COMPLETE"
-        sudo reboot
+        # sudo reboot
     # else
     #     echo "INSTALLATION ABORTED"
     # fi
