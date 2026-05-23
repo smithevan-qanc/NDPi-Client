@@ -22,9 +22,9 @@ def read_file(filepath):
     with open(filepath, 'r') as f:
         return f.read().strip()
     
-device_name = read_file('/device_name')
-device_ip = read_file('/device_ip')
-ndi_status = read_file('/ndpi_status_ndi')
+device_name = read_file('device_name')
+device_ip = read_file('device_ip')
+ndi_status = read_file('ndpi_status_ndi')
 
 try:
     # display with hardware SPI:
