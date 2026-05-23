@@ -62,7 +62,8 @@ XYZ_*
 
 version/notes
 
-*.cpp
+ndi_discover_v2.cpp
+ndi_receiver_v3.cpp
 
 complete-deploy-client.sh
 git-hub-deploy-client
