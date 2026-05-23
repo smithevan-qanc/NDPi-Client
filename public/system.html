@@ -143,18 +143,18 @@
         <div class="card">
             <h2>Connected TV Controls</h2>
             <div class="flex-row">
-                <button class="red" id="tv_power_off">Off</button>
-                <button id="tv_power_on">On</button>
-            </div>
-            <label>Volume</label>
-            <div class="flex-row">
-                <button id="tv_volume_down">-</button>
-                <button id="tv_volume_up">+</button>
-            </div>
-            <label>Input</label>
-            <div class="flex-column">
-                <button id="tv_as">Switch To NDPi</button>
-                <button class="red" id="tv_is">Home</button>
+                <div class="flex-column">
+                    <button class="red" id="tv_power_off">Off</button>
+                    <button id="tv_power_on">On</button>
+                </div>
+                <div class="flex-column">
+                    <button id="tv_volume_up">Volume <strong>+</strong></button>
+                    <button id="tv_volume_down">Volume <strong>-</strong></button>
+                </div>
+                <div class="flex-column">
+                    <button id="tv_as">NDPi Monitor</button>
+                    <button class="red" id="tv_is">Home</button>
+                </div>
             </div>
             <label>Custom CEC Command</label>
             <input type="text" value="" id="send_bytes">
@@ -162,15 +162,11 @@
         <div class="card">
             <h2>NDI Source</h2>
             <div class="flex-row">
+                <button id="refresh_sources">Refresh</button>
                 <select id="source_selection">
                     <option value="none">None</option>
                 </select>
-                <button id="refresh_sources">Refresh</button>
             </div>
-        </div>
-        <div class="card">
-            <h2>System Settings</h2>
-            <table class="settings-table" id="settings"></table>
         </div>
         <div class="card">
             <h2>Overlay Image</h2>
@@ -182,6 +178,10 @@
                 <button id="save_overlay" disabled>Set Overlay</button>
                 <button class="red" id="reset_overlay_upload">Reset</button>
             </div>
+        </div>
+        <div class="card">
+            <h2>System Settings</h2>
+            <table class="settings-table" id="settings"></table>
         </div>
     </div>
 </body>
