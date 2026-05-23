@@ -369,7 +369,7 @@
             try
             {
                 server._ws.send(JSON.stringify(command));
-                return;
+                return { success: true };
             }
             catch (err)
             { console.error(err); }
@@ -401,7 +401,7 @@
     async function refreshSources() {
         const response = await sendCommand({ type: 'get-sources' });
         console.log(response);
-        if (response.success)
+        if (response?.success)
         { availableSources = response.data.sources || []; }
         renderSources();
     }
