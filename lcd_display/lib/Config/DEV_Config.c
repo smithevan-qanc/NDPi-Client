@@ -189,9 +189,7 @@ UBYTE DEV_ModuleInit(void)
 
 #elif  USE_DEV_LIB
     char buffer[NUM_MAXBUF];
-    FILE *fp;
-
-    fp = fopen("cat /proc/cpuinfo | grep 'Raspberry Pi 5'", "r");
+    FILE* fp = popen("cat /proc/cpuinfo | grep 'Raspberry Pi 5'", "r");
     if (fp == NULL) {
         DEBUG("It is not possible to determine the model of the Raspberry PI\n");
         return -1;
