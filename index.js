@@ -76,7 +76,7 @@ class NDPi {
 
         //  FS System Ready
         this.settings.on('ready', () => {
-            this.setDisplayResolution();
+            func.setDisplayResolution();
             this.startApi();
             this.startLcdDisplay();
         });
@@ -181,31 +181,31 @@ class NDPi {
         this.settings.on('output_display_port', (data) => {
             const output = String(data || '').trim() || null;
             if (!output)
-                { return }
-            setTimeout(() => { this.setDisplayResolution(); }, 500);
+                { return; }
+            setTimeout(() => { func.setDisplayResolution(); }, 500);
         });
 
         //  HDMI Resolution
         this.settings.on('output_display_resolution_current', (data) => {
-            setTimeout(() => { this.setDisplayResolution(); }, 500);
+            setTimeout(() => { func.setDisplayResolution(); }, 500);
         });
 
         //  HDMI Framerate
         this.settings.on('output_display_framerate_current', (data) => {
-            setTimeout(() => { this.setDisplayResolution(); }, 500);
+            setTimeout(() => { func.setDisplayResolution(); }, 500);
         });
 
     }
 
     startLcdDisplay() {
-        // if (this.lcdDisplay)
-        // { try { this.lcdDisplay.kill(); } catch {} }
+        if (this.lcdDisplay)
+        { try { this.lcdDisplay.kill(); } catch {} }
 
-        // this.lcdDisplay = spawn('python3', ['update_lcd.py'], { cwd: this.settings.lcdDisplayScriptPath });
+        this.lcdDisplay = spawn('python3', ['update_lcd.py'], { cwd: this.settings.lcdDisplayScriptPath });
 
-        // this.lcdDisplay.on('error', (error) => {
-        //     console.error(`🔴 [ python ][ ERROR ] ${error.toString()}`);
-        // });
+        this.lcdDisplay.on('error', (error) => {
+            console.error(`🔴 [ python ][ ERROR ] ${error.toString()}`);
+        });
     }
 
     startApi() {
@@ -357,28 +357,6 @@ class NDPi {
         };
 
         this.wsConnection_ndpiServer.send(status);
-    }
-
-    setDisplayResolution() {
-        const displayOutput = this.settings.get('output_display_port') || 'HDMI-1';
-        const resolution = this.settings.get('output_display_resolution_current') || null;
-        const framerate  = this.settings.get('output_display_framerate_current') || null;
-        require('child_process').exec(`xrandr \
-            --output ${displayOutput} \
-            ${resolution ? `--mode ${resolution}` : '--auto'} \
-            ${framerate ? `--rate ${framerate}` : ''} \
-        `, { env: { ...process.env } }, (error, stderr) => {
-            if (error)
-                { console.log('🔴 [ index ][ ERROR ] Resolution Set', stderr) }
-            else
-                {
-                    require('node:child_process').exec('openbox --restart', {
-                        env: { ...process.env }
-                    }, (error, stdout, stderr) => {
-                        console.log(error ? `🔴 [ index ][ ERROR ] ${String(stderr)}` : ``);
-                    });
-                }
-        });
     }
 }
 

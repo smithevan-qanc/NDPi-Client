@@ -122,7 +122,12 @@ try:
 
 except KeyboardInterrupt:
     print("\nStopping...")
+    disp.clear()
     disp.module_exit()
 except Exception as e:
     logging.error(f"Error: {e}")
+    errImg = Image.new("RGB", (disp.height, disp.width), "RED")
+    drawErr = ImageDraw.Draw(errImg)
+    disp.ShowImage(errImg)
+    time.sleep(1)
     disp.module_exit()

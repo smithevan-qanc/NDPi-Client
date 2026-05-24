@@ -228,6 +228,7 @@ const { exec } = require('node:child_process');
 
     /** COMPLETED */
 
+        /** GET LOCAL IP */
         async function getLocalIp(testForNetwork = false) {
             if (testForNetwork)
                 {
@@ -247,6 +248,7 @@ const { exec } = require('node:child_process');
             return null;
         }
 
+        /** SET NDI SOURCE */
         async function setNdi(res = {}, command = {}) {
             let response = { ...res };
             try
@@ -272,6 +274,7 @@ const { exec } = require('node:child_process');
             return response;
         }
 
+        /** FOCUS WINDOW */
         async function focusWindow(className, res = { data: {} }) {
             let response = { ...res };
             await new Promise((resolve) => {
@@ -322,6 +325,7 @@ const { exec } = require('node:child_process');
             return response;
         }
 
+        /** STDOUT TO ARRAY */
         function stdoutToArray(stdout) {
             let a = [];
             let stdin = stdout.trim() || '';
@@ -331,12 +335,42 @@ const { exec } = require('node:child_process');
             return a;
         }
 
+        /** SET DISPLAY RESOLUTION */
+        function setDisplayResolution() {
+            let config = {
+                displayPort: 'HDMI-1',
+                resolution: null,
+                framerate: null,
+            };
+            try { config.displayPort = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_port'), 'utf8').trim() } catch {}
+            try { config.resolution = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_resolution_current'), 'utf8').trim() } catch {}
+            try { config.framerate = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_framerate_current'), 'utf8').trim() } catch {}
+
+            exec(`xrandr \
+                --output ${config.displayPort} \
+                ${config.resolution ? `--mode ${config.resolution}` : '--auto'} \
+                ${config.framerate ? `--rate ${config.framerate}` : ''} \
+            `, { env: { ...process.env } }, (error, stderr) => {
+                if (error)
+                { console.error('🔴 [ functions ][ setDisplayResolution() ][ ERROR ] Resolution Set:', stderr) }
+                else
+                {
+                    exec('openbox --restart', {
+                        env: { ...process.env }
+                    }, (error, stdout, stderr) => {
+                        console.error(error ? `🔴 [ functions ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}` : ``);
+                    });
+                }
+            });
+        }
+
 
 module.exports = {
     getLocalIp,
     processCommand,
     focusWindow,
     stdoutToArray,
+    setDisplayResolution,
 };
 
 

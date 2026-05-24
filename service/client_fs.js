@@ -546,55 +546,65 @@ class FileSystemMonitor extends EventEmitter {
         });
     }
 
-    /*
+        /*
 
-    output_display_resolution_current
-    output_display_framerate_current
-    output_display_resolution_preferred
-    output_display_framerate_preferred
-    output_display_port
-    output_display_manufacturer
-    output_display_model
-    output_display_cec_enabled
-    output_display_cec_status_power
-    output_display_cec_active_source
-    
-    */
+        output_display_resolution_current
+        output_display_framerate_current
+        output_display_resolution_preferred
+        output_display_framerate_preferred
+        output_display_port
+        output_display_manufacturer
+        output_display_model
+        output_display_cec_enabled
+        output_display_cec_status_power
+        output_display_cec_active_source
+        
+        */
 
-    updateOutputDisplay() {
-        let HDMI_1 = 'disconnected';
-        let HDMI_2 = 'disconnected';
+    async updateOutputDisplay() {
+        let HDMI_1;
+        let HDMI_2;
 
-        exec('cat /sys/class/drm/card*HDMI*/status', (error, stdout, stderr) => {
-            if (!error)
-            {
-                const output = func.stdoutToArray(stdout);
-                HDMI_1 = output[0] || 'disconnected';
-                HDMI_2 = output[1] || 'disconnected';
-            }
+        await new Promise((resolve) => {
+            exec('cat /sys/class/drm/card*HDMI*/status', (error, stdout, stderr) => {
+                if (error)
+                {
+                    console.error(`🔴 [ functions ][ updateOutputDisplay() ][ ERROR ]`, stderr.toString().trim());
+                }
+                else
+                {
+                    const output = func.stdoutToArray(stdout);
+                    console.log('(updateOutputDisplay)', output);
+                    
+                    HDMI_1 = output[0] || 'disconnected';
+                    HDMI_2 = output[1] || 'disconnected';
+                    resolve();
+                }
+            });
         });
 
         console.log('(updateOutputDisplay) HDMI 1', HDMI_1, 'HDMI 2', HDMI_2);
-        
+
         if (HDMI_1 === 'disconnected' && HDMI_2 === 'disconnected')
         {
-            this.put('output_display_resolution_current', '');
-            this.put('output_display_framerate_current', '');
-            this.put('output_display_resolution_preferred', '');
-            this.put('output_display_framerate_preferred', '');
-            this.put('output_display_port', '');
-            this.put('output_display_manufacturer', '');
-            this.put('output_display_model', '');
+            // this.put('output_display_resolution_current', '');
+            // this.put('output_display_framerate_current', '');
+            // this.put('output_display_resolution_preferred', '');
+            // this.put('output_display_framerate_preferred', '');
+            // this.put('output_display_port', '');
+            // this.put('output_display_manufacturer', '');
+            // this.put('output_display_model', '');
             // this.put('output_display_cec_enabled', 'false');
             // this.put('output_display_cec_status_power', 'unknown');
             // this.put('output_display_cec_active_source', '');
+            console.log('dsffsdf')
         }
         else
         {
             const commandPath = path.join(__dirname, '..', 'sh', 'current-resolution');
             exec(commandPath, (error, stdout, stderr) => {
                 if (error)
-                { console.log(`🔴 [ client_fs ][ ERROR ] ${stderr.toString().trim()}`); }
+                { console.error(`🔴 [ functions ][ updateOutputDisplay() ][ ERROR ] ${stderr.toString().trim()}`); }
                 else
                 {
                     let resolutionOptions = [];
@@ -610,6 +620,8 @@ class FileSystemMonitor extends EventEmitter {
                         const splitOptKey   = lineSplit_2[0].trim();
                         const splitOptValue = lineSplit_2[1].trim();
 
+                        console.log(splitValue)
+                        
                         switch(splitKey)
                         {
                             case 'current_output':
@@ -621,23 +633,23 @@ class FileSystemMonitor extends EventEmitter {
                                 return;
                                 break;
                             case 'current_framerate':
-                                this.put('output_display_framerate_current', '');
+                                this.put('output_display_framerate_current', splitValue);
                                 return;
                                 break;
                             case 'preferred_resolution':
-                                this.put('output_display_resolution_preferred', '');
+                                this.put('output_display_resolution_preferred', splitValue);
                                 return;
                                 break;
                             case 'preferred_framerate':
-                                this.put('output_display_framerate_preferred', '');
+                                this.put('output_display_framerate_preferred', splitValue);
                                 return;
                                 break;
                             case 'manufacturer':
-                                this.put('output_display_manufacturer', '');
+                                this.put('output_display_manufacturer', splitValue);
                                 return;
                                 break;
                             case 'model':
-                                this.put('output_display_model', '');
+                                this.put('output_display_model', splitValue);
                                 return;
                                 break;
                             case 'list_resolutions':
@@ -649,6 +661,7 @@ class FileSystemMonitor extends EventEmitter {
                     const fileMapCurrRes = this.fileMap.get('output_display_resolution_current');
                     fileMapCurrRes.options = resolutionOptions;
                     this.fileMap.set('output_display_resolution_current', fileMapCurrRes);
+                    console.log(fileMapCurrRes);
                 }
             });
         }
