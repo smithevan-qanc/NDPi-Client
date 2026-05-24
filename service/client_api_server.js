@@ -262,9 +262,8 @@ class NDPiCommandServer_Client extends EventEmitter {
 
     setCecController(CecController) {
         if (!CecController)
-            { return }
+        { return; }
         this.controller_cec = CecController;
-        console.log('[ client_api_server ] CEC Controller Set');
     }
 }
 

@@ -614,14 +614,14 @@ class FileSystemMonitor extends EventEmitter {
                     {
                         const output        = line.toString().trim();
                         const lineSplit_1   = output.split(' : ');
-                        const splitKey      = lineSplit_1[0].trim();
-                        const splitValue    = lineSplit_1[1].trim();
+                        const splitKey      = lineSplit_1[0]?.trim();
+                        const splitValue    = lineSplit_1[1]?.trim();
                         const lineSplit_2   = splitValue.split(' :: ');
-                        const splitOptKey   = lineSplit_2[0].trim();
-                        const splitOptValue = lineSplit_2[1].trim();
+                        const splitOptKey   = lineSplit_2[0]?.trim();
+                        const splitOptValue = lineSplit_2[1]?.trim();
 
                         console.log(splitValue)
-                        
+
                         switch(splitKey)
                         {
                             case 'current_output':
