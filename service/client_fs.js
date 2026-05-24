@@ -462,7 +462,7 @@ class FileSystemMonitor extends EventEmitter {
         }
     }
 
-    poll(interval = 10000) {
+    poll(interval = 60000) {
         this.#fsPoll = setInterval(() => {
             this.updateLocalIp();
             // Add other functions to poll
@@ -497,7 +497,6 @@ class FileSystemMonitor extends EventEmitter {
      */
 
     async updateLocalIp() {
-        console.log('**** Getting IP', Date.now());
         let fileName = 'device_ip';
         let deviceIP = null;
 
@@ -511,16 +510,12 @@ class FileSystemMonitor extends EventEmitter {
                 else
                 {
                     deviceIP = stdout.toString().trim() || null;
-                    console.log('new source IP', deviceIP, Date.now());
                     resolve();
                     return;
                 }
             });
         });
 
-
-        // deviceIP = await func.getLocalIp(this.firstRun);
-        console.log('**** IP Set', Date.now());
         if (deviceIP)
         {
             const storedValue = this.fileMap.get(fileName).value;
