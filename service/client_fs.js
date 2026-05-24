@@ -409,7 +409,7 @@ class FileSystemMonitor extends EventEmitter {
         // Call updateLocalIp() right away. It will call poll() after.
         setTimeout(() => {
             this.updateLocalIp();
-        }, 500);
+        }, 100);
     }
 
     start() {
@@ -497,13 +497,33 @@ class FileSystemMonitor extends EventEmitter {
      */
 
     async updateLocalIp() {
-        const fileName = 'device_ip';
-        const updateValue = await func.getLocalIp(this.firstRun);
-        if (updateValue)
+        let fileName = 'device_ip';
+        let deviceIP = null;
+
+        await new Promise((resolve) => {
+            exec("hostname -I | awk '{print $1}'", (error, stdout, stderr) => {
+                if (error)
+                {
+                    resolve();
+                    return;
+                }
+                else
+                {
+                    deviceIP = stdout.toString().trim() || null;
+                    console.log('new source IP', deviceIP);
+                    resolve();
+                    return;
+                }
+            });
+        });
+
+
+        // deviceIP = await func.getLocalIp(this.firstRun);
+        if (deviceIP)
         {
             const storedValue = this.fileMap.get(fileName).value;
-            if (updateValue !== storedValue)
-            { this.put(fileName, updateValue) }
+            if (deviceIP !== storedValue)
+            { this.put(fileName, deviceIP); }
             
             if (this.firstRun)
             {

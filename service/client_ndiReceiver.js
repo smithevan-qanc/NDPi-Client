@@ -32,7 +32,7 @@ class NDI_Receiver_v2 extends EventEmitter {
 
         this.receiver = null;
         this.receiverName = this.settings.get('ndi_receiver_exec');
-        this.libraryPath = libraryPath || `/opt/NDI SDK for Linux/lib/aarch64-rpi4-linux-gnueabi:${(process.env.LD_LIBRARY_PATH || '')}`;
+        this.libraryPath = libraryPath || `/opt/NDI SDK for Linux/lib/aarch64-rpi4-linux-gnueabi:${process.env.LD_LIBRARY_PATH}`;
         this.xAuth = xAuthority || `${this.homeDirectory}/.Xauthority`;
 
         this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
