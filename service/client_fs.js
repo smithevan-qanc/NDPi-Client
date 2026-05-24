@@ -414,52 +414,47 @@ class FileSystemMonitor extends EventEmitter {
 
     start() {
         fs.watch(this.dataDir, async (event, filename) => {
-            if (!this.fileMap.has(filename))
-            { return; }
-
-            const filePath = path.join(this.dataDir, filename);
-
-            if (event === 'change')
-            {
-                let currentValue = this.fileMap.get(filename);
-                const fsValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trim();
-                if (currentValue.value !== fsValue)
-                {
-                    currentValue.value = fsValue;
-                    this.fileMap.set(filename, currentValue);
-                    this._fsEvent(filename, fsValue);
-                }
-            }
+            if (!this.fileMap.has(filename) && event === 'change')
+            { this._fsEvent(filename); }
         });
         this.startDrmMonitor();
     }
     
-    _fsEvent(name, value, debounceMs = 500) {
+    _fsEvent(name, debounceMs = 500) {
         const last = this.debounceMap.get(name) || 0;
         const now = Date.now();
+
         if (now - last < debounceMs)
-        { return }
+        { return; }
 
         this.debounceMap.set(name, now);
-        this.queue.push({ name, value });
+        this.queue.push({ name });
         this.__flushQueue();
     }
 
     __flushQueue() {
         while (this.queue.length > 0)
         {
-            const { name, value } = this.queue.shift();
+            const { name } = this.queue.shift();
+            const filePath = path.join(this.dataDir, name);
 
-            if (name === 'media_overlay_image')
-            { console.log(`[ client_fs ][ UPDATE ] '${name}'`); }
-            else
-            { console.log(`[ client_fs ][ UPDATE ] '${name}' ==> '${value}'`); }
-
-            this.emit(name, value);
-
-            if (this.sendToLCD.includes(name))
+            let currentValue = this.fileMap.get(name);
+            const fsValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trim();
+            
+            if (currentValue.value !== fsValue)
             {
-                fs.writeFileSync(path.join(this.lcdDisplayScriptPath, name), value, 'utf8');
+                currentValue.value = fsValue;
+                this.fileMap.set(name, currentValue);
+
+                if (name === 'media_overlay_image')
+                { console.log(`[ client_fs ][ UPDATE ] '${name}'`); }
+                else
+                { console.log(`[ client_fs ][ UPDATE ] '${name}' ==> '${fsValue}'`); }
+
+                if (this.sendToLCD.includes(name))
+                { fs.writeFileSync(path.join(this.lcdDisplayScriptPath, name), fsValue, 'utf8'); }
+
+                this.emit(name, fsValue);
             }
         }
         this.emit('update', JSON.stringify(Array.from(this.fileMap)));
@@ -483,7 +478,7 @@ class FileSystemMonitor extends EventEmitter {
         if (!fileName || !this.fileMap.has(fileName))
         { return }
         try
-        { fs.writeFileSync(path.join(this.dataDir, fileName), data.trimEnd(), 'utf8') }
+        { fs.writeFileSync(path.join(this.dataDir, fileName), data.trim(), 'utf8') }
         catch (error)
         { console.error('🔴 [ client_fs ][ ERROR ] Saving to FileSystem') }
     }
