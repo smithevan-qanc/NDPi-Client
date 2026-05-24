@@ -75,33 +75,28 @@ try:
         draw.text((dev_nam_x, 15),     device_name,     fill="GREEN", font=Font1)
         draw.line([(0, 52), (280, 52)], fill = "GRAY", width = 1)
 
-        draw.text((10, 62),     "Status",           fill="GRAY", font=Font4)
-        draw.text((80, 60),     ndpi_status_ndi, fill="GREEN", font=Font3)
-
+        draw.text((10, 62), "Status", fill="GRAY", font=Font4)
+        draw.text((80, 60), ndpi_status_ndi, fill="GREEN", font=Font3)
 
         src_x_1 = get_centered_x(src_line_1, 25)
         src_x_2 = get_centered_x(src_line_2, 25)
-        draw.text((src_x_1, 100),    src_line_1,      fill="GREEN", font=Font2)
-        draw.text((src_x_2, 128),    src_line_2,      fill="GREEN", font=Font2)
+        draw.text((src_x_1, 100), src_line_1, fill="GREEN", font=Font2)
+        draw.text((src_x_2, 128), src_line_2, fill="GREEN", font=Font2)
 
         draw.line([(0, 190), (280, 190)], fill = "GRAY", width = 1)
 
-        date_time_string = datetime.now().strftime("%m-%d-%Y %H:%M")
+        # date_time_string = datetime.now().strftime("%m-%d-%Y %H:%M")
         sys_temp = f"{str(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000)}°C"
-        line_date_temp = f"{date_time_string} | {sys_temp}".strip()
-        line_date_temp_x = get_centered_x(line_date_temp, 20)
-        draw.text((line_date_temp_x, 165), line_date_temp, fill="GREEN", font=Font4)
+        sys_temp_x = get_centered_x(sys_temp, 20)
+        draw.text((sys_temp_x, 165), sys_temp, fill="GREEN", font=Font4)
 
         line_dev_info = f"({ndpi_version})  {device_ip}".strip()
         line_dev_info_x = get_centered_x(line_dev_info, 20)
         draw.text((line_dev_info_x, 195), line_dev_info, fill="GREEN", font=Font4)
 
-        # draw.text((10, 205),    "ID",            fill="GRAY", font=Font4)
-        draw.text((dev_id_x, 215),    device_id,       fill="GREEN", font=Font4)
+        draw.text((dev_id_x, 215), device_id, fill="GREEN", font=Font4)
         
         disp.ShowImage(image1)
-        
-        # Wait 5 seconds before next update
         time.sleep(1)
 
 except KeyboardInterrupt:
