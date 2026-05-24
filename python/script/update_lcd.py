@@ -29,6 +29,11 @@ def get_centered_x(text, font_size, display_width=280):
     x_coordinate = (display_width - text_width) / 2
     return max(0, int(round(x_coordinate)))
 
+def get_right_x(text, font_size, display_width=280):
+    text_width = len(text) * (font_size * 0.55)
+    x_coordinate = (display_width - text_width)
+    return max(0, int(round(x_coordinate)))
+
 try:
     # Initialize display ONCE at startup
     disp = LCD_1inch69.LCD_1inch69()
@@ -72,11 +77,13 @@ try:
         draw = ImageDraw.Draw(image1)
         
         # logging.info(f"Updating: {device_name} | {device_ip} | {ndi_status}")
-        draw.text((dev_nam_x, 15),     device_name,     fill="GREEN", font=Font1)
+        draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=Font1)
         draw.line([(0, 52), (280, 52)], fill = "GRAY", width = 1)
 
-        draw.text((10, 62), "Status", fill="GRAY", font=Font4)
-        draw.text((80, 60), ndpi_status_ndi, fill="GREEN", font=Font3)
+        draw.text((10, 62), "NDI\nStatus", fill="GRAY", font=Font4)
+
+        ndi_status_x = get_right_x(ndpi_status_ndi, 25)
+        draw.text((ndi_status_x, 60), ndpi_status_ndi, fill="GREEN", font=Font3)
 
         src_x_1 = get_centered_x(src_line_1, 25)
         src_x_2 = get_centered_x(src_line_2, 25)
