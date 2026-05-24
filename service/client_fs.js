@@ -608,10 +608,7 @@ class FileSystemMonitor extends EventEmitter {
                 else
                 {
                     let resolutionOptions = [];
-                    const stdoutLine = func.stdoutToArray(stdout);
-
-                    for (const line of stdoutLine)
-                    {
+                    func.stdoutToArray(stdout).forEach((line) => {
                         const output        = line.toString().trim();
                         const lineSplit_1   = output.split(' : ');
                         const splitKey      = lineSplit_1[0]?.trim();
@@ -657,11 +654,11 @@ class FileSystemMonitor extends EventEmitter {
                                 return;
                                 break;
                         }
-                    };
+                    });
                     const fileMapCurrRes = this.fileMap.get('output_display_resolution_current');
                     fileMapCurrRes.options = resolutionOptions;
                     this.fileMap.set('output_display_resolution_current', fileMapCurrRes);
-                    console.log(fileMapCurrRes);
+                    console.log(this.fileMap.get('output_display_resolution_current'));
                 }
             });
         }
