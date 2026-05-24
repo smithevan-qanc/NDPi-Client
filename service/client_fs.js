@@ -497,6 +497,7 @@ class FileSystemMonitor extends EventEmitter {
      */
 
     async updateLocalIp() {
+        console.log('**** Getting IP');
         let fileName = 'device_ip';
         let deviceIP = null;
 
@@ -519,6 +520,7 @@ class FileSystemMonitor extends EventEmitter {
 
 
         // deviceIP = await func.getLocalIp(this.firstRun);
+        console.log('**** IP Set')
         if (deviceIP)
         {
             const storedValue = this.fileMap.get(fileName).value;
