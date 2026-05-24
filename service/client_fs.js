@@ -407,9 +407,10 @@ class FileSystemMonitor extends EventEmitter {
         };
 
         // Call updateLocalIp() right away. It will call poll() after.
-        setTimeout(() => {
-            this.updateLocalIp();
-        }, 1000);
+        process.nextTick(() => { this.start(); });
+        // setTimeout(() => {
+        //     this.updateLocalIp();
+        // }, 1000);
     }
 
     start() {
@@ -418,6 +419,7 @@ class FileSystemMonitor extends EventEmitter {
             { this._fsEvent(filename); }
         });
         this.startDrmMonitor();
+        this.updateLocalIp();
     }
     
     _fsEvent(name, debounceMs = 800) {
@@ -527,7 +529,7 @@ class FileSystemMonitor extends EventEmitter {
                 this.poll();
                 this.emit('ready');
                 this.firstRun = false;
-                this.start();
+                // this.start();
             }
         }
     }
