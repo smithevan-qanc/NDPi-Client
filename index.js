@@ -62,7 +62,10 @@ class NDPi {
                 .split(/\r?\n/)
                 .forEach((line) => { console.log(line) });
         });
-        startup.on('exit', () => { this.startFsData(); });
+        startup.on('exit', () => { 
+            this.startFsData();
+            this.startLcdDisplay();
+        });
         try { exec('killall xcompmgr'); } catch {}
         try { exec('killall picom'); } catch {}
         
@@ -77,7 +80,6 @@ class NDPi {
         this.settings.on('ready', () => {
             func.setDisplayResolution();
             this.startApi();
-            this.startLcdDisplay();
         });
 
         //  NDI Source Target
@@ -156,23 +158,33 @@ class NDPi {
         //  Device IP
         this.settings.on('device_ip', (data) => {
             const output = String(data || '').trim() || null;
+
             if (!output)
-                { return }
+            { return }
+
             this.server_api.updateDisplay({
                 type: 'update-details',
                 thisDevice: { address: output }
             });
-            this.service_bonjour.localIp = output;
-            this.service_bonjour._tryPublish();
+
+            if (!this.service_bonjour)
+            {
+                this.startMdns();
+            }
+            else
+            {
+                this.service_bonjour.localIp = output;
+                this.service_bonjour._tryPublish();
+            }
         });
 
         //  API Port Number
         this.settings.on('local_port_number_api', (data) => {
             const output = String(data || '').trim() || null;
             if (!output)
-                { return }
-            try { this.server_api.close() }
-            catch {}
+            { return; }
+
+            try { this.server_api.close(); } catch {}
             this.startApi();
         });
 
@@ -213,33 +225,36 @@ class NDPi {
 
         this.server_api.on('online', () => {
             if (!this.isInitialized)
-                {
-                    this.startMdns();
-                    this.startChromium();
-                    this.openCecController();
-                    this.connectToNDPiServer();
-                    this.targetSource = this.settings.get('ndpi_status_ndi_source_target');
-                    if (String(this.targetSource || 'none').toLowerCase() !== 'none')
-                        { 
-                            setTimeout(() => {
-                                this.startNdiReceiver();
-                            }, 5000);
-                        }
-                    this.isInitialized = true;
-                }
+            {
+                this.startChromium();
+                this.openCecController();
+                this.connectToNDPiServer();
+                this.targetSource = this.settings.get('ndpi_status_ndi_source_target');
+                if (String(this.targetSource || 'none').toLowerCase() !== 'none')
+                    { 
+                        setTimeout(() => {
+                            this.startNdiReceiver();
+                        }, 5000);
+                    }
+                this.isInitialized = true;
+            }
             else 
+            {
+                if (this.service_bonjour)
                 {
                     this.service_bonjour.commandPort = output;
                     this.service_bonjour._tryPublish();
-                    try 
-                    { this.service_chromium?.close(); }
-                    catch {}
-                    finally
-                    { 
-                        this.service_chromium = null;
-                        this.startChromium();
-                    }
                 }
+                
+                try 
+                { this.service_chromium?.close(); }
+                catch {}
+                finally
+                { 
+                    this.service_chromium = null;
+                    this.startChromium();
+                }
+            }
         });
     }
 
