@@ -420,7 +420,7 @@ class FileSystemMonitor extends EventEmitter {
         this.startDrmMonitor();
     }
     
-    _fsEvent(name, debounceMs = 500) {
+    _fsEvent(name, debounceMs = 800) {
         const last = this.debounceMap.get(name) || 0;
         const now = Date.now();
 
@@ -429,17 +429,19 @@ class FileSystemMonitor extends EventEmitter {
 
         this.debounceMap.set(name, now);
         this.queue.push({ name });
-        this.__flushQueue();
+
+        setTimeout(() => {
+            this.__flushQueue();
+        }, 500);
     }
 
     __flushQueue() {
         while (this.queue.length > 0)
         {
             const { name } = this.queue.shift();
-            const filePath = path.join(this.dataDir, name);
 
             let currentValue = this.fileMap.get(name);
-            const fsValue = fs.readFileSync(filePath, 'utf8').replace(/\0/g, '').trim();
+            const fsValue = fs.readFileSync(path.join(this.dataDir, name), 'utf8').replace(/\0/g, '').trim();
             
             if (currentValue.value !== fsValue)
             {
@@ -455,9 +457,9 @@ class FileSystemMonitor extends EventEmitter {
                 { fs.writeFileSync(path.join(this.lcdDisplayScriptPath, name), fsValue, 'utf8'); }
 
                 this.emit(name, fsValue);
+                this.emit('update', JSON.stringify(Array.from(this.fileMap)));
             }
         }
-        this.emit('update', JSON.stringify(Array.from(this.fileMap)));
     }
 
     poll(interval = 10000) {
