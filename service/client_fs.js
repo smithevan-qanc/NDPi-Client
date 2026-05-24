@@ -529,37 +529,13 @@ class FileSystemMonitor extends EventEmitter {
         this.drmMonitor.stdout.on('data', (data) => {
             console.log('[ client_fs ] DRM Update');
             this.updateOutputDisplay();
-            // const HDMI_1 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1', 'status'), 'utf8').trimEnd();
-            // const HDMI_2 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2', 'status'), 'utf8').trimEnd();
-
-            // if (HDMI_1.startsWith('connected'))
-            // { this.put('output_display_port', 'HDMI-1'); }
-            // else if (HDMI_2.startsWith('connected'))
-            // { this.put('output_display_port', 'HDMI-2'); }
-            // else
-            // { this.put('output_display_port', ''); }
         });
 
-        this.drmMonitor.on('error', () => {
-            console.log("🔴 [ client_fs ][ ERROR ] 'udevadm' not available, DRM monitor disabled");
+        this.drmMonitor.on('error', (error) => {
+            console.log("🔴 [ client_fs ][ ERROR ] 'udevadm' DRM monitor disabled", error.toString());
             this.drmMonitor = null;
         });
     }
-
-        /*
-
-        output_display_resolution_current
-        output_display_framerate_current
-        output_display_resolution_preferred
-        output_display_framerate_preferred
-        output_display_port
-        output_display_manufacturer
-        output_display_model
-        output_display_cec_enabled
-        output_display_cec_status_power
-        output_display_cec_active_source
-        
-        */
 
     async updateOutputDisplay() {
         let HDMI_1;
@@ -574,8 +550,6 @@ class FileSystemMonitor extends EventEmitter {
                 else
                 {
                     const output = func.stdoutToArray(stdout);
-                    console.log('(updateOutputDisplay)', output);
-                    
                     HDMI_1 = output[0] || 'disconnected';
                     HDMI_2 = output[1] || 'disconnected';
                     resolve();
@@ -583,21 +557,16 @@ class FileSystemMonitor extends EventEmitter {
             });
         });
 
-        console.log('(updateOutputDisplay) HDMI 1', HDMI_1, 'HDMI 2', HDMI_2);
-
         if (HDMI_1 === 'disconnected' && HDMI_2 === 'disconnected')
         {
-            // this.put('output_display_resolution_current', '');
-            // this.put('output_display_framerate_current', '');
-            // this.put('output_display_resolution_preferred', '');
-            // this.put('output_display_framerate_preferred', '');
-            // this.put('output_display_port', '');
-            // this.put('output_display_manufacturer', '');
-            // this.put('output_display_model', '');
-            // this.put('output_display_cec_enabled', 'false');
-            // this.put('output_display_cec_status_power', 'unknown');
-            // this.put('output_display_cec_active_source', '');
-            console.log('dsffsdf')
+            this.put('output_display_port', '');
+            this.put('output_display_resolution_preferred', '');
+            this.put('output_display_framerate_preferred', '');
+            this.put('output_display_manufacturer', '');
+            this.put('output_display_model', '');
+            this.put('output_display_cec_enabled', 'false');
+            this.put('output_display_cec_status_power', 'unknown');
+            this.put('output_display_cec_active_source', '');
         }
         else
         {
@@ -616,8 +585,6 @@ class FileSystemMonitor extends EventEmitter {
                         const lineSplit_2   = splitValue.split(' :: ');
                         const splitOptKey   = lineSplit_2[0]?.trim();
                         const splitOptValue = lineSplit_2[1]?.trim();
-
-                        console.log(splitValue)
 
                         switch(splitKey)
                         {
@@ -658,7 +625,6 @@ class FileSystemMonitor extends EventEmitter {
                     const fileMapCurrRes = this.fileMap.get('output_display_resolution_current');
                     fileMapCurrRes.options = resolutionOptions;
                     this.fileMap.set('output_display_resolution_current', fileMapCurrRes);
-                    console.log(this.fileMap.get('output_display_resolution_current'));
                 }
             });
         }
