@@ -4,7 +4,7 @@ import os
 import sys 
 import time
 import logging
-import math
+from datetime import datetime
 sys.path.append("..")
 from lib import LCD_1inch69
 from PIL import Image, ImageDraw, ImageFont
@@ -66,7 +66,6 @@ try:
             src_line_2 = f"({target_src[1].strip()}"
         except IndexError:
             src_line_2 = ""
-        
 
         # Draw on display
         image1 = Image.new("RGB", (disp.height, disp.width), "BLACK")
@@ -87,8 +86,11 @@ try:
 
         draw.line([(0, 190), (280, 190)], fill = "GRAY", width = 1)
 
+        date_time_string = datetime.now().strftime("%d-%m-%Y %H:%M")
         sys_temp = f"{str(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000)}°C"
-        draw.text((65, 165), sys_temp, fill="GREEN", font=Font4)
+        line_date_temp = f"{date_time_string} | {sys_temp}".strip()
+        line_date_temp_x = get_centered_x(line_date_temp, 20)
+        draw.text((line_date_temp_x, 165), line_date_temp, fill="GREEN", font=Font4)
 
         line_dev_info = f"({ndpi_version})  {device_ip}".strip()
         line_dev_info_x = get_centered_x(line_dev_info, 20)
