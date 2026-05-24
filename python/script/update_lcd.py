@@ -29,27 +29,30 @@ def get_centered_x(text, font_size, display_width=280):
     x_coordinate = (display_width - text_width) / 2
     return max(0, int(round(x_coordinate)))
 
-def get_right_x(text, font_size, display_width=280):
+def get_right_x(text, font_size, margin=10, display_width=280):
     text_width = len(text) * (font_size * 0.55)
-    x_coordinate = (display_width - text_width)
+    x_coordinate = (display_width - text_width - margin)
     return max(0, int(round(x_coordinate)))
+    
+Font1 = ImageFont.truetype("../Font/ConsolasBold.ttf", 30)
+Font2 = ImageFont.truetype("../Font/ConsolasBold.ttf", 25)
+Font3 = ImageFont.truetype("../Font/Consolas.ttf", 25)
+Font4 = ImageFont.truetype("../Font/ConsolasBold.ttf", 20)
 
 try:
     # Initialize display ONCE at startup
     disp = LCD_1inch69.LCD_1inch69()
     disp.Init()
     disp.clear()
-    disp.bl_DutyCycle(100)
-    
-    Font1 = ImageFont.truetype("../Font/ConsolasBold.ttf", 30)
-    Font2 = ImageFont.truetype("../Font/ConsolasBold.ttf", 25)
-    Font3 = ImageFont.truetype("../Font/Consolas.ttf", 25)
-    Font4 = ImageFont.truetype("../Font/ConsolasBold.ttf", 20)
+    disp.bl_DutyCycle(90)
     
     print("Display initialized. Starting loop...")
     
     # Loop forever, reading files every 5 seconds
     while True:
+        
+        # date_time_string = datetime.now().strftime("%m-%d-%Y %H:%M")
+
         # Read files
         device_name = read_file('device_name')
         dev_nam_x = get_centered_x(device_name.strip(), 30)
@@ -63,10 +66,12 @@ try:
 
         target_source = read_file('ndpi_status_ndi_source_target').upper()
         target_src = target_source.split('(')
+        
         try:
             src_line_1 = target_src[0].strip()
         except IndexError:
             src_line_1 = ""
+
         try:
             src_line_2 = f"({target_src[1].strip()}"
         except IndexError:
@@ -76,33 +81,42 @@ try:
         image1 = Image.new("RGB", (disp.height, disp.width), "BLACK")
         draw = ImageDraw.Draw(image1)
         
-        # logging.info(f"Updating: {device_name} | {device_ip} | {ndi_status}")
+        # Device Name
         draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=Font1)
+
+        # Gray Line
         draw.line([(0, 52), (280, 52)], fill = "GRAY", width = 1)
 
-        draw.text((10, 62), "NDI\nStatus", fill="GRAY", font=Font4)
+        # NDI Status Label
+        draw.text((10, 60), "NDI\nStatus", fill="GRAY", font=Font4)
 
+        # NDI Current State
         ndi_status_x = get_right_x(ndpi_status_ndi, 25)
         draw.text((ndi_status_x, 60), ndpi_status_ndi, fill="GREEN", font=Font3)
 
+        # NDI Target Source
         src_x_1 = get_centered_x(src_line_1, 25)
         src_x_2 = get_centered_x(src_line_2, 25)
-        draw.text((src_x_1, 100), src_line_1, fill="GREEN", font=Font2)
-        draw.text((src_x_2, 128), src_line_2, fill="GREEN", font=Font2)
+        draw.text((src_x_1, 105), src_line_1, fill="GREEN", font=Font2)
+        draw.text((src_x_2, 132), src_line_2, fill="GREEN", font=Font2)
 
-        draw.line([(0, 190), (280, 190)], fill = "GRAY", width = 1)
+        # Gray Line
+        draw.line([(0, 170), (280, 170)], fill = "GRAY", width = 1)
 
-        # date_time_string = datetime.now().strftime("%m-%d-%Y %H:%M")
+        # CPU Temperature
         sys_temp = f"{str(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000)}°C"
         sys_temp_x = get_centered_x(sys_temp, 20)
-        draw.text((sys_temp_x, 165), sys_temp, fill="GREEN", font=Font4)
+        draw.text((sys_temp_x, 175), sys_temp, fill="GREEN", font=Font4)
 
+        # NDPi Version & Device IP
         line_dev_info = f"({ndpi_version})  {device_ip}".strip()
         line_dev_info_x = get_centered_x(line_dev_info, 20)
         draw.text((line_dev_info_x, 195), line_dev_info, fill="GREEN", font=Font4)
 
+        # Device ID
         draw.text((dev_id_x, 215), device_id, fill="GREEN", font=Font4)
         
+        # Display
         disp.ShowImage(image1)
         time.sleep(1)
 
