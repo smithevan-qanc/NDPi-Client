@@ -62,11 +62,18 @@ class NDPiBonjourService {
         });
     }
 
-    close() {
-        if (this.service) {
-            this.service.stop();
-            this.service = null;
-        }
+    async close() {
+        await new Promise((resolve) => {
+            if (this.service)
+            {
+                this.service.stop();
+                this.service = null;
+                setTimeout(() => { resolve(); }, 1000);
+            }
+            else
+            { resolve(); }
+        });
+        return;
     }
 }
 

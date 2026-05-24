@@ -86,10 +86,11 @@ class ClientServerWebSocket extends EventEmitter {
     close() {
         this.enabled = false;
         if (this.socket)
-            {
-                if (this.socket.readyState === WebSocket.OPEN)
-                    { this.socket.close() }
-            }
+        {
+            if (this.socket.readyState === WebSocket.OPEN)
+            { this.socket.close(); }
+        }
+        
         this.socket = null;
     }
 

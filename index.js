@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const func = require('./service/functions.js');
-const { spawn } = require('node:child_process');
+const { exec, spawn } = require('node:child_process');
 
 const VERSION_DIR = path.join(__dirname, 'version');
 const NDPi_VERSION = (
@@ -55,7 +55,6 @@ class NDPi {
     }
 
     initiate() {
-        const { exec, spawn } = require('node:child_process');
         const startup = exec(`./sh/startup`);
         startup.stdout.on('data', (data) => {
             data
@@ -320,7 +319,6 @@ class NDPi {
         }
     }
 
-    //  TODO: Migrate the server status updates to be triggered like the display status updates.
     connectToNDPiServer() {
         const ClientServerWebSocket = require('./service/clientServer_websocket.js');
         this.wsConnection_ndpiServer = new ClientServerWebSocket(this.settings, this.server_api);
@@ -335,7 +333,8 @@ class NDPi {
     sendStatusToNDPiServer() {
         const status = {
             type: 'client-status',
-            ndiInfo: {}
+            ndiInfo: {},
+            fsMap: Array.from(this.settings.fileMap)
         };
         status.deviceId = this.settings.get('device_id');
         status.deviceName = this.settings.get('device_name');
@@ -371,6 +370,7 @@ function quitNDPi(signal) {
             index.ndpiServerStatusUpdate = null;
         }
     try { index.ndiReceiver?.close(); } catch {}
+    try { index.lcdDisplay?.kill() } catch {}
     try { index.controller_cec?.close(); } catch {}
     try { index.service_bonjour?.close(); } catch {}
     try { index.service_chromium?.close(); } catch {}
