@@ -577,11 +577,19 @@ class FileSystemMonitor extends EventEmitter {
                     func.stdoutToArray(stdout).forEach((line) => {
                         const output        = line.toString().trim();
                         const lineSplit_1   = output.split(' : ');
-                        const splitKey      = lineSplit_1[0]?.trim();
-                        const splitValue    = lineSplit_1[1]?.trim();
-                        const lineSplit_2   = splitValue?.split(' :: ');
-                        const splitOptKey   = lineSplit_2[0]?.trim();
-                        const splitOptValue = lineSplit_2[1]?.trim();
+                        const splitKey      = lineSplit_1[0].trim();
+                        const splitValue    = lineSplit_1[1].trim();
+                        
+                        let lineSplit_2 = null;
+                        let splitOptKey = null;
+                        let splitOptValue = null;
+
+                        if (splitValue.includes(' :: '))
+                        {
+                            lineSplit_2   = splitValue.split(' :: ');
+                            splitOptKey   = lineSplit_2[0].trim();
+                            splitOptValue = lineSplit_2[1].trim();
+                        }
 
                         switch(splitKey)
                         {
@@ -614,7 +622,8 @@ class FileSystemMonitor extends EventEmitter {
                                 return;
                                 break;
                             case 'list_resolutions':
-                                resolutionOptions.push([splitOptKey, splitOptValue]);
+                                if (splitOptKey && splitOptValue)
+                                { resolutionOptions.push([splitOptKey, splitOptValue]); }
                                 return;
                                 break;
                         }
