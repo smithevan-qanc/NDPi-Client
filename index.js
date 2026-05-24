@@ -178,7 +178,7 @@ class NDPi {
         });
 
         //  HDMI Port
-        this.settings.on('output_device_port', (data) => {
+        this.settings.on('output_display_port', (data) => {
             const output = String(data || '').trim() || null;
             if (!output)
                 { return }
@@ -186,12 +186,12 @@ class NDPi {
         });
 
         //  HDMI Resolution
-        this.settings.on('output_resolution_current', (data) => {
+        this.settings.on('output_display_resolution_current', (data) => {
             setTimeout(() => { this.setDisplayResolution(); }, 500);
         });
 
         //  HDMI Framerate
-        this.settings.on('output_framerate_current', (data) => {
+        this.settings.on('output_display_framerate_current', (data) => {
             setTimeout(() => { this.setDisplayResolution(); }, 500);
         });
 
@@ -345,8 +345,8 @@ class NDPi {
         status.displayMode = this.settings.get('ndpi_status_no_source_display_mode');
         status.ndiInfo.resolution = this.settings.get('ndpi_status_ndi_source_resolution');
         status.ndiInfo.framerate = this.settings.get('ndpi_status_ndi_source_framerate');
-        status.ndiInfo.displayResolution = this.settings.get('output_resolution_current');
-        status.ndiInfo.displayName = this.settings.get('output_framerate_current');
+        status.ndiInfo.displayResolution = this.settings.get('output_display_resolution_current');
+        status.ndiInfo.displayName = this.settings.get('output_display_framerate_current');
         status.ndiInfo.connectedAt = this.settings.get('ndpi_status_ndi_source_connected_time');
         status.status = this.settings.get('ndpi_status_ndi');
         status.systemStats = {
@@ -360,9 +360,9 @@ class NDPi {
     }
 
     setDisplayResolution() {
-        const displayOutput = this.settings.get('output_device_port') || 'HDMI-1';
-        const resolution = this.settings.get('output_resolution_current') || null;
-        const framerate  = this.settings.get('output_framerate_current') || null;
+        const displayOutput = this.settings.get('output_display_port') || 'HDMI-1';
+        const resolution = this.settings.get('output_display_resolution_current') || null;
+        const framerate  = this.settings.get('output_display_framerate_current') || null;
         require('child_process').exec(`xrandr \
             --output ${displayOutput} \
             ${resolution ? `--mode ${resolution}` : '--auto'} \

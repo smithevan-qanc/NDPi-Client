@@ -118,7 +118,7 @@ class CecController extends EventEmitter {
                     {
                         console.log(`[ client_cec ][  UPDATE ] ${lineSplit}`);
                         if (lineSplit.includes('TV') && lineSplit.includes('power status'))
-                            { this.settings.put('output_device_cec_status_power', lineSplit.split("'")[3]) }
+                            { this.settings.put('output_display_cec_status_power', lineSplit.split("'")[3]) }
                     }
                     else if (line.includes('ERROR'))
                     { console.log(`🔴 [ client_cec ][ ERROR ] ${lineSplit}`) }
@@ -139,7 +139,7 @@ class CecController extends EventEmitter {
                 }
                 this.emit('ready');
                 console.log('[ client_cec ] CEC Ready');
-                this.settings.put('output_device_cec_enabled', 'true');
+                this.settings.put('output_display_cec_enabled', 'true');
                 this.restartDelay = 1000;
                 this._flushQueue();
             }

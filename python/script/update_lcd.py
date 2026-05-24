@@ -34,10 +34,10 @@ def get_right_x(text, font_size, margin=10, display_width=280):
     x_coordinate = (display_width - text_width - margin)
     return max(0, int(round(x_coordinate)))
     
-Font1 = ImageFont.truetype("../Font/ConsolasBold.ttf", 30)
-Font2 = ImageFont.truetype("../Font/ConsolasBold.ttf", 25)
-Font3 = ImageFont.truetype("../Font/Consolas.ttf", 25)
-Font4 = ImageFont.truetype("../Font/ConsolasBold.ttf", 20)
+Consolas_Bold_30 = ImageFont.truetype("../Font/ConsolasBold.ttf", 30)
+Consolas_Bold_25 = ImageFont.truetype("../Font/ConsolasBold.ttf", 25)
+Consolas_25 = ImageFont.truetype("../Font/Consolas.ttf", 25)
+Consolas_Bold_20 = ImageFont.truetype("../Font/ConsolasBold.ttf", 20)
 
 try:
     # Initialize display ONCE at startup
@@ -77,46 +77,46 @@ try:
         except IndexError:
             src_line_2 = ""
 
-        # Draw on display
+        # Draw on display ------------------------------------------------------------
         image1 = Image.new("RGB", (disp.height, disp.width), "BLACK")
         draw = ImageDraw.Draw(image1)
         
-        # Device Name
-        draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=Font1)
+        # Device Name ----------------------------------------------------------------
+        draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=Consolas_Bold_30)
 
-        # Gray Line
+        # Gray Line ------------------------------------------------------------------
         draw.line([(0, 52), (280, 52)], fill = "GRAY", width = 1)
 
-        # NDI Status Label
-        draw.text((10, 60), "NDI\nStatus", fill="GRAY", font=Font4)
+        # NDI Status Label -----------------------------------------------------------
+        draw.text((10, 60), "NDI\nStatus", fill="GRAY", font=Consolas_Bold_20)
 
-        # NDI Current State
+        # NDI Current State ----------------------------------------------------------
         ndi_status_x = get_right_x(ndpi_status_ndi, 25)
-        draw.text((ndi_status_x, 60), ndpi_status_ndi, fill="GREEN", font=Font3)
+        draw.text((ndi_status_x, 60), ndpi_status_ndi, fill="GREEN", font=Consolas_25)
 
-        # NDI Target Source
+        # NDI Target Source ----------------------------------------------------------
         src_x_1 = get_centered_x(src_line_1, 25)
         src_x_2 = get_centered_x(src_line_2, 25)
-        draw.text((src_x_1, 105), src_line_1, fill="GREEN", font=Font2)
-        draw.text((src_x_2, 132), src_line_2, fill="GREEN", font=Font2)
+        draw.text((src_x_1, 105), src_line_1, fill="GREEN", font=Consolas_Bold_25)
+        draw.text((src_x_2, 132), src_line_2, fill="GREEN", font=Consolas_25)
 
-        # Gray Line
+        # Gray Line ------------------------------------------------------------------
         draw.line([(0, 170), (280, 170)], fill = "GRAY", width = 1)
 
-        # CPU Temperature
+        # CPU Temperature ------------------------------------------------------------
         sys_temp = f"{str(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000)}°C"
         sys_temp_x = get_centered_x(sys_temp, 20)
-        draw.text((sys_temp_x, 175), sys_temp, fill="GREEN", font=Font4)
+        draw.text((sys_temp_x, 175), sys_temp, fill="GREEN", font=Consolas_Bold_20)
 
-        # NDPi Version & Device IP
+        # NDPi Version & Device IP ---------------------------------------------------
         line_dev_info = f"({ndpi_version})  {device_ip}".strip()
         line_dev_info_x = get_centered_x(line_dev_info, 20)
-        draw.text((line_dev_info_x, 195), line_dev_info, fill="GREEN", font=Font4)
+        draw.text((line_dev_info_x, 195), line_dev_info, fill="GREEN", font=Consolas_Bold_20)
 
-        # Device ID
-        draw.text((dev_id_x, 215), device_id, fill="GREEN", font=Font4)
+        # Device ID ------------------------------------------------------------------
+        draw.text((dev_id_x, 215), device_id, fill="GREEN", font=Consolas_Bold_20)
         
-        # Display
+        # Display --------------------------------------------------------------------
         disp.ShowImage(image1)
         time.sleep(1)
 

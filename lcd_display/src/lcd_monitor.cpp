@@ -61,7 +61,7 @@ typedef struct {
     char device_ip[MAX_STRING_LEN];
     char ndpi_status_ndi[MAX_STRING_LEN];
     char ndpi_status_ndi_source_resolution[MAX_STRING_LEN];
-    char output_resolution_current[MAX_STRING_LEN];
+    char output_display_resolution_current[MAX_STRING_LEN];
     uint32_t last_update_ms;
 } DisplayData;
 
@@ -182,10 +182,10 @@ static int parse_json_message(const char *message)
         }
     }
     
-    if (extract_json_string(message, "output_resolution_current", temp, sizeof(temp))) {
-        if (strcmp(g_display_data.output_resolution_current, temp) != 0) {
-            strncpy(g_display_data.output_resolution_current, temp, 
-                    sizeof(g_display_data.output_resolution_current) - 1);
+    if (extract_json_string(message, "output_display_resolution_current", temp, sizeof(temp))) {
+        if (strcmp(g_display_data.output_display_resolution_current, temp) != 0) {
+            strncpy(g_display_data.output_display_resolution_current, temp, 
+                    sizeof(g_display_data.output_display_resolution_current) - 1);
             updated = 1;
         }
     }
@@ -280,7 +280,7 @@ static void render_display(void)
     /* ---- SECTION 4: Output Resolution (max 18 chars Font8) ---- */
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, "Out Res:", &Font8, COLOR_HEADER, COLOR_BG);
     y_pos += 10;
-    truncate_string(truncated, g_display_data.output_resolution_current, 18);
+    truncate_string(truncated, g_display_data.output_display_resolution_current, 18);
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, truncated, &Font8, COLOR_TEXT, COLOR_BG);
     
     /* ---- FOOTER: Status Indicator ---- */

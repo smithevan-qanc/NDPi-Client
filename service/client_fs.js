@@ -3,8 +3,8 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const { setInterval, clearInterval } = require('timers');
-const { getLocalIp } = require('./functions.js');
-const { exec } = require('node:child_process');
+const func = require('./functions.js');
+const { exec, spawn } = require('node:child_process');
 const { setTimeout } = require('node:timers');
 
 class FileSystemMonitor extends EventEmitter {
@@ -42,7 +42,7 @@ class FileSystemMonitor extends EventEmitter {
             'ndpi_status_ndi_source_target',
         ];
 
-        // First run is used as a flag for getLocalIp();
+        // First run is used as a flag for func.getLocalIp();
         this.firstRun = true;
 
         this.init();
@@ -259,70 +259,71 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditExternal: true,
             },
             {
-                key: "output_resolution_current",
+                key: "output_display_resolution_current",
+                value: ``,
+                group: ``,
+                options: [],
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "output_display_framerate_current",
                 value: ``,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: true,
             },
             {
-                key: "output_framerate_current",
-                value: ``,
-                group: ``,
-                allowEditInternal: true,
-                allowEditExternal: true,
-            },
-            {
-                key: "output_device_resolution_preferred",
+                key: "output_display_resolution_preferred",
                 value: ``,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: false,
             },
             {
-                key: "output_device_framerate_preferred",
+                key: "output_display_framerate_preferred",
                 value: ``,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: false,
             },
             {
-                key: "output_device_port",
+                key: "output_display_port",
                 value: ``,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: false,
             },
             {
-                key: "output_device_manufacturer",
+                key: "output_display_manufacturer",
                 value: ``,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: false,
             },
             {
-                key: "output_device_model",
+                key: "output_display_model",
                 value: ``,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: false,
             },
             {
-                key: "output_device_cec_enabled",
+                key: "output_display_cec_enabled",
                 value: `false`,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: false,
             },
             {
-                key: "output_device_cec_status_power",
+                key: "output_display_cec_status_power",
                 value: `unknown`,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: false,
             },
             {
-                key: "output_device_cec_active_source",
+                key: "output_display_cec_active_source",
                 value: ``,
                 group: ``,
                 allowEditInternal: true,
@@ -359,9 +360,9 @@ class FileSystemMonitor extends EventEmitter {
             'ndpi_status_ndi_source_connected_time',
             'ndpi_status_ndi_source_resolution',
             'ndpi_status_ndi_source_framerate',
-            'output_device_cec_enabled',
-            'output_device_cec_status_power',
-            'output_device_cec_active_source',
+            'output_display_cec_enabled',
+            'output_display_cec_status_power',
+            'output_display_cec_active_source',
         ];
 
         /**
@@ -500,7 +501,7 @@ class FileSystemMonitor extends EventEmitter {
 
     async updateLocalIp() {
         const fileName = 'device_ip';
-        const updateValue = await getLocalIp(this.firstRun);
+        const updateValue = await func.getLocalIp(this.firstRun);
         if (updateValue)
         {
             const storedValue = this.fileMap.get(fileName).value;
@@ -523,21 +524,134 @@ class FileSystemMonitor extends EventEmitter {
         // const pth_thermal_fanSpeed = path.join('/sys','class','thermal','cooling_device0','cur_state');
         // const pth_thermal_cpuTemperature = path.join('/sys','class','thermal','thermal_zone0','temp');
 
-        this.drmMonitor = require('node:child_process').spawn('udevadm', ['monitor', '--subsystem-match=drm', '--kernel']);
+        this.drmMonitor = spawn('udevadm', ['monitor', '--subsystem-match=drm', '--kernel']);
 
         this.drmMonitor.stdout.on('data', (data) => {
-            const HDMI_1 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1', 'status'), 'utf8').trimEnd();
-            const HDMI_2 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2', 'status'), 'utf8').trimEnd();
-            if (HDMI_1.startsWith('connected'))
-                { this.put('output_device_port', 'HDMI-1') }
-            else if (HDMI_2.startsWith('connected'))
-                { this.put('output_device_port', 'HDMI-2') }
+            console.log('[ client_fs ] DRM Update');
+            this.updateOutputDisplay();
+            // const HDMI_1 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-1', 'status'), 'utf8').trimEnd();
+            // const HDMI_2 = fs.readFileSync(path.join('/sys', 'class', 'drm', 'card1-HDMI-A-2', 'status'), 'utf8').trimEnd();
+
+            // if (HDMI_1.startsWith('connected'))
+            // { this.put('output_display_port', 'HDMI-1'); }
+            // else if (HDMI_2.startsWith('connected'))
+            // { this.put('output_display_port', 'HDMI-2'); }
+            // else
+            // { this.put('output_display_port', ''); }
         });
 
         this.drmMonitor.on('error', () => {
             console.log("🔴 [ client_fs ][ ERROR ] 'udevadm' not available, DRM monitor disabled");
             this.drmMonitor = null;
         });
+    }
+
+    /*
+
+    output_display_resolution_current
+    output_display_framerate_current
+    output_display_resolution_preferred
+    output_display_framerate_preferred
+    output_display_port
+    output_display_manufacturer
+    output_display_model
+    output_display_cec_enabled
+    output_display_cec_status_power
+    output_display_cec_active_source
+    
+    */
+
+    updateOutputDisplay() {
+        let HDMI_1 = 'disconnected';
+        let HDMI_2 = 'disconnected';
+
+        exec('cat /sys/class/drm/card*HDMI*/status', (error, stdout, stderr) => {
+            if (!error)
+            {
+                const output = func.stdoutToArray(stdout);
+                HDMI_1 = output[0] || 'disconnected';
+                HDMI_2 = output[1] || 'disconnected';
+            }
+        });
+
+        console.log('(updateOutputDisplay) HDMI 1', HDMI_1, 'HDMI 2', HDMI_2);
+        
+        if (HDMI_1 === 'disconnected' && HDMI_2 === 'disconnected')
+        {
+            this.put('output_display_resolution_current', '');
+            this.put('output_display_framerate_current', '');
+            this.put('output_display_resolution_preferred', '');
+            this.put('output_display_framerate_preferred', '');
+            this.put('output_display_port', '');
+            this.put('output_display_manufacturer', '');
+            this.put('output_display_model', '');
+            // this.put('output_display_cec_enabled', 'false');
+            // this.put('output_display_cec_status_power', 'unknown');
+            // this.put('output_display_cec_active_source', '');
+        }
+        else
+        {
+            const commandPath = path.join(__dirname, '..', 'sh', 'current-resolution');
+            exec(commandPath, (error, stdout, stderr) => {
+                if (error)
+                { console.log(`🔴 [ client_fs ][ ERROR ] ${stderr.toString().trim()}`); }
+                else
+                {
+                    let resolutionOptions = [];
+                    const stdoutLine = func.stdoutToArray(stdout);
+
+                    for (const line of stdoutLine)
+                    {
+                        const output        = line.toString().trim();
+                        const lineSplit_1   = output.split(' : ');
+                        const splitKey      = lineSplit_1[0].trim();
+                        const splitValue    = lineSplit_1[1].trim();
+                        const lineSplit_2   = splitValue.split(' :: ');
+                        const splitOptKey   = lineSplit_2[0].trim();
+                        const splitOptValue = lineSplit_2[1].trim();
+
+                        switch(splitKey)
+                        {
+                            case 'current_output':
+                                this.put('output_display_port', splitValue);
+                                return;
+                                break;
+                            case 'current_resolution':
+                                this.put('output_display_resolution_current', splitValue);
+                                return;
+                                break;
+                            case 'current_framerate':
+                                this.put('output_display_framerate_current', '');
+                                return;
+                                break;
+                            case 'preferred_resolution':
+                                this.put('output_display_resolution_preferred', '');
+                                return;
+                                break;
+                            case 'preferred_framerate':
+                                this.put('output_display_framerate_preferred', '');
+                                return;
+                                break;
+                            case 'manufacturer':
+                                this.put('output_display_manufacturer', '');
+                                return;
+                                break;
+                            case 'model':
+                                this.put('output_display_model', '');
+                                return;
+                                break;
+                            case 'list_resolutions':
+                                resolutionOptions.push([splitOptKey, splitOptValue]);
+                                return;
+                                break;
+                        }
+                    };
+                    const fileMapCurrRes = this.fileMap.get('output_display_resolution_current');
+                    fileMapCurrRes.options = resolutionOptions;
+                    this.fileMap.set('output_display_resolution_current', fileMapCurrRes);
+                }
+            });
+        }
     }
 }
 

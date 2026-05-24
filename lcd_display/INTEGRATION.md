@@ -41,7 +41,7 @@ function initLcdMonitor(fileMonitor) {
         'device_ip': 'device_ip',
         'ndpi_status_ndi': 'ndpi_status_ndi',
         'ndpi_status_ndi_source_resolution': 'ndpi_status_ndi_source_resolution',
-        'output_resolution_current': 'output_resolution_current'
+        'output_display_resolution_current': 'output_display_resolution_current'
     };
     
     // Listen to fs.watch events and pipe to LCD

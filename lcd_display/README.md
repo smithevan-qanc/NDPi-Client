@@ -138,7 +138,7 @@ const lcd_fields = [
     'device_ip',
     'ndpi_status_ndi',
     'ndpi_status_ndi_source_resolution',
-    'output_resolution_current'
+    'output_display_resolution_current'
 ];
 
 // Listen to fs.watch events and forward to LCD
@@ -160,9 +160,9 @@ fileMonitor.on('ndpi_status_ndi_source_resolution', (value) => {
     }) + '\n');
 });
 
-fileMonitor.on('output_resolution_current', (value) => {
+fileMonitor.on('output_display_resolution_current', (value) => {
     lcdMonitor.stdin.write(JSON.stringify({ 
-        output_resolution_current: value 
+        output_display_resolution_current: value 
     }) + '\n');
 });
 
@@ -183,7 +183,7 @@ The LCD Monitor expects **newline-delimited JSON**, one field per message:
 {"device_ip":"192.168.1.100"}
 {"ndpi_status_ndi":"receiving"}
 {"ndpi_status_ndi_source_resolution":"1920x1080"}
-{"output_resolution_current":"1920x1080"}
+{"output_display_resolution_current":"1920x1080"}
 ```
 
 Each message can contain one or more fields. Unknown fields are ignored.
@@ -330,7 +330,7 @@ Expected output (on LCD):
 | `device_ip` | Auto-detected | "192.168.1.100" | Local IP address |
 | `ndpi_status_ndi` | NDI receiver status | "idle", "receiving", "error" | Connection status (color-coded) |
 | `ndpi_status_ndi_source_resolution` | NDI source metadata | "1920x1080" | Input resolution |
-| `output_resolution_current` | Display manager | "1920x1080" | Output resolution |
+| `output_display_resolution_current` | Display manager | "1920x1080" | Output resolution |
 
 See [client_fs.js](../service/client_fs.js) for data structure definitions.
 

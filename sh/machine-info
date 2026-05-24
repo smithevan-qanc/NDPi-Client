@@ -85,7 +85,7 @@ echo "$(xrandr | grep -v 'm' | awk '{print "list_resolutions :", $1, "::", "--mo
 #  ================================================================================
 
 
-hostnamectl
+# hostnamectl
 #  Static hostname: NDPi-Client
 #        Icon name: computer
 #       Machine ID: 5c2c9c075d03474396188cda33e732be
@@ -94,5 +94,5 @@ hostnamectl
 #           Kernel: Linux 6.12.75+rpt-rpi-2712
 #     Architecture: arm64
 
-uptime -p
+# uptime -p
 # up 49 minutes
