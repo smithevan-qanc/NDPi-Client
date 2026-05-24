@@ -414,7 +414,7 @@ class FileSystemMonitor extends EventEmitter {
 
     start() {
         fs.watch(this.dataDir, async (event, filename) => {
-            if (!this.fileMap.has(filename) && event === 'change')
+            if (this.fileMap.has(filename) && event === 'change')
             { this._fsEvent(filename); }
         });
         this.startDrmMonitor();
