@@ -5,11 +5,11 @@ xrandr
 xrandr --listactivemonitors
 
 # Get Current Framerate
-xrandr | sed -E 's/.+ ([0-9.]+)\*.*/\1/'
+xrandr | grep -oP '[0-9.]+(?=\*)'
 
 # Get Prefered Framerate
-xrandr | grep -oP '[0-9.]+(?=\s\+)'
 xrandr | grep -oP '[0-9.]+(?=\*\+)'
+xrandr | grep -oP '[0-9.]+(?=\s\+)'
 
 
 exit 0

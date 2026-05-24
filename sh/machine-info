@@ -10,6 +10,11 @@ echo "$(xrandr | grep -Fw 'connected' | awk '{print "current_output :", $1}')"
 
 # Current Resolution
 echo "$(xrandr | grep '*' | awk '{print "current_resolution :", $1}')"
+echo "$(xrandr | grep -oP '[0-9.]+(?=\*)' | awk '{print "current_framerate :", $1}')"
+#
+# Preferred Resolution
+echo "$(xrandr | grep '+ ' | awk '{print "preferred_resolution :", $1}')"
+echo "$(xrandr | grep '+ ' | awk '{print "preferred_framerate :", $2}')"
 #
 
 # List Resolutions

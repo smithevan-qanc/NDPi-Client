@@ -363,6 +363,7 @@ class FileSystemMonitor extends EventEmitter {
             'output_device_cec_status_power',
             'output_device_cec_active_source',
         ];
+
         /**
          * 
          *  If the @key is within the retainDefaultValue Array,
@@ -372,6 +373,7 @@ class FileSystemMonitor extends EventEmitter {
          *  This is used to prevent reading value from file.
          * 
          */
+
         for (const file of files)
         {
             let setting = file;
