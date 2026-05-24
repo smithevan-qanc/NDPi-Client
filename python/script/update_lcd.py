@@ -44,7 +44,7 @@ try:
     disp = LCD_1inch69.LCD_1inch69()
     disp.Init()
     disp.clear()
-    disp.bl_DutyCycle(90)
+    disp.bl_DutyCycle(100)
     
     print("Display initialized. Starting loop...")
     
