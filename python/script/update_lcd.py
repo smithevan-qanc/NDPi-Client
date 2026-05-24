@@ -86,7 +86,7 @@ try:
 
         draw.line([(0, 190), (280, 190)], fill = "GRAY", width = 1)
 
-        date_time_string = datetime.now().strftime("%d-%m-%Y %H:%M")
+        date_time_string = datetime.now().strftime("%m-%d-%Y %H:%M")
         sys_temp = f"{str(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000)}°C"
         line_date_temp = f"{date_time_string} | {sys_temp}".strip()
         line_date_temp_x = get_centered_x(line_date_temp, 20)
