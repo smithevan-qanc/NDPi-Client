@@ -409,7 +409,7 @@ class FileSystemMonitor extends EventEmitter {
         // Call updateLocalIp() right away. It will call poll() after.
         setTimeout(() => {
             this.updateLocalIp();
-        }, 100);
+        }, 1000);
     }
 
     start() {
