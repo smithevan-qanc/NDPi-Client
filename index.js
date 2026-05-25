@@ -260,6 +260,9 @@ class NDPi {
                 }
             }
         });
+
+        this.server_api.on('shutdown', () => { shutdownDevice(); });
+        this.server_api.on('reboot', () => { rebootDevice(); });
     }
 
     /** START BONJOUR MDNS BROADCAST */
@@ -386,23 +389,37 @@ class NDPi {
 
 const index = new NDPi();
 
-function quitNDPi(signal) {
-    const sig = signal ? `[ ${signal} ]` : '';
-    console.log(`[ index ]${sig} Shutting down application...`);
-    if (index.ndpiServerStatusUpdate)
-        {
-            clearInterval(index.ndpiServerStatusUpdate);
-            index.ndpiServerStatusUpdate = null;
-        }
-    try { index.ndiReceiver?.close(); } catch {}
-    try { index.lcdDisplay?.kill() } catch {}
-    try { index.controller_cec?.close(); } catch {}
-    try { index.service_bonjour?.close(); } catch {}
-    try { index.service_chromium?.close(); } catch {}
-    try { index.wsConnection_ndpiServer?.close(); } catch {}
-    try { index.server_api?.close(); } catch {}
-    try { index.settings?.close(); } catch {}
-    process.exit(0);
+async function shutdownDevice() {
+    await quitNDPi('SIGTERM', false);
+    exec('sudo shutdown now');
+}
+
+async function rebootDevice() {
+    await quitNDPi('SIGTERM', false);
+    exec('sudo reboot');
+}
+
+async function quitNDPi(signal, exit = true) {
+    await new Promise((resolve) => {
+        const sig = signal ? `[ ${signal} ]` : '';
+        console.log(`[ index ]${sig} Shutting down application...`);
+        if (index.ndpiServerStatusUpdate)
+            {
+                clearInterval(index.ndpiServerStatusUpdate);
+                index.ndpiServerStatusUpdate = null;
+            }
+        try { index.ndiReceiver?.close(); } catch {}
+        try { index.lcdDisplay?.kill() } catch {}
+        try { index.controller_cec?.close(); } catch {}
+        try { index.service_bonjour?.close(); } catch {}
+        try { index.service_chromium?.close(); } catch {}
+        try { index.wsConnection_ndpiServer?.close(); } catch {}
+        try { index.server_api?.close(); } catch {}
+        try { index.settings?.close(); } catch {}
+        resolve();
+    });
+    if (exit)
+    { process.exit(0); }
 }
 
 process.on('uncaughtException', (err) => {

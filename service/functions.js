@@ -170,7 +170,7 @@ const { exec } = require('node:child_process');
                     return response;
                     break;
                 
-                case '':
+                // case '':
                 //     console.log(`PROCESSING: ${command.type}`);
 
                 //     response.success = true;
@@ -191,15 +191,39 @@ const { exec } = require('node:child_process');
 
                 // Device
                 case 'shutdown-device':
-                    console.log(`PROCESSING: ${command.type}`);
-
-                    response.success = true;
+                    try
+                    {
+                        const f = await fetch('http://localhost:3080/api/v1/__internal/shutdown', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(command)
+                        });
+                        if (f.ok) { response.success = true }
+                        else { response.success = false }
+                    }
+                    catch (error)
+                    {
+                        response.data.message = error;
+                        response.success = false;
+                    }
                     return response;
                     break;
                 case 'reboot-device':
-                    console.log(`PROCESSING: ${command.type}`);
-
-                    response.success = true;
+                    try
+                    {
+                        const f = await fetch('http://localhost:3080/api/v1/__internal/reboot', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(command)
+                        });
+                        if (f.ok) { response.success = true }
+                        else { response.success = false }
+                    }
+                    catch (error)
+                    {
+                        response.data.message = error;
+                        response.success = false;
+                    }
                     return response;
                     break;
                 case 'rename-device':
