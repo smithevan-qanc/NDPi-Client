@@ -261,8 +261,16 @@ class NDPi {
             }
         });
 
-        this.server_api.on('shutdown', () => { shutdownDevice(); });
-        this.server_api.on('reboot', () => { rebootDevice(); });
+        this.server_api.on('shutdown', () => {
+            setTimeout(() => {
+                shutdownDevice();
+            }, 1000);
+        });
+        this.server_api.on('reboot', () => {
+            setTimeout(() => {
+                rebootDevice();
+            }, 1000);
+        });
     }
 
     /** START BONJOUR MDNS BROADCAST */
