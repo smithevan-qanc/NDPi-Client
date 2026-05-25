@@ -65,7 +65,6 @@ class NDPi {
         });
         startup.on('exit', () => { 
             this.startFsData();
-            this.startLcdDisplay();
         });
         try { exec('killall xcompmgr'); } catch {}
         try { exec('killall picom'); } catch {}
@@ -80,6 +79,7 @@ class NDPi {
 
         //  FS System Ready
         this.settings.on('ready', () => {
+            this.startLcdDisplay();
             func.setDisplayResolution();
             this.startApi();
         });
