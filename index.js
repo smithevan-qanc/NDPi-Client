@@ -54,6 +54,7 @@ class NDPi {
         this.initiate();
     }
 
+    /** INITIATE */
     initiate() {
         const startup = exec(`./sh/startup`);
         startup.stdout.on('data', (data) => {
@@ -72,6 +73,7 @@ class NDPi {
         this.compMgr = exec('./sh/xcompmgr');
     }
 
+    /** START FILE SYSTEM WATCHER */
     startFsData() {
         const FileSystemMonitor = require('./service/client_fs.js');
         this.settings = new FileSystemMonitor(NDPi_VERSION, NDPi_VERSION_DATE);
@@ -208,6 +210,7 @@ class NDPi {
 
     }
 
+    /** LAUNCH LCD DISPLAY RENDERER */
     startLcdDisplay() {
         if (this.lcdDisplay)
         { try { this.lcdDisplay.kill(); } catch {} }
@@ -219,6 +222,7 @@ class NDPi {
         });
     }
 
+    /** START API */
     startApi() {
         const NDPiCommandServer_Client = require('./service/client_api_server.js');
         this.server_api = new NDPiCommandServer_Client(this.settings);
@@ -258,11 +262,13 @@ class NDPi {
         });
     }
 
+    /** START BONJOUR MDNS BROADCAST */
     startMdns() {
         const NDPiBonjourService = require('./service/client_bonjour.js');
         this.service_bonjour = new NDPiBonjourService(this.settings);
     }
 
+    /** LAUNCH LOCAL CHROMIUM DISPLAY */
     startChromium() {
         if (fs.existsSync('/usr/bin/chromium'))
         {
@@ -276,6 +282,7 @@ class NDPi {
         }
     }
 
+    /** OPEN CEC CONTROLER */
     openCecController() {
         const CecController = require('./service/client_cec.js');
         this.controller_cec = new CecController(this.settings);
@@ -299,6 +306,7 @@ class NDPi {
         });
     }
 
+    /** LAUNCH NDI RECEIVER */
     startNdiReceiver() {
         if (this.ndiReceiver)
         {
@@ -324,6 +332,7 @@ class NDPi {
         });
     }
 
+    /** RELAUNCH NDI RECEIVER */
     __restartNdiReceiver(wait = 1000) {
         if (!this.timerRestartNdi)
         {
@@ -334,6 +343,7 @@ class NDPi {
         }
     }
 
+    /** OPEN COMMUNICATION WITH NDPI HUB SERVER */
     connectToNDPiServer() {
         const ClientServerWebSocket = require('./service/clientServer_websocket.js');
         this.wsConnection_ndpiServer = new ClientServerWebSocket(this.settings, this.server_api);
@@ -344,7 +354,7 @@ class NDPi {
         });
     }
 
-    // FUNCTIONS
+    /** HELPER FUNCTIONS */
     sendStatusToNDPiServer() {
         const status = {
             type: 'client-status',
