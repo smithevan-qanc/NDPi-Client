@@ -343,8 +343,8 @@ const { exec } = require('node:child_process');
                 framerate: null,
             };
             try { config.displayPort = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_port'), 'utf8').trim() } catch {}
-            try { config.resolution = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_resolution_current'), 'utf8').trim() } catch {}
-            try { config.framerate = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_framerate_current'), 'utf8').trim() } catch {}
+            try { config.resolution = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_resolution_preference'), 'utf8').trim() } catch {}
+            try { config.framerate = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_framerate_preference'), 'utf8').trim() } catch {}
 
             exec(`xrandr \
                 --output ${config.displayPort} \

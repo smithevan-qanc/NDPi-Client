@@ -40,7 +40,9 @@ echo "$(edid-decode /sys/class/drm/card1-HDMI-A-1/edid | grep -wF 'Display Produ
 
 # List Resolutions
 #   -v (Invert Match): Removes lines containg the letter 'm'
-echo "$(xrandr | grep -v 'm' | tr -d "*" | tr -d "+" | awk '{print "list_resolutions :", $1, "::", "--mode", $1, "--rate", $2}')"
+echo "$(xrandr | grep -v 'm' | tr -d "*" | tr -d "+" | awk '{print "list_resolutions :", $1, $2, "::", $1}')"
+
+# echo "$(xrandr | grep -v 'm' | tr -d "*" | tr -d "+" | awk '{print "list_resolutions :", $1, "::", "--mode", $1, "--rate", $2}')"
   # Example Return:
     # list_resolutions : 1920x1080 :: --mode 1920x1080 --rate 60.00*+
     # list_resolutions : 1680x1050 :: --mode 1680x1050 --rate 59.88

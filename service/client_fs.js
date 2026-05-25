@@ -259,19 +259,33 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditExternal: true,
             },
             {
-                key: "output_display_resolution_current",
-                value: ``,
+                key: "output_display_resolution_preference",
+                value: `1920x1080`,
                 group: ``,
                 options: [],
                 allowEditInternal: true,
                 allowEditExternal: true,
             },
             {
-                key: "output_display_framerate_current",
+                key: "output_display_framerate_preference",
                 value: ``,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: true,
+            },
+            {
+                key: "output_display_resolution_current",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_display_framerate_current",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
             },
             {
                 key: "output_display_resolution_preferred",
@@ -647,9 +661,9 @@ class FileSystemMonitor extends EventEmitter {
                                 break;
                         }
                     });
-                    const fileMapCurrRes = this.fileMap.get('output_display_resolution_current');
+                    const fileMapCurrRes = this.fileMap.get('output_display_resolution_preference');
                     fileMapCurrRes.options = resolutionOptions;
-                    this.fileMap.set('output_display_resolution_current', fileMapCurrRes);
+                    this.fileMap.set('output_display_resolution_preference', fileMapCurrRes);
                 }
             });
         }

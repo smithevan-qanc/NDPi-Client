@@ -27,12 +27,12 @@ def read_file(filepath):
 def get_centered_x(text, font_size, display_width=280):
     text_width = len(text) * (font_size * 0.55)
     x_coordinate = (display_width - text_width) / 2
-    return max(0, int(round(x_coordinate)))
+    return max(5, int(round(x_coordinate)))
 
 def get_right_x(text, font_size, margin=10, display_width=280):
     text_width = len(text) * (font_size * 0.55)
     x_coordinate = (display_width - text_width - margin)
-    return max(0, int(round(x_coordinate)))
+    return max(5, int(round(x_coordinate)))
     
 Consolas_Bold_30 = ImageFont.truetype("../Font/ConsolasBold.ttf", 30)
 Consolas_Bold_25 = ImageFont.truetype("../Font/ConsolasBold.ttf", 25)
@@ -106,11 +106,11 @@ try:
 
         # CPU Temperature ------------------------------------------------------------
         sys_temp = f"{str(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000)}°C"
-        sys_temp_x = get_centered_x("##:## | ##.#°C", 20)
+        sys_temp_x = get_centered_x(" ##:## | ##.#°C", 20)
         draw.text((sys_temp_x, 175), f"{time_string} | {sys_temp}", fill="GREEN", font=Consolas_Bold_20)
 
         # NDPi Version & Device IP ---------------------------------------------------
-        line_dev_info = f"({ndpi_version})  {device_ip}".strip()
+        line_dev_info = f"(v{ndpi_version}) {device_ip}".strip()
         line_dev_info_x = get_centered_x(line_dev_info, 20)
         draw.text((line_dev_info_x, 195), line_dev_info, fill="GREEN", font=Consolas_Bold_20)
 

@@ -199,12 +199,12 @@ class NDPi {
         });
 
         //  HDMI Resolution
-        this.settings.on('output_display_resolution_current', (data) => {
+        this.settings.on('output_display_resolution_preference', (data) => {
             setTimeout(() => { func.setDisplayResolution(); }, 500);
         });
 
         //  HDMI Framerate
-        this.settings.on('output_display_framerate_current', (data) => {
+        this.settings.on('output_display_framerate_preference', (data) => {
             setTimeout(() => { func.setDisplayResolution(); }, 500);
         });
 
