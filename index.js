@@ -66,10 +66,11 @@ class NDPi {
         startup.on('exit', () => { 
             this.startFsData();
         });
-        try { exec('killall xcompmgr'); } catch {}
-        try { exec('killall picom'); } catch {}
+        // try { exec('killall xcompmgr'); } catch {}
+        // try { exec('killall picom'); } catch {}
         
-        this.compMgr = exec('./sh/xcompmgr');
+        // this.compMgr = exec('./sh/xcompmgr');
+        this.compMgr = spawn('xcompmgr', ['-d', ':0', '-fF']);
     }
 
     /** START FILE SYSTEM WATCHER */
