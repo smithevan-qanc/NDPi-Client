@@ -70,7 +70,7 @@ class NDPi {
         // try { exec('killall picom'); } catch {}
         
         // this.compMgr = exec('./sh/xcompmgr');
-        this.compMgr = spawn('xcompmgr', ['-d', ':0', '-fF']);
+        // this.compMgr = spawn('xcompmgr', ['-d', ':0', '-fFn']);
     }
 
     /** START FILE SYSTEM WATCHER */
