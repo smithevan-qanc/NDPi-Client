@@ -436,7 +436,6 @@ class FileSystemMonitor extends EventEmitter {
         this.watcher = fs.watch(this.dataDir);
 
         this.watcher.on('change', (eventType, filename) => {
-            console.log(`[ client_fs ][ ${eventType} ]`);
             if (this.fileMap.has(filename))
             { this._fsEvent(filename) }
         });
