@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 # This script is executed on the remote machine automatically after the update from GitHub is downloaded.
@@ -10,14 +10,16 @@ set -e
 customInstallInstructions() {
     # Write Custom Update Script Here
     echo ""
+    sudo rsync -zq ${PGM}/config/.xinitrc /home/ndpi-client/
+    sudo chown ndpi-client:ndpi-client /home/ndpi-client/.xinitrc
 }
 
 install() {
     echo "PREPARING TO INSTALL UPDATE"
     cd ../
     sleep 1
-    local TMP="$(pwd)/TMP_ndpi"
-    local PGM="$(pwd)/ndpi"
+    TMP="$(pwd)/TMP_ndpi"
+    PGM="$(pwd)/ndpi"
     echo "    [FROM] $TMP"
     echo "      [TO] $PGM"
     # read -rp "Install? (y/n) " confirm
