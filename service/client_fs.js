@@ -13,6 +13,7 @@ class FileSystemMonitor extends EventEmitter {
     #fsPoll;
     constructor(version = '1.0.0', versionDate = '1970-01-01') {
         super();
+        this.watcher;
         this.setMaxListeners(100)
 
         this.defaultDeviceName = 'NDPi Client';
@@ -428,10 +429,24 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     start() {
-        fs.watch(this.dataDir, async (event, filename) => {
-            if (this.fileMap.has(filename) && event === 'change')
-            { this._fsEvent(filename); }
+        // this.watcher = fs.watch(this.dataDir, async (event, filename) => {
+        //     if (this.fileMap.has(filename) && event === 'change')
+        //     { this._fsEvent(filename); }
+        // });
+        this.watcher = fs.watch(this.dataDir);
+
+        this.watcher.on('change', (eventType, filename) => {
+            console.log(`[ client_fs ][ ${eventType} ]`);
+            if (this.fileMap.has(filename))
+            { this._fsEvent(filename) }
         });
+        this.watcher.on('close', () => {
+            this.__flushQueue();
+        });
+        this.watcher.on('error', (error) => {
+            console.log(`🔴 [ client_fs ][ ERROR ]`, error);
+        });
+        
         this.startDrmMonitor();
         this.updateLocalIp();
     }
@@ -448,7 +463,7 @@ class FileSystemMonitor extends EventEmitter {
 
         setTimeout(() => {
             this.__flushQueue();
-        }, 500);
+        }, debounceMs);
     }
 
     __flushQueue() {
@@ -494,7 +509,7 @@ class FileSystemMonitor extends EventEmitter {
 
     put(fileName, data = '') {
         if (!fileName || !this.fileMap.has(fileName))
-        { return }
+        { return; }
         try
         { fs.writeFileSync(path.join(this.dataDir, fileName), data.trim(), 'utf8') }
         catch (error)
@@ -538,7 +553,7 @@ class FileSystemMonitor extends EventEmitter {
             if (deviceIP !== storedValue)
             { this.put(fileName, deviceIP); }
         }
-        
+
         if (this.firstRun)
         {
             this.poll();
