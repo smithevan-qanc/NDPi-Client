@@ -289,8 +289,8 @@ class NDPi {
         } 
         else
         {
-            console.log('[ index ][ client_chromium ] Skipping Chromium display launch.');
-            console.log('[ index ][ client_chromium ] -- Missing binary: /usr/bin/chromium');
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] Skipping Chromium display launch.`);
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] -- Missing binary: /usr/bin/chromium`);
         }
     }
 
@@ -309,15 +309,15 @@ class NDPi {
         });
 
         this.controller_cec.on('event', (data) => {
-            console.log(`[ index ][ client_cec ]`, data);
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_cec ]`, data);
         });
         
         this.controller_cec.on('error_log', (data) => {
-            console.log(`🔴 [ index ][ client_cec ][ ERROR ]`, data);
+            console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ client_cec ][ ERROR ]`, data);
         });
 
         this.controller_cec.on('timeout', (data) => {
-            console.log(`[ index ][ client_cec ] ${String(data || 'CEC Unavailable')}`);
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_cec ] ${String(data || 'CEC Unavailable')}`);
             this.controller_cec.quit();
             this.controller_cec = null;
         });
@@ -334,7 +334,7 @@ class NDPi {
         this.ndiReceiver = new NDI_Receiver_v2(this.settings, this.server_api, this.service_chromium);
 
         this.ndiReceiver.on('connected', () => {
-            console.log('[ index ][ client_ndiReceiver ] Receiver Started');
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
             this.server_api.updateDisplay({ type: `show-ndi` });
             //this.service_chromium.close();
         });

@@ -50,7 +50,7 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     async init() {
-        console.log(`[ client_fs ] NDPi Data Management Module - v${this.#pgmVersion} - ${this.#pgmVersionDate}`);
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ] NDPi Data Management Module - v${this.#pgmVersion} - ${this.#pgmVersionDate}`);
 
         // Create directory if it doesn't exist.
         if (!fs.existsSync(this.dataDir))
@@ -67,12 +67,12 @@ class FileSystemMonitor extends EventEmitter {
             try
             {
                 deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
-                console.log('[ client_fs ][ DEVICE ID ]',  deviceId);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ DEVICE ID ] ${deviceId}`);
             }
             catch 
             {
                 deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
-                console.log('[ client_fs ][ FALLBACK DEVICE ID ] ', deviceId);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ FALLBACK DEVICE ID ] ${deviceId}`);
             }
         }
         else // MacOS Compatability
@@ -415,7 +415,7 @@ class FileSystemMonitor extends EventEmitter {
                 }
             }
             catch (err)
-            { console.log(`🔴 [ client_fs ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err) }
+            { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err) }
             
             if (this.sendToLCD.includes(setting.key))
             { fs.writeFileSync(path.join(__dirname, '..', 'python', 'script', setting.key), setting.value, 'utf8'); }
@@ -443,7 +443,7 @@ class FileSystemMonitor extends EventEmitter {
             this.__flushQueue();
         });
         this.watcher.on('error', (error) => {
-            console.log(`🔴 [ client_fs ][ ERROR ]`, error);
+            console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error);
         });
         
         this.startDrmMonitor();
@@ -479,9 +479,9 @@ class FileSystemMonitor extends EventEmitter {
                 this.fileMap.set(name, currentValue);
 
                 if (name === 'media_overlay_image')
-                { console.log(`[ client_fs ][ UPDATE ] '${name}'`); }
+                { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ UPDATE ] '${name}'`); }
                 else
-                { console.log(`[ client_fs ][ UPDATE ] '${name}' ==> '${fsValue}'`); }
+                { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ UPDATE ] '${name}' ==> '${fsValue}'`); }
 
                 if (this.sendToLCD.includes(name))
                 { fs.writeFileSync(path.join(this.lcdDisplayScriptPath, name), fsValue, 'utf8'); }
@@ -512,7 +512,7 @@ class FileSystemMonitor extends EventEmitter {
         try
         { fs.writeFileSync(path.join(this.dataDir, fileName), data.trim(), 'utf8') }
         catch (error)
-        { console.error('🔴 [ client_fs ][ ERROR ] Saving to FileSystem') }
+        { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving to FileSystem`) }
     }
 
     close() {
@@ -597,7 +597,7 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     startDrmMonitor() {
-        console.log('[ client_fs ] STARTING DRM MONITOR');
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ] Starting DRM Monitor`);
 
         // const pth_thermal_fanSpeed = path.join('/sys','class','thermal','cooling_device0','cur_state');
         // const pth_thermal_cpuTemperature = path.join('/sys','class','thermal','thermal_zone0','temp');
@@ -605,12 +605,12 @@ class FileSystemMonitor extends EventEmitter {
         this.drmMonitor = spawn('udevadm', ['monitor', '--subsystem-match=drm', '--kernel']);
 
         this.drmMonitor.stdout.on('data', (data) => {
-            console.log('[ client_fs ] DRM Update');
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ] DRM Update`);
             this.updateOutputDisplay();
         });
 
         this.drmMonitor.on('error', (error) => {
-            console.log("🔴 [ client_fs ][ ERROR ] 'udevadm' DRM monitor disabled", error.toString());
+            console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] 'udevadm' DRM monitor disabled`, error.toString());
             this.drmMonitor = null;
         });
     }

@@ -98,11 +98,10 @@ class ChromiumOverlayDisplay extends EventEmitter {
         this.service.on('error', (err) => {
             console.error(
                 '🔴',
-                `[ ${path.basename(__filename)} ]`,
+                `[ ${path.basename(__filename).split('.')[0]} ]`,
                 '[ ERROR ]',
                 err
             );
-            // console.log('🔴 [ client_chromium ][ ERROR ]', err);
         });
 
         this.service.on('close', () => {

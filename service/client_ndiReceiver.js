@@ -110,14 +110,12 @@ class NDI_Receiver_v2 extends EventEmitter {
 
         this.receiver.on('error', (error) => {
             process.nextTick(() => { this.emit('error') });
-            console.log(`🔴 [ client_ndiReceiver ][ NDI ] --▶ Critical Error:`, error);
+            console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ NDI ] --▶ Critical Error:`, error);
         });
 
         this.receiver.stderr.on('data', (data) => {
             const output = data.toString().trim();
-            output.split(/\r?\n/).forEach((line) => {
-                console.log(`🔴 [ client_ndiReceiver ][ NDI ] --▶ Error: ${line}`);
-            });
+            output.split(/\r?\n/).forEach((line) => { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ NDI ] --▶ Error: ${line}`); });
         });
 
         this.receiver.on('close', (code, signal) => {
@@ -138,7 +136,7 @@ class NDI_Receiver_v2 extends EventEmitter {
             this.ndiResolution = null;
             this.settings.put('ndpi_status_ndi_source_resolution', '');
             
-            console.log(`[ client_ndiReceiver ][ NDI ] --▶ Terminated - Code:${code}, Signal:${signal}`);
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] --▶ Terminated - Code:${code || 'n/a'}, Signal:${signal || 'n/a'}`);
             //this.server.broadcastToDisplay();
 
             console.info(
@@ -162,7 +160,7 @@ class NDI_Receiver_v2 extends EventEmitter {
             setTimeout(() => {
                 try {
                     this.receiver.kill('SIGKILL');
-                    console.log('[ client_ndiReceiver ][ NDI ] --▶ SIGKILL');
+                    console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] --▶ SIGKILL`);
                 }
                 catch {}
                 finally {
@@ -187,7 +185,7 @@ class NDI_Receiver_v2 extends EventEmitter {
     // }
 
     parseInfo(data) {
-        const logInfo = (line = '') => { console.log(`[ client_ndiReceiver ][ NDI ] --▶ ${line}`); }
+        const logInfo = (line = '') => { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] --▶ ${line}`); }
         data.split(/\r?\n/).forEach((stdout) => {
             const str = String(stdout || '');
             if (str && !str.startsWith('- '))
@@ -253,32 +251,32 @@ class NDI_Receiver_v2 extends EventEmitter {
                 return;
                 break;
             case 10:
-                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             case 20:
-                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             case 30:
-                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             case 40:
-                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             case 50:
-                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             case 60:
-                console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             default:
                 if (this.secondsInactive === 61)
-                { console.log(`[ client_ndiReceiver ] ${this.ndiSource} inactive longer than 60 seconds. Awaiting reconnection.`); }
+                { console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive longer than 60 seconds. Awaiting reconnection.`); }
                 return;
                 break;
         }

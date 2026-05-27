@@ -55,12 +55,10 @@ class NDPiBonjourService {
         }
 
         const options = this._buildOptions();
-        console.log('[ client_bonjour ] Publishing Service');//, options
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Publishing Service');
 
         this.service = bonjour.publish(options);
-        this.service.on('error', (err) => {
-            console.log('🔴 [ client_bonjour ][ ERROR ]', err.message);
-        });
+        this.service.on('error', (err) => { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, err.message); });
     }
 
     async close() {

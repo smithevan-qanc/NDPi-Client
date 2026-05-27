@@ -26,7 +26,7 @@ class CecController extends EventEmitter {
 
         this.maxDelay = 10000;
 
-        console.log('[ client_cec ] Opening CEC Client')
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Opening CEC Client')
         this.start();
     }
 
@@ -76,7 +76,7 @@ class CecController extends EventEmitter {
 
     async close() {
         console.info(
-            `[ ${path.basename(__filename)} ]`,
+            `[ ${path.basename(__filename).split('.')[0]} ]`,
             'Closing Module'
         );
         this.enabled = false;
@@ -117,30 +117,30 @@ class CecController extends EventEmitter {
             const lineCheck = line.trim() || null;
             if (this.showAllOut)
             {
-                console.log(`[ client_cec ][ MESSAGE ] ${line}`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ MESSAGE ] ${line}`);
                 return;
             }
 
             if (!line.includes('TRAFFIC') && lineCheck && lineCheck !== "'")
             {
                 if (!line.includes(']'))
-                { console.log(`[ client_cec ][ MESSAGE ] ${line}`) }
+                { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ MESSAGE ] ${line}`) }
                 else
                 {
                     let lineSplit = line.split(']')[1].trim();
                     let lineSendReceive = `${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`;
                     if (lineSplit.includes('<<'))
-                    { console.log(`[ client_cec ][    SEND ] ${lineSendReceive}`); }
+                    { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ ---SEND ] ${lineSendReceive}`); }
                     else if (lineSplit.includes('>>'))
-                    { console.log(`[ client_cec ][ RECEIVE ] ${lineSendReceive}`) }
+                    { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ RECEIVE ] ${lineSendReceive}`) }
                     else if (lineSplit.includes('(0):') || lineSplit.includes('(1):'))
                     {
-                        console.log(`[ client_cec ][  UPDATE ] ${lineSplit}`);
+                        console.info(`[ ${path.basename(__filename).split('.')[0]} ][ -UPDATE ] ${lineSplit}`);
                         if (lineSplit.includes('TV') && lineSplit.includes('power status'))
                             { this.settings.put('output_display_cec_status_power', lineSplit.split("'")[3]) }
                     }
                     else if (line.includes('ERROR'))
-                    { console.log(`🔴 [ client_cec ][ ERROR ] ${lineSplit}`) }
+                    { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${lineSplit}`) }
                 }
             }
         });
@@ -157,7 +157,7 @@ class CecController extends EventEmitter {
                     this.timeoutTimer = null;
                 }
                 this.emit('ready');
-                console.log('[ client_cec ] CEC Ready');
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] CEC Ready`);
                 this.settings.put('output_display_cec_enabled', 'true');
                 this.restartDelay = 1000;
                 this._flushQueue();

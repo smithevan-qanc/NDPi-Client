@@ -37,8 +37,8 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         this.Server = http.createServer(this.App)
             .listen(this.port, '0.0.0.0', () => {
-                console.log('[ client_api_server ] API/Display Server Online');
-                console.log(`[ client_api_server ] PORT: ${this.port}`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'API/Display Server Online');
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`,`PORT: ${this.port}`);
                 process.nextTick(() => { this.emit('online'); });
             })
             .on('upgrade', (request, socket, head) => {
@@ -58,7 +58,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             });
 
         this.ws_serv_display.on('connection', (ws) =>{
-            console.log('[ client_api_server ] Display WebSocket connection started.');
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Display WebSocket connection started.');
             
             this.ws_conn_display.add(ws);
             
@@ -66,11 +66,11 @@ class NDPiCommandServer_Client extends EventEmitter {
             
             ws.on('close', () => { this.ws_conn_display.delete(ws); });
 
-            ws.on('error', (error) => { console.log('🔴 [ client_api_server ][ ERROR ] WebSocket GUI Connection', error); });
+            ws.on('error', (error) => { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] WebSocket GUI Connection`, error); });
         });
         
         this.ws_serv_system.on('connection', (ws) =>{
-            console.log('[ client_api_server ] System WebSocket connection started.');
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'System WebSocket connection started.');
             
             this.ws_conn_system.add(ws);
 
@@ -83,7 +83,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             
             ws.on('close', () => { this.ws_conn_system.delete(ws); });
 
-            ws.on('error', (error) => { console.log('🔴 [ client_api_server ][ ERROR ] WebSocket GUI Connection', error); });
+            ws.on('error', (error) => { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] WebSocket GUI Connection`, error); });
         });
 
         this.Routes = express.Router();
@@ -100,7 +100,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             .route('/api/v1/command')
             .get(async (req, res) => {
                 // to use: http://<ip>:<port>/api/v1/command?type=set-source&data=EVAN-MSI (OBS PGM)
-                console.log('[ client_api_server ] GET:', req.url);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'GET:', req.url);
 
                 const commandRes = await processCommand({
                     ...req.query,
@@ -118,7 +118,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                 }
             })
             .post(async (req, res) => {
-                console.log('[ client_api_server ] POST:', req.url);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'POST:', req.url);
 
                 const commandRes = await processCommand({
                     ...req.body,
@@ -208,16 +208,16 @@ class NDPiCommandServer_Client extends EventEmitter {
 
     close() {
         console.info(
-            '[ client_api_server ]',
+            `[ ${path.basename(__filename).split('.')[0]} ]`,
             'Closing Module',
-            `[ Connections ] Server:${this.Server.connections}, Display WS: ${this.ws_conn_display.size}, System WS: ${this.ws_conn_system.size}`
+            `[ Connections ] Server:${this.Server?.connections}, Display WS: ${this.ws_conn_display.size}, System WS: ${this.ws_conn_system.size}`
         );
         this.ws_conn_display.forEach(client => {
             // if (client.readyState === WebSocket.OPEN)
             try {
                 client.close();
             } catch (e) {
-                console.error('🔴', '[ client_api_server ]', 'Error Closing Display WebSocket Client Connection', e);
+                console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e);
             } finally {
                 this.ws_conn_display.delete(client);
             }
@@ -227,14 +227,14 @@ class NDPiCommandServer_Client extends EventEmitter {
             try {
                 client.close();
             } catch (e) {
-                console.error('🔴', '[ client_api_server ]', 'Error Closing Display WebSocket Client Connection', e);
+                console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e);
             } finally {
                 this.ws_conn_system.delete(client);
             }
         });
         this.Server.closeAllConnections();
         this.Server.close();
-        console.info('[ client_api_server ]', 'Module Exited', `Connections: ${this.Server.connections}`);
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited', `Connections: ${this.Server.connections}`);
     }
 
     broadcastToDisplay(message = {}, sendAll = false, options = {}) {
@@ -259,7 +259,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                 updateData.service = {};
                 updateData.service.name = this.settings.get('device_type');
                 updateData.service.version = this.settings.get('ndpi_version');
-                console.log('[ client_api_server ] Sending update to GUI');
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Sending update to GUI');
             }
 
         if (options.ws) 

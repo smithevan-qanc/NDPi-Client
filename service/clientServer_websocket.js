@@ -32,17 +32,18 @@ class ClientServerWebSocket extends EventEmitter {
         
         // Clean up existing connection
         if (this.socket)
-            {
-                try { this.socket.close(); } catch {}
-                this.socket = null;
-            }
-        if (this.reconnectTimer)
-            {
-                clearTimeout(this.reconnectTimer);
-                this.reconnectTimer = null;
-            }
+        {
+            try { this.socket.close(); } catch {}
+            this.socket = null;
+        }
 
-        console.log('[ clientServer_websocket ] Connecting');
+        if (this.reconnectTimer)
+        {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
+
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ] Connecting`);
         try
         {
             const wsUrl = `ws://${this.ndpiServerIp}:${this.ndpiServerPort}/ws/client`;
@@ -50,12 +51,12 @@ class ClientServerWebSocket extends EventEmitter {
         }
         catch (error)
         {
-            console.log('🔴 [ clientServer_websocket ] Connection Failed', error);
+            console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ] Connection Failed`, error);
             this.scheduleReconnect();
         }
             
         this.socket.on('open', () => {
-            console.log(`[ clientServer_websocket ] Connected NDPi Server`);
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ] Connected NDPi Server`);
             this.server.broadcastToDisplay({ type: 'ndpi-server-connected' }, true);
             this.emit('connected');
         });
@@ -64,22 +65,22 @@ class ClientServerWebSocket extends EventEmitter {
             try
             {
                 const message = JSON.parse(data);
-                console.log('[ clientServer_websocket ][ Message ] NDPi Server: Message:', message);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ Message ] NDPi Server: Message:`, message);
                 processCommand(message);
             }
             catch (error)
             {
-                console.log('🔴 [ clientServer_websocket ][ ERROR ] NDPi Server: Message:', data);
-                console.log('🔴 [ clientServer_websocket ][ ERROR ] NDPi Server: Error:', error);
+                console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] NDPi Server: Message:`, data);
+                console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] NDPi Server: Error:`, error);
             }
         });
         
         this.socket.on('error', (error) => {
-            console.log('🔴 [ clientServer_websocket ][ ERROR ] NDPi Server Connection', error);
+            console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] NDPi Server Connection`, error);
         });
         
         this.socket.on('close', () => {
-            console.log('[ clientServer_websocket ] NDPi Server Disconnected');
+            console.info(`🔴 [ ${path.basename(__filename).split('.')[0]} ] NDPi Server Disconnected`);
             this.scheduleReconnect();
         });
     }
@@ -132,13 +133,13 @@ class ClientServerWebSocket extends EventEmitter {
             { return }
         if (!message.type)
             {
-                console.log("🔴 [ clientServer_websocket ][ ERROR ] Missing 'message.type'. Message:", message);
+                console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Missing 'message.type'. Message:`, message);
                 return;
             }
         if (this.socket && this.socket.readyState <= 1)
             { this.socket.send(JSON.stringify(message)) }
         else
-            { console.log("🔴 [ clientServer_websocket ][ ERROR ] Unable to send message.") }
+            { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Unable to send message.`) }
     }
 
 }
