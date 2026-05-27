@@ -105,7 +105,7 @@ try:
         draw.line([(0, 170), (280, 170)], fill = "GRAY", width = 1)
 
         # CPU Temperature ------------------------------------------------------------
-        sys_temp = f"{str(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000)}°C"
+        sys_temp = f"{format(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000, ".2f")}°C"
         sys_temp_x = get_centered_x(" ##:## | ##.#°C", 20)
         draw.text((sys_temp_x, 175), f"{time_string} | {sys_temp}", fill="GREEN", font=Consolas_Bold_20)
 

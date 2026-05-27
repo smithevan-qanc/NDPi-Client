@@ -537,14 +537,14 @@ class FileSystemMonitor extends EventEmitter {
             const storedValue = this.fileMap.get(fileName).value;
             if (deviceIP !== storedValue)
             { this.put(fileName, deviceIP); }
-            
-            if (this.firstRun)
-            {
-                this.poll();
-                this.emit('ready');
-                this.firstRun = false;
-                // this.start();
-            }
+        }
+        
+        if (this.firstRun)
+        {
+            this.poll();
+            this.emit('ready');
+            this.firstRun = false;
+            // this.start();
         }
     }
 

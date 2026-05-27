@@ -170,6 +170,7 @@ class CecController extends EventEmitter {
     }
 
     send(command, { debounceKey = null, debounceMs = 300 } = {}) {
+        staticDebounceKey = debounceKey || String(command).split(' ')[0] || null;
         if (debounceKey)
         {
             const last = this.debounceMap.get(debounceKey) || 0;

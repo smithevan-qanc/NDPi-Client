@@ -301,6 +301,11 @@ class NDPi {
 
         this.controller_cec.on('ready', () => {
             this.server_api.setCecController(this.controller_cec);
+            // Command TV to turn ON <<< Then, Command TV to display this device as the active source.
+            this.controller_cec.proc.stdin.write('on 0\n');
+            setTimeout(() => {
+                this.controller_cec.proc.stdin.write('as\n');
+            }, 3000);
         });
 
         this.controller_cec.on('event', (data) => {
@@ -425,7 +430,9 @@ async function quitNDPi(signal, exit = true) {
         try { index.wsConnection_ndpiServer?.close(); } catch {}
         try { index.server_api?.close(); } catch {}
         try { index.settings?.close(); } catch {}
-        resolve();
+        setTimeout(() => {
+            resolve();
+        }, 3000);
     });
     if (exit)
     { process.exit(0); }

@@ -17,6 +17,8 @@ echo "$(xrandr | grep '+ ' | awk '{print "preferred_resolution :", $1}')"
 echo "$(xrandr | grep '+ ' | awk '{print "preferred_framerate :", $2}')"
 #
 
+cd /sys/class/hwmon && cat hwmon0/temp1_input
+
 # List Resolutions
 #   -v (Invert Match): Removes lines containg the letter 'm'
 echo "$(xrandr | grep -v 'm' | awk '{print "list_resolutions :", $1, "::", "--mode", $1, "--rate", $2}')"
