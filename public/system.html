@@ -82,7 +82,7 @@
             justify-content: center;
             align-items: center;
             text-wrap-mode: nowrap;
-            transition: all ease-in-out 500ms;
+            transition: all ease-out 180ms;
         }
         button:hover {
             background: rgb(103, 167, 14);
@@ -333,6 +333,22 @@
             { resetOverlayUpload(); }
             else
             { console.error('Failed to upload overlay.', res) }
+        });
+        document.getElementById('device_reboot').addEventListener('click', async function(e) {
+            e.preventDefault();
+            this.disabled = true;
+            this.textContent = 'REBOOTING...'
+            await sendCommand({
+                type: 'reboot-device'
+            });
+        });
+        document.getElementById('device_shutdown').addEventListener('click', async function(e) {
+            e.preventDefault();
+            this.disabled = true;
+            this.textContent = 'SHUTTING DOWN...'
+            await sendCommand({
+                type: 'shutdown-device'
+            });
         });
         
     }
