@@ -5,3 +5,4 @@
 
 RecordNotifyDuration=0
 ConnNotifyTimeout=0
+DisableTrayIcon=2

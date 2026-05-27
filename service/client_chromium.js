@@ -24,14 +24,8 @@ class ChromiumOverlayDisplay extends EventEmitter {
             'Closing Module'
         );
         try {
-            this.service.kill();
+            this.service?.kill();
         } catch (err) {
-            console.error(
-                '🔴',
-                `[ ${path.basename(__filename)} ]`,
-                '[ ERROR ]',
-                err
-            );
             exec('killall chromium', (error, stdout, stderr) => {
                 if (error)
                 {

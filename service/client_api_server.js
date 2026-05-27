@@ -242,25 +242,25 @@ class NDPiCommandServer_Client extends EventEmitter {
         let updateData = {};
         
         if (message.type)
-            { updateData.type = message.type; }
+        { updateData.type = message.type; }
         else
-            { updateData.type = `show-${displayMode}`; }
+        { updateData.type = `show-${displayMode}`; }
 
         if (this.settings.get('ndpi_status_ndi') === 'streaming')
-            { updateData.type = 'show-ndi'; }
+        { updateData.type = 'show-ndi'; }
 
         if (sendAll)
-            {
-                updateData.serverIp = this.settings.get('ndpi_command_server_host');
-                updateData.thisDevice = {};
-                updateData.thisDevice.id = this.settings.get('device_id');
-                updateData.thisDevice.address = this.settings.get('device_ip');
-                updateData.thisDevice.name = this.settings.get('device_name');
-                updateData.service = {};
-                updateData.service.name = this.settings.get('device_type');
-                updateData.service.version = this.settings.get('ndpi_version');
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Sending update to GUI');
-            }
+        {
+            updateData.serverIp = this.settings.get('ndpi_command_server_host');
+            updateData.thisDevice = {};
+            updateData.thisDevice.id = this.settings.get('device_id');
+            updateData.thisDevice.address = this.settings.get('device_ip');
+            updateData.thisDevice.name = this.settings.get('device_name');
+            updateData.service = {};
+            updateData.service.name = this.settings.get('device_type');
+            updateData.service.version = this.settings.get('ndpi_version');
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Sending update to GUI');
+        }
 
         if (options.ws) 
         {
@@ -270,11 +270,13 @@ class NDPiCommandServer_Client extends EventEmitter {
                 return;
             }
         }
-
-        this.ws_conn_display.forEach(client => {
-            if (client.readyState === WebSocket.OPEN)
-                { client.send(JSON.stringify(updateData)) }
-        });
+        else
+        {
+            this.ws_conn_display.forEach(client => {
+                if (client.readyState === WebSocket.OPEN)
+                { client.send(JSON.stringify(updateData)); }
+            });
+        }
     }
 
     updateDisplay(message = {}) {
@@ -282,7 +284,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             { return; }
         this.ws_conn_display.forEach(client => {
             if (client.readyState === WebSocket.OPEN)
-                { client.send(JSON.stringify(message)) }
+            { client.send(JSON.stringify(message)); }
         });
     }
 

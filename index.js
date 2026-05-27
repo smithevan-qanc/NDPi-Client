@@ -344,16 +344,16 @@ class NDPi {
 
         this.ndiReceiver.on('connected', () => {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
+            
             this.server_api.updateDisplay({ type: `show-ndi` });
-            //this.service_chromium.close();
         });
 
         this.ndiReceiver.on('close', () => {
             
-            // if (String(this.targetSource || 'none').toLowerCase() !== 'none') 
             if (this.ndiReceiver.enabled) 
             { this.__restartNdiReceiver(); }
-            else 
+
+            if (String(this.targetSource || 'none').toLowerCase() !== 'none')
             { setTimeout(() => { this.server_api.broadcastToDisplay(); }, 400); }
             
             this.ndiReceiver = null;
