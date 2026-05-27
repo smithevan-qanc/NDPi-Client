@@ -84,7 +84,7 @@ class CecController extends EventEmitter {
         this.proc.kill();
         await new Promise((resolve) => {
             const recheckStatus = () => {
-                if (this.proc.killed) 
+                if (this.proc?.killed)
                 { resolve(); }
                 setTimeout(() => { recheckStatus(); }, 500);
             };
