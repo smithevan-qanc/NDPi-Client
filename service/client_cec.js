@@ -170,14 +170,14 @@ class CecController extends EventEmitter {
     }
 
     send(command, { debounceKey = null, debounceMs = 300 } = {}) {
-        staticDebounceKey = debounceKey || String(command).split(' ')[0] || null;
-        if (debounceKey)
+        const staticDebounceKey = debounceKey || String(command).split(' ')[0] || null;
+        if (staticDebounceKey)
         {
-            const last = this.debounceMap.get(debounceKey) || 0;
+            const last = this.debounceMap.get(staticDebounceKey) || 0;
             const now = Date.now();
             if (now - last < debounceMs)
                 { return }
-            this.debounceMap.set(debounceKey, now);
+            this.debounceMap.set(staticDebounceKey, now);
         }
         this.queue.push(command);
         this._flushQueue();
