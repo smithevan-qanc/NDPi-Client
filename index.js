@@ -437,11 +437,12 @@ async function quitNDPi(signal, exit = true) {
         try { index.lcdDisplay?.kill() } catch {}
         try { index.controller_cec?.close(); } catch {}
         try { index.service_bonjour?.close(); } catch {}
-        try { index.service_chromium?.close(); } catch {}
         try { index.wsConnection_ndpiServer?.close(); } catch {}
         try { index.server_api?.close(); } catch {}
         try { index.settings?.close(); } catch {}
+        try { index.compMgr.kill() } catch {}
         setTimeout(() => {
+            try { index.service_chromium?.close(); } catch {}
             resolve();
         }, 3000);
     });
