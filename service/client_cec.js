@@ -1,5 +1,6 @@
-const { spawn }    = require('child_process');
+const { spawn } = require('child_process');
 const EventEmitter = require('events');
+const path = require('path');
 
 class CecController extends EventEmitter {
     constructor(fsData) {
@@ -43,17 +44,17 @@ class CecController extends EventEmitter {
             this.isReady = false;
             this.proc = null;
             if (this.enabled)
-                { this._scheduleRestart() }
+            { this._scheduleRestart() }
             else
+            {
+                if (this.timeoutTimer)
                 {
-                    if (this.timeoutTimer)
-                        {
-                            clearTimeout(this.timeoutTimer);
-                            this.timeoutTimer = null;
-                        }
-                    this.queue = [];
-                    this.debounceMap.clear();
+                    clearTimeout(this.timeoutTimer);
+                    this.timeoutTimer = null;
                 }
+                this.queue = [];
+                this.debounceMap.clear();
+            }
         });
 
         this.proc.on('error', () => {
@@ -62,21 +63,39 @@ class CecController extends EventEmitter {
         });
 
         if (this.timeoutTimer)
-            { return }
+        { return }
         this.timeoutTimer = setTimeout(() => {
             if (!this.isReady)
-                {
-                    this.emit('timeout', "Never received 'waiting for input' signal");
-                    this.close();
-                }
+            {
+                this.emit('timeout', "Never received 'waiting for input' signal");
+                this.close();
+            }
             this.timeoutTimer = null;
         }, 30000);
     }
 
-    close() {
+    async close() {
+        console.info(
+            `[ ${path.basename(__filename)} ]`,
+            'Closing Module'
+        );
         this.enabled = false;
         this.isReady = false;
-        this.send('q');
+        this.proc.kill();
+        await new Promise((resolve) => {
+            const recheckStatus = () => {
+                if (this.proc.killed) 
+                { resolve(); }
+                setTimeout(() => { recheckStatus(); }, 500);
+            };
+            recheckStatus();
+        });
+        console.info(
+            `[ ${path.basename(__filename)} ]`,
+            'Module Exited'
+        );
+        return;
+        // this.send('q');
     }
 
     _scheduleRestart() {

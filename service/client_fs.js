@@ -516,10 +516,44 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     close() {
-        clearInterval(this.#fsPoll);
-        this.#fsPoll = null;
-        this.drmMonitor.kill();
-        this.drmMonitor = null;
+        console.info(
+            `[ ${path.basename(__filename)} ]`,
+            'Closing Module'
+        );
+
+        this.watcher.close();
+
+        try {
+            clearInterval(this.#fsPoll);
+        } catch (e) {
+            console.error(
+                '🔴',
+                `[ ${path.basename(__filename)} ]`,
+                '[ ERROR ]',
+                'Clearing fsPoll',
+                e
+            );
+        } finally {
+            this.#fsPoll = null;
+        }
+
+        try {
+            this.drmMonitor.kill();
+        } catch (e) {
+            console.error(
+                '🔴',
+                `[ ${path.basename(__filename)} ]`,
+                '[ ERROR ]',
+                'SIGTERM drmMonitor',
+                e
+            );
+        } finally {
+            this.drmMonitor = null;
+        }
+        console.info(
+            `[ ${path.basename(__filename)} ]`,
+            'Module Exited'
+        );
     }
 
     /**

@@ -207,18 +207,34 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     close() {
+        console.info(
+            '[ client_api_server ]',
+            'Closing Module',
+            `[ Connections ] Server:${this.Server.connections}, Display WS: ${this.ws_conn_display.size}, System WS: ${this.ws_conn_system.size}`
+        );
         this.ws_conn_display.forEach(client => {
-            if (client.readyState === WebSocket.OPEN)
-                { try { client.close() } catch {} }
-            this.ws_conn_display.delete(client);
+            // if (client.readyState === WebSocket.OPEN)
+            try {
+                client.close();
+            } catch (e) {
+                console.error('🔴', '[ client_api_server ]', 'Error Closing Display WebSocket Client Connection', e);
+            } finally {
+                this.ws_conn_display.delete(client);
+            }
         });
         this.ws_conn_system.forEach(client => {
-            if (client.readyState === WebSocket.OPEN)
-                { try { client.close() } catch {} }
-            this.ws_conn_system.delete(client);
+            // if (client.readyState === WebSocket.OPEN)
+            try {
+                client.close();
+            } catch (e) {
+                console.error('🔴', '[ client_api_server ]', 'Error Closing Display WebSocket Client Connection', e);
+            } finally {
+                this.ws_conn_system.delete(client);
+            }
         });
         this.Server.closeAllConnections();
         this.Server.close();
+        console.info('[ client_api_server ]', 'Module Exited', `Connections: ${this.Server.connections}`);
     }
 
     broadcastToDisplay(message = {}, sendAll = false, options = {}) {

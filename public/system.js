@@ -40,11 +40,9 @@ class DeviceSocket {
                 const msg = JSON.parse(message.data);
                 for (const [id, object] of msg)
                 {
-                    // const settingInnerHTML = `<label style="text-transform: capitalize;" for="${id}">${String(id.split('_').join(' '))}:</label><input type="text" id="${id}" value="${value}">`;
-
                     const settingInnerHTML = `
-                        <td style="text-transform: uppercase; min-width: 120px; text-align: right;">${String(id.split('_').join(' '))}:</td>
-                        <td style="width: 60%;">
+                        <td style="text-transform: uppercase; min-width: 120px; text-align: right; font-size: 12px;">${String(id.split('_').join(' '))}:</td>
+                        <td style="width: 70%;">
                             <input type="text" id="${id}" value="${object.value}" ${object.allowEditExternal ? '' : 'disabled'}>
                         </td>`;
 
@@ -79,7 +77,7 @@ class DeviceSocket {
         }
     }
 
-    scheduleDeviceReconnect(ms = 10000, timeout = 120000) {
+    scheduleDeviceReconnect(ms = 10000, timeout = 60000) {
         if (this.timerReconnectDevice) 
         { clearInterval(this.timerReconnectDevice); this.timerReconnectDevice = null; }
         this.timerReconnectDevice = setInterval(() => { this.connect(); }, ms);

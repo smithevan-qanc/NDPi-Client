@@ -340,12 +340,14 @@ class NDPi {
         });
 
         this.ndiReceiver.on('close', () => {
-            this.ndiReceiver = null;
             
-            if (String(this.targetSource || 'none').toLowerCase() !== 'none') 
+            // if (String(this.targetSource || 'none').toLowerCase() !== 'none') 
+            if (this.ndiReceiver.enabled) 
             { this.__restartNdiReceiver(); }
             else 
             { setTimeout(() => { this.server_api.broadcastToDisplay(); }, 400); }
+            
+            this.ndiReceiver = null;
         });
     }
 

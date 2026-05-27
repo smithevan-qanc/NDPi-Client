@@ -1,4 +1,5 @@
 const bonjour = require('bonjour')();
+const path = require('path');
 
 class NDPiBonjourService {
     constructor(fsData) {
@@ -63,6 +64,10 @@ class NDPiBonjourService {
     }
 
     async close() {
+        console.info(
+            `[ ${path.basename(__filename)} ]`,
+            'Closing Module'
+        );
         await new Promise((resolve) => {
             if (this.service)
             {
@@ -73,6 +78,10 @@ class NDPiBonjourService {
             else
             { resolve(); }
         });
+        console.info(
+            `[ ${path.basename(__filename)} ]`,
+            'Module Exited'
+        );
         return;
     }
 }

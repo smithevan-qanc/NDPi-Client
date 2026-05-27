@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 const { EventEmitter } = require('events');
 const { processCommand } = require('./functions');
+const path = require('path');
 
 class ClientServerWebSocket extends EventEmitter {
     constructor(fsData, api) {
@@ -22,10 +23,10 @@ class ClientServerWebSocket extends EventEmitter {
     }
     connect() {
         if (!this.ndpiServerIp || this.ndpiServerIp.includes('localhost'))
-            {
-                this.scheduleReconnect();
-                return;
-            }
+        {
+            this.scheduleReconnect();
+            return;
+        }
 
         this.enabled = true;
         
@@ -84,30 +85,46 @@ class ClientServerWebSocket extends EventEmitter {
     }
 
     close() {
+        console.info(
+            `[ ${path.basename(__filename)} ]`,
+            'Closing Module'
+        );
         this.enabled = false;
-        if (this.socket)
-        {
-            if (this.socket.readyState === WebSocket.OPEN)
-            { this.socket.close(); }
+        try {
+            this.socket.close()
         }
+        catch {}
+        finally {
+            this.socket = null;
+        }
+        console.info(
+            `[ ${path.basename(__filename)} ]`,
+            'Module Exited'
+        );
+
+        // if (this.socket)
+        // {
+        //     if (this.socket.readyState === WebSocket.OPEN)
+        //     { this.socket.close(); }
+        // }
         
-        this.socket = null;
+        // this.socket = null;
     }
 
     scheduleReconnect(ms = 5000) {
         if (this.reconnectTimer)
-            {
-                clearTimeout(this.reconnectTimer);
-                this.reconnectTimer = null;
-            }
+        {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
         if (this.enabled)
-            {
-                this.reconnectTimer = setTimeout(() => {
-                    if (this.enabled)
-                        { this.connect() }
-                    this.reconnectTimer = null;
-                }, ms);
-            }
+        {
+            this.reconnectTimer = setTimeout(() => {
+                if (this.enabled)
+                    { this.connect() }
+                this.reconnectTimer = null;
+            }, ms);
+        }
     }
 
     send(message = {}) {

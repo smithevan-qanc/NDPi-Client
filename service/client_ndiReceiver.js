@@ -141,37 +141,37 @@ class NDI_Receiver_v2 extends EventEmitter {
             console.log(`[ client_ndiReceiver ][ NDI ] --▶ Terminated - Code:${code}, Signal:${signal}`);
             //this.server.broadcastToDisplay();
 
+            console.info(
+                `[ ${path.basename(__filename)} ]`,
+                'Module Exited'
+            );
+
             //this.scheduleReconnect();
             this.emit('close');
         });
     }
-
-    // close() {
-    //     this.enabled = false;
-    //     if (this.receiver)
-    //         {
-    //             this.chromium.launch();
-    //             this.server.broadcastToDisplay();
-    //         }
-    //     setTimeout(() => {
-    //         try { this.receiver.kill('SIGKILL') } catch {}
-    //         console.log('[ client_ndiReceiver ][ NDI ] --▶ SIGKILL');
-    //         this.receiver = null;
-    //         if (!this.enabled)
-    //             { this.emit('close') }
-    //     }, 1000);
-    // }
     
-    close() {
+    async close() {
+        console.info(
+            `[ ${path.basename(__filename)} ]`,
+            'Closing Module'
+        );
         this.enabled = false;
         func.focusWindow('chromium');
-        try
-        {
-            this.receiver.kill('SIGKILL');
-            console.log('[ client_ndiReceiver ][ NDI ] --▶ SIGKILL');
-        }
-        catch {}
-        this.receiver = null;
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                try {
+                    this.receiver.kill('SIGKILL');
+                    console.log('[ client_ndiReceiver ][ NDI ] --▶ SIGKILL');
+                }
+                catch {}
+                finally {
+                    this.receiver = null;
+                    resolve();
+                }
+            }, 700);
+        });
+        return;
     }
 
     // scheduleReconnect(ms = 15000) {
