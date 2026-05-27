@@ -10,3 +10,9 @@ export DISPLAY=:0
 xset s off
 xset -dpms
 xset s noblank
+
+hsetroot -solid "#000000"
+# hsetroot -solid "#000066"
+
+echo "Starting Xcompmgr"
+xcompmgr -d :0 -fFn &

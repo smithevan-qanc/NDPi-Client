@@ -10,16 +10,14 @@ set -e
 customInstallInstructions() {
     # Write Custom Update Script Here
     # echo ""
-    sudo rsync -zq ${PGM}/config/.xinitrc /home/ndpi-client/
-    sudo chown ndpi-client:ndpi-client /home/ndpi-client/.xinitrc
 }
 
 install() {
     echo "PREPARING TO INSTALL UPDATE"
     cd ../
     sleep 1
-    TMP="$(pwd)/TMP_ndpi"
-    PGM="$(pwd)/ndpi"
+    local TMP="$(pwd)/TMP_ndpi"
+    local PGM="$(pwd)/ndpi"
     echo "    [FROM] $TMP"
     echo "      [TO] $PGM"
     # read -rp "Install? (y/n) " confirm
@@ -30,9 +28,9 @@ install() {
         echo "$(pwd)"
         customInstallInstructions
         sleep 1
-        # sudo systemctl restart ndpi.service
+        sudo systemctl restart ndpi.service
         echo "INSTALLATION COMPLETE"
-        sudo reboot
+        # sudo reboot
     # else
     #     echo "INSTALLATION ABORTED"
     # fi
