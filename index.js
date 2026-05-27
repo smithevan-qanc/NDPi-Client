@@ -196,17 +196,26 @@ class NDPi {
             const output = String(data || '').trim() || null;
             if (!output)
                 { return; }
-            setTimeout(() => { func.setDisplayResolution(); }, 500);
+            setTimeout(async () => {
+                await func.setDisplayResolution();
+                try { this.ndiReceiver.kill(); } catch {}
+            }, 500);
         });
 
         //  HDMI Resolution
         this.settings.on('output_display_resolution_preference', (data) => {
-            setTimeout(() => { func.setDisplayResolution(); }, 500);
+            setTimeout(async () => {
+                await func.setDisplayResolution();
+                try { this.ndiReceiver.kill(); } catch {}
+            }, 500);
         });
 
         //  HDMI Framerate
         this.settings.on('output_display_framerate_preference', (data) => {
-            setTimeout(() => { func.setDisplayResolution(); }, 500);
+            setTimeout(async () => {
+                await func.setDisplayResolution();
+                try { this.ndiReceiver.kill(); } catch {}
+            }, 500);
         });
 
     }

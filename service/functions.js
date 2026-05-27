@@ -344,7 +344,7 @@ const { exec } = require('node:child_process');
         }
 
         /** SET DISPLAY RESOLUTION */
-        function setDisplayResolution() {
+        async function setDisplayResolution() {
             let config = {
                 displayPort: 'HDMI-1',
                 resolution: null,
@@ -354,22 +354,34 @@ const { exec } = require('node:child_process');
             try { config.resolution = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_resolution_preference'), 'utf8').trim() } catch {}
             try { config.framerate = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_framerate_preference'), 'utf8').trim() } catch {}
 
-            exec(`xrandr \
-                --output ${config.displayPort} \
-                ${config.resolution ? `--mode ${config.resolution}` : '--auto'} \
-                ${config.framerate ? `--rate ${config.framerate}` : ''} \
-            `, { env: { ...process.env } }, (error, stderr) => {
-                if (error)
-                { console.error('🔴 [ functions ][ setDisplayResolution() ][ ERROR ] Resolution Set:', config, stderr) }
-                else
-                {
-                    exec('openbox --restart', {
-                        env: { ...process.env }
-                    }, (error, stdout, stderr) => {
-                        console.error(error ? `🔴 [ functions ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}` : ``);
-                    });
-                }
+            await new Promise((resolve) => {
+                exec(`xrandr \
+                    --output ${config.displayPort} \
+                    ${config.resolution ? `--mode ${config.resolution}` : '--auto'} \
+                    ${config.framerate ? `--rate ${config.framerate}` : ''} \
+                `, {
+                    env: { ...process.env }
+                }, (error, stderr) => {
+                    if (error)
+                    {
+                        console.error('🔴 [ functions ][ setDisplayResolution() ][ ERROR ] Resolution Set:', config, stderr);
+                        resolve();
+                    }
+                    else
+                    {
+                        exec('openbox --restart', {
+                            env: { ...process.env }
+                        }, (error, stdout, stderr) => {
+                            if (error)
+                            {
+                                console.error(`🔴 [ functions ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`);
+                            }
+                            resolve();
+                        });
+                    }
+                });
             });
+            return;
         }
 
 
