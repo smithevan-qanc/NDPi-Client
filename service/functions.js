@@ -360,7 +360,7 @@ const { exec } = require('node:child_process');
                 ${config.framerate ? `--rate ${config.framerate}` : ''} \
             `, { env: { ...process.env } }, (error, stderr) => {
                 if (error)
-                { console.error('🔴 [ functions ][ setDisplayResolution() ][ ERROR ] Resolution Set:', stderr) }
+                { console.error('🔴 [ functions ][ setDisplayResolution() ][ ERROR ] Resolution Set:', config, stderr) }
                 else
                 {
                     exec('openbox --restart', {
