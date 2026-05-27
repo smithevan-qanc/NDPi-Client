@@ -176,18 +176,6 @@ const { exec } = require('node:child_process');
                 //     response.success = true;
                 //     return response;
                 //     break;
-                // case '':
-                //     console.log(`PROCESSING: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
-                // case '':
-                //     console.log(`PROCESSING: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
 
                 // Device
                 case 'shutdown-device':
@@ -208,6 +196,7 @@ const { exec } = require('node:child_process');
                     }
                     return response;
                     break;
+                
                 case 'reboot-device':
                     try
                     {
@@ -226,18 +215,13 @@ const { exec } = require('node:child_process');
                     }
                     return response;
                     break;
+                
                 case 'rename-device':
                     console.log(`PROCESSING: ${command.type}`);
 
                     response.success = true;
                     return response;
                     break;
-                // case '':
-                //     console.log(`PROCESSING: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
 
                 // Default Fallback
                 default:
@@ -307,7 +291,7 @@ const { exec } = require('node:child_process');
                 }, (error, stdout, stderr) => {
                     if (error)
                     {
-                        console.log('🔴 [ functions ] Could NOT find window:', stderr.toString().trim());
+                        // console.log('🔴 [ functions ] Could NOT find window:', stderr.toString().trim());
                         response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
                         response.success = false;
                         resolve();
@@ -315,10 +299,10 @@ const { exec } = require('node:child_process');
                     }
                     else 
                     {
-                        console.log('[ functions ] Focusing Window ID:', stdout.toString().trim());
+                        console.info(`[ ${path.basename(__filename).split('.')[0]} ] Focusing Window ID:`, stdout.toString().trim());
                         if (!stdout.toString().trim())
                         {
-                            console.log(`🔴 [ functions ] ${className} NOT running.`);
+                            // console.log(`🔴 [ functions ] ${className} NOT running.`);
                             response.data.message = `${className} is NOT running.`;
                             response.success = false;
                             resolve();
@@ -330,7 +314,7 @@ const { exec } = require('node:child_process');
                         }, (error, stdout, stderr) => {
                             if (error)
                             {
-                                console.log('🔴 [ functions ] Could NOT activate window:', stderr.toString().trim() || 'null');
+                                console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ] Could NOT activate window:`, stderr.toString().trim() || 'null');
                                 response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
                                 response.success = false;
                                 resolve();

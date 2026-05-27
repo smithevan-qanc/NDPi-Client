@@ -69,8 +69,8 @@ class NDPi {
         // try { exec('killall xcompmgr'); } catch {}
         // try { exec('killall picom'); } catch {}
         
-        // this.compMgr = exec('./sh/xcompmgr');
-        // this.compMgr = spawn('xcompmgr', ['-d', ':0', '-fFn']);
+        exec(`hsetroot -solid "#000000"`);
+        this.compMgr = spawn('xcompmgr', ['-d', ':0', '-fFn']);
     }
 
     /** START FILE SYSTEM WATCHER */
