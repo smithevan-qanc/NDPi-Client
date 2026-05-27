@@ -9,7 +9,7 @@ set -e
 
 customInstallInstructions() {
     # Write Custom Update Script Here
-    # echo ""
+    sleep 1
 }
 
 install() {
