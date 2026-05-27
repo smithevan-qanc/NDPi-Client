@@ -82,6 +82,7 @@
             justify-content: center;
             align-items: center;
             text-wrap-mode: nowrap;
+            transition: all ease-in-out 500ms;
         }
         button:hover {
             background: rgb(103, 167, 14);
@@ -129,6 +130,17 @@
         }
         .red:hover {
             background: rgba(220, 80, 80, 1);
+            border-color: rgba(240, 50, 50, 1);
+            box-shadow: 0px 0px 5px rgba(200, 200, 200, 0.2);
+        }
+        .yellow {
+            min-width: 0;
+            background: rgba(255, 255, 0, 0.8);
+            color: #000;
+            border-color: rgba(220, 80, 80, 1);
+        }
+        .yellow:hover {
+            background: rgba(255, 255, 0, 1);
             border-color: rgba(240, 50, 50, 1);
             box-shadow: 0px 0px 5px rgba(200, 200, 200, 0.2);
         }
@@ -207,6 +219,12 @@
         <div class="card">
             <h2>System Settings</h2>
             <table class="settings-table" id="settings"></table>
+        </div>
+        <div class="card">
+            <div class="flex-row">
+                <button id="device_reboot">REBOOT Device</button>
+                <button class="red" id="device_shutdown">SHUTDOWN Device</button>
+            </div>
         </div>
     </div>
 </body>
