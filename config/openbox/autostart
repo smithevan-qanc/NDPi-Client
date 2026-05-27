@@ -7,11 +7,11 @@
 export DISPLAY=:0
 
 # Disable screen blanking and power management
-xset s off
-xset -dpms
-xset s noblank
+xset s off &
+xset -dpms &
+xset s noblank &
 
-hsetroot -solid "#000000"
+hsetroot -solid "#000000" &
 # hsetroot -solid "#000066"
 
 echo "Starting Xcompmgr"
