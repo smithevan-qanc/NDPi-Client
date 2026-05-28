@@ -1,6 +1,5 @@
 class DeviceSocket {
     constructor() {
-        
         this._ws = null;
 
         this.protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';

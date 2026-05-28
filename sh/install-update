@@ -32,7 +32,7 @@ install() {
         echo "$(pwd)"
         customInstallInstructions
         sleep 1
-        sudo systemctl restart ndpi.service
+        echo "Restarting NDPi Client" && sudo systemctl restart ndpi
         echo "INSTALLATION COMPLETE"
         # sudo reboot
     # else
