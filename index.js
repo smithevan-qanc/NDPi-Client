@@ -352,7 +352,7 @@ class NDPi {
             
             if (this.ndiReceiver.enabled) 
             { this.__restartNdiReceiver(); }
-
+//////////////////// NOT SHOWING OVERLAY OR SYSTEM DETAILS IN CHROMIUM WHEN CLEARING THE SOURCE.
             if (String(this.targetSource || 'none').toLowerCase() !== 'none')
             { setTimeout(() => { this.server_api.broadcastToDisplay(); }, 400); }
             
