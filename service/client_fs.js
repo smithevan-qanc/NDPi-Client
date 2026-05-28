@@ -634,12 +634,13 @@ class FileSystemMonitor extends EventEmitter {
             if (deviceIP !== storedValue)
             {
                 this.put(fileName, deviceIP);
-                this.fsPollInterval = 60000;
+                this.fsPollInterval = 10000;
                 this.poll();
             }
         }
         else
         {
+            this.put(fileName, '');
             this.fsPollInterval = 1000;
             this.poll();
         }
