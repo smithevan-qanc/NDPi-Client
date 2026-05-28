@@ -42,8 +42,7 @@ class DeviceSocket {
                 {
                     const settingInnerHTML = `
                         <td>
-                            <div style="text-transform: uppercase; text-align: left; font-size: 14px; padding-left: 16px; margin-bottom: 5px;">${String(id.split('_').join(' '))}:</div>
-                            <br>
+                            <div style="text-transform: uppercase; text-align: left; font-size: 14px; padding-left: 10px; margin-bottom: 5px;">${String(id.split('_').join(' '))}:</div>
                             <input type="text" id="${id}" value="${object.value}" ${object.allowEditExternal ? '' : 'disabled'}>
                         </td>`;
 
