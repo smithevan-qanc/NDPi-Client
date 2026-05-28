@@ -311,7 +311,7 @@
     })();
     
     // import NDPi_WebSocket from './socket.js'
-    const server = new NDPi_WebSocket('/ws/system');
+    const server = new NDPi_WebSocket('ws/system');
 
     server._ws.onmessage = (message) => {
         try
