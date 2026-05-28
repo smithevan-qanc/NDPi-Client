@@ -592,9 +592,25 @@ class FileSystemMonitor extends EventEmitter {
                                 .filter(link => link.link_type == 'ether')
                                 .filter(link => link.operstate == 'UP');
                             console.log('OUTPUT 2', output);
+                            if (output.length >= 1)
+                            {
+                                const output_obj = output[0];
+                                let output_addr_info = JSON.parse(output_obj.addr_info || '[]');
+                                if (Array.isArray(output_addr_info))
+                                {
+                                    output_addr_info = output_addr_info.filter(addr => addr.family == 'inet');
+                                    if (output_addr_info.length === 1)
+                                    {
+                                        console.log('OUTPUT 3', output_addr_info, output_addr_info[0])
+                                    }
+                                    // ipObj = JSON.parse(output_addr_info);
+                                    // console.log(ipObj)
+                                }
+                            }
                         }
                     }
-                    catch {}
+                    catch (error)
+                    { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, error); }
                     finally
                     { resolve(); }
                 }
