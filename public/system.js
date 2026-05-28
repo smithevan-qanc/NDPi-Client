@@ -41,10 +41,9 @@ class DeviceSocket {
                 for (const [id, object] of msg)
                 {
                     const settingInnerHTML = `
-                        <td>
-                            <div style="text-transform: uppercase; text-align: left; font-size: 14px; padding-left: 10px; margin-bottom: 5px;">${String(id.split('_').join(' '))}:</div>
-                            <input type="text" id="${id}" value="${object.value}" ${object.allowEditExternal ? '' : 'disabled'}>
-                        </td>`;
+                        <div style="text-transform: uppercase; text-align: left; font-size: 14px; padding-left: 10px; margin-bottom: 5px;">${String(id.split('_').join(' '))}:</div>
+                        <input type="text" id="${id}" value="${String(object.value).replaceAll('"', '\"')}" ${object.allowEditExternal ? '' : 'disabled'}>
+                    `;
 
                     if (id === 'ndpi_status_ndi_source_target') 
                     { document.getElementById('source_selection').value = object.value || 'none'; }
@@ -52,7 +51,7 @@ class DeviceSocket {
                     let settingEl = document.getElementById(`__${id}`);
                     if (!settingEl)
                     {
-                        settingEl = document.createElement('tr');
+                        settingEl = document.createElement('div');
                         settingEl.id = `__${id}`;
                         // settingEl.className = 'flex-row';
                         settingEl.innerHTML = settingInnerHTML;
