@@ -595,10 +595,9 @@ class FileSystemMonitor extends EventEmitter {
                             if (output.length >= 1)
                             {
                                 const output_obj = output[0];
-                                let output_addr_info = JSON.parse(output_obj.addr_info || '[]');
-                                if (Array.isArray(output_addr_info))
+                                if (Array.isArray(output_obj.addr_info))
                                 {
-                                    output_addr_info = output_addr_info.filter(addr => addr.family == 'inet');
+                                    let output_addr_info = output_obj.addr_info.filter(addr => addr.family == 'inet');
                                     if (output_addr_info.length === 1)
                                     {
                                         console.log('OUTPUT 3', output_addr_info, output_addr_info[0])
