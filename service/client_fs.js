@@ -585,13 +585,13 @@ class FileSystemMonitor extends EventEmitter {
                     try
                     {
                         let output = JSON.parse(String(stdout));
-                        console.log('OUTPUT 1', output)
+                        
                         if (Array.isArray(output))
                         {
                             output = output
                                 .filter(link => link.link_type == 'ether')
                                 .filter(link => link.operstate == 'UP');
-                            console.log('OUTPUT 2', output);
+
                             if (output.length >= 1)
                             {
                                 const output_obj = output[0];
