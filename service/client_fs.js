@@ -494,6 +494,12 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     poll() {
+        if (this.#fsPoll)
+        {
+            clearInterval(this.#fsPoll);
+            this.#fsPoll = null;
+        }
+
         this.#fsPoll = setInterval(() => {
             this.updateLocalIp();
             console.log('IP Interval');
@@ -566,6 +572,33 @@ class FileSystemMonitor extends EventEmitter {
         let fileName = 'device_ip';
         let deviceIP = null;
 
+        let ipObj = {};
+        await new Promise((resolve) => {
+            exec('ip -j address', (error, stdout, stderr) => {
+                if (error)
+                {
+                    console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, stderr.toString());
+                    resolve();
+                }
+                else
+                {
+                    try
+                    {
+                        const output = JSON.parse(String(stdout));
+                        console.log('OUTPUT 1', output)
+                        if (Array.isArray(output))
+                        {
+                            output
+                                .filter(link => link.link_type == 'ether')
+                                .filter(link => link.operstate == 'UP');
+                            console.log('OUTPUT 2', output);
+                        }
+                    }
+                    catch {}
+                }
+            });
+        });
+
         await new Promise((resolve) => {
             exec("hostname -I | awk '{print $1}'", (error, stdout, stderr) => {
                 if (error)
@@ -584,13 +617,18 @@ class FileSystemMonitor extends EventEmitter {
 
         if (deviceIP)
         {
-            this.fsPollInterval = 60000;
             const storedValue = this.fileMap.get(fileName).value;
             if (deviceIP !== storedValue)
-            { this.put(fileName, deviceIP); }
+            {
+                this.put(fileName, deviceIP);
+                this.fsPollInterval = 60000;
+                this.poll();
+            }
         }
-        else 
-        { this.fsPollInterval = 1000; }
+        else
+        {
+            this.fsPollInterval = 1000;
+        }
 
         if (this.firstRun)
         {
