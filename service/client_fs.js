@@ -584,17 +584,19 @@ class FileSystemMonitor extends EventEmitter {
                 {
                     try
                     {
-                        const output = JSON.parse(String(stdout));
+                        let output = JSON.parse(String(stdout));
                         console.log('OUTPUT 1', output)
                         if (Array.isArray(output))
                         {
-                            output
+                            output = output
                                 .filter(link => link.link_type == 'ether')
                                 .filter(link => link.operstate == 'UP');
                             console.log('OUTPUT 2', output);
                         }
                     }
                     catch {}
+                    finally
+                    { resolve(); }
                 }
             });
         });
