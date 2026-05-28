@@ -20,6 +20,7 @@ class FileSystemMonitor extends EventEmitter {
 
         // Data Poll Timer
         this.#fsPoll = null;
+        this.fsPollInterval = 1000;
 
         this.dataDir = process.env.DATA_NDPI_PATH;
         this.fileMap = null;
@@ -492,11 +493,12 @@ class FileSystemMonitor extends EventEmitter {
         }
     }
 
-    poll(interval = 60000) {
+    poll() {
         this.#fsPoll = setInterval(() => {
             this.updateLocalIp();
+            console.log('IP Interval');
             // Add other functions to poll
-        }, interval);
+        }, this.fsPollInterval);
     }
 
     get(fileName) {
@@ -582,10 +584,13 @@ class FileSystemMonitor extends EventEmitter {
 
         if (deviceIP)
         {
+            this.fsPollInterval = 60000;
             const storedValue = this.fileMap.get(fileName).value;
             if (deviceIP !== storedValue)
             { this.put(fileName, deviceIP); }
         }
+        else 
+        { this.fsPollInterval = 1000; }
 
         if (this.firstRun)
         {
