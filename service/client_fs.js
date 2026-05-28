@@ -599,11 +599,7 @@ class FileSystemMonitor extends EventEmitter {
                                 {
                                     let output_addr_info = output_obj.addr_info.filter(addr => addr.family == 'inet');
                                     if (output_addr_info.length === 1)
-                                    {
-                                        console.log('OUTPUT 3', output_addr_info, output_addr_info[0])
-                                    }
-                                    // ipObj = JSON.parse(output_addr_info);
-                                    // console.log(ipObj)
+                                    { deviceIP = output_addr_info[0].local; }
                                 }
                             }
                         }
@@ -616,21 +612,21 @@ class FileSystemMonitor extends EventEmitter {
             });
         });
 
-        await new Promise((resolve) => {
-            exec("hostname -I | awk '{print $1}'", (error, stdout, stderr) => {
-                if (error)
-                {
-                    resolve();
-                    return;
-                }
-                else
-                {
-                    deviceIP = stdout.toString().trim() || null;
-                    resolve();
-                    return;
-                }
-            });
-        });
+        // await new Promise((resolve) => {
+        //     exec("hostname -I | awk '{print $1}'", (error, stdout, stderr) => {
+        //         if (error)
+        //         {
+        //             resolve();
+        //             return;
+        //         }
+        //         else
+        //         {
+        //             deviceIP = stdout.toString().trim() || null;
+        //             resolve();
+        //             return;
+        //         }
+        //     });
+        // });
 
         if (deviceIP)
         {
@@ -645,11 +641,11 @@ class FileSystemMonitor extends EventEmitter {
         else
         {
             this.fsPollInterval = 1000;
+            this.poll();
         }
 
         if (this.firstRun)
         {
-            this.poll();
             this.emit('ready');
             this.firstRun = false;
             // this.start();
