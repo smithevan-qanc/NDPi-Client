@@ -1,4 +1,4 @@
-export class NDPi_WebSocket extends EventTarget {
+class NDPi_WebSocket extends EventTarget {
     /**
      * Opens a WebSocket connection. Uses the 'wss' protocol while connected via 'https', and 'ws' while connected via 'http'.
      * @param {string} path - Path for the destination WebSocket connection (e.g. 'path/to/socket')
