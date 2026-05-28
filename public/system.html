@@ -99,10 +99,11 @@
         }
         select:focus,
         input:focus {
-            /* box-shadow: 0px 0px 0.5px 1px rgba(255, 255, 255, 0.7), 0px 0px 2px 3.8px rgba(0, 120, 255, 1); */
+            /* box-shadow: 0px 0px 0.5px 1px rgba(255, 255, 255, 0.7), 0px 0px 1px 3px rgba(0, 130, 200, 0.8); */
+            box-shadow: 0px 0px 1px 3px rgba(0, 130, 200, 0.8);
             border-color: rgba(0, 130, 200, 0.8);
             border-style: solid;
-            border-width: 3px;
+            /* border-width: 3px; */
         }
         input[type=file] {
             cursor: pointer;
@@ -165,7 +166,6 @@
         .red:hover {
             background: rgba(190, 10, 10, 1);
             border-color: rgba(220, 40, 40, 1);
-            /* box-shadow: 0px 0px 5px rgba(200, 200, 200, 0.2); */
         }
         .red:active {
             background: rgba(220, 40, 40, 1);
@@ -180,13 +180,13 @@
         .yellow:hover {
             background: rgba(200, 170, 0, 1);
             border-color: rgba(240, 210, 0, 1);
-            /* box-shadow: 0px 0px 5px rgba(200, 200, 200, 0.2); */
         }
         .yellow:active {
             background: rgba(240, 210, 0, 1);
             border-color: rgba(200, 170, 0, 1);
         }
 
+        button,
         input,
         select {
             height: 34px;
@@ -255,11 +255,11 @@
         </div>
         <div class="card">
             <h2>NDI Source</h2>
-            <div class="flex-row">
-                <button style="min-width: 0;" id="refresh_sources">Refresh</button>
+            <div class="flex-column">
                 <select id="source_selection">
                     <option value="none">None</option>
                 </select>
+                <button style="min-width: 0;" id="refresh_sources">Refresh</button>
             </div>
         </div>
         <div class="card">
@@ -274,7 +274,7 @@
             </div>
         </div>
         <div class="card">
-            <div class="flex-row">
+            <div class="flex-column">
                 <button class="yellow" id="device_reboot">REBOOT Device</button>
                 <button class="red" id="device_shutdown">SHUTDOWN Device</button>
             </div>
