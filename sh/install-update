@@ -22,7 +22,7 @@ install() {
     echo "      [TO] $PGM"
     # read -rp "Install? (y/n) " confirm
     # if [[ "$confirm" = [yY] ]]; then
-        sudo rsync -rvu --exclude '.git' "$TMP"/ "$PGM"
+        sudo rsync -rvu --exclude .git "$TMP"/ "$PGM"
         sleep 1
         cd $PGM
         echo "$(pwd)"
