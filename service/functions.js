@@ -3,12 +3,24 @@ const os = require('os');
 const net = require('net');
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('node:child_process');
+const { exec, spawn } = require('node:child_process');
 
 /** ---- Export Functions ---- */
 
     /** TODO */
-    processCommand()
+
+        async function checkCecCompliance() {
+            let responseCecCompliance = [];
+            await new Promise((resolve) => {
+                const proc = spawn('cec-compliance', ['-s']);
+                proc.stdout.on('data', (data) => {
+                    responseCecCompliance.push(stdoutToArray(data.toString()));
+                });
+                proc.on('close', () => { resolve(); });
+            });
+            console.log(JSON.stringify(responseCecCompliance, null, 2));
+        }
+    
         /** 
          * (NDPi Function) - Process API Command.
          * @param {object} message - Message object from API. Required: 'type'
@@ -402,6 +414,7 @@ module.exports = {
     focusWindow,
     stdoutToArray,
     setDisplayResolution,
+    checkCecCompliance,
 };
 
 

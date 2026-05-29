@@ -1,6 +1,7 @@
 const { spawn } = require('child_process');
 const EventEmitter = require('events');
 const path = require('path');
+const func = require('./functions');
 
 class CecController extends EventEmitter {
     constructor(fsData) {
@@ -33,7 +34,7 @@ class CecController extends EventEmitter {
     start() {
         this.isReady = false;
 
-        this.proc = spawn('cec-client', ['-o', this.deviceName, '-t', 'r', '-d', '4'], {
+        this.proc = spawn('cec-client', ['-o', this.deviceName, '-t', 'r'], {
             stdio: ['pipe', 'pipe', 'pipe']
         });
 
@@ -134,6 +135,7 @@ class CecController extends EventEmitter {
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ] CEC Ready`);
                 this.emit('ready');
                 this.settings.put('output_display_cec_enabled', 'true');
+                func.checkCecCompliance();
 
                 this._flushQueue();
             }
