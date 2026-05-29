@@ -19,6 +19,17 @@ const { exec, spawn } = require('node:child_process');
                 });
                 proc.on('close', () => { resolve(); });
             });
+            responseCecCompliance.forEach((line) => {
+                if (String(line).includes('Polling:'))
+                {
+                    const line_polling = String(line).split(': ');
+                    if (line_polling[1] == 'OK')
+                    {
+                        console.log('Writing To Path', path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'))
+                        fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'), 'true', 'utf8');
+                    }
+                }
+            });
             console.log(JSON.stringify(responseCecCompliance, null, 2));
         }
     
