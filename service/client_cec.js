@@ -116,7 +116,7 @@ class CecController extends EventEmitter {
 
         const thisLine = String(data).split(/\r?\n/);
 
-        thisLine.forEach((line) => {
+        thisLine.forEach(async (line) => {
             
             if (this.debug) { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ DEBUG ] ${line}`); }
 
@@ -135,7 +135,8 @@ class CecController extends EventEmitter {
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ] CEC Ready`);
                 this.emit('ready');
                 this.settings.put('output_display_cec_enabled', 'true');
-                func.checkCecCompliance();
+                await func.checkCecCompliance();
+                console.log('cec compliance check complete');
 
                 this._flushQueue();
             }

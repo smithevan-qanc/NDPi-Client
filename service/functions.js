@@ -14,7 +14,8 @@ const { exec, spawn } = require('node:child_process');
             await new Promise((resolve) => {
                 const proc = spawn('cec-compliance', ['-s']);
                 proc.stdout.on('data', (data) => {
-                    responseCecCompliance.push(stdoutToArray(data.toString()));
+                    const output = String(data.toString()).replaceAll('\t', '');
+                    responseCecCompliance.push(stdoutToArray(output));
                 });
                 proc.on('close', () => { resolve(); });
             });
