@@ -13,6 +13,7 @@ class FileSystemMonitor extends EventEmitter {
     #fsPoll;
     constructor(version = '1.0.0', versionDate = '1970-01-01') {
         super();
+
         this.watcher;
         this.setMaxListeners(100)
 
@@ -46,7 +47,6 @@ class FileSystemMonitor extends EventEmitter {
 
         // First run is used as a flag for func.getLocalIp();
         this.firstRun = true;
-
         this.init();
     }
 
@@ -59,10 +59,12 @@ class FileSystemMonitor extends EventEmitter {
 
         // Set the deviceId from either serial-number or machine-id
         let deviceId = '';
+
         const deviceIdPaths = [
             path.join('/sys','firmware','devicetree','base','serial-number'),
             path.join('/etc','machine-id'),
         ];
+
         if (fs.existsSync(deviceIdPaths[0]) || fs.existsSync(deviceIdPaths[1]))
         {
             try
@@ -91,63 +93,63 @@ class FileSystemMonitor extends EventEmitter {
         this.fileMap = new Map();
         const files = [
             { 
-                key: "device_name",                             // Custom device name
+                key: "device_name",
                 value: `${this.defaultDeviceName}`,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: true,
             },
             {
-                key: "device_type",                             // Device type for broadcast over Bonjour
+                key: "device_type",
                 value: `NDPi Monitor Client`,
                 group: ``,
                 allowEditInternal: false,
                 allowEditExternal: false,
             },
             {
-                key: "device_id",                               // Device ID
+                key: "device_id",
                 value: deviceId.toUpperCase(),
                 group: ``,
                 allowEditInternal: false,
                 allowEditExternal: false,
             },
             {
-                key: "device_ip",                               // Local IP for device
+                key: "device_ip",
                 value: ``,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: false,
             },
             {
-                key: "local_port_number_api",                   // Port number for device API
+                key: "local_port_number_api",
                 value: `${process.env.PORT_API || 3080}`,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: true,
             },
             {
-                key: "local_port_number_bonjour",               // Port number for device Bonjour
+                key: "local_port_number_bonjour",
                 value: `${process.env.PORT_MDNS || 3053}`,
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: true,
             },
             {
-                key: "ndpi_version",                            // Version of NDPi 
+                key: "ndpi_version",
                 value: this.#pgmVersion,
                 group: ``,
                 allowEditInternal: false,
                 allowEditExternal: false,
             },
             {
-                key: "ndpi_version_date",                       // NDPi Version release date.
+                key: "ndpi_version_date",
                 value: this.#pgmVersionDate,
                 group: ``,
                 allowEditInternal: false,
                 allowEditExternal: false,
             },
             {
-                key: "ndpi_command_server_host",                // 
+                key: "ndpi_command_server_host",
                 value: ``,
                 group: ``,
                 allowEditInternal: true,
@@ -352,13 +354,6 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditInternal: true,
                 allowEditExternal: true,
             },
-            // {
-            //     key: "",
-            //     value: ``,
-            //     group: ``,
-            //     allowEditInternal: true,
-            //     allowEditExternal: true,
-            // },
         ];
         // Files that will NOT initialize with the previously stored value.
         const retainDefaultValue = [
@@ -380,16 +375,6 @@ class FileSystemMonitor extends EventEmitter {
             'output_display_cec_status_power',
             'output_display_cec_active_source',
         ];
-
-        /**
-         * 
-         *  If the @key is within the retainDefaultValue Array,
-         *      then change the @getValueFromFile flag to false.
-         *      then overwrite the stored value with the default value.
-         * 
-         *  This is used to prevent reading value from file.
-         * 
-         */
 
         for (const file of files)
         {
@@ -430,19 +415,17 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     start() {
-        // this.watcher = fs.watch(this.dataDir, async (event, filename) => {
-        //     if (this.fileMap.has(filename) && event === 'change')
-        //     { this._fsEvent(filename); }
-        // });
         this.watcher = fs.watch(this.dataDir);
 
         this.watcher.on('change', (eventType, filename) => {
             if (this.fileMap.has(filename))
             { this._fsEvent(filename) }
         });
+
         this.watcher.on('close', () => {
             this.__flushQueue();
         });
+
         this.watcher.on('error', (error) => {
             console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error);
         });
@@ -502,64 +485,39 @@ class FileSystemMonitor extends EventEmitter {
 
         this.#fsPoll = setInterval(() => {
             this.updateLocalIp();
-            console.log('IP Interval');
-            // Add other functions to poll
         }, this.fsPollInterval);
     }
 
     get(fileName) {
         if (!fileName || !this.fileMap.has(fileName))
         { return null; }
-
         return this.fileMap.get(fileName).value;
     }
 
     put(fileName, data = '') {
         if (!fileName || !this.fileMap.has(fileName))
         { return; }
-        try
-        { fs.writeFileSync(path.join(this.dataDir, fileName), data.trim(), 'utf8') }
-        catch (error)
-        { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving to FileSystem`) }
+        try { fs.writeFileSync(path.join(this.dataDir, fileName), data.trim(), 'utf8') }
+        catch (error) { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving to FileSystem`); }
     }
 
     close() {
-        console.info(
-            `[ ${path.basename(__filename)} ]`,
+        console.info( `[ ${path.basename(__filename)} ]`,
             'Closing Module'
         );
 
-        this.watcher.close();
+        try { this.watcher.close(); }
+        catch {}
 
-        try {
-            clearInterval(this.#fsPoll);
-        } catch (e) {
-            console.error(
-                '🔴',
-                `[ ${path.basename(__filename)} ]`,
-                '[ ERROR ]',
-                'Clearing fsPoll',
-                e
-            );
-        } finally {
-            this.#fsPoll = null;
-        }
+        try { clearInterval(this.#fsPoll); }
+        catch (e) { console.error('🔴', `[ ${path.basename(__filename)} ]`, '[ ERROR ]', 'Clearing fsPoll', e); }
+        finally { this.#fsPoll = null; }
 
-        try {
-            this.drmMonitor.kill();
-        } catch (e) {
-            console.error(
-                '🔴',
-                `[ ${path.basename(__filename)} ]`,
-                '[ ERROR ]',
-                'SIGTERM drmMonitor',
-                e
-            );
-        } finally {
-            this.drmMonitor = null;
-        }
-        console.info(
-            `[ ${path.basename(__filename)} ]`,
+        try { this.drmMonitor.kill(); }
+        catch (e) { console.error('🔴', `[ ${path.basename(__filename)} ]`, '[ ERROR ]', 'SIGTERM drmMonitor', e); }
+        finally { this.drmMonitor = null; }
+        
+        console.info(`[ ${path.basename(__filename)} ]`,
             'Module Exited'
         );
     }
@@ -612,22 +570,6 @@ class FileSystemMonitor extends EventEmitter {
             });
         });
 
-        // await new Promise((resolve) => {
-        //     exec("hostname -I | awk '{print $1}'", (error, stdout, stderr) => {
-        //         if (error)
-        //         {
-        //             resolve();
-        //             return;
-        //         }
-        //         else
-        //         {
-        //             deviceIP = stdout.toString().trim() || null;
-        //             resolve();
-        //             return;
-        //         }
-        //     });
-        // });
-
         if (deviceIP)
         {
             const storedValue = this.fileMap.get(fileName).value;
@@ -655,9 +597,6 @@ class FileSystemMonitor extends EventEmitter {
 
     startDrmMonitor() {
         console.info(`[ ${path.basename(__filename).split('.')[0]} ] Starting DRM Monitor`);
-
-        // const pth_thermal_fanSpeed = path.join('/sys','class','thermal','cooling_device0','cur_state');
-        // const pth_thermal_cpuTemperature = path.join('/sys','class','thermal','thermal_zone0','temp');
 
         this.drmMonitor = spawn('udevadm', ['monitor', '--subsystem-match=drm', '--kernel']);
 

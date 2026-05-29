@@ -8,7 +8,16 @@ const { exec } = require('node:child_process');
 /** ---- Export Functions ---- */
 
     /** TODO */
-
+    processCommand()
+        /** 
+         * (NDPi Function) - Process API Command.
+         * @param {object} message - Message object from API. Required: 'type'
+         * @param {string} [message.id] 
+         * @param {string} [message.type]
+         * @param {any} [message.data]
+         * 
+         * @returns {object} 
+         */
         async function processCommand(message = {}) {
             // ... Reference For Building
             let command = {
@@ -170,13 +179,6 @@ const { exec } = require('node:child_process');
                     return response;
                     break;
                 
-                // case '':
-                //     console.log(`PROCESSING: ${command.type}`);
-
-                //     response.success = true;
-                //     return response;
-                //     break;
-
                 // Device
                 case 'shutdown-device':
                     try
@@ -239,20 +241,20 @@ const { exec } = require('node:child_process');
         /** GET LOCAL IP */
         async function getLocalIp(testForNetwork = false) {
             if (testForNetwork)
-                {
-                    console.log('[ functions ] Waiting for network online...');
-                    await waitForNetwork();
-                }
+            {
+                console.log('[ functions ] Waiting for network online...');
+                await waitForNetwork();
+            }
             const interfaces = os.networkInterfaces();
             for (const name of Object.keys(interfaces))
+            {
+                for (const iface of interfaces[name])
                 {
-                    for (const iface of interfaces[name])
-                        {
-                            const isIPv4 = iface.family === 'IPv4' || iface.family === 4;
-                            if (isIPv4 && !iface.internal)
-                                { return iface.address || null }
-                        }
+                    const isIPv4 = iface.family === 'IPv4' || iface.family === 4;
+                    if (isIPv4 && !iface.internal)
+                    { return iface.address || null }
                 }
+            }
             return null;
         }
 
@@ -283,6 +285,12 @@ const { exec } = require('node:child_process');
         }
 
         /** FOCUS WINDOW */
+        /**
+         * Set focus to a visible window.
+         * @param {string} className - Window class name of the window to focus. Discover the class name using xprop.
+         * @param {object} res - Response object. This function will use and update a response object from an API call. This is optional.
+         * @returns {object} - Response object
+         */
         async function focusWindow(className, res = { data: {} }) {
             let response = { ...res };
             await new Promise((resolve) => {
@@ -344,6 +352,9 @@ const { exec } = require('node:child_process');
         }
 
         /** SET DISPLAY RESOLUTION */
+        /**
+         * This function set's the HDMI output resolution to the currently set values contained in 'output_display_port', 'output_display_resolution_preference', and 'output_display_framerate_preference'.
+         */
         async function setDisplayResolution() {
             let config = {
                 displayPort: 'HDMI-1',
