@@ -42,35 +42,25 @@ const { exec, spawn } = require('node:child_process');
                 }
 
                 if (lineIncludes(line, 'CEC Version') && !fileName)
-                {
-                    fileName = 'output_display_cec_version'; writeValue = String(splitLine[1] || '').trim();
-                }
+                { fileName = 'output_display_cec_version'; writeValue = String(splitLine[1] || '').trim(); }
 
                 if (lineIncludes(line, 'Physical Address') && !fileName)
                 {
-                    console.log(
-                        'Address To Number',
+                    console.log('Address To Number',
                         `| String: '${String(splitLine[1] || '').trim().replaceAll('.', '')}'`,
                         `| Number: ${Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0)}`
                     );
-                    fileName = '';
-                    writeValue = Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0);
+                    fileName = 'output_display_cec_address'; writeValue = Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0);
                 }
 
-                // if (lineIncludes(line, 'Polling') && !fileName)
-                // {
-                //     if (String(splitLine[1] || '').trim() == 'OK')
-                //     { fileName = ''; writeValue = ''; }
-                //     else
-                //     { fileName = ''; writeValue = ''; }
-                // }
+                if (lineIncludes(line, 'Power Status') && !fileName)
+                { fileName = 'output_display_cec_status_power'; writeValue = String(splitLine[1] || 'unknown').trim(); }
 
                 if (fileName)
                 {
                     console.log('Writing To Path', path.join(process.env.DATA_NDPI_PATH, fileName), 'Write Value:', writeValue);
-                    //fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, fileName), writeValue, 'utf8');
+                    fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, fileName), writeValue, 'utf8');
                 }
-                else { console.log('Skipping Blank Line') }
             });
         }
     
