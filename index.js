@@ -60,13 +60,13 @@ class NDPi {
             this.startFsData();
         });
 
-        // this.compMgr = spawn('xcompmgr', ['-d', ':0', '-f'], {
-        //     env: { DISPLAY: ':0' }
-        // });
-
-        this.compMgr = spawn('picom', ['-d', ':0', '-f'], {
+        this.compMgr = spawn('xcompmgr', ['-d', ':0', '-f'], {
             env: { DISPLAY: ':0' }
         });
+
+        // this.compMgr = spawn('picom', ['-d', ':0', '-f'], {
+        //     env: { DISPLAY: ':0' }
+        // });
     }
 
     /** START FILE SYSTEM WATCHER */
