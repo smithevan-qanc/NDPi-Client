@@ -33,7 +33,7 @@ const { exec, spawn } = require('node:child_process');
 
                 const splitLine = String(line).split(':');
 
-                if (lineIncludes('Polling:') && !fileName)
+                if (lineIncludes(line, 'Polling:') && !fileName)
                 {
                     if (String(splitLine[1] || '').trim() == 'OK')
                     { fileName = 'output_display_cec_enabled'; writeValue = 'true'; }
@@ -41,12 +41,12 @@ const { exec, spawn } = require('node:child_process');
                     { fileName = 'output_display_cec_enabled'; writeValue = 'false'; }
                 }
 
-                if (lineIncludes('CEC Version') && !fileName)
+                if (lineIncludes(line, 'CEC Version') && !fileName)
                 {
                     fileName = 'output_display_cec_version'; writeValue = String(splitLine[1] || '').trim();
                 }
 
-                if (lineIncludes('Physical Address') && !fileName)
+                if (lineIncludes(line, 'Physical Address') && !fileName)
                 {
                     console.log(
                         'Address To Number',
@@ -57,7 +57,7 @@ const { exec, spawn } = require('node:child_process');
                     writeValue = Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0);
                 }
 
-                // if (lineIncludes('Polling') && !fileName)
+                // if (lineIncludes(line, 'Polling') && !fileName)
                 // {
                 //     if (String(splitLine[1] || '').trim() == 'OK')
                 //     { fileName = ''; writeValue = ''; }
