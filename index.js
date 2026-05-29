@@ -66,11 +66,23 @@ class NDPi {
         startup.on('exit', () => { 
             this.startFsData();
         });
-        // try { exec('killall xcompmgr'); } catch {}
-        // try { exec('killall picom'); } catch {}
         
-        exec(`hsetroot -solid "#000000"`);
-        this.compMgr = spawn('xcompmgr', ['-d', ':0', '-fFn']);
+        spawn(`xsetroot`, [ '-solid', '"#000000"' ], {
+            env: {
+                ...process.env,
+                DISPLAY: ':0',
+            }
+        });
+
+        const compositer = spawn('xcompmgr', ['-d', ':0', '-f'], {
+            env: {
+                ...process.env,
+                DISPLAY: ':0',
+            },
+            detached: true,
+            stdio: 'ignore',
+        });
+        compositer.unref();
     }
 
     /** START FILE SYSTEM WATCHER */
