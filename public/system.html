@@ -36,7 +36,7 @@
             display: grid;
             padding: 0.8em;
             gap: 0.8em;
-            grid-template-columns: repeat(auto-fit, minmax(clamp(450px, 600px, 100%), 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(clamp(400px, 600px, 100%), 1fr));
             justify-content: start;
             /* grid-auto-rows: 1fr; */
             /* grid-template-areas: 
@@ -102,6 +102,9 @@
             outline: none;
             text-decoration: none;
             transition: box-shadow ease-in-out 200ms, border ease-in-out 200ms;
+        }
+        input::grammar-error {
+            display: none;
         }
         select:focus,
         input:focus {
