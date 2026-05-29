@@ -66,6 +66,8 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.ndiResolution = null;
         this.ndiStatus = 'idle';
 
+        this.closing = false;
+
         setTimeout(() => {
             if (this.ndiSource.toLowerCase() === 'none')
                 { this.close(); }
@@ -143,8 +145,12 @@ class NDI_Receiver_v2 extends EventEmitter {
     }
     
     async close() {
+        if (this.closing)
+        { return; }
+        
+        this.closing = true;
 
-        console.info( `[ ${path.basename(__filename)} ]`, 'Closing Module' );
+        console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module' );
 
         this.enabled = false;
 
@@ -166,9 +172,11 @@ class NDI_Receiver_v2 extends EventEmitter {
 
         });
 
-        console.info( `[ ${path.basename(__filename)} ]`, 'Module Exited' );
+        console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited' );
 
         this.emit('close');
+
+        this.closing = false;
 
         return;
 

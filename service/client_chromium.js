@@ -48,7 +48,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         const connectionPort = this.settings.get('local_port_number_api');
         const command = 'chromium';
         const args = [
-            //'--kiosk',
+            '--kiosk',
             '--aggressive-cache-discard',
             '--deny-permission-prompts',
             '--disable-component-extensions-with-background-pages',

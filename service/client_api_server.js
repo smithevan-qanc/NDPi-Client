@@ -238,6 +238,7 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     broadcastToDisplay(message = {}, sendAll = false, options = {}) {
+        
         const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
         let updateData = {};
         

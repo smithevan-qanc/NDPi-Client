@@ -40,8 +40,9 @@ class NDPi {
     }
 
     /** INITIATE */
-    initiate() {
-        const setBackground = spawn(`xsetroot`, [ '-solid', '"#000000"' ], {
+    async initiate() {
+
+        exec(`xsetroot`, [ '-solid', '#000000' ], {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
@@ -59,12 +60,13 @@ class NDPi {
             this.startFsData();
         });
 
-        const compmgr = spawn('xcompmgr', ['-d', ':0', '-f'], {
-            env: { DISPLAY: ':0' },
-            detached: true,
-            stdio: 'ignore',
+        // this.compMgr = spawn('xcompmgr', ['-d', ':0', '-f'], {
+        //     env: { DISPLAY: ':0' }
+        // });
+
+        this.compMgr = spawn('picom', ['-d', ':0', '-f'], {
+            env: { DISPLAY: ':0' }
         });
-        compmgr.unref();
     }
 
     /** START FILE SYSTEM WATCHER */
@@ -346,9 +348,14 @@ class NDPi {
             
             if (this.ndiReceiver.enabled) 
             { this.__restartNdiReceiver(); }
-//////////////////// NOT SHOWING OVERLAY OR SYSTEM DETAILS IN CHROMIUM WHEN CLEARING THE SOURCE.
+            
             if (String(this.targetSource || 'none').toLowerCase() !== 'none')
-            { setTimeout(() => { this.server_api.broadcastToDisplay(); }, 400); }
+            {
+                setTimeout(() => {
+                    const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
+                    this.server_api.updateDisplay({ type: `show-${displayMode}` });
+                }, 800);
+            }
             
             this.ndiReceiver = null;
         });
