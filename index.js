@@ -41,29 +41,30 @@ class NDPi {
 
     /** INITIATE */
     initiate() {
-        spawn(`xsetroot`, [ '-solid', '"#000000"' ], {
+        const setBackground = spawn(`xsetroot`, [ '-solid', '"#000000"' ], {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
             }
         });
 
-        const startup = exec(`./sh/startup`)
-            .stdout.on('data', (data) => {
-                data
-                    .toString()
-                    .split(/\r?\n/)
-                    .forEach((line) => { console.log(line) });
-            })
-            .on('exit', () => {
-                this.startFsData();
-            });
+        const startup = exec(`./sh/startup`);
+        startup.stdout.on('data', (data) => {
+            data
+                .toString()
+                .split(/\r?\n/)
+                .forEach((line) => { console.log(line) });
+        });
+        startup.on('exit', () => {
+            this.startFsData();
+        });
 
-        spawn('xcompmgr', ['-d', ':0', '-f'], {
+        const compmgr = spawn('xcompmgr', ['-d', ':0', '-f'], {
             env: { ...process.env, DISPLAY: ':0' },
             detached: true,
             stdio: 'ignore',
-        }).unref();
+        });
+        compmgr.unref();
     }
 
     /** START FILE SYSTEM WATCHER */
