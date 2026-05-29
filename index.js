@@ -60,7 +60,7 @@ class NDPi {
         });
 
         const compmgr = spawn('xcompmgr', ['-d', ':0', '-f'], {
-            env: { ...process.env, DISPLAY: ':0' },
+            env: { DISPLAY: ':0' },
             detached: true,
             stdio: 'ignore',
         });
