@@ -314,7 +314,7 @@ class NDPi {
             this.controller_cec.proc.stdin.write('on 0\n');
             setTimeout(() => {
                 this.controller_cec.proc.stdin.write('as\n');
-            }, 3000);
+            }, 2000);
         });
 
         this.controller_cec.on('event', (data) => {
