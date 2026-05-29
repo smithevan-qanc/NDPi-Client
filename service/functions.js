@@ -26,7 +26,7 @@ const { exec, spawn } = require('node:child_process');
                     if (line_polling[1] == 'OK')
                     {
                         console.log('Writing To Path', path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'))
-                        fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'), 'true', 'utf8');
+                        //fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'), 'true', 'utf8');
                     }
                 }
             });
