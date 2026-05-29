@@ -15,25 +15,46 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     git reset --hard origin/$BRANCH
 
     chmod +x ./sh/*
-    printf \nP
+    printf \n
+    printf P
+    sleep 0.5
     printf R
+    sleep 0.5
     printf E
+    sleep 0.5
     printf P
+    sleep 0.5
     printf A
+    sleep 0.5
     printf R
+    sleep 0.5
     printf I
+    sleep 0.5
     printf N
+    sleep 0.5
     printf G
+    sleep 0.5
     printf " "
+    sleep 0.5
     printf T
+    sleep 0.5
     printf O
+    sleep 0.5
     printf " "
+    sleep 0.5
     printf U
+    sleep 0.5
     printf P
+    sleep 0.5
     printf D
+    sleep 0.5
     printf A
+    sleep 0.5
     printf T
-    printf E\n
+    sleep 0.5
+    printf E
+    printf \n
+    sleep 1
 
     ./sh/install-update
 fi
