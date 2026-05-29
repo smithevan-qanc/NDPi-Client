@@ -11,28 +11,36 @@ const { exec, spawn } = require('node:child_process');
 
         async function checkCecCompliance() {
             let responseCecCompliance = [];
+
             await new Promise((resolve) => {
                 const proc = spawn('cec-compliance', ['-s']);
                 proc.stdout.on('data', (data) => {
                     const output = String(data.toString()).replaceAll('\t', '');
                     stdoutToArray(output).forEach((line) => {
-                        responseCecCompliance.push(line);
+                        if (line) { responseCecCompliance.push(line); }
                     });
                 });
                 proc.on('close', () => { resolve(); });
             });
+
+            console.log(JSON.stringify(responseCecCompliance, null, 2));
+            
             responseCecCompliance.forEach((line) => {
+                let fileName = null;
+                let writeValue = '';
+                const splitLine = 
+
                 if (String(line).includes('Polling:'))
+
                 {
                     const line_polling = String(line).split(': ');
-                    if (line_polling[1] == 'OK')
+                    if (line_polling[1].trim() == 'OK')
                     {
                         console.log('Writing To Path', path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'))
                         //fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'), 'true', 'utf8');
                     }
                 }
             });
-            console.log(JSON.stringify(responseCecCompliance, null, 2));
         }
     
         /** 
