@@ -348,6 +348,20 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditExternal: false,
             },
             {
+                key: "output_display_cec_version",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_display_cec_address",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
                 key: "media_overlay_image",
                 value: ``,
                 group: ``,

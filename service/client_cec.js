@@ -17,7 +17,7 @@ class CecController extends EventEmitter {
 
         this.enabled = true;
         this.isReady = false;
-        this.showAllOut = false;
+        this.debug = true;
 
         this.restartDelay = 1000;
         this.restartTimer = null;
@@ -43,17 +43,21 @@ class CecController extends EventEmitter {
         this.proc.on('close', () => {
             this.isReady = false;
             this.proc = null;
+
             if (this.enabled)
             { this._scheduleRestart() }
             else
             {
-                if (this.timeoutTimer)
+                try
+                { clearTimeout(this.timeoutTimer); }
+                catch
+                {}
+                finally
                 {
-                    clearTimeout(this.timeoutTimer);
                     this.timeoutTimer = null;
+                    this.queue = [];
+                    this.debounceMap.clear();
                 }
-                this.queue = [];
-                this.debounceMap.clear();
             }
         });
 
@@ -108,91 +112,65 @@ class CecController extends EventEmitter {
     }
 
     _handleStdout(data) {
-        this.buffer += data.toString();
-        let lines = this.buffer.split('\n');
-        this.buffer = lines.pop();
 
         const thisLine = String(data).split(/\r?\n/);
+
         thisLine.forEach((line) => {
-            const lineCheck = line.trim() || null;
-            if (this.showAllOut)
-            {
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ MESSAGE ] ${line}`);
-                return;
-            }
+            
+            if (this.debug) { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ DEBUG ] ${line}`); }
 
-            // if (!line.includes('TRAFFIC') && lineCheck && lineCheck !== "'")
-            // {
-            //     if (!line.includes(']'))
-            //     { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ MESSAGE ] ${line}`) }
-            //     else
-            //     {
-            //         let lineSplit = line.split(']')[1].trim();
-            //         let lineSendReceive = `${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`;
-            //         // if (lineSplit.includes('<<'))
-            //         // {
-            //         //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ ---SEND ] ${lineSendReceive}`);
-            //         // }
-            //         // else if (lineSplit.includes('>>'))
-            //         // {
-            //         //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ RECEIVE ] ${lineSendReceive}`);
-            //         // }
-            //         // else 
-            //         if (lineSplit.includes('(0):') || lineSplit.includes('(1):'))
-            //         {
-            //             // console.info(`[ ${path.basename(__filename).split('.')[0]} ][ -UPDATE ] ${lineSplit}`);
-            //             if (lineSplit.includes('TV') && lineSplit.includes('power status'))
-            //             { this.settings.put('output_display_cec_status_power', lineSplit.split("'")[3]); }
-            //         }
-            //         else if (line.includes('ERROR'))
-            //         {
-            //             console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${lineSplit}`);
-            //         }
-            //     }
-            // }
-        });
-
-        for (const line of lines)
-        {
-            const parsed = this._parseLine(line.trim());
             if (line.includes('waiting for input'))
             {
-                this.isReady = true;
-                if (this.timeoutTimer)
+                try
+                { clearTimeout(this.timeoutTimer); }
+                catch {}
+                finally
                 {
-                    clearTimeout(this.timeoutTimer);
                     this.timeoutTimer = null;
+                    this.restartDelay = 1000;
+                    this.isReady = true;
                 }
-                this.emit('ready');
+
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ] CEC Ready`);
+                this.emit('ready');
                 this.settings.put('output_display_cec_enabled', 'true');
-                this.restartDelay = 1000;
+
                 this._flushQueue();
             }
-        }
+
+            const lineCheck = line.trim() || null;
+            if (!line.includes('TRAFFIC') && lineCheck && lineCheck !== "'")
+            {
+                if (line.includes(']'))
+                {
+                    let lineSplit = line.split(']')[1].trim();
+
+                    // let lineSendReceive = `${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`;
+                    // if (lineSplit.includes('<<'))
+                    // {
+                    //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ ---SEND ] ${lineSendReceive}`);
+                    // }
+                    // else if (lineSplit.includes('>>'))
+                    // {
+                    //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ RECEIVE ] ${lineSendReceive}`);
+                    // }
+                    // else 
+
+                    if (lineSplit.includes('(0):') || lineSplit.includes('(1):'))
+                    {
+                        // console.info(`[ ${path.basename(__filename).split('.')[0]} ][ -UPDATE ] ${lineSplit}`);
+                        if (lineSplit.includes('TV') && lineSplit.includes('power status'))
+                        { this.settings.put('output_display_cec_status_power', lineSplit.split("'")[3]); }
+                    }
+                    else if (line.includes('ERROR'))
+                    { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${lineSplit}`); }
+                }
+            }
+        });
     }
 
     _handleStderr(data) {
         this.emit('error_log', data.toString());
-    }
-
-    _parseLine(line) {
-        if (!line)
-            { return null }
-        if (line.includes('power status changed'))
-            { return {
-                type: 'POWER',
-                raw: line.split(/\t/)[1]
-            } }
-        if (line.includes('>>') || line.includes('<<'))
-            { return {
-                type: 'TRAFFIC',
-                raw: line.split(/\t/)[1]
-            } }
-        return {
-            type: 'UNKNOWN',
-            raw: line.split(/\t/)[1]
-        };
     }
 
     send(command, { debounceKey = null, debounceMs = 300 } = {}) {
@@ -211,14 +189,15 @@ class CecController extends EventEmitter {
 
     _flushQueue() {
         if (!this.isReady || !this.proc)
-            { return }
+        { return }
+        
         while (this.queue.length > 0)
         {
             const cmd = this.queue.shift();
             if (cmd === 'h')
-            { this.showAllOut = true; }
+            { this.debug = true; }
             else 
-            { this.showAllOut = false; }
+            { this.debug = false; }
             this.proc.stdin.write(cmd + '\n');
         }
     }
