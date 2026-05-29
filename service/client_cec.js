@@ -121,35 +121,35 @@ class CecController extends EventEmitter {
                 return;
             }
 
-            if (!line.includes('TRAFFIC') && lineCheck && lineCheck !== "'")
-            {
-                if (!line.includes(']'))
-                { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ MESSAGE ] ${line}`) }
-                else
-                {
-                    let lineSplit = line.split(']')[1].trim();
-                    let lineSendReceive = `${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`;
-                    // if (lineSplit.includes('<<'))
-                    // {
-                    //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ ---SEND ] ${lineSendReceive}`);
-                    // }
-                    // else if (lineSplit.includes('>>'))
-                    // {
-                    //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ RECEIVE ] ${lineSendReceive}`);
-                    // }
-                    // else 
-                    if (lineSplit.includes('(0):') || lineSplit.includes('(1):'))
-                    {
-                        // console.info(`[ ${path.basename(__filename).split('.')[0]} ][ -UPDATE ] ${lineSplit}`);
-                        if (lineSplit.includes('TV') && lineSplit.includes('power status'))
-                        { this.settings.put('output_display_cec_status_power', lineSplit.split("'")[3]); }
-                    }
-                    else if (line.includes('ERROR'))
-                    {
-                        console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${lineSplit}`);
-                    }
-                }
-            }
+            // if (!line.includes('TRAFFIC') && lineCheck && lineCheck !== "'")
+            // {
+            //     if (!line.includes(']'))
+            //     { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ MESSAGE ] ${line}`) }
+            //     else
+            //     {
+            //         let lineSplit = line.split(']')[1].trim();
+            //         let lineSendReceive = `${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`;
+            //         // if (lineSplit.includes('<<'))
+            //         // {
+            //         //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ ---SEND ] ${lineSendReceive}`);
+            //         // }
+            //         // else if (lineSplit.includes('>>'))
+            //         // {
+            //         //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ RECEIVE ] ${lineSendReceive}`);
+            //         // }
+            //         // else 
+            //         if (lineSplit.includes('(0):') || lineSplit.includes('(1):'))
+            //         {
+            //             // console.info(`[ ${path.basename(__filename).split('.')[0]} ][ -UPDATE ] ${lineSplit}`);
+            //             if (lineSplit.includes('TV') && lineSplit.includes('power status'))
+            //             { this.settings.put('output_display_cec_status_power', lineSplit.split("'")[3]); }
+            //         }
+            //         else if (line.includes('ERROR'))
+            //         {
+            //             console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${lineSplit}`);
+            //         }
+            //     }
+            // }
         });
 
         for (const line of lines)
