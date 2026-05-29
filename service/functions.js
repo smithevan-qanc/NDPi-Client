@@ -25,7 +25,7 @@ const { exec, spawn } = require('node:child_process');
 
             console.log(JSON.stringify(responseCecCompliance, null, 2));
 
-            const lineIncludes = (search = '') => { return String(line).includes(search); }
+            const lineIncludes = (search = '', match = '') => { return search.includes(match); }
             
             responseCecCompliance.forEach((line) => {
                 let fileName = null;
