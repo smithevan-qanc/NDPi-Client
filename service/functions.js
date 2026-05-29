@@ -50,7 +50,7 @@ const { exec, spawn } = require('node:child_process');
                         `| String: '${String(splitLine[1] || '').trim().replaceAll('.', '')}'`,
                         `| Number: ${Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0)}`
                     );
-                    fileName = 'output_display_cec_address'; writeValue = Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0);
+                    fileName = 'output_display_cec_address'; writeValue = String(Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0));
                 }
 
                 if (lineIncludes(line, 'Power Status') && !fileName)
