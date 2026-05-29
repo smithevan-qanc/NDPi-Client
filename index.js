@@ -42,7 +42,7 @@ class NDPi {
     /** INITIATE */
     async initiate() {
 
-        exec(`xsetroot`, [ '-solid', '#000000' ], {
+        spawn(`xsetroot`, [ '-solid', '#000000' ], {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
