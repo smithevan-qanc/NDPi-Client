@@ -7,7 +7,7 @@ const VERSION_DIR = path.join(__dirname, 'version');
 const NDPi_VERSION = (
     fs.existsSync(`${VERSION_DIR}/current`)
     ? fs.readFileSync(`${VERSION_DIR}/current`, 'utf8')
-    : '3.1'
+    : '3.1.0'
 );
 const NDPi_VERSION_DATE = (
     fs.existsSync(`${VERSION_DIR}/current-date`)
@@ -15,25 +15,9 @@ const NDPi_VERSION_DATE = (
     : '2026-02-04'
 );
 
-// const spi = require('spi-device');
-
-// const device = spi.openSync(0, 0);
-
-// const message = [{
-//     sendBuffer: Buffer.from([0x01, 0x02, 0x03]),
-//     receiveBuffer: Buffer.alloc(3),
-//     byteLength: 3,
-//     speedHz: 1000000
-// }];
-
-// device.transfer(message, (err, messages) => {
-//     if (err) throw err;
-//     console.log(messages[0].receiveBuffer);
-// });
-
-
 class NDPi {
     constructor() {
+
         this.isInitialized = false;
 
         this.settings = null;
@@ -52,21 +36,11 @@ class NDPi {
         this.compMgr = null;
 
         this.initiate();
+
     }
 
     /** INITIATE */
     initiate() {
-        const startup = exec(`./sh/startup`);
-        startup.stdout.on('data', (data) => {
-            data
-                .toString()
-                .split(/\r?\n/)
-                .forEach((line) => { console.log(line) });
-        });
-        startup.on('exit', () => { 
-            this.startFsData();
-        });
-        
         spawn(`xsetroot`, [ '-solid', '"#000000"' ], {
             env: {
                 ...process.env,
@@ -74,15 +48,22 @@ class NDPi {
             }
         });
 
-        const compositer = spawn('xcompmgr', ['-d', ':0', '-f'], {
-            env: {
-                ...process.env,
-                DISPLAY: ':0',
-            },
+        const startup = exec(`./sh/startup`)
+            .stdout.on('data', (data) => {
+                data
+                    .toString()
+                    .split(/\r?\n/)
+                    .forEach((line) => { console.log(line) });
+            })
+            .on('exit', () => {
+                this.startFsData();
+            });
+
+        spawn('xcompmgr', ['-d', ':0', '-f'], {
+            env: { ...process.env, DISPLAY: ':0' },
             detached: true,
             stdio: 'ignore',
-        });
-        compositer.unref();
+        }).unref();
     }
 
     /** START FILE SYSTEM WATCHER */
@@ -240,7 +221,7 @@ class NDPi {
         this.lcdDisplay = spawn('python3', ['update_lcd.py'], { cwd: this.settings.lcdDisplayScriptPath });
 
         this.lcdDisplay.on('error', (error) => {
-            console.error(`🔴 [ python ][ ERROR ] ${error.toString()}`);
+            console.error(`⚠️ [ python ][ ERROR ] ${error.toString()}`);
         });
     }
 
@@ -334,7 +315,7 @@ class NDPi {
         });
         
         this.controller_cec.on('error_log', (data) => {
-            console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ client_cec ][ ERROR ]`, data);
+            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ client_cec ][ ERROR ]`, data);
         });
 
         this.controller_cec.on('timeout', (data) => {
@@ -428,36 +409,54 @@ const index = new NDPi();
 
 async function shutdownDevice() {
     await quitNDPi('SIGTERM', false);
-    exec('sudo shutdown now');
+    setTimeout(() => { exec('sudo shutdown now'); }, 1000);
 }
 
 async function rebootDevice() {
     await quitNDPi('SIGTERM', false);
-    exec('sudo reboot');
+    setTimeout(() => { exec('sudo reboot'); }, 1000);
 }
 
 async function quitNDPi(signal, exit = true) {
+
     await new Promise((resolve) => {
+
         const sig = signal ? `[ ${signal} ]` : '';
+
         console.log(`[ index ]${sig} Shutting down application...`);
-        if (index.ndpiServerStatusUpdate)
-            {
-                clearInterval(index.ndpiServerStatusUpdate);
-                index.ndpiServerStatusUpdate = null;
-            }
-        try { index.ndiReceiver?.close(); } catch {}
-        try { index.lcdDisplay?.kill() } catch {}
-        try { index.controller_cec?.close(); } catch {}
-        try { index.service_bonjour?.close(); } catch {}
-        try { index.wsConnection_ndpiServer?.close(); } catch {}
-        try { index.server_api?.close(); } catch {}
-        try { index.settings?.close(); } catch {}
-        try { index.compMgr.kill() } catch {}
+
+        try { clearInterval(index.ndpiServerStatusUpdate); }
+        catch {}
+        finally { index.ndpiServerStatusUpdate = null; }
+
+        try { index.ndiReceiver?.close(); }
+        catch {}
+
+        try { index.lcdDisplay?.kill('SIGTERM') }
+        catch {}
+
+        try { index.controller_cec?.close(); }
+        catch {}
+
+        try { index.service_bonjour?.close(); }
+        catch {}
+
+        try { index.wsConnection_ndpiServer?.close(); }
+        catch {}
+
+        try { index.server_api?.close(); }
+        catch {}
+
+        try { index.settings?.close(); }
+        catch {}
+
         setTimeout(() => {
-            try { index.service_chromium?.close(); } catch {}
-            resolve();
+            try { index.service_chromium?.close(); }
+            catch {}
+            finally { resolve(); }
         }, 3000);
     });
+
     if (exit)
     { process.exit(0); }
 }

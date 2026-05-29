@@ -66,7 +66,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             
             ws.on('close', () => { this.ws_conn_display.delete(ws); });
 
-            ws.on('error', (error) => { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] WebSocket GUI Connection`, error); });
+            ws.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] WebSocket GUI Connection`, error); });
         });
         
         this.ws_serv_system.on('connection', (ws) =>{
@@ -83,7 +83,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             
             ws.on('close', () => { this.ws_conn_system.delete(ws); });
 
-            ws.on('error', (error) => { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] WebSocket GUI Connection`, error); });
+            ws.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] WebSocket GUI Connection`, error); });
         });
 
         this.Routes = express.Router();
@@ -217,7 +217,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             try {
                 client.close();
             } catch (e) {
-                console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e);
+                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e);
             } finally {
                 this.ws_conn_display.delete(client);
             }
@@ -227,7 +227,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             try {
                 client.close();
             } catch (e) {
-                console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e);
+                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e);
             } finally {
                 this.ws_conn_system.delete(client);
             }

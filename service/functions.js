@@ -359,7 +359,7 @@ const { exec, spawn } = require('node:child_process');
                 }, (error, stdout, stderr) => {
                     if (error)
                     {
-                        // console.log('🔴 [ functions ] Could NOT find window:', stderr.toString().trim());
+                        // console.log('⚠️ [ functions ] Could NOT find window:', stderr.toString().trim());
                         response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
                         response.success = false;
                         resolve();
@@ -370,7 +370,7 @@ const { exec, spawn } = require('node:child_process');
                         console.info(`[ ${path.basename(__filename).split('.')[0]} ] Focusing Window ID:`, stdout.toString().trim());
                         if (!stdout.toString().trim())
                         {
-                            // console.log(`🔴 [ functions ] ${className} NOT running.`);
+                            // console.log(`⚠️ [ functions ] ${className} NOT running.`);
                             response.data.message = `${className} is NOT running.`;
                             response.success = false;
                             resolve();
@@ -382,7 +382,7 @@ const { exec, spawn } = require('node:child_process');
                         }, (error, stdout, stderr) => {
                             if (error)
                             {
-                                console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ] Could NOT activate window:`, stderr.toString().trim() || 'null');
+                                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] Could NOT activate window:`, stderr.toString().trim() || 'null');
                                 response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
                                 response.success = false;
                                 resolve();
@@ -435,7 +435,7 @@ const { exec, spawn } = require('node:child_process');
                 }, (error, stderr) => {
                     if (error)
                     {
-                        console.error('🔴 [ functions ][ setDisplayResolution() ][ ERROR ] Resolution Set:', config, stderr);
+                        console.error('⚠️ [ functions ][ setDisplayResolution() ][ ERROR ] Resolution Set:', config, stderr);
                         resolve();
                     }
                     else
@@ -445,7 +445,7 @@ const { exec, spawn } = require('node:child_process');
                         }, (error, stdout, stderr) => {
                             if (error)
                             {
-                                console.error(`🔴 [ functions ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`);
+                                console.error(`⚠️ [ functions ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`);
                             }
                             resolve();
                         });

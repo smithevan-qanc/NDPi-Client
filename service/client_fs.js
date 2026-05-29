@@ -417,7 +417,7 @@ class FileSystemMonitor extends EventEmitter {
                 }
             }
             catch (err)
-            { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err) }
+            { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err) }
             
             if (this.sendToLCD.includes(setting.key))
             { fs.writeFileSync(path.join(__dirname, '..', 'python', 'script', setting.key), setting.value, 'utf8'); }
@@ -443,7 +443,7 @@ class FileSystemMonitor extends EventEmitter {
         });
 
         this.watcher.on('error', (error) => {
-            console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error);
+            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error);
         });
         
         this.startDrmMonitor();
@@ -514,7 +514,7 @@ class FileSystemMonitor extends EventEmitter {
         if (!fileName || !this.fileMap.has(fileName))
         { return; }
         try { fs.writeFileSync(path.join(this.dataDir, fileName), data.trim(), 'utf8') }
-        catch (error) { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving to FileSystem`); }
+        catch (error) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving to FileSystem`); }
     }
 
     close() {
@@ -526,11 +526,11 @@ class FileSystemMonitor extends EventEmitter {
         catch {}
 
         try { clearInterval(this.#fsPoll); }
-        catch (e) { console.error('🔴', `[ ${path.basename(__filename)} ]`, '[ ERROR ]', 'Clearing fsPoll', e); }
+        catch (e) { console.error('⚠️', `[ ${path.basename(__filename)} ]`, '[ ERROR ]', 'Clearing fsPoll', e); }
         finally { this.#fsPoll = null; }
 
         try { this.drmMonitor.kill(); }
-        catch (e) { console.error('🔴', `[ ${path.basename(__filename)} ]`, '[ ERROR ]', 'SIGTERM drmMonitor', e); }
+        catch (e) { console.error('⚠️', `[ ${path.basename(__filename)} ]`, '[ ERROR ]', 'SIGTERM drmMonitor', e); }
         finally { this.drmMonitor = null; }
         
         console.info(`[ ${path.basename(__filename)} ]`,
@@ -551,7 +551,7 @@ class FileSystemMonitor extends EventEmitter {
             exec('ip -j address', (error, stdout, stderr) => {
                 if (error)
                 {
-                    console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, stderr.toString());
+                    console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, stderr.toString());
                     resolve();
                 }
                 else
@@ -579,7 +579,7 @@ class FileSystemMonitor extends EventEmitter {
                         }
                     }
                     catch (error)
-                    { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, error); }
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, error); }
                     finally
                     { resolve(); }
                 }
@@ -622,7 +622,7 @@ class FileSystemMonitor extends EventEmitter {
         });
 
         this.drmMonitor.on('error', (error) => {
-            console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] 'udevadm' DRM monitor disabled`, error.toString());
+            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] 'udevadm' DRM monitor disabled`, error.toString());
             this.drmMonitor = null;
         });
     }
@@ -635,7 +635,7 @@ class FileSystemMonitor extends EventEmitter {
             exec('cat /sys/class/drm/card*HDMI*/status', (error, stdout, stderr) => {
                 if (error)
                 {
-                    console.error(`🔴 [ functions ][ updateOutputDisplay() ][ ERROR ]`, stderr.toString().trim());
+                    console.error(`⚠️ [ functions ][ updateOutputDisplay() ][ ERROR ]`, stderr.toString().trim());
                 }
                 else
                 {
@@ -665,7 +665,7 @@ class FileSystemMonitor extends EventEmitter {
             const commandPath = path.join(__dirname, '..', 'sh', 'current-resolution');
             exec(commandPath, (error, stdout, stderr) => {
                 if (error)
-                { console.error(`🔴 [ functions ][ updateOutputDisplay() ][ ERROR ] ${stderr.toString().trim()}`); }
+                { console.error(`⚠️ [ functions ][ updateOutputDisplay() ][ ERROR ] ${stderr.toString().trim()}`); }
                 else
                 {
                     let resolutionOptions = [];

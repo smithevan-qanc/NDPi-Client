@@ -30,7 +30,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
                 if (error)
                 {
                     console.error(
-                        '🔴',
+                        '⚠️',
                         `[ ${path.basename(__filename)} ]`,
                         '[ ERROR ]',
                         stderr
@@ -91,7 +91,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         
         this.service.on('error', (err) => {
             console.error(
-                '🔴',
+                '⚠️',
                 `[ ${path.basename(__filename).split('.')[0]} ]`,
                 '[ ERROR ]',
                 err

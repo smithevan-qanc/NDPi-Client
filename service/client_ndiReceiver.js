@@ -108,17 +108,18 @@ class NDI_Receiver_v2 extends EventEmitter {
             }
         });
 
-        this.receiver.on('error', (error) => {
-            process.nextTick(() => { this.emit('error') });
-            console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ NDI ] --▶ Critical Error:`, error);
-        });
-
         this.receiver.stderr.on('data', (data) => {
             const output = data.toString().trim();
-            output.split(/\r?\n/).forEach((line) => { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ NDI ] --▶ Error: ${line}`); });
+            output.split(/\r?\n/).forEach((line) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ NDI ] --▶`, line); });
+        });
+
+        this.receiver.on('error', (error) => {
+            process.nextTick(() => { this.emit('error') });
+            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ RECEIVER ERROR ][ NDI ] --▶`, error);
         });
 
         this.receiver.on('close', (code, signal) => {
+
             this.receiver = null;
 
             this.ndiActiveSource = null;
@@ -136,40 +137,41 @@ class NDI_Receiver_v2 extends EventEmitter {
             this.ndiResolution = null;
             this.settings.put('ndpi_status_ndi_source_resolution', '');
             
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] --▶ Terminated - Code:${code || 'n/a'}, Signal:${signal || 'n/a'}`);
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] --▶ Terminated - [ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
             //this.server.broadcastToDisplay();
-
-            console.info(
-                `[ ${path.basename(__filename)} ]`,
-                'Module Exited'
-            );
-
-            //this.scheduleReconnect();
-            this.emit('close');
         });
     }
     
     async close() {
-        console.info(
-            `[ ${path.basename(__filename)} ]`,
-            'Closing Module'
-        );
+
+        console.info( `[ ${path.basename(__filename)} ]`, 'Closing Module' );
+
         this.enabled = false;
+
         func.focusWindow('chromium');
+
         await new Promise((resolve) => {
+
             setTimeout(() => {
-                try {
-                    this.receiver.kill('SIGKILL');
-                    console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] --▶ SIGKILL`);
-                }
+
+                try { this.receiver.kill('SIGKILL'); }
                 catch {}
-                finally {
-                    this.receiver = null;
+                finally { this.receiver = null; }
+
+                setTimeout(() => {
                     resolve();
-                }
-            }, 700);
+                }, 500);
+
+            }, 1000);
+
         });
+
+        console.info( `[ ${path.basename(__filename)} ]`, 'Module Exited' );
+
+        this.emit('close');
+
         return;
+
     }
 
     // scheduleReconnect(ms = 15000) {

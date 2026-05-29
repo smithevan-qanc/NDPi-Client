@@ -1227,8 +1227,8 @@ class NDPiClient {
 function consoleLog(message = 'SYSTEM UPDATE', data, error) {
     if (error) {
         console.log('⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻   ⸻ ');
-        //console.log(`  [${ipAddr}] ⸺  ▶ 🔴 ERROR: ${message.toUpperCase()}`);
-        console.log(`🔴 ERROR: ${message}`);
+        //console.log(`  [${ipAddr}] ⸺  ▶ ⚠️ ERROR: ${message.toUpperCase()}`);
+        console.log(`⚠️ ERROR: ${message}`);
         console.log(JSON.stringify(error, null, 2));
         if (data) {
             console.log(`DATA:`, JSON.stringify(data, null, 2));
