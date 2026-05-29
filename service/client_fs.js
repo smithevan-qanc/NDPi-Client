@@ -45,8 +45,6 @@ class FileSystemMonitor extends EventEmitter {
             'ndpi_status_ndi_source_target',
         ];
 
-        // First run is used as a flag for func.getLocalIp();
-        this.firstRun = true;
         this.init();
     }
 
@@ -430,7 +428,7 @@ class FileSystemMonitor extends EventEmitter {
         // }, 1000);
     }
 
-    start() {
+    async start() {
         this.watcher = fs.watch(this.dataDir);
 
         this.watcher.on('change', (eventType, filename) => {
@@ -447,6 +445,9 @@ class FileSystemMonitor extends EventEmitter {
         });
         
         this.startDrmMonitor();
+        this.emit('ready');
+
+        await func.waitForNetwork();
         this.updateLocalIp();
     }
     
@@ -601,13 +602,6 @@ class FileSystemMonitor extends EventEmitter {
             this.put(fileName, '');
             this.fsPollInterval = 1000;
             this.poll();
-        }
-
-        if (this.firstRun)
-        {
-            this.emit('ready');
-            this.firstRun = false;
-            // this.start();
         }
     }
 

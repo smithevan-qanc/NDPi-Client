@@ -152,10 +152,8 @@ class CecController extends EventEmitter {
         catch {}
         finally { this.debounceCheckCompliance = null; }
 
-        this.debounceCheckCompliance = setTimeout(async () => {
-            console.log('cec compliance check STARTED')
-            await func.checkCecCompliance();
-            console.log('cec compliance check COMPLETE');
+        this.debounceCheckCompliance = setTimeout(() => {
+            func.checkCecCompliance();
         }, 2000);
     }
 

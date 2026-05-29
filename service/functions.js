@@ -23,7 +23,7 @@ const { exec, spawn } = require('node:child_process');
                 proc.on('close', () => { resolve(); });
             });
 
-            console.log(JSON.stringify(responseCecCompliance, null, 2));
+            // console.log(JSON.stringify(responseCecCompliance, null, 2));
 
             const lineIncludes = (search = '', match = '') => { return search.includes(match); }
             
@@ -60,10 +60,10 @@ const { exec, spawn } = require('node:child_process');
 
                 if (fileName)
                 {
-                    console.log('CEC Compliance Update:', JSON.stringify({
-                        PATH: path.join(process.env.DATA_NDPI_PATH, fileName),
-                        VALUE: writeValue
-                    }));
+                    // console.log('CEC Compliance Update:', JSON.stringify({
+                    //     PATH: path.join(process.env.DATA_NDPI_PATH, fileName),
+                    //     VALUE: writeValue
+                    // }));
                     fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, fileName), writeValue, 'utf8');
                 }
             });
@@ -302,7 +302,7 @@ const { exec, spawn } = require('node:child_process');
         async function getLocalIp(testForNetwork = false) {
             if (testForNetwork)
             {
-                console.log('[ functions ] Waiting for network online...');
+                console.info('[ functions ] Waiting for network online...');
                 await waitForNetwork();
             }
             const interfaces = os.networkInterfaces();
@@ -455,33 +455,6 @@ const { exec, spawn } = require('node:child_process');
             return;
         }
 
-
-module.exports = {
-    getLocalIp,
-    processCommand,
-    focusWindow,
-    stdoutToArray,
-    setDisplayResolution,
-    checkCecCompliance,
-};
-
-
-/** ---- Helper Functions ---- */
-
-    /** TODO */
-
-        function displayForceBlank() {
-            ///
-        }
-        function displayForceOverlay() {
-            ///
-        }
-        function updateOverlay(data) {
-            /// write image base 64 to file 'media_overlay_image'
-        }
-
-    /** COMPLETED */
-
         async function waitForNetwork({ host = '8.8.8.8', port = 53, retryMs = 1000 } = {}) {
             return await new Promise((resolve) => {
                 const tryConnect = () => {
@@ -506,3 +479,31 @@ module.exports = {
                 tryConnect();
             });
         }
+
+
+module.exports = {
+    processCommand,
+    focusWindow,
+    stdoutToArray,
+    setDisplayResolution,
+    checkCecCompliance,
+    waitForNetwork,
+};
+
+
+/** ---- Helper Functions ---- */
+
+    /** TODO */
+
+        function displayForceBlank() {
+            ///
+        }
+        function displayForceOverlay() {
+            ///
+        }
+        function updateOverlay(data) {
+            /// write image base 64 to file 'media_overlay_image'
+        }
+
+    /** COMPLETED */
+
