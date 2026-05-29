@@ -2,7 +2,7 @@
 set -e
 
 # cd "$(dirname "${0}")/.."
-cd "~/TMP_ndpi"
+cd $HOME/TMP_ndpi
 
 BRANCH="$(head -n 1 version/git)"
 
@@ -14,20 +14,27 @@ REMOTE=$(git rev-parse origin/$BRANCH)
 if [ "$LOCAL" != "$REMOTE" ]; then
     git reset --hard origin/$BRANCH
 
-    # for file in sh/*; do
-    #     [ -f $file ] && chmod +x $file
-    # done
-
     chmod +x ./sh/*
+    printf \nP
+    printf R
+    printf E
+    printf P
+    printf A
+    printf R
+    printf I
+    printf N
+    printf G
+    printf " "
+    printf T
+    printf O
+    printf " "
+    printf U
+    printf P
+    printf D
+    printf A
+    printf T
+    printf E\n
 
-    # chmod +x sh/git-update
-    # chmod +x sh/install-update
-    # chmod +x sh/machine-info
-    # chmod +x sh/resolutions
-    # chmod +x sh/startup
-    echo ""
-    echo "PREPARING TO UPDATE"
-    sleep 0.5
     ./sh/install-update
 fi
 
