@@ -341,7 +341,7 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditExternal: false,
             },
             {
-                key: "output_display_cec_active_source",
+                key: "output_display_cec_this_source_active",
                 value: ``,
                 group: ``,
                 allowEditInternal: true,
@@ -387,7 +387,9 @@ class FileSystemMonitor extends EventEmitter {
             'ndpi_status_ndi_source_framerate',
             'output_display_cec_enabled',
             'output_display_cec_status_power',
-            'output_display_cec_active_source',
+            'output_display_cec_this_source_active',
+            'output_display_cec_version',
+            'output_display_cec_address',
         ];
 
         for (const file of files)
@@ -654,7 +656,9 @@ class FileSystemMonitor extends EventEmitter {
             this.put('output_display_model', '');
             this.put('output_display_cec_enabled', 'false');
             this.put('output_display_cec_status_power', 'unknown');
-            this.put('output_display_cec_active_source', '');
+            this.put('output_display_cec_this_source_active', 'false');
+            this.put('output_display_cec_version', '');
+            this.put('output_display_cec_address', '');
         }
         else
         {

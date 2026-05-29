@@ -25,6 +25,8 @@ class CecController extends EventEmitter {
 
         this.timeoutTimer = null;
 
+        this.debounceCheckCompliance = null;
+
         this.maxDelay = 10000;
 
         console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Opening CEC Client')
@@ -132,47 +134,36 @@ class CecController extends EventEmitter {
 
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ] CEC Ready`);
                 this.emit('ready');
-                this.settings.put('output_display_cec_enabled', 'true');
-                await func.checkCecCompliance();
-                console.log('cec compliance check complete');
 
                 this._flushQueue();
             }
 
-            const lineCheck = line.trim() || null;
-            if (!line.includes('TRAFFIC') && lineCheck && lineCheck !== "'")
-            {
-                if (line.includes(']'))
-                {
-                    let lineSplit = line.split(']')[1].trim();
+            if (line.includes('source deactivated') && line.includes('Recorder 1'))
+            { this.settings.put('output_display_cec_this_source_active', 'false'); }
+            
+            if (line.includes('source activated') && line.includes('Recorder 1'))
+            { this.settings.put('output_display_cec_this_source_active', 'true'); }
 
-                    // let lineSendReceive = `${lineSplit.includes('->') ? lineSplit.split(':')[1].trim() : lineSplit}`;
-                    // if (lineSplit.includes('<<'))
-                    // {
-                    //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ ---SEND ] ${lineSendReceive}`);
-                    // }
-                    // else if (lineSplit.includes('>>'))
-                    // {
-                    //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ RECEIVE ] ${lineSendReceive}`);
-                    // }
-                    // else 
-
-                    if (lineSplit.includes('(0):') || lineSplit.includes('(1):'))
-                    {
-                        // console.info(`[ ${path.basename(__filename).split('.')[0]} ][ -UPDATE ] ${lineSplit}`);
-                        if (lineSplit.includes('TV') && lineSplit.includes('power status'))
-                        { this.settings.put('output_display_cec_status_power', lineSplit.split("'")[3] || 'unknown'); }
-                    }
-                    else if (line.includes('ERROR'))
-                    { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${lineSplit}`); }
-                }
-            }
+            if (line.includes('ERROR'))
+            { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${lineSplit}`); }
         });
+
+        try { clearTimeout(this.debounceCheckCompliance); }
+        catch {}
+        finally { this.debounceCheckCompliance = null; }
+
+        this.debounceCheckCompliance = setTimeout(async () => {
+            console.log('cec compliance check STARTED')
+            await func.checkCecCompliance();
+            console.log('cec compliance check COMPLETE');
+        }, 2000);
     }
 
     _handleStderr(data) {
         this.emit('error_log', data.toString());
     }
+
+
 
     send(command, { debounceKey = null, debounceMs = 300 } = {}) {
         const staticDebounceKey = debounceKey || String(command).split(' ')[0] || null;
