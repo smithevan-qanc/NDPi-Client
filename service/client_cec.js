@@ -160,7 +160,7 @@ class CecController extends EventEmitter {
                     {
                         // console.info(`[ ${path.basename(__filename).split('.')[0]} ][ -UPDATE ] ${lineSplit}`);
                         if (lineSplit.includes('TV') && lineSplit.includes('power status'))
-                        { this.settings.put('output_display_cec_status_power', lineSplit.split("'")[3]); }
+                        { this.settings.put('output_display_cec_status_power', lineSplit.split("'")[3] || 'unknown'); }
                     }
                     else if (line.includes('ERROR'))
                     { console.error(`🔴 [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${lineSplit}`); }
@@ -197,7 +197,7 @@ class CecController extends EventEmitter {
             if (cmd === 'h')
             { this.debug = true; }
             else 
-            { this.debug = false; }
+            { this.debug = true; }
             this.proc.stdin.write(cmd + '\n');
         }
     }
