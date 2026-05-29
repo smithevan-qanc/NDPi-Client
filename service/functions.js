@@ -28,18 +28,19 @@ const { exec, spawn } = require('node:child_process');
             responseCecCompliance.forEach((line) => {
                 let fileName = null;
                 let writeValue = '';
-                const splitLine = 
 
-                if (String(line).includes('Polling:'))
+                const splitLine = String(line).split(': ');
+                const lineIncludes = (search = '') => { return String(line).includes(search); };
 
+                if (lineIncludes('Polling:') && String(splitLine[1]).trim() == 'OK')
+                { fileName = 'output_display_cec_enabled'; writeValue = 'true'; }
+
+                if (fileName)
                 {
-                    const line_polling = String(line).split(': ');
-                    if (line_polling[1].trim() == 'OK')
-                    {
-                        console.log('Writing To Path', path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'))
-                        //fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'), 'true', 'utf8');
-                    }
+                    console.log('Writing To Path', path.join(process.env.DATA_NDPI_PATH, fileName), 'Write Value:', writeValue);
+                    //fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, fileName), writeValue, 'utf8');
                 }
+                else { console.log('Skipping Blank Line') }
             });
         }
     
