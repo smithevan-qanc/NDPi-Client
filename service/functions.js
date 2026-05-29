@@ -24,16 +24,46 @@ const { exec, spawn } = require('node:child_process');
             });
 
             console.log(JSON.stringify(responseCecCompliance, null, 2));
+
+            const lineIncludes = (search = '') => { return String(line).includes(search); }
             
             responseCecCompliance.forEach((line) => {
                 let fileName = null;
                 let writeValue = '';
 
-                const splitLine = String(line).split(': ');
-                const lineIncludes = (search = '') => { return String(line).includes(search); };
+                const splitLine = String(line).split(':');
 
-                if (lineIncludes('Polling:') && String(splitLine[1]).trim() == 'OK')
-                { fileName = 'output_display_cec_enabled'; writeValue = 'true'; }
+                if (lineIncludes('Polling:') && !fileName)
+                {
+                    if (String(splitLine[1] || '').trim() == 'OK')
+                    { fileName = 'output_display_cec_enabled'; writeValue = 'true'; }
+                    else
+                    { fileName = 'output_display_cec_enabled'; writeValue = 'false'; }
+                }
+
+                if (lineIncludes('CEC Version') && !fileName)
+                {
+                    fileName = 'output_display_cec_version'; writeValue = String(splitLine[1] || '').trim();
+                }
+
+                if (lineIncludes('Physical Address') && !fileName)
+                {
+                    console.log(
+                        'Address To Number',
+                        `| String: '${String(splitLine[1] || '').trim().replaceAll('.', '')}'`,
+                        `| Number: ${Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0)}`
+                    );
+                    fileName = '';
+                    writeValue = Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0);
+                }
+
+                // if (lineIncludes('Polling') && !fileName)
+                // {
+                //     if (String(splitLine[1] || '').trim() == 'OK')
+                //     { fileName = ''; writeValue = ''; }
+                //     else
+                //     { fileName = ''; writeValue = ''; }
+                // }
 
                 if (fileName)
                 {
