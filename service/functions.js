@@ -35,30 +35,35 @@ const { exec, spawn } = require('node:child_process');
 
                 if (lineIncludes(line, 'Polling:') && !fileName)
                 {
-                    if (String(splitLine[1] || '').trim() == 'OK')
-                    { fileName = 'output_display_cec_enabled'; writeValue = 'true'; }
-                    else
-                    { fileName = 'output_display_cec_enabled'; writeValue = 'false'; }
+                    fileName = 'output_display_cec_enabled';
+                    writeValue = String(splitLine[1] || '').trim() == 'OK' ? 'true' : 'false';
                 }
 
-                if (lineIncludes(line, 'CEC Version') && !fileName)
-                { fileName = 'output_display_cec_version'; writeValue = String(splitLine[1] || '').trim(); }
-
-                if (lineIncludes(line, 'Physical Address') && !fileName)
+                if (lineIncludes(line, 'CEC Version') && !fileName && !String(splitLine[1] || '').startsWith('Tx'))
                 {
-                    console.log('Address To Number',
-                        `| String: '${String(splitLine[1] || '').trim().replaceAll('.', '')}'`,
-                        `| Number: ${Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0)}`
-                    );
-                    fileName = 'output_display_cec_address'; writeValue = String(Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0));
+                    fileName = 'output_display_cec_version';
+                    writeValue = String(splitLine[1] || '').trim();
+                }
+
+                if (lineIncludes(line, 'Physical Address') && !fileName && !String(splitLine[1] || '').startsWith('Tx'))
+                {
+                    fileName = 'output_display_cec_address';
+                    writeValue = String(Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0));
                 }
 
                 if (lineIncludes(line, 'Power Status') && !fileName)
-                { fileName = 'output_display_cec_status_power'; writeValue = String(splitLine[1] || 'unknown').trim(); }
+                {
+                    fileName = 'output_display_cec_status_power';
+                    writeValue = String(splitLine[1] || 'unknown').trim();
+                }
+
 
                 if (fileName)
                 {
-                    console.log('Writing To Path', path.join(process.env.DATA_NDPI_PATH, fileName), 'Write Value:', writeValue);
+                    console.log('CEC Compliance Update:', JSON.stringify({
+                        PATH: path.join(process.env.DATA_NDPI_PATH, fileName),
+                        VALUE: writeValue
+                    }));
                     fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, fileName), writeValue, 'utf8');
                 }
             });
