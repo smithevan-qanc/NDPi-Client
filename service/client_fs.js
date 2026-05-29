@@ -672,8 +672,8 @@ class FileSystemMonitor extends EventEmitter {
                     func.stdoutToArray(stdout).forEach((line) => {
                         const output        = line.toString().trim();
                         const lineSplit_1   = output.split(' : ');
-                        const splitKey      = lineSplit_1[0].trim();
-                        const splitValue    = lineSplit_1[1].trim();
+                        const splitKey      = String(lineSplit_1[0] || '').trim();
+                        const splitValue    = String(lineSplit_1[1] || '').trim();
                         
                         let lineSplit_2 = null;
                         let splitOptKey = null;
@@ -682,8 +682,8 @@ class FileSystemMonitor extends EventEmitter {
                         if (splitValue.includes(' :: '))
                         {
                             lineSplit_2   = splitValue.split(' :: ');
-                            splitOptKey   = lineSplit_2[0].trim();
-                            splitOptValue = lineSplit_2[1].trim();
+                            splitOptKey   = String(lineSplit_2[0] || '').trim();
+                            splitOptValue = String(lineSplit_2[1] || '').trim();
                         }
 
                         switch(splitKey)
