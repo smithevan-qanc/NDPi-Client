@@ -9,13 +9,13 @@ set -e
 
 customInstallInstructions() {
     # Write Custom Update Script Here
-    sleep 1
+    sleep 0.1
 }
 
 install() {
     echo "PREPARING TO INSTALL UPDATE"
     cd ../
-    sleep 1
+    sleep 0.5
     local TMP="$(pwd)/TMP_ndpi"
     local PGM="$(pwd)/ndpi"
     echo "    [FROM] $TMP"
@@ -27,7 +27,7 @@ install() {
           --exclude sh/install-update \
           --exclude sh/git-update \
           "$TMP"/ "$PGM"
-        sleep 1
+        sleep 0.5
         cd $PGM
         echo "$(pwd)"
         customInstallInstructions

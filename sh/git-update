@@ -27,7 +27,7 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     # chmod +x sh/startup
     echo ""
     echo "PREPARING TO UPDATE"
-    sleep 1
+    sleep 0.5
     ./sh/install-update
 fi
 

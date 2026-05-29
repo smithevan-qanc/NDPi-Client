@@ -106,8 +106,10 @@ try:
 
         # CPU Temperature ------------------------------------------------------------
         sys_temp = f"{format(int(read_file('../../../../../sys/class/thermal/thermal_zone0/temp'))/1000, ".2f")}°C"
-        sys_temp_x = get_centered_x(" ##:## | ##.#°C", 20)
-        draw.text((sys_temp_x, 175), f"{time_string} | {sys_temp}", fill="GREEN", font=Consolas_Bold_20)
+        sys_fan_rpm = f"{read_file('../../../../../sys/class/hwmon/hwmon2/fan1_input')}"
+        sys_temp_x = get_centered_x(" ##:## | ##.#°C | ####", 20)
+        draw.text((sys_temp_x, 175), f"{time_string} | {sys_temp} | {sys_fan_rpm}", fill="GREEN", font=Consolas_Bold_20)
+
 
         # NDPi Version & Device IP ---------------------------------------------------
         line_dev_info = f"(v{ndpi_version}) {device_ip}".strip()

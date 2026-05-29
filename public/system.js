@@ -1,120 +1,278 @@
-class DeviceSocket {
-    constructor() {
-        this._ws = null;
+// use NDPi_WebSocket from './socket.js'
+const server = new NDPi_WebSocket('ws/system');
 
-        this.protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        this.host = window.location.host;
+(async () => {
+    await refreshSources();
+    addEvents();
+})();
 
-        this.timerNdpiHubServerPing = null;
-        this.timerReconnectDevice = null;
-        this.timerPageReload = null;
 
-        this.connect();
-    }
+server._ws.onmessage = (message) => {
+    try
+    {
+        const msg = JSON.parse(message.data);
+        for (const [id, object] of msg)
+        {
+            const settingInnerHTML = `
+                <div class="div-label">${String(id.split('_').join(' '))}</div>
+                <input type="text" id="${id}" value="${String(object.value).replaceAll('"', "'")}" ${object.allowEditExternal ? '' : 'disabled'}>
+            `;
 
-    disconnect() {
-        if (this._ws && this._ws.readyState === WebSocket.OPEN)
-        try { this._ws.close(); } catch {}
-        this._ws = null;
-    }
+            if (id === 'ndpi_status_ndi_source_target') 
+            { document.getElementById('source_selection').value = object.value || 'none'; }
 
-    connect() {
-        if (this._ws && this._ws.readyState === WebSocket.OPEN)
-        try { this._ws.close(); } catch {}
-        this._ws = null;
-
-        this._ws = new WebSocket(`${this.protocol}//${this.host}/ws/system`);
-
-        this._ws.onopen = () => {
-            console.log('Connected to device server');
-            if (this.timerPageReload) 
-            { clearTimeout(this.timerPageReload); this.timerPageReload = null; }
-            if (this.timerReconnectDevice)
-            { clearInterval(this.timerReconnectDevice); this.timerReconnectDevice = null; }
-        };
-
-        this._ws.onmessage = (message) => {
-            try
+            let settingEl = document.getElementById(`__${id}`);
+            if (!settingEl)
             {
-                const msg = JSON.parse(message.data);
-                for (const [id, object] of msg)
-                {
-                    const settingInnerHTML = `
-                        <div class="div-label">${String(id.split('_').join(' '))}</div>
-                        <input type="text" id="${id}" value="${String(object.value).replaceAll('"', '\"')}" ${object.allowEditExternal ? '' : 'disabled'}>
-                    `;
-
-                    if (id === 'ndpi_status_ndi_source_target') 
-                    { document.getElementById('source_selection').value = object.value || 'none'; }
-
-                    let settingEl = document.getElementById(`__${id}`);
-                    if (!settingEl)
-                    {
-                        settingEl = document.createElement('div');
-                        settingEl.id = `__${id}`;
-                        // settingEl.className = 'flex-row';
-                        settingEl.innerHTML = settingInnerHTML;
-                        document.getElementById('settings').appendChild(settingEl);
-                    } else
-                    {
-                        settingEl.innerHTML = settingInnerHTML;
-                    }
-                }
+                settingEl = document.createElement('div');
+                settingEl.id = `__${id}`;
+                settingEl.innerHTML = settingInnerHTML;
+                document.getElementById('settings').appendChild(settingEl);
+            } else
+            {
+                settingEl.innerHTML = settingInnerHTML;
             }
-            catch (e)
-            { console.error('Invalid message:', e); }
-        };
-
-        this._ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
-
-        this._ws.onclose = () => {
-            this.scheduleDeviceReconnect();
-            this._ws = null;
         }
     }
+    catch (e)
+    { console.error('Invalid message:', e); }
+};
 
-    scheduleDeviceReconnect(ms = 10000, timeout = 60000) {
-        if (this.timerReconnectDevice) 
-        { clearInterval(this.timerReconnectDevice); this.timerReconnectDevice = null; }
-        this.timerReconnectDevice = setInterval(() => { this.connect(); }, ms);
-
-        if (this.timerPageReload) 
-        { return; }
-        this.timerPageReload = setTimeout(() => { window.navigation.reload(); }, timeout);
+// Available sources array.
+let availableSources = [];
+const uploaderEl = document.getElementById('overlay_upload');
+const uploaderPreviewEl = document.getElementById('overlay_preview');
+let overlayUploadCommand = {
+    type: 'set-overlay',
+    data: {
+        name: '',
+        type: '',
+        size: 0,
+        dateLastModified: '',
+        dateUploaded: '',
+        src: '',
     }
+};
 
-    // // call this when the NDPi Hub Server establishes a connection with the client device.
-    // hubConnected(timeout = 10000) {
-    //     waitingForServer(false);
-    //     if (this.timerNdpiHubServerPing)
-    //     {
-    //         clearTimeout(this.timerNdpiHubServerPing);
-    //         this.timerNdpiHubServerPing = null;
-    //     }
-    //     this.timerNdpiHubServerPing = setTimeout(() => { waitingForServer(true); }, timeout);
-    // }
+function addEvents() {
+    document.getElementById('tv_power_off').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await sendCommand({
+            type: 'send-cec',
+            // data: 'standby%200',
+            data: encodeURI('standby 0'),
+        });
+    });
+    document.getElementById('tv_power_on').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await sendCommand({
+            type: 'send-cec',
+            data: encodeURI('on 0'),
+        });
+    });
+    document.getElementById('tv_volume_down').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await sendCommand({
+            type: 'send-cec',
+            data: encodeURI('voldown'),
+        });
+    });
+    document.getElementById('tv_volume_up').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await sendCommand({
+            type: 'send-cec',
+            data: encodeURI('volup'),
+        });
+    });
+    document.getElementById('tv_as').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await sendCommand({
+            type: 'send-cec',
+            data: encodeURI('as'),
+        });
+    });
+    document.getElementById('tv_is').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await sendCommand({
+            type: 'send-cec',
+            data: encodeURI('is'),
+        });
+    });
+    document.getElementById('send_bytes').addEventListener('change', async function(e) {
+        e.preventDefault();
+        this.disabled = true;
+        await sendCommand({
+            type: 'send-cec',
+            data: encodeURI(`${this.value}`),
+        });
+        this.value = '';
+        this.disabled = false;
+    });
+    document.getElementById('source_selection').addEventListener('change', async function(e) {
+        e.preventDefault();
+        this.disabled = true;
+        await sendCommand({
+            type: 'set-source',
+            data: this.value,
+        });
+        this.disabled = false;
+    });
+    document.getElementById('refresh_sources').addEventListener('click', async function(e) {
+        e.preventDefault();
+        this.disabled = true;
+        await refreshSources();
+        this.disabled = false;
+    });
+    uploaderEl.addEventListener('change', handleFiles);
+    document.getElementById('reset_overlay_upload').addEventListener('click', (e) => {
+        e.preventDefault();
+        resetOverlayUpload();
+    });
+    document.getElementById('save_overlay').addEventListener('click', async function(e) {
+        e.preventDefault();
+        this.disabled = true;
+        const res = await sendCommand(overlayUploadCommand);
+        if (res?.success)
+        { resetOverlayUpload(); }
+        else
+        { console.error('Failed to upload overlay.', res) }
+    });
+    document.getElementById('device_reboot').addEventListener('click', async function(e) {
+        e.preventDefault();
+        this.disabled = true;
+        this.textContent = 'REBOOTING...'
+        await sendCommand({
+            type: 'reboot-device'
+        });
+    });
+    document.getElementById('device_shutdown').addEventListener('click', async function(e) {
+        e.preventDefault();
+        this.disabled = true;
+        this.textContent = 'SHUTTING DOWN...'
+        await sendCommand({
+            type: 'shutdown-device'
+        });
+    });
     
 }
 
-const server = new DeviceSocket();
+function resetOverlayUpload() {
+    document.getElementById('save_overlay').disabled = true;
+    uploaderEl.value = '';
+    uploaderPreviewEl.innerHTML = '';
+    overlayUploadCommand = {
+        type: 'set-overlay',
+        data: {
+            name: '',
+            type: '',
+            size: 0,
+            dateLastModified: '',
+            dateUploaded: '',
+            src: '',
+        }
+    };
+}
 
-// function updateDetails(msg) {
-//     const fields = {
-//         devName:     msg.thisDevice?.name,
-//         devId:       msg.thisDevice?.id,
-//         devIp:       msg.thisDevice?.address === undefined ? undefined
-//                         : msg.thisDevice.address === 'localhost' ? 'Obtaining...'
-//                         : msg.thisDevice.address,
-//         servIp:      msg.serverIp || '-.-.-.-',
-//         programName: msg.service?.name,
-//         programVer:  msg.service?.version,
-//     };
+async function handleFiles() {
+    uploaderEl.scroll({behavior: 'smooth'});
+    const file = uploaderEl.files[0];
 
-//     for (const [id, value] of Object.entries(fields)) {
-//         if (value === undefined) continue;
-//         document.getElementById(id).textContent = value;
-//     }
-//     displayDetails();
-// }
+    if (!file.type.startsWith("image/"))
+    { return; }
+
+    const img = document.createElement("img");
+    img.file = file;
+    uploaderPreviewEl.appendChild(img);
+
+    overlayUploadCommand.data.name = file.name || '';
+    overlayUploadCommand.data.type = file.type || '';
+    overlayUploadCommand.data.size = file.size || 0;
+    overlayUploadCommand.data.dateLastModified = file.lastModified;
+    overlayUploadCommand.data.dateUploaded = Date.now();
+
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        img.src = e.target.result;
+        overlayUploadCommand.data.src = e.target.result;
+        if (overlayUploadCommand.data.src)
+        { document.getElementById('save_overlay').disabled = false; }
+    };
+    reader.readAsDataURL(file);
+}
+
+async function sendCommand(command = {}, viaWebSocket = true) {
+    if (!command.type) return null;
+    
+    if (viaWebSocket && server?._ws && server?._ws.readyState === WebSocket.OPEN) 
+    {
+        try
+        {
+            server._ws.send(JSON.stringify(command));
+            return;
+        }
+        catch (err)
+        { console.error(err); }
+    }
+    
+    // const searchParams = new URLSearchParams(command).toString();
+    // const url = new URLPattern(window.location.href);
+    // const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/command?${searchParams}`;
+
+    const url = new URLPattern(window.location.href);
+    const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/command`;
+
+    let data = null;
+    try
+    {
+        const res = await fetch(urlString, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(command)
+        });
+        if (!res.ok) throw new Error(await res.json());
+        data = await res.json();
+    }
+    catch (e) 
+    { console.error(e); }
+    return data;
+}
+
+async function refreshSources() {
+    const response = await sendCommand({ type: 'get-sources' }, false);
+    console.log(response);
+    if (response?.success)
+    { availableSources = response.data.sources || []; }
+    renderSources();
+}
+
+function renderSources() {
+    const sourceSelectorEl = document.getElementById('source_selection');
+    if (!sourceSelectorEl)
+    { return; }
+
+    sourceSelectorEl.innerHTML = '';
+
+    const noSourceOpt = document.createElement('option');
+    noSourceOpt.value = 'none';
+    noSourceOpt.textContent = 'Clear Source';
+    sourceSelectorEl.appendChild(noSourceOpt);
+
+    if (availableSources.length >= 1)
+    {
+        availableSources.forEach((source) => {
+            if (!source.name)
+            { return; }
+
+            const sourceOpt = document.createElement('option');
+            sourceOpt.value = source.name;
+            sourceOpt.dataset.url = source.url || '';
+            sourceOpt.textContent = source.name;
+            sourceSelectorEl.appendChild(sourceOpt);
+        });
+    }
+    const currentSourceEl = document.getElementById('ndpi_status_ndi_source_target');
+
+    if (currentSourceEl)
+    { sourceSelectorEl.value = currentSourceEl.value || 'none'; }
+}
