@@ -381,7 +381,7 @@ const { exec, spawn } = require('node:child_process');
                             resolve();
                             return;
                         }
-                        const a = `xdotool windowactivate ${stdout.toString().trim()}`;
+                        const a = `xdotool windowminimize ${stdout.toString().trim()} && xdotool windowraise ${stdout.toString().trim()} && xdotool windowactivate ${stdout.toString().trim()}` ;
                         exec(a, {
                             env: { ...process.env }
                         }, (error, stdout, stderr) => {
