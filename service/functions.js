@@ -235,7 +235,7 @@ const { exec, spawn } = require('node:child_process');
                     break;
                 
                 case 'focus-ndi':
-                    response = await focusWindow('gstreamer', response);
+                    response = await focusWindow('gstreamer', response, { onlyVisible: false });
                     return response;
                     break;
                 
@@ -346,16 +346,21 @@ const { exec, spawn } = require('node:child_process');
 
         /** FOCUS WINDOW */
         /**
-         * Set focus to a visible window.
+         * Set focus to a window by class name.
          * @param {string} className - Window class name of the window to focus. Discover the class name using xprop.
          * @param {object} res - Response object. This function will use and update a response object from an API call. This is optional.
+         * @param {object} options - Additional configuration.
+         * @param {boolean} [options.onlyVisible] - Search for windows that are Visible. (excludes background processes from attempting to focus.)
          * @returns {object} - Response object
          */
-        async function focusWindow(className, res = { data: {} }) {
+        async function focusWindow(className, res = { data: {} }, options = { onlyVisible: true }) {
             let response = { ...res };
             await new Promise((resolve) => {
-                exec(`xdotool search --onlyvisible --class "${className}" | head -n 1`, {
-                    env: { ...process.env }
+                exec(`xdotool search ${options.onlyVisible ? '--onlyvisible' : ''} --class "${className}" | head -n 1`, {
+                    env: {
+                        ...process.env,
+                        DISPLAY: ':0',
+                    }
                 }, (error, stdout, stderr) => {
                     if (error)
                     {

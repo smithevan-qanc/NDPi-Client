@@ -33,7 +33,7 @@
     </application>
 
     <!--  Display Browser  -->
-    <application name="chromium">
+    <application class="Chromium">
       <fullscreen>yes</fullscreen>
       <layer>above</layer>
       <shade>yes</shade>
