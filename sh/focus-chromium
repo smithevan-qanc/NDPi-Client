@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+export DISPLAY=':0'
+
+# xcompmgr -d :0 -fFCnR &
+
+WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
+echo $WINDOW_ID
