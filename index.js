@@ -81,7 +81,7 @@ class NDPi {
         spawnXsetroot().once('error', (err) => { console.error(`⚠️ [ xsetroot ][ ERROR ]`, err); });
         setTimeout(() => {
             execStartup();
-            spawnCompositor();
+            //spawnCompositor();
         }, 100);
 
         // this.compMgr = spawn('picom', ['-d', ':0', '-f'], {

@@ -2,7 +2,14 @@
 
 export DISPLAY=':0'
 
-# xcompmgr -d :0 -fFCnR &
-
 WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
-echo $WINDOW_ID
+
+xcompmgr -d :0 -fFCnR &
+sleep 0.5
+xdotool windowminimize $WINDOW_ID
+sleep 0.5
+xdotool windowraise $WINDOW_ID
+sleep 0.5
+xdotool windowactivate $WINDOW_ID
+sleep 1
+killall xcompmgr
