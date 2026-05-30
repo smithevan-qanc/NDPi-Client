@@ -35,12 +35,11 @@ class CecController extends EventEmitter {
 
     start() {
         this.isReady = false;
+        this.enabled = true;
 
         this.proc = spawn('cec-client', ['-o', this.deviceName, '-t', 'r', '-d', '4'], { stdio: ['pipe', 'pipe', 'pipe'] });
-
         this.proc.stdout.on('data', (data) => this._handleStdout(data));
         this.proc.stderr.on('data', (data) => this._handleStderr(data));
-
         this.proc.on('close', () => {
             this.isReady = false;
             this.proc = null;
@@ -49,10 +48,8 @@ class CecController extends EventEmitter {
             { this._scheduleRestart() }
             else
             {
-                try
-                { clearTimeout(this.timeoutTimer); }
-                catch
-                {}
+                try { clearTimeout(this.timeoutTimer); }
+                catch {}
                 finally
                 {
                     this.timeoutTimer = null;
@@ -61,14 +58,14 @@ class CecController extends EventEmitter {
                 }
             }
         });
-
         this.proc.on('error', () => {
             this.isReady = false;
             this._scheduleRestart();
         });
 
         if (this.timeoutTimer)
-        { return }
+        { return; }
+
         this.timeoutTimer = setTimeout(() => {
             if (!this.isReady)
             {
@@ -79,28 +76,40 @@ class CecController extends EventEmitter {
         }, 30000);
     }
 
-    async close() {
+    /**
+     * Update the OSD name of the device.
+     * @param {string} name 
+     */
+    updateDeviceName(name) {
+        if (this.deviceName !== name && typeof name == 'string')
+        {
+            this.deviceName = name;
+            this.send(`osd 4 ${this.deviceName}`);
+        }
+    }
+
+    /**
+     * Kill the CEC Adapter and close out of the module.
+     * @param {boolean} shutdown - Set as true when exiting the entire NDPi Process.
+     */
+    async close(shutdown = false) {
         console.info(
             `[ ${path.basename(__filename).split('.')[0]} ]`,
             'Closing Module'
         );
+
         this.enabled = false;
         this.isReady = false;
+
         this.proc.kill();
-        await new Promise((resolve) => {
-            const recheckStatus = () => {
-                if (this.proc?.killed)
-                { resolve(); }
-                setTimeout(() => { recheckStatus(); }, 500);
-            };
-            recheckStatus();
-        });
+
+        await new Promise((resolve) => { setTimeout(() => { resolve(); }, shutdown ? 50 : 500); });
+
         console.info(
-            `[ ${path.basename(__filename)} ]`,
+            `[ ${path.basename(__filename).split('.')[0]} ]`,
             'Module Exited'
         );
         return;
-        // this.send('q');
     }
 
     _scheduleRestart() {
@@ -160,8 +169,6 @@ class CecController extends EventEmitter {
     _handleStderr(data) {
         this.emit('error_log', data.toString());
     }
-
-
 
     send(command, { debounceKey = null, debounceMs = 300 } = {}) {
         const staticDebounceKey = debounceKey || String(command).split(' ')[0] || null;

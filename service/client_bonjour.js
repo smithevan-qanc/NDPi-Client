@@ -46,7 +46,8 @@ class NDPiBonjourService {
     }
 
     _tryPublish() {
-        if (!this._isReady()) return;
+        if (!this._isReady())
+        { return; }
 
         // Stop existing service before republishing with updated data
         if (this.service) {
@@ -55,29 +56,66 @@ class NDPiBonjourService {
         }
 
         const options = this._buildOptions();
-        console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Publishing Service');
 
-        this.service = bonjour.publish(options);
+        setTimeout(() => {
+            try
+            {
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Publishing Service');
+                this.service = bonjour.publish(options);
+            }
+            catch {}
+        }, 1500);
+
         this.service.on('error', (err) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, err.message); });
     }
 
-    async close() {
+    /**
+     * Update the device name on mDNS.
+     * @param {string} name 
+     */
+    updateDeviceName(name) {
+        if (this.deviceName !== name && typeof name == 'string')
+        {
+            this.deviceName = name;
+            this._tryPublish();
+        }
+    }
+
+    /**
+     * Update the device IP address on mDNS.
+     * @param {string} address 
+     */
+    updateDeviceIp(address) {
+        if (this.localIp !== address && typeof address == 'string')
+        {
+            this.localIp = address;
+            this._tryPublish();
+        }
+    }
+
+    /**
+     * Kill the Bonjour client and close out of the module.
+     * @param {boolean} shutdown - Set as true when exiting the entire NDPi Process.
+     */
+    async close(shutdown = false) {
         console.info(
-            `[ ${path.basename(__filename)} ]`,
+            `[ ${path.basename(__filename).split('.')[0]} ]`,
             'Closing Module'
         );
+
         await new Promise((resolve) => {
             if (this.service)
             {
                 this.service.stop();
                 this.service = null;
-                setTimeout(() => { resolve(); }, 1000);
+                setTimeout(() => { resolve(); }, shutdown ? 50 : 1000);
             }
             else
             { resolve(); }
         });
+
         console.info(
-            `[ ${path.basename(__filename)} ]`,
+            `[ ${path.basename(__filename).split('.')[0]} ]`,
             'Module Exited'
         );
         return;

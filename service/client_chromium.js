@@ -20,7 +20,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
 
     close() {
         console.info(
-            `[ ${path.basename(__filename)} ]`,
+            `[ ${path.basename(__filename).split('.')[0]} ]`,
             'Closing Module'
         );
         try {
@@ -31,7 +31,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
                 {
                     console.error(
                         '⚠️',
-                        `[ ${path.basename(__filename)} ]`,
+                        `[ ${path.basename(__filename).split('.')[0]} ]`,
                         '[ ERROR ]',
                         stderr
                     );
@@ -101,7 +101,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         this.service.on('close', () => {
             this.service = null;
             console.info(
-                `[ ${path.basename(__filename)} ]`,
+                `[ ${path.basename(__filename).split('.')[0]} ]`,
                 'Module Exited'
             );
             this.emit('close');

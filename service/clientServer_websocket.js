@@ -87,29 +87,20 @@ class ClientServerWebSocket extends EventEmitter {
 
     close() {
         console.info(
-            `[ ${path.basename(__filename)} ]`,
+            `[ ${path.basename(__filename).split('.')[0]} ]`,
             'Closing Module'
         );
+
         this.enabled = false;
-        try {
-            this.socket.close()
-        }
+
+        try { this.socket.close(); }
         catch {}
-        finally {
-            this.socket = null;
-        }
+        finally { this.socket = null; }
+
         console.info(
-            `[ ${path.basename(__filename)} ]`,
+            `[ ${path.basename(__filename).split('.')[0]} ]`,
             'Module Exited'
         );
-
-        // if (this.socket)
-        // {
-        //     if (this.socket.readyState === WebSocket.OPEN)
-        //     { this.socket.close(); }
-        // }
-        
-        // this.socket = null;
     }
 
     scheduleReconnect(ms = 5000) {

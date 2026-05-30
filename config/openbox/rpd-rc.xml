@@ -22,8 +22,8 @@
   </theme>
   <applications>
     
-    <!--  NDI Receiver <<Must Be: name="ndi_receiver_v2*">>  -->
-    <application name="*ndi_receiver_v2">
+    <!--  NDI Receiver <<Must Be: name="ndi_receiver_v3*">>  -->
+    <application name="*ndi_receiver*">
       <decor>no</decor>
       <layer>above</layer>
       <focus>no</focus>
@@ -34,7 +34,7 @@
     <application name="chromium">
       <fullscreen>yes</fullscreen>
       <layer>below</layer>
-      <focus>no</focus>
+      <!-- <focus>no</focus> -->
     </application>
 
     <application name="*">

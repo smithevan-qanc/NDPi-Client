@@ -132,9 +132,6 @@ function handleDisplayCommand(msg) {
         case 'ndi-init':
             connectingToSource(true);
             break;
-        case 'ndi-started':
-            hideAll();
-            break;
         case 'show-ndi':
             hideAll();
             break;

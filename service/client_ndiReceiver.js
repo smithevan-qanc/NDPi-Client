@@ -5,7 +5,7 @@ const path = require('path');
 const func = require('./functions');
 const { OutgoingMessage } = require('node:http');
 
-class NDI_Receiver_v2 extends EventEmitter {
+class NDI_Receiver_v3 extends EventEmitter {
     constructor(
         fsData,
         api,
@@ -20,7 +20,6 @@ class NDI_Receiver_v2 extends EventEmitter {
         this.settings = fsData;
         this.server = api;
         this.chromium = chromium;
-        this.server.updateDisplay({ type: `ndi-init` });
 
         this.homeDirectory = path.join(__dirname, '..', '..');
         this.parentDirectory = path.join(__dirname, '..');
@@ -89,24 +88,33 @@ class NDI_Receiver_v2 extends EventEmitter {
         });
 
         this.receiver.stdout.on('data', (data) => {
+            const showNDI = (delay = 1000) => {
+                setTimeout(() => {
+                    func.focusWindow(this.receiverName);
+                    this.server.updateDisplay({ type: `show-ndi` });
+                }, delay);
+            }
             const output = data.toString().trim();
             this.parseInfo(output);
+
             if (output.includes('Connected to:'))
             {
+                this.secondsInactive = 0;
                 this.ndiConnectedAt = new Date().toISOString();
                 this.ndiActiveSource = this.ndiSource;
                 this.ndiStatus = 'streaming';
                 this.settings.put('ndpi_status_ndi', this.ndiStatus);
                 this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
                 this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
-                process.nextTick(() => { this.emit('connected') });
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
+                showNDI(1000);
             }
             else if (output.includes('Reconnected to:'))
             {
                 this.secondsInactive = 0;
                 this.ndiStatus = 'streaming';
                 this.settings.put('ndpi_status_ndi', this.ndiStatus);
-                func.focusWindow('gstreamer');
+                showNDI(1000);
             }
         });
 
@@ -116,12 +124,11 @@ class NDI_Receiver_v2 extends EventEmitter {
         });
 
         this.receiver.on('error', (error) => {
-            process.nextTick(() => { this.emit('error') });
+            this.emit('error');
             console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ RECEIVER ERROR ][ NDI ] --▶`, error);
         });
 
         this.receiver.on('close', (code, signal) => {
-
             this.receiver = null;
 
             this.ndiActiveSource = null;
@@ -140,26 +147,36 @@ class NDI_Receiver_v2 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_resolution', '');
             
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] --▶ Terminated - [ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
-            //this.server.broadcastToDisplay();
         });
     }
+
+    /**
+     * Kill the NDI Receiver without resetting the target source.
+     * To reactivate the source, call 'thisModule.connect();'
+     */
+    softClose() {
+        try { this.receiver.kill('SIGKILL'); }
+        catch (error) {
+            // console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ SIGKILL ERROR ][ softClose() ]`, error);
+            exec(`killall ${this.receiverName}`);
+        }
+    }
     
-    async close() {
+    /**
+     * Kill the NDI Receiver and close out of the module.
+     * @param {boolean} shutdown - Set as true when exiting the entire NDPi Process.
+     */
+    async close(shutdown = false) {
         if (this.closing)
         { return; }
         
         this.closing = true;
+        this.enabled = false;
 
         console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module' );
 
-        this.enabled = false;
-
-        func.focusWindow('chromium');
-
         await new Promise((resolve) => {
-
             setTimeout(() => {
-
                 try { this.receiver.kill('SIGKILL'); }
                 catch {}
                 finally { this.receiver = null; }
@@ -167,32 +184,15 @@ class NDI_Receiver_v2 extends EventEmitter {
                 setTimeout(() => {
                     resolve();
                 }, 500);
-
-            }, 1000);
-
+            }, shutdown ? 500 : 1000);
         });
 
         console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited' );
 
-        this.emit('close');
-
         this.closing = false;
-
+        this.emit('close');
         return;
-
     }
-
-    // scheduleReconnect(ms = 15000) {
-    //     if (this.enabled)
-    //         {
-    //             this.server.broadcastToDisplay({ type: `ndi-init` });
-    //             this.reconnectTimer = setTimeout(() => {
-    //                 if (this.enabled && this.ndiSource && this.ndiSource !== 'none' && !this.receiver)
-    //                     { this.connect() }
-    //                 this.reconnectTimer = null;
-    //             }, ms);
-    //         }
-    // }
 
     parseInfo(data) {
         const logInfo = (line = '') => { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] --▶ ${line}`); }
@@ -231,25 +231,6 @@ class NDI_Receiver_v2 extends EventEmitter {
             else
             { logInfo(stdout); }
         });
-
-        // const videoMatch = data.match(/(?:Video|Source):\s*(\d+)x(\d+)\s*@\s*(\d+(?:\.\d+)?)/i);
-        // if (videoMatch)
-        // {
-        //     this.ndiResolution = `${videoMatch[1]}x${videoMatch[2]}`;
-        //     this.ndiFramerate = parseFloat(videoMatch[3]);
-        // }
-        // if (!this.ndiResolution)
-        // {
-        //     const resMatch = data.match(/(\d{3,4})x(\d{3,4})/);
-        //     if (resMatch)
-        //         { this.ndiResolution = `${resMatch[1]}x${resMatch[2]}` }
-        // }
-        // if (!this.ndiFramerate)
-        // {
-        //     const fpsMatch = data.match(/(\d+(?:\.\d+)?)\s*fps|@\s*(\d+(?:\.\d+)?)/i);
-        //     if (fpsMatch)
-        //         { this.ndiFramerate = parseFloat(fpsMatch[1] || fpsMatch[2]) }
-        // }
     }
 
     processInactiveStream() {
@@ -293,4 +274,4 @@ class NDI_Receiver_v2 extends EventEmitter {
     }
 }
 
-module.exports = NDI_Receiver_v2;
+module.exports = NDI_Receiver_v3;

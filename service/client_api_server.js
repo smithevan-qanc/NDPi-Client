@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
-const { processCommand } = require('./functions');
+const func = require('./functions');
 const { randomUUID } = require('crypto');
 
 
@@ -17,8 +17,8 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         fsData.on('update', (data) => {
             this.ws_conn_system.forEach(client => {
-                if (client.readyState === WebSocket.OPEN)
-                    { client.send(data) }
+                try { client.send(data); }
+                catch {}
             });
         });
         
@@ -78,7 +78,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
             ws.on('message', (data) => {
                 const message = JSON.parse(data.toString());
-                processCommand(message);
+                func.processCommand(message);
             });
             
             ws.on('close', () => { this.ws_conn_system.delete(ws); });
@@ -102,7 +102,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                 // to use: http://<ip>:<port>/api/v1/command?type=set-source&data=EVAN-MSI (OBS PGM)
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'GET:', req.url);
 
-                const commandRes = await processCommand({
+                const commandRes = await func.processCommand({
                     ...req.query,
                     id: randomUUID(),
                 });
@@ -120,7 +120,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             .post(async (req, res) => {
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'POST:', req.url);
 
-                const commandRes = await processCommand({
+                const commandRes = await func.processCommand({
                     ...req.body,
                     id: randomUUID(),
                 });
@@ -176,27 +176,35 @@ class NDPiCommandServer_Client extends EventEmitter {
                     case 'ndi':
                         let source;
 
-                        if (!data)
-                        { source = 'none'; }
-                        else if (String(data).toLowerCase() === 'none')
-                        { source = 'none'; }
+                        if (String(data || 'none').toLowerCase() === 'none')
+                        {
+                            func.focusWindow('chromium');
+                            source = 'none';
+                            setTimeout(() => {
+                                const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
+                                this.updateDisplay({ type: `show-${displayMode}` });
+                            }, 5000);
+                        }
                         else
-                        { source = String(data); }
+                        {
+                            source = String(data);
+                            this.updateDisplay({ type: `ndi-init` });
+                        }
 
                         this.settings.put('ndpi_status_ndi_source_target', source);
+
                         res.status(200);
                         res.json({ success: true, message: `NDI Source Set: ${source}` });
-
                         break;
 
                     case 'shutdown':
-                        this.emit('shutdown');
                         res.sendStatus(200);
+                        this.emit('shutdown');
                         break;
 
                     case 'reboot':
-                        this.emit('reboot');
                         res.sendStatus(200);
+                        this.emit('reboot');
                         break;
 
                     default:
@@ -207,38 +215,33 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     close() {
+        
         console.info(
             `[ ${path.basename(__filename).split('.')[0]} ]`,
             'Closing Module',
-            `[ Connections ] Server:${this.Server?.connections}, Display WS: ${this.ws_conn_display.size}, System WS: ${this.ws_conn_system.size}`
+            `[ Connections ] Server: ${this.Server.connections || 'n/a'}, Display WS: ${this.ws_conn_display.size}, System WS: ${this.ws_conn_system.size}`
         );
+
         this.ws_conn_display.forEach(client => {
-            // if (client.readyState === WebSocket.OPEN)
-            try {
-                client.close();
-            } catch (e) {
-                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e);
-            } finally {
-                this.ws_conn_display.delete(client);
-            }
+            try { client.close(); }
+            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e); }
+            finally { this.ws_conn_display.delete(client); }
         });
+
         this.ws_conn_system.forEach(client => {
-            // if (client.readyState === WebSocket.OPEN)
-            try {
-                client.close();
-            } catch (e) {
-                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e);
-            } finally {
-                this.ws_conn_system.delete(client);
-            }
+            try { client.close(); }
+            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e); }
+            finally { this.ws_conn_system.delete(client); }
         });
+
         this.Server.closeAllConnections();
         this.Server.close();
-        console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited', `Connections: ${this.Server.connections}`);
+
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited');
     }
 
     broadcastToDisplay(message = {}, sendAll = false, options = {}) {
-        
+
         const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
         let updateData = {};
         
@@ -282,10 +285,10 @@ class NDPiCommandServer_Client extends EventEmitter {
 
     updateDisplay(message = {}) {
         if (!message.type)
-            { return; }
+        { return; }
         this.ws_conn_display.forEach(client => {
-            if (client.readyState === WebSocket.OPEN)
-            { client.send(JSON.stringify(message)); }
+            try { client.send(JSON.stringify(message)); }
+            catch { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.', message); }
         });
     }
 
