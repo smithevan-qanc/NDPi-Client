@@ -178,12 +178,11 @@ class NDPiCommandServer_Client extends EventEmitter {
 
                         if (String(data || 'none').toLowerCase() === 'none')
                         {
-                            func.focusWindow('chromium');
                             source = 'none';
                             setTimeout(() => {
                                 const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
                                 this.updateDisplay({ type: `show-${displayMode}` });
-                            }, 5000);
+                            }, 2000);
                         }
                         else
                         {
