@@ -26,6 +26,8 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.ws_conn_display = new Set();
         this.ws_serv_system = new WebSocket.Server({ noServer: true });
         this.ws_conn_system = new Set();
+        this.ws_serv_sources = new WebSocket.Server({ noServer: true });
+        this.ws_conn_sources = new Set();
 
         this.App = express();
         this.App.use(express.json());
