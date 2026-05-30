@@ -8,15 +8,22 @@ WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
 # xsetroot -solid '#000000' -name 'Chromium' &
 
 # picom -i 0 -f --backend xrender --force-win-blend --use-damage &
-picom -f -D 6 -i 0 --backend xrender --force-win-blend --realtime --no-vsync &
 
-# xdotool windowminimize $WINDOW_ID
-# sleep 1
 # xcompmgr -d :0 -fFCnR &
 # sleep 1
-# xdotool windowraise $WINDOW_ID
-sleep 1
-xdotool windowactivate $WINDOW_ID
-sleep 1
-# killall xcompmgr
+    
+activateWindow() {
+    if [[ -z "$WINDOW_ID" ]]; then
+        return
+    fi
+    picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
+    # xdotool windowminimize $WINDOW_ID
+    # sleep 1
+    # xdotool windowraise $WINDOW_ID
+    sleep 1
+    xdotool windowactivate $WINDOW_ID
+    sleep 1
+}
+
+activateWindow
 killall picom
