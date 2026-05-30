@@ -430,6 +430,8 @@ class FileSystemMonitor extends EventEmitter {
 
     async start() {
         const startWatcher = () => { this.watcher = fs.watch(this.dataDir); }
+        startWatcher();
+        
         this.watcher.on('change', (eventType, filename) => { if (this.fileMap.has(filename)) { this._fsEvent(filename); } });
         this.watcher.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error); });
         this.watcher.on('close', () => {
@@ -437,7 +439,6 @@ class FileSystemMonitor extends EventEmitter {
             if (this.watcherEnable) { startWatcher(); }
         });
 
-        startWatcher();
         this.emit('ready');
         this.startDrmMonitor();
 
