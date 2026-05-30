@@ -179,7 +179,6 @@ class NDI_Receiver_v3 extends EventEmitter {
             setTimeout(() => {
                 try { this.receiver.kill('SIGKILL'); }
                 catch {}
-                finally { this.receiver = null; }
 
                 setTimeout(() => {
                     resolve();
