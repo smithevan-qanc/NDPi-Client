@@ -2,7 +2,7 @@
 
 export DISPLAY=':0'
 
-WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
+WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
 
 xdotool windowminimize $WINDOW_ID
 sleep 0.5
