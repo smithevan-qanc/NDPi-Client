@@ -35,8 +35,7 @@
     <!--  Display Browser  -->
     <application class="Chromium">
       <fullscreen>yes</fullscreen>
-      <layer>above</layer>
-      <shade>yes</shade>
+      <layer>below</layer>
       <focus>yes</focus>
     </application>
 

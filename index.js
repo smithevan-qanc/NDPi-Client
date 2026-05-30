@@ -65,11 +65,12 @@ class NDPi {
                 }
             });
         };
+
         const spawnCompositor = () => {
             try { this.compMgr.kill() }
             catch {}
             finally { this.compMgr = null; }
-            this.compMgr = spawn('xcompmgr', ['-d', ':0', '-f'], {
+            this.compMgr = spawn('xcompmgr', ['-d', ':0', '-fFCR'], {
                 env: { DISPLAY: ':0' }
             });
             this.compMgr.on('exit', () => {
