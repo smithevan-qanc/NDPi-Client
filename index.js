@@ -44,9 +44,8 @@ class NDPi {
     /** INITIATE */
     async initiate() {
 
-        let startup;
         const execStartup = async () => {
-            startup = exec(`./sh/startup`);
+            const startup = exec(`./sh/startup`);
             startup.stdout.on('data', (data) => {
                 data
                     .toString()
@@ -59,7 +58,7 @@ class NDPi {
         };
 
         const spawnXsetroot = () => {
-            spawn(`xsetroot`, [ '-solid', '#000000' ], {
+            return spawn(`xsetroot`, [ '-solid', '#000000' ], {
                 env: {
                     ...process.env,
                     DISPLAY: ':0',
@@ -78,9 +77,11 @@ class NDPi {
             });
         };
 
-        execStartup();
-        spawnXsetroot();
-        spawnCompositor();
+        spawnXsetroot().once('error', (err) => { console.error(`⚠️ [ xsetroot ][ ERROR ]`, err); });
+        setTimeout(() => {
+            execStartup();
+            spawnCompositor();
+        }, 100);
 
         // this.compMgr = spawn('picom', ['-d', ':0', '-f'], {
         //     env: { DISPLAY: ':0' }
