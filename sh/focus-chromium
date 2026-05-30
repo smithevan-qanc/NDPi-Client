@@ -4,12 +4,14 @@ export DISPLAY=':0'
 
 WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
 
+xsetroot -solid '#000000' -name 'ndi_receiver_v3' &
+
 xdotool windowminimize $WINDOW_ID
-sleep 0.5
+sleep 1
 xcompmgr -d :0 -fFCnR &
 sleep 1
 xdotool windowraise $WINDOW_ID
-sleep 0.5
+sleep 1
 xdotool windowactivate $WINDOW_ID
 sleep 1
 killall xcompmgr

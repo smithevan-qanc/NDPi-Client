@@ -4,6 +4,8 @@ export DISPLAY=':0'
 
 WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
 
+xsetroot -solid '#000000'
+
 xdotool windowminimize $WINDOW_ID
 sleep 0.5
 xcompmgr -d :0 -fFCnR &

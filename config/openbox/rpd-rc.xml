@@ -23,7 +23,6 @@
   <applications>
     
     <!--  NDI Receiver <<Must Be: name="ndi_receiver_v3*">>  -->
-    <!-- <application name="*ndi_receiver_v3">GStreamer -->
     <application class="GStreamer">
       <decor>no</decor>
       <layer>below</layer>
@@ -36,7 +35,8 @@
     <application class="Chromium">
       <fullscreen>yes</fullscreen>
       <layer>below</layer>
-      <focus>yes</focus>
+      <focus>no</focus>
+      <maximized>false</maximized>
     </application>
 
     <application name="*">
@@ -46,11 +46,11 @@
       <maximized>false</maximized>
     </application>
 
-    <application name="vncserver*">
+    <!-- <application name="vncserver*">
       <skip_taskbar>yes</skip_taskbar>
       <iconic>yes</iconic>
       <maximized>false</maximized>
-    </application>
+    </application> -->
 
     <!--
   # this is an example with comments through out. use these to make your
