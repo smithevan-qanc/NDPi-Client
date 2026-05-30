@@ -465,7 +465,7 @@ async function rebootDevice() {
 
 async function quitNDPi(signal, exit = true) {
 
-    await new Promise((resolve) => {
+    await new Promise(async (resolve) => {
         const sig = signal ? `[ ${signal} ]` : '';
 
         console.log(`[ index ]${sig} Shutting down application...`);
