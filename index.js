@@ -78,7 +78,7 @@ class NDPi {
             });
         };
 
-        spawnXsetroot().once('error', (err) => { console.error(`⚠️ [ xsetroot ][ ERROR ]`, err); });
+        //spawnXsetroot().once('error', (err) => { console.error(`⚠️ [ xsetroot ][ ERROR ]`, err); });
         setTimeout(() => {
             execStartup();
             //spawnCompositor();

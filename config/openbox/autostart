@@ -5,16 +5,16 @@
 #       2026-05-07
 
 # Set display
-export DISPLAY=:0
+# export DISPLAY=:0
 
 # Disable screen blanking and power management
 # xset s off &
 # xset -dpms &
 # xset s noblank &
 
-xsetroot -solid "#000000" &
+# xsetroot -solid "#000000" &
 
-# # hsetroot -solid "#000066"
+# hsetroot -solid "#000066"
 
 # echo "Starting Xcompmgr"
-xcompmgr -d :0 -fFn &
+# xcompmgr -d :0 -fFn &
