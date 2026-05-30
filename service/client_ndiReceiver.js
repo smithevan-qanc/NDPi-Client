@@ -90,6 +90,7 @@ class NDI_Receiver_v3 extends EventEmitter {
         this.receiver.stdout.on('data', (data) => {
             const showNDI = (delay = 1000) => {
                 setTimeout(() => {
+                    func.focusWindow('gstreamer');
                     this.server.updateDisplay({ type: `show-ndi` });
                 }, delay);
             }

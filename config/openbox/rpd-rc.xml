@@ -23,28 +23,34 @@
   <applications>
     
     <!--  NDI Receiver <<Must Be: name="ndi_receiver_v3*">>  -->
-    <application name="*ndi_receiver*">
+    <!-- <application name="*ndi_receiver_v3">GStreamer -->
+    <application class="GStreamer">
       <decor>no</decor>
-      <layer>above</layer>
+      <layer>below</layer>
       <focus>no</focus>
-      <maximized>Horizontal</maximized>
+      <maximized>true</maximized>
+      <fullscreen>yes</fullscreen>
     </application>
 
     <!--  Display Browser  -->
     <application name="chromium">
       <fullscreen>yes</fullscreen>
-      <layer>below</layer>
-      <!-- <focus>no</focus> -->
+      <layer>above</layer>
+      <shade>yes</shade>
+      <focus>yes</focus>
     </application>
 
     <application name="*">
       <decor>no</decor>
-      <layer>above</layer>
-      <maximized>Horizontal</maximized>
+      <iconic>yes</iconic>
+      <layer>below</layer>
+      <maximized>false</maximized>
     </application>
 
     <application name="vncserver*">
       <skip_taskbar>yes</skip_taskbar>
+      <iconic>yes</iconic>
+      <maximized>false</maximized>
     </application>
 
     <!--
