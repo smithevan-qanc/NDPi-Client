@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
+set -e
 
 export DISPLAY=':0'
 
 WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
 
-xsetroot -solid '#000000'
+# xsetroot -solid '#000000' -name 'Chromium' &
 
-xdotool windowminimize $WINDOW_ID
-sleep 0.5
-xcompmgr -d :0 -fFCnR &
+picom -i 0 -f --backend xrender --force-win-blend --use-damage &
+
+# xdotool windowminimize $WINDOW_ID
+# sleep 1
+# xcompmgr -d :0 -fFCnR &
+# sleep 1
+# xdotool windowraise $WINDOW_ID
 sleep 1
-xdotool windowraise $WINDOW_ID
-sleep 0.5
 xdotool windowactivate $WINDOW_ID
 sleep 1
-killall xcompmgr
+# killall xcompmgr
+killall picom
