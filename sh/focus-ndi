@@ -7,7 +7,8 @@ WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
 
 # xsetroot -solid '#000000' -name 'Chromium' &
 
-picom -i 0 -f --backend xrender --force-win-blend --use-damage &
+# picom -i 0 -f --backend xrender --force-win-blend --use-damage &
+picom -f -D 6 -i 0 --backend xrender --force-win-blend --realtime --no-vsync &
 
 # xdotool windowminimize $WINDOW_ID
 # sleep 1

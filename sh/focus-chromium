@@ -7,7 +7,7 @@ WINDOW_ID="$(xdotool search --onlyvisible --class 'Chromium' | head -n 1)"
 
 # xsetroot -solid '#000000' -name 'ndi_receiver_v3' &
 
-picom -f -D 6 -i 0 --backend xrender --force-win-blend &
+picom -f -D 6 -i 0 --backend xrender --force-win-blend --realtime --no-vsync &
 
 xdotool windowminimize $WINDOW_ID
 # sleep 1
