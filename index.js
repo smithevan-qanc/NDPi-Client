@@ -229,7 +229,7 @@ class NDPi {
             finally { this.startApi(); }
         });
 
-        const setResolutionResetNDI = () => {
+        const setResolutionResetNDI = async () => {
             await func.setDisplayResolution();
             try
             {
