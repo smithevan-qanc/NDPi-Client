@@ -70,7 +70,7 @@ class NDPi {
             try { this.compMgr.kill() }
             catch {}
             finally { this.compMgr = null; }
-            this.compMgr = spawn('xcompmgr', ['-d', ':0', '-fFCR'], {
+            this.compMgr = spawn('xcompmgr', ['-d', ':0', '-fFCnR'], {
                 env: { DISPLAY: ':0' }
             });
             this.compMgr.on('exit', () => {

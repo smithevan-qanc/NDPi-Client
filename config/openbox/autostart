@@ -1,3 +1,4 @@
+
 # Openbox autostart script for NDPi Monitor - CLIENT 
 # Revised:
 #       Evan Smith
@@ -11,8 +12,9 @@ export DISPLAY=:0
 # xset -dpms &
 # xset s noblank &
 
-# hsetroot -solid "#000000" &
+xsetroot -solid "#000000" &
+
 # # hsetroot -solid "#000066"
 
 # echo "Starting Xcompmgr"
-# xcompmgr -d :0 -fFn &
+xcompmgr -d :0 -fFn &
