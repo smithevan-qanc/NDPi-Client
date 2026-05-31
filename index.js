@@ -482,7 +482,7 @@ async function quitNDPi(signal, exit = true) {
         try { await index.ndiReceiver.close(); }
         catch {}
 
-        try { index.lcdDisplay.kill('SIGTERM') }
+        try { index.lcdDisplay.kill('SIGTERM'); }
         catch {}
 
         try { await index.controller_cec.close(); }

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -e
+
+UPDATE_AVAILABLE=false
+
+cd $HOME/ndpi
+CURRENT_VERSION="$(head -n 1 version/current)"
+
+cd $HOME/TMP_ndpi
+BRANCH="$(head -n 1 version/git)"
+
+git fetch origin $BRANCH &>/dev/null
+
+LOCAL=$(git rev-parse HEAD)
+REMOTE=$(git rev-parse origin/$BRANCH)
+
+if [ "$LOCAL" != "$REMOTE" ]; then
+    git reset --hard origin/$BRANCH
+    chmod +x ./sh/*
+    UPDATE_AVAILABLE=true
+fi
+NEWEST_VERSION="$(head -n 1 version/current)"
+
+printf "{
+    \"update_available\": ${UPDATE_AVAILABLE},
+    \"installed_version\": {
+        \"git\": \"$LOCAL\",
+        \"ndpi\": \"$CURRENT_VERSION\"
+    },
+    \"current_version\": {
+        \"git\": \"$REMOTE\",
+        \"ndpi\": \"$NEWEST_VERSION\"
+    }
+}"
+
+exit 0

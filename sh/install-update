@@ -14,14 +14,14 @@ customInstallInstructions() {
 
 install() {
     echo "PREPARING TO INSTALL UPDATE"
-    cd ../
+    cd $HOME
     sleep 0.5
     local TMP="$(pwd)/TMP_ndpi"
     local PGM="$(pwd)/ndpi"
     echo "    [FROM] $TMP"
     echo "      [TO] $PGM"
-    # read -rp "Install? (y/n) " confirm
-    # if [[ "$confirm" = [yY] ]]; then
+    read -rp "Install? (y/n) " confirm
+    if [[ "$confirm" = [yY] ]]; then
         sudo rsync -rvu \
           --exclude .git \
           --exclude sh/install-update \
@@ -35,9 +35,9 @@ install() {
         echo "Restarting NDPi Client" && sudo systemctl restart ndpi
         echo "INSTALLATION COMPLETE"
         # sudo reboot
-    # else
-    #     echo "INSTALLATION ABORTED"
-    # fi
+    else
+        echo "INSTALLATION ABORTED"
+    fi
 }
 
 install
