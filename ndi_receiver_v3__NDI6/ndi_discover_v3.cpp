@@ -9,6 +9,7 @@
  * 
  * Compilation:
  *   g++ -o ndi_discover_v3 ndi_discover_v3.cpp -I"/opt/NDI SDK for Linux/include" -ldl -std=c++11
+ *   g++ -o ndpi_discover ndi_discover_v3.cpp -I"include" -ldl -std=c++11
  * 
  * 
  * Usage:
@@ -141,7 +142,7 @@ int main(int argc, char* argv[])
             if (i + 1 < argc) {
                 timeout_seconds = std::atoi(argv[++i]);
             } else {
-                std::cerr << "Error: " << arg << " requires a value.\n" << std::endl;
+                std::cerr << "Error: " << arg << " requires a value." << std::endl;
                 return 1;
             }
         } else if (arg == "-v" || arg == "--version") {
@@ -149,11 +150,11 @@ int main(int argc, char* argv[])
             return 0;
         } 
         else if (arg == "-h" || arg == "--help") {
-            std::cout << "Usage: " << argv[0] << "\n" << std::endl;
-            std::cout << "\t" << "[-s|--single-line <separator>]" << "\t" << "Outputs one(1) source per line. E.g.:'NAME<seperator>URL'. (Default: JSON string array)" << "\n" << std::endl;
-            std::cout << "\t" << "[-t|--timeout <seconds>]" << "\t" << "How long to search for available sources before giving up. (Default: 5)" << "\n" << std::endl;
-            std::cout << "\t" << "[-v|--version]" << "\t" << "\t" << "NDPi Discover Version." << "\n" << std::endl;
-            std::cout << "\t" << "[-h|--help]" << "\t" << "\t" << "This help menu." << "\n" << std::endl;
+            std::cout << "Usage: " << argv[0] << std::endl;
+            std::cout << "\t" << "[-s|--single-line <separator>]" << "\t" << "Outputs one(1) source per line. E.g.:'NAME<seperator>URL'. (Default: JSON string array)" << std::endl;
+            std::cout << "\t" << "[-t|--timeout <seconds>]" << "\t" << "How long to search for available sources before giving up. (Default: 5)" << std::endl;
+            std::cout << "\t" << "[-v|--version]" << "\t" << "\t" << "NDPi Discover Version." << std::endl;
+            std::cout << "\t" << "[-h|--help]" << "\t" << "\t" << "This help menu." << std::endl;
             return 0;
         } 
     }
@@ -183,18 +184,18 @@ int main(int argc, char* argv[])
     const NDIlib_source_t* p_sources = g_ndi.find_get_current_sources(pNDI_find, &no_sources);
 
     if (use_json) {
-        std::cout << "[" << std::endl;
+        std::cout << "[";
     }
     for (uint32_t i = 0; i < no_sources; i++) {
 
         std::string source_name = p_sources[i].p_ndi_name ? p_sources[i].p_ndi_name : "";
         std::string source_url = p_sources[i].p_url_address ? p_sources[i].p_url_address : "";
-        std::string obj_line_end = i < no_sources - 1 ? "," : "";
+        std::string obj_line_end = i < no_sources - 1 ? ", " : "";
 
         if (use_json) {
-            std::cout << "{\"name\":\"" << source_name << "\", \"url\":\"" << source_url << "\"}" << obj_line_end << std::endl;
+            std::cout << "{\"name\":\"" << source_name << "\", \"url\":\"" << source_url << "\"}" << obj_line_end;
         } else {
-            std::cout << source_name << options.separator << source_url << "\n" << std::endl;
+            std::cout << source_name << options.separator << source_url << "\n";
         }
     }
     if (use_json) {
