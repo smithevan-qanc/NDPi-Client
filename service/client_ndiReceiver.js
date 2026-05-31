@@ -69,9 +69,9 @@ class NDI_Receiver_v3 extends EventEmitter {
 
         setTimeout(() => {
             if (this.ndiSource.toLowerCase() === 'none')
-                { this.close(); }
+            { this.close(); }
             else
-                { this.connect(); }
+            { this.connect(); }
         }, 500);
     }
 

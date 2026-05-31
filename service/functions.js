@@ -230,13 +230,17 @@ const { exec, spawn } = require('node:child_process');
                     break;
                 
                 case 'focus-chromium':
-                    response = await focusWindow('chromium', response);
+                    // response = await focusWindow('chromium', response);
                     await new Promise((resolve) => {
                         exec(path.join(__dirname, '..', 'sh', 'focus-chromium'),{
                             env: {
                                 ...process.env,
                             }
-                        })
+                        }, (error, stdout, stderr) => {
+                            if (error)
+                            { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ processCommand('${command.type}') ][ ERROR ]`, stderr); }
+                            resolve();
+                        });
                     });
                     return response;
                     break;
@@ -447,7 +451,7 @@ const { exec, spawn } = require('node:child_process');
                 }, (error, stderr) => {
                     if (error)
                     {
-                        console.error('⚠️ [ functions ][ setDisplayResolution() ][ ERROR ] Resolution Set:', config, stderr);
+                        console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Resolution Set:`, config, stderr);
                         resolve();
                     }
                     else
@@ -456,9 +460,7 @@ const { exec, spawn } = require('node:child_process');
                             env: { ...process.env }
                         }, (error, stdout, stderr) => {
                             if (error)
-                            {
-                                console.error(`⚠️ [ functions ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`);
-                            }
+                            { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`); }
                             resolve();
                         });
                     }
