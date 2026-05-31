@@ -5,6 +5,7 @@ const WebSocket = require('ws');
 const path = require('path');
 const func = require('./functions');
 const { randomUUID } = require('crypto');
+const { spawn } = require('node:child_process');
 
 
 class NDPiCommandServer_Client extends EventEmitter {
@@ -21,6 +22,8 @@ class NDPiCommandServer_Client extends EventEmitter {
                 catch {}
             });
         });
+
+        this.discoveryExec = null;
         
         this.ws_serv_display = new WebSocket.Server({ noServer: true });
         this.ws_conn_display = new Set();
@@ -54,25 +57,29 @@ class NDPiCommandServer_Client extends EventEmitter {
                     this.ws_serv_system.handleUpgrade(request, socket, head, (ws) => {
                         this.ws_serv_system.emit('connection', ws, request);
                     });
+                } else if (pathname === '/ws/sources') {
+                    this.ws_serv_sources.handleUpgrade(request, socket, head, (ws) => {
+                        this.ws_serv_sources.emit('connection', ws, request);
+                    });
                 } else {
                     socket.destroy();
                 }
             });
 
         this.ws_serv_display.on('connection', (ws) =>{
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Display WebSocket connection started.');
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Display WebSocket connection added.');
             
             this.ws_conn_display.add(ws);
             
             setTimeout(() => { this.broadcastToDisplay(undefined, true, { ws }); }, 1000);
+
+            ws.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Display WebSocket Server`, error); });
             
             ws.on('close', () => { this.ws_conn_display.delete(ws); });
-
-            ws.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] WebSocket GUI Connection`, error); });
         });
         
         this.ws_serv_system.on('connection', (ws) =>{
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'System WebSocket connection started.');
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'System WebSocket connection added.');
             
             this.ws_conn_system.add(ws);
 
@@ -82,10 +89,27 @@ class NDPiCommandServer_Client extends EventEmitter {
                 const message = JSON.parse(data.toString());
                 func.processCommand(message);
             });
+
+            ws.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] System WebSocket Server`, error); });
             
             ws.on('close', () => { this.ws_conn_system.delete(ws); });
+        });
 
-            ws.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] WebSocket GUI Connection`, error); });
+        this.ws_serv_sources.on('connection', (ws) =>{
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Source WebSocket connection added.');
+            
+            this.ws_conn_sources.add(ws);
+            
+            this.startDiscovery();
+
+            ws.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Sources WebSocket Server`, error); });
+            
+            ws.on('close', () => {
+                this.ws_conn_sources.delete(ws);
+                
+                if (this.ws_conn_sources.size === 0)
+                { this.discoveryExec.kill('SIGKILL'); }
+            });
         });
 
         this.Routes = express.Router();
@@ -297,6 +321,33 @@ class NDPiCommandServer_Client extends EventEmitter {
         if (!CecController)
         { return; }
         this.controller_cec = CecController;
+    }
+
+    startDiscovery() {
+        if (this.discoveryExec)
+        { return; }
+        const discoveryPath = `.${path.join(__dirname, '..', 'ndi_receiver_v3__NDI6', 'ndpi_discover')}`;
+        console.log('Discovery exec path', discoveryPath)
+        this.discoveryExec = spawn(discoveryPath);
+        this.discoveryExec.stdout.on('data', (data) => {
+            const output = data.toString() || '[]';
+            try
+            {
+                const sources = JSON.parse(output);
+                if (Array.isArray(sources))
+                {
+                    sources.forEach((obj) => {
+                        console.log('Source Name:', obj.name, `[[ ${obj.url || 'n/a'} ]]`);
+                    });
+                }
+                /// Add this.ws_conn_sources.forEach(ws) Send(Array) HERE 'output'
+            }
+            catch {}
+        });
+        this.discoveryExec.on('exit', () => {
+            console.log('Discovery Exited.')
+            this.discoveryExec = null;
+        });
     }
 }
 

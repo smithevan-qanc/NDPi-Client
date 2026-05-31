@@ -1,5 +1,6 @@
 // use NDPi_WebSocket from './socket.js'
 const server = new NDPi_WebSocket('ws/system');
+const sources = new NDPi_WebSocket('ws/sources');
 
 (async () => {
     await refreshSources();

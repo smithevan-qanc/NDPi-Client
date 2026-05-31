@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-while true; do
-    ./ndpi/ndi_discover_v2
-    sleep 5
-done
