@@ -2,6 +2,23 @@
 const server = new NDPi_WebSocket('ws/system');
 const sources = new NDPi_WebSocket('ws/sources');
 
+
+// Available sources array.
+let availableSources = [];
+const uploaderEl = document.getElementById('overlay_upload');
+const uploaderPreviewEl = document.getElementById('overlay_preview');
+let overlayUploadCommand = {
+    type: 'set-overlay',
+    data: {
+        name: '',
+        type: '',
+        size: 0,
+        dateLastModified: '',
+        dateUploaded: '',
+        src: '',
+    }
+};
+
 (async () => {
     await refreshSources();
     addEvents();
@@ -39,20 +56,17 @@ server._ws.onmessage = (message) => {
     { console.error('Invalid message:', e); }
 };
 
-// Available sources array.
-let availableSources = [];
-const uploaderEl = document.getElementById('overlay_upload');
-const uploaderPreviewEl = document.getElementById('overlay_preview');
-let overlayUploadCommand = {
-    type: 'set-overlay',
-    data: {
-        name: '',
-        type: '',
-        size: 0,
-        dateLastModified: '',
-        dateUploaded: '',
-        src: '',
+sources._ws.onmessage = (message) => {
+    try
+    {
+        const sources = JSON.parse(message.data);
+        if (Array.isArray(sources))
+        {
+            availableSources = sources;
+            renderSources();
+        }
     }
+    catch {}
 };
 
 function addEvents() {

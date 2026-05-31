@@ -313,7 +313,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         { return; }
         this.ws_conn_display.forEach(client => {
             try { client.send(JSON.stringify(message)); }
-            catch { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.', message); }
+            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', message, '\n', e); }
         });
     }
 
@@ -328,23 +328,18 @@ class NDPiCommandServer_Client extends EventEmitter {
         { return; }
 
         const discoveryPath = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
+        const programName = './ndpi_discover';
         
-        this.discoveryExec = spawn('./ndpi_discover', { cwd: discoveryPath });
+        this.discoveryExec = spawn(programName, { cwd: discoveryPath });
         this.discoveryExec.stdout.on('data', (data) => {
             const output = data.toString() || '[]';
             try
             {
                 const sources = JSON.parse(output);
                 if (Array.isArray(sources))
-                {
-                    // sources.forEach((obj) => {
-                    //     console.log('Source Name:', obj.name, `[[ ${obj.url || 'n/a'} ]]`);
-                    // });
-                    this.ws_conn_sources.forEach((ws) => { ws.send(JSON.stringify(sources)); });
-                }
-                /// Add this.ws_conn_sources.forEach(ws) Send(Array) HERE 'output'
+                { this.ws_conn_sources.forEach((ws) => { ws.send(JSON.stringify(sources)); }); }
             }
-            catch {}
+            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Misformed Data Received from ${programName}\n`, output, '\n', e); }
         });
         this.discoveryExec.on('exit', () => {
             console.log('Discovery Exited.')
