@@ -57,14 +57,14 @@ install() {
     # echo "Restarting NDPi Client" && sudo systemctl restart ndpi
     # echo "INSTALLATION COMPLETE"
 
-    echo       "Restarting NDPi Client" && sudo systemctl restart ndpi
+    echo       "Restarting NDPi Client"
+    sudo systemctl restart ndpi
     echo -ne "\rINSTALLATION COMPLETE "
 
     # sudo reboot
     # else
     #     echo "INSTALLATION ABORTED"
     # fi
-
 }
 
 install
