@@ -116,7 +116,7 @@ class NDPi {
                 }
                 else
                 {
-                    func.focusWindow('chromium');
+                    func.focusChromium();
                     setTimeout(() => { try { this.ndiReceiver.close(); } catch {} }, 800);
                 }
             }

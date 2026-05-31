@@ -95,7 +95,8 @@ class NDI_Receiver_v3 extends EventEmitter {
         this.receiver.stdout.on('data', (data) => {
             const showNDI = (delay = 1000) => {
                 setTimeout(() => {
-                    func.focusWindow('gstreamer', undefined, { onlyVisible: false });
+                    // func.focusWindow('gstreamer', undefined, { onlyVisible: false });
+                    func.focusNdi();
                     this.server.updateDisplay({ type: `show-ndi` });
                 }, delay);
             }
@@ -162,7 +163,8 @@ class NDI_Receiver_v3 extends EventEmitter {
     softClose() {
         try { this.receiver.kill('SIGKILL'); }
         catch (error) {
-            // console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ SIGKILL ERROR ][ softClose() ]`, error);
+            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ SIGKILL ERROR ][ softClose() ]`, error);
+            console.info (`➡️ [ ${path.basename(__filename).split('.')[0]} ] Executing 'killall'`);
             exec(`killall ${this.receiverName}`);
         }
     }

@@ -231,22 +231,13 @@ const { exec, spawn } = require('node:child_process');
                 
                 case 'focus-chromium':
                     // response = await focusWindow('chromium', response);
-                    await new Promise((resolve) => {
-                        exec(path.join(__dirname, '..', 'sh', 'focus-chromium'),{
-                            env: {
-                                ...process.env,
-                            }
-                        }, (error, stdout, stderr) => {
-                            if (error)
-                            { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ processCommand('${command.type}') ][ ERROR ]`, stderr); }
-                            resolve();
-                        });
-                    });
+                    await focusChromium();
                     return response;
                     break;
                 
                 case 'focus-ndi':
-                    response = await focusWindow('gstreamer', response, { onlyVisible: false });
+                    // response = await focusWindow('gstreamer', response, { onlyVisible: false });
+                    await focusNdi();
                     return response;
                     break;
                 
@@ -417,6 +408,34 @@ const { exec, spawn } = require('node:child_process');
             return response;
         }
 
+        async function focusChromium() {
+            return await new Promise((resolve) => {
+                exec(path.join(__dirname, '..', 'sh', 'focus-chromium'),{
+                    env: {
+                        ...process.env,
+                    }
+                }, (error, stdout, stderr) => {
+                    if (error)
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ focusChromium() ][ ERROR ]`, stderr); }
+                    resolve();
+                });
+            });
+        }
+
+        async function focusNdi() {
+            return await new Promise((resolve) => {
+                exec(path.join(__dirname, '..', 'sh', 'focus-ndi'),{
+                    env: {
+                        ...process.env,
+                    }
+                }, (error, stdout, stderr) => {
+                    if (error)
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ focusNdi() ][ ERROR ]`, stderr); }
+                    resolve();
+                });
+            });
+        }
+
         /** STDOUT TO ARRAY */
         function stdoutToArray(stdout) {
             let a = [];
@@ -497,11 +516,13 @@ const { exec, spawn } = require('node:child_process');
 
 module.exports = {
     processCommand,
-    focusWindow,
+    // focusWindow,
     stdoutToArray,
     setDisplayResolution,
     checkCecCompliance,
     waitForNetwork,
+    focusChromium,
+    focusNdi
 };
 
 
