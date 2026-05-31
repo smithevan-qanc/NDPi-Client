@@ -81,7 +81,7 @@ class NDI_Receiver_v3 extends EventEmitter {
             '--source', this.ndiSource,
             '--bandwidth', this.ndiBandwidth,
             '--color-format', this.ndiColorFormat,
-            '--framesync'
+            //'--framesync'
         ], {
             env: {
                 ...process.env,
