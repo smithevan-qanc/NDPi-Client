@@ -70,6 +70,18 @@ struct NDILib {
     bool (*util_audio_to_interleaved_16s_v3)(const NDIlib_audio_frame_v3_t* p_src,
                                               NDIlib_audio_frame_interleaved_16s_t* p_dst) = nullptr;
     
+    // FrameSync functions
+    NDIlib_framesync_instance_t (*framesync_create_v2)(const NDIlib_framesync_create_t* p_create_settings) = nullptr;
+    void (*framesync_destroy)(NDIlib_framesync_instance_t p_instance) = nullptr;
+    void (*framesync_add_source)(NDIlib_framesync_instance_t p_instance, const NDIlib_source_t* p_source) = nullptr;
+    void (*framesync_remove_source)(NDIlib_framesync_instance_t p_instance, const NDIlib_source_t* p_source) = nullptr;
+    NDIlib_frame_type_e (*framesync_capture_video)(NDIlib_framesync_instance_t p_instance,
+                                                    NDIlib_video_frame_v2_t* p_video_data,
+                                                    NDIlib_audio_frame_v3_t* p_audio_data,
+                                                    uint32_t timeout_in_ms) = nullptr;
+    void (*framesync_free_video)(NDIlib_framesync_instance_t p_instance, const NDIlib_video_frame_v2_t* p_video_data) = nullptr;
+    void (*framesync_free_audio)(NDIlib_framesync_instance_t p_instance, const NDIlib_audio_frame_v3_t* p_audio_data) = nullptr;
+    
     bool loadLibrary() {
         // Try to load NDI library from common locations
         const char* lib_paths[] = {
@@ -122,6 +134,13 @@ struct NDILib {
         LOAD_FUNC(find_wait_for_sources);
         LOAD_FUNC(find_get_current_sources);
         LOAD_FUNC(util_audio_to_interleaved_16s_v3);
+        LOAD_FUNC(framesync_create_v2);
+        LOAD_FUNC(framesync_destroy);
+        LOAD_FUNC(framesync_add_source);
+        LOAD_FUNC(framesync_remove_source);
+        LOAD_FUNC(framesync_capture_video);
+        LOAD_FUNC(framesync_free_video);
+        LOAD_FUNC(framesync_free_audio);
         
         #undef LOAD_FUNC
         
@@ -143,6 +162,8 @@ NDILib g_ndi;
 class NDIReceiver {
 private:
     NDIlib_recv_instance_t ndi_recv = nullptr;
+    NDIlib_framesync_instance_t ndi_framesync = nullptr;
+    bool use_framesync = false;
 
     GstElement *pipeline = nullptr;
     GstElement *appsrc = nullptr;
@@ -240,8 +261,9 @@ private:
 public:
     NDIReceiver(
         NDIlib_recv_bandwidth_e bandwidth = NDIlib_recv_bandwidth_max,
-        NDIlib_recv_color_format_e color_format = NDIlib_recv_color_format_fastest
-    ) : bandwidth_setting(bandwidth), color_format_setting(color_format) {
+        NDIlib_recv_color_format_e color_format = NDIlib_recv_color_format_fastest,
+        bool enable_framesync = false
+    ) : bandwidth_setting(bandwidth), color_format_setting(color_format), use_framesync(enable_framesync) {
     //NDIReceiver() {
         // Initialize GStreamer
         gst_init(nullptr, nullptr);
@@ -299,9 +321,23 @@ public:
         recv_desc.allow_video_fields = false;  // Disable interlaced - reduces latency
         recv_desc.p_ndi_recv_name = "NDPi-Monitor-Client";
         
-        ndi_recv = g_ndi.recv_create_v3(&recv_desc);
-        if (!ndi_recv) {
-            throw std::runtime_error("Failed to create NDI receiver");
+        if (use_framesync) {
+            // Create framesync receiver
+            NDIlib_framesync_create_t framesync_desc;
+            framesync_desc.p_ndi_recv_name = "NDPi-Monitor-FrameSync";
+            framesync_desc.frame_rate_N = 0;  // Auto-detect
+            framesync_desc.frame_rate_D = 1;
+            framesync_desc.interlaced_fields = false;
+            
+            ndi_framesync = g_ndi.framesync_create_v2(&framesync_desc);
+            if (!ndi_framesync) {
+                throw std::runtime_error("Failed to create NDI framesync receiver");
+            }
+        } else {
+            ndi_recv = g_ndi.recv_create_v3(&recv_desc);
+            if (!ndi_recv) {
+                throw std::runtime_error("Failed to create NDI receiver");
+            }
         }
         
         main_loop = g_main_loop_new(nullptr, FALSE);
@@ -310,6 +346,7 @@ public:
     ~NDIReceiver() {
         stop();
         if (ndi_recv) g_ndi.recv_destroy(ndi_recv);
+        if (ndi_framesync) g_ndi.framesync_destroy(ndi_framesync);
         if (main_loop) g_main_loop_unref(main_loop);
         g_ndi.destroy();
     }
@@ -356,7 +393,11 @@ public:
                 if (source_name == sources[i].p_ndi_name) {
                     std::cout << "- Target source found: " << source_name << std::endl;
                     // Connect to source
-                    g_ndi.recv_connect(ndi_recv, &sources[i]);
+                    if (use_framesync) {
+                        g_ndi.framesync_add_source(ndi_framesync, (NDIlib_source_t*)&sources[i]);
+                    } else {
+                        g_ndi.recv_connect(ndi_recv, &sources[i]);
+                    }
                     current_source = source_name;
                     g_ndi.find_destroy(finder);
                     return true;
@@ -442,19 +483,11 @@ public:
         
         pipeline_created = true;
         
-        /**
-         * Get audio element 
-         * then
-         * Start GStreamer pipeline
-         * 
-         */ 
         audio_appsrc = gst_bin_get_by_name(GST_BIN(pipeline), "audio_src");
         gst_element_set_state(pipeline, GST_STATE_PLAYING);
         // block=false on both appsrcs means push-buffer never blocks regardless of pipeline state.
         // Let preroll complete naturally as the first frame flows through to autovideosink.
         
-        // std::cout << "NDI_Source_Resolution=" << width << "x" << height << std::endl;
-        // std::cout << "NDI_Source_Framerate=" << ((double)framerate_n / framerate_d) << std::endl;
     }
 
     void createPipelineCompressed(int width, int height, int framerate_n, int framerate_d, bool is_hevc) {
@@ -544,8 +577,6 @@ public:
         audio_appsrc = gst_bin_get_by_name(GST_BIN(comp_pipeline), "audio_src");
         gst_element_set_state(comp_pipeline, GST_STATE_PLAYING);
 
-        // std::cout << "Compressed Source: " << width << "x" << height << " @ " << fps << " fps (" << (is_hevc ? "H.265/HEVC" : "H.264") << ")" << std::endl;
-        // std::cout << "Resolution Scaled: " << display_width << "x" << display_height << std::endl;
     }
     
     void start() {
@@ -601,7 +632,15 @@ private:
         GstElement* comp_appsrc = nullptr;
         
         while (is_running) {
-            switch (g_ndi.recv_capture_v3(ndi_recv, &video_frame, &audio_frame, nullptr, 50)) {
+            // Use framesync_capture_video or recv_capture_v3 depending on mode
+            NDIlib_frame_type_e frame_type;
+            if (use_framesync) {
+                frame_type = g_ndi.framesync_capture_video(ndi_framesync, &video_frame, &audio_frame, 50);
+            } else {
+                frame_type = g_ndi.recv_capture_v3(ndi_recv, &video_frame, &audio_frame, nullptr, 50);
+            }
+            
+            switch (frame_type) {
                 case NDIlib_frame_type_video: {
                     // HX sources deliver compressed frames via NDIlib_frame_type_video with a
                     // compressed FourCC (H264 / H265 / HEVC).  Detect this here and route to
@@ -718,7 +757,11 @@ private:
                         }
                     }
 
-                    g_ndi.recv_free_video_v2(ndi_recv, &video_frame);
+                    if (use_framesync) {
+                        g_ndi.framesync_free_video(ndi_framesync, &video_frame);
+                    } else {
+                        g_ndi.recv_free_video_v2(ndi_recv, &video_frame);
+                    }
                     break;
                 }
                 case NDIlib_frame_type_audio: {
@@ -757,7 +800,11 @@ private:
                         gst_buffer_unref(buffer);
                     }
 
-                    g_ndi.recv_free_audio_v3(ndi_recv, &audio_frame);
+                    if (use_framesync) {
+                        g_ndi.framesync_free_audio(ndi_framesync, &audio_frame);
+                    } else {
+                        g_ndi.recv_free_audio_v3(ndi_recv, &audio_frame);
+                    }
                     break;
                 }
                 // case NDIlib_frame_type_compressed_video: {
@@ -876,6 +923,7 @@ int main(int argc, char* argv[]) {
     std::string source_name = "";
     NDIlib_recv_bandwidth_e bandwidth = NDIlib_recv_bandwidth_max;
     NDIlib_recv_color_format_e color_format = NDIlib_recv_color_format_fastest;
+    bool use_framesync = false;
 
 
     for (int i = 1; i < argc; ++i) {
@@ -893,6 +941,8 @@ int main(int argc, char* argv[]) {
             if (i + 1 < argc) {
                 color_format = (NDIlib_recv_color_format_e)std::stol(argv[++i], nullptr, 0);
             }
+        } else if (arg == "-f" || arg == "--framesync") {
+            use_framesync = true;
         } else if (arg == "-v" || arg == "--version") {
             std::cout << version << std::endl;
             std::cout << g_ndi.version() << std::endl;
@@ -919,6 +969,10 @@ int main(int argc, char* argv[]) {
             std::cout << "                                                  '100' -> fastest                       " << "\n";
             std::cout << "                                                  '101' -> best                          " << "\n";
             std::cout << "                                                                                         " << "\n";
+            std::cout << "    [-f|--framesync] --------------------------- Enable frame-synchronized receiver.      " << "\n";
+            std::cout << "                                                  (Provides synchronized frames from one " << "\n";
+            std::cout << "                                                   or multiple NDI sources)              " << "\n";
+            std::cout << "                                                                                         " << "\n";
             std::cout << "    [-v|--version] ------------------------------ NDPi Receiver Version.                 " << "\n";
             std::cout << "    [-h|--help] --------------------------------- This help menu.                        " << std::endl;
 
@@ -940,7 +994,7 @@ int main(int argc, char* argv[]) {
     // }
     
     try {
-        g_receiver = new NDIReceiver(bandwidth, color_format);
+        g_receiver = new NDIReceiver(bandwidth, color_format, use_framesync);
         
         //if (argc > 1) {
         if (!source_name.empty()) {
