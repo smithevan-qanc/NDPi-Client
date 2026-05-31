@@ -109,7 +109,7 @@ void signal_handler(int signum) {
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.9)";
+    std::string version = "NDPi Discover (3.0.10)";
     std::string separator = "^";
     int timeout = 5;
 };
@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
     while (!g_shutdown) {
         auto current_time = std::chrono::steady_clock::now();
         
-        if (g_ndi.find_wait_for_sources(pNDI_find, timeout_seconds)) {
+        if (g_ndi.find_wait_for_sources(pNDI_find, timeout_seconds * 1000)) {
             // New discovery detected - reset debounce timer
             last_discovery_time = current_time;
             output_pending = false;
@@ -201,10 +201,10 @@ int main(int argc, char* argv[])
 
                 std::string source_name = p_sources[i].p_ndi_name ? p_sources[i].p_ndi_name : "";
                 std::string source_url = p_sources[i].p_url_address ? p_sources[i].p_url_address : "";
-                std::string obj_line_end = i < no_sources - 1 ? ", " : "";
+                std::string obj_line_end = i < no_sources - 1 ? "," : "";
 
                 if (use_json) {
-                    std::cout << "{\"name\":\"" << source_name << "\", \"url\":\"" << source_url << "\"}" << obj_line_end;
+                    std::cout << "{\"name\":\"" << source_name << "\",\"url\":\"" << source_url << "\"}" << obj_line_end;
                 } else {
                     std::cout << source_name << options.separator << source_url << "\n";
                 }
