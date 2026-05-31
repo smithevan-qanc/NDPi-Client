@@ -109,9 +109,9 @@ void signal_handler(int signum) {
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.10)";
+    std::string version = "NDPi Discover (3.0.11)";
     std::string separator = "^";
-    int timeout = 5;
+    int timeout = 1;
 };
 
 int main(int argc, char* argv[])
@@ -166,30 +166,30 @@ int main(int argc, char* argv[])
             std::cout << "Usage: " << argv[0] << "[OPTIONS]\n\n";
             std::cout << "[OPTIONS]:\n";
             std::cout << "\t" << "[-s|--single-line [<separator>]]" << "\t" << "Outputs one(1) source per line. E.g.:'NAME<seperator>URL'. (Default: '^')\n";
-            std::cout << "\t" << "[-t|--timeout [<seconds>]]" << "\t\t" << "How long to search for available sources before giving up. (Default: 5)\n";
+            std::cout << "\t" << "[-t|--timeout [<seconds>]]" << "\t\t" << "How long to search for available sources before giving up. (Default: 1)\n";
             std::cout << "\t" << "[-v|--version]" << "\t\t\t\t" << "NDPi Discover Version.\n";
             std::cout << "\t" << "[-h|--help]" << "\t\t\t\t" << "This help menu." << std::endl;
             return 0;
         } 
     }
 
-    static auto last_discovery_time = std::chrono::steady_clock::now() - std::chrono::seconds(2);
-    static bool output_pending = false;
+    // static auto last_discovery_time = std::chrono::steady_clock::now() - std::chrono::seconds(2);
+    // static bool output_pending = false;
 
     while (!g_shutdown) {
-        auto current_time = std::chrono::steady_clock::now();
+        // auto current_time = std::chrono::steady_clock::now();
         
         if (g_ndi.find_wait_for_sources(pNDI_find, timeout_seconds * 1000)) {
-            // New discovery detected - reset debounce timer
-            last_discovery_time = current_time;
-            output_pending = false;
-        }
+        //     // New discovery detected - reset debounce timer
+        //     last_discovery_time = current_time;
+        //     output_pending = false;
+        // }
 
-        // Check if enough time has passed since last discovery
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_discovery_time).count();
+        // // Check if enough time has passed since last discovery
+        // auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_discovery_time).count();
 
-        if (elapsed >= 1000 && !output_pending) {
-            output_pending = true;
+        // if (elapsed >= 1000 && !output_pending) {
+        //     output_pending = true;
             
             uint32_t no_sources = 0;
             const NDIlib_source_t* p_sources = g_ndi.find_get_current_sources(pNDI_find, &no_sources);
