@@ -643,7 +643,7 @@ private:
                 }
             } else {
                 // Standard receiver mode
-                frame_type = g_ndi.recv_capture_v3(ndi_recv, &video_frame, &audio_frame, nullptr, 60);
+                frame_type = g_ndi.recv_capture_v3(ndi_recv, &video_frame, &audio_frame, nullptr, 30);
             }
             
             switch (frame_type) {
@@ -925,7 +925,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string version = "NDPi Receiver [GStreamer] (4.0.1)";
+    std::string version = "NDPi Receiver [GStreamer] (4.0.2)";
     std::string source_name = "";
     NDIlib_recv_bandwidth_e bandwidth = NDIlib_recv_bandwidth_max;
     NDIlib_recv_color_format_e color_format = NDIlib_recv_color_format_fastest;
