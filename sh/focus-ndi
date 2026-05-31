@@ -39,10 +39,6 @@ activateWindow() {
         exit 1
     fi
 
-    # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
-    # picom -f -D 6 -i 0 --backend xrender --no-fading-openclose --no-vsync &
-    # sleep 1
-
     # xdotool windowminimize $WINDOW_ID
     # sleep 0.5
 
@@ -57,6 +53,6 @@ activateWindow() {
 
 activateWindow
 
-killall picom
+killall picom &>/dev/null
 
 exit 0

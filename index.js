@@ -112,12 +112,12 @@ class NDPi {
                 {
                     try { this.ndiReceiver.close(); }
                     catch {}
-                    setTimeout(() => { this.startNdiReceiver(); }, 1000);
+                    finally { setTimeout(() => { this.startNdiReceiver(); }, 500); }
                 }
                 else
                 {
                     func.focusChromium();
-                    setTimeout(() => { try { this.ndiReceiver.close(); } catch {} }, 800);
+                    setTimeout(() => { try { this.ndiReceiver.close(); } catch {} }, 1000);
                 }
             }
         });
@@ -353,6 +353,10 @@ class NDPi {
         {
             const ChromiumOverlayDisplay = require('./service/client_chromium.js');
             this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
+            setTimeout(() => {
+                try { spawn('picom', ['--config', `${process.env.HOME}/.config/picom/picom.conf`], { env: { ...process.env } }); }
+                catch {}
+            }, 1000);
         } 
         else
         {
