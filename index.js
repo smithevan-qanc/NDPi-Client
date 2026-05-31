@@ -278,7 +278,7 @@ class NDPi {
 
         this.lcdDisplay.on('error', (error) => { console.error(`⚠️ [ python ][ ERROR ] ${error.toString()}`); });
 
-        this.lcdDisplay.stderr.on('data', (data) => { console.error(`⚠️ [ python ][ ERROR ] ${error.toString()}`); });
+        this.lcdDisplay.stderr.on('data', (data) => { console.error(`⚠️ [ python ][ ERROR ]`, data); });
 
         this.lcdDisplay.on('close', (code, signal) => {
             if (!this.shutdown)
