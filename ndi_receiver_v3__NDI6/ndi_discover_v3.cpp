@@ -17,6 +17,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
+#include <thread>
 #include <string>
 #include <signal.h>
 #include <dlfcn.h>
@@ -109,7 +110,7 @@ void signal_handler(int signum) {
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.16)";
+    std::string version = "NDPi Discover (3.0.17)";
     std::string separator = "^";
     int timeout = 2;
 };
@@ -192,6 +193,7 @@ int main(int argc, char* argv[])
         // if (elapsed >= 1000 && !output_pending) {
         //     output_pending = true;
 
+            std::this_thread::sleep_for(std::chrono::seconds(timeout_seconds));
             timeout_seconds = 0;
             
             uint32_t no_sources = 0;
