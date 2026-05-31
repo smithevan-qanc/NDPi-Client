@@ -178,6 +178,9 @@ int main(int argc, char* argv[])
 
     while (!g_shutdown) {
         auto current_time = std::chrono::steady_clock::now();
+
+        // Check if enough time has passed since last discovery
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_discovery_time).count();
         
         if (g_ndi.find_wait_for_sources(pNDI_find, timeout_seconds)) {
             // New discovery detected - reset debounce timer
@@ -185,11 +188,7 @@ int main(int argc, char* argv[])
             output_pending = false;
         }
 
-        // Check if enough time has passed since last discovery
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_discovery_time).count();
-
         if (elapsed >= 1000 && !output_pending) {
-            // It's been 1 second since last discovery - output now
             output_pending = true;
             
             uint32_t no_sources = 0;
