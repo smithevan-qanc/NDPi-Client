@@ -110,7 +110,7 @@ void signal_handler(int signum) {
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.18)";
+    std::string version = "NDPi Discover (3.0.19)";
     std::string separator = "^";
     int timeout = 5;
 };
@@ -167,8 +167,8 @@ int main(int argc, char* argv[])
             std::cout << "Usage: " << argv[0] << "[OPTIONS]\n\n";
             std::cout << "[OPTIONS]:\n";
             std::cout << "    " << "[-s|--single-line [<separator>]]" << "\t" << "Outputs one(1) source per line. E.g.:'NAME<seperator>URL'. (Default: '^')\n";
-            std::cout << "    " << "[-t|--timeout [<seconds>]]" << "\t\t" << "How long to search for available sources before giving up. (Default: 1)\n";
-            std::cout << "    " << "" << "\t\t" << "                              NOTE:  Increasing the '-timeout' will also increase the time it takes to shutdown.\n";
+            std::cout << "    " << "[-t|--timeout [<seconds>]]" << "\t\t" << "How long to search for available sources before giving up. (Default: 5)\n";
+            // std::cout << "    " << "" << "\t\t" << "                              NOTE:  Increasing the '-timeout' will also increase the time it takes to shutdown.\n";
             std::cout << "    " << "[-v|--version]" << "\t\t\t" << "NDPi Discover Version.\n";
             std::cout << "    " << "[-h|--help]" << "\t\t\t\t" << "This help menu." << std::endl;
 
@@ -178,6 +178,7 @@ int main(int argc, char* argv[])
 
     // static auto last_discovery_time = std::chrono::steady_clock::now() - std::chrono::seconds(5);
     // static bool output_pending = false;
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
     while (!g_shutdown) {
 
@@ -193,7 +194,6 @@ int main(int argc, char* argv[])
         // if (elapsed >= 1000 && !output_pending) {
         //     output_pending = true;
 
-            std::this_thread::sleep_for(std::chrono::seconds(timeout_seconds));
             timeout_seconds = 0;
             
             uint32_t no_sources = 0;
