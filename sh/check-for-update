@@ -9,15 +9,13 @@ CURRENT_VERSION="$(head -n 1 version/current)"
 cd $HOME/TMP_ndpi
 BRANCH="$(head -n 1 version/git)"
 
-echo "Fetch Origin"
 git fetch origin $BRANCH &>/dev/null
 
 LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse origin/$BRANCH)
 
 if [ "$LOCAL" != "$REMOTE" ]; then
-    echo "Reset"
-    git reset --hard origin/$BRANCH
+    git reset --hard origin/$BRANCH &>/dev/null
     chmod +x ./sh/*
 fi
 
@@ -28,15 +26,16 @@ if [ "$CURRENT_VERSION" != "$NEWEST_VERSION" ]; then
 fi
 
 printf "{
-    \"update_available\": ${UPDATE_AVAILABLE},
-    \"installed_version\": {
-        \"git\": \"$LOCAL\",
-        \"ndpi\": \"$CURRENT_VERSION\"
+    \"update_available\":${UPDATE_AVAILABLE},
+    \"newest_version\":{
+        \"ndpi\":\"$NEWEST_VERSION\",
+        \"git\":\"$REMOTE\"
     },
-    \"current_version\": {
-        \"git\": \"$REMOTE\",
-        \"ndpi\": \"$NEWEST_VERSION\"
+    \"installed_version\":{
+        \"ndpi\":\"$CURRENT_VERSION\",
+        \"git\":\"$LOCAL\"
     }
-}"
+}
+"
 
 exit 0
