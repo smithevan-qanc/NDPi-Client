@@ -104,12 +104,12 @@ NDILib g_ndi;
 static volatile bool g_shutdown = false;
 
 void signal_handler(int signum) {
-    printf("Closing...\n");
+    printf("\nClosing...\n");
     g_shutdown = true;
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.6)";
+    std::string version = "NDPi Discover (3.0.7)";
     std::string separator = "^";
     int timeout = 5;
 };
