@@ -31,9 +31,12 @@ install() {
         echo "$(pwd)"
         customInstallInstructions
         
+        # echo "Restarting NDPi Client" && sudo systemctl restart ndpi
+        # echo "INSTALLATION COMPLETE"
         printf "Restarting NDPi Client" && sudo systemctl restart ndpi
-        printf "INSTALLATION COMPLETE \n\n"
+        printf "INSTALLATION COMPLETE 
 
+"
         # sudo reboot
     # else
     #     echo "INSTALLATION ABORTED"
