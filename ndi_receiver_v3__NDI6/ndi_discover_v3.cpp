@@ -27,6 +27,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
+#include <signal.h>
 #include <dlfcn.h>
 #include "Processing.NDI.Lib.h"
 
@@ -65,7 +66,7 @@ struct NDILib {
         for (int i = 0; lib_paths[i] != nullptr; i++) {
             handle = dlopen(lib_paths[i], RTLD_LAZY | RTLD_LOCAL);
             if (handle) {
-                std::cout << "Loaded NDI library from: " << lib_paths[i] << std::endl;
+                // std::cout << "Loaded NDI library from: " << lib_paths[i] << std::endl;
                 break;
             }
         }
@@ -110,6 +111,13 @@ struct NDILib {
 // Global NDI library instance
 NDILib g_ndi;
 
+// Signal handling for graceful shutdown
+static volatile bool g_shutdown = false;
+
+void signal_handler(int signum) {
+    g_shutdown = true;
+}
+
 struct Options {
     std::string version = "NDPi Discover (3.0.3)";
     std::string separator = "^";
@@ -135,6 +143,10 @@ int main(int argc, char* argv[])
         g_ndi.unloadLibrary();
         return 1;
     }
+
+    // Setup signal handlers for graceful shutdown
+    signal(SIGINT, signal_handler);   // Ctrl+C
+    signal(SIGTERM, signal_handler);  // Termination signal
 
     Options options;
 
@@ -172,36 +184,41 @@ int main(int argc, char* argv[])
         } 
     }
 
-    g_ndi.find_wait_for_sources(pNDI_find, timeout_seconds * 1000);
+    // Main discovery loop - runs until signal is received
+    while (!g_shutdown) {
+        if (g_ndi.find_wait_for_sources(pNDI_find, 5000)) {
+            // Get the current sources
+            uint32_t no_sources = 0;
+            const NDIlib_source_t* p_sources = g_ndi.find_get_current_sources(pNDI_find, &no_sources);
 
-    // Get the current sources
-    uint32_t no_sources = 0;
-    const NDIlib_source_t* p_sources = g_ndi.find_get_current_sources(pNDI_find, &no_sources);
+            if (use_json) {
+                std::cout << "[" << std::endl;
+            }
+            for (uint32_t i = 0; i < no_sources; i++) {
 
-    if (use_json) {
-        std::cout << "[" << std::endl;
-    }
-    for (uint32_t i = 0; i < no_sources; i++) {
+                std::string source_name = p_sources[i].p_ndi_name ? p_sources[i].p_ndi_name : "";
+                std::string source_url = p_sources[i].p_url_address ? p_sources[i].p_url_address : "";
+                std::string obj_line_end = i < no_sources - 1 ? ", " : "";
 
-        std::string source_name = p_sources[i].p_ndi_name ? p_sources[i].p_ndi_name : "";
-        std::string source_url = p_sources[i].p_url_address ? p_sources[i].p_url_address : "";
-        std::string obj_line_end = i < no_sources - 1 ? ", " : "";
-
-        if (use_json) {
-            std::cout << "{\"name\":\"" << source_name << "\", \"url\":\"" << source_url << "\"}" << obj_line_end << std::endl;
-        } else {
-            std::cout << source_name << options.separator << source_url << "\n";
+                if (use_json) {
+                    std::cout << "{\"name\":\"" << source_name << "\", \"url\":\"" << source_url << "\"}" << obj_line_end << std::endl;
+                } else {
+                    std::cout << source_name << options.separator << source_url << "\n";
+                }
+            }
+            if (use_json) {
+                std::cout << "]" << std::endl;
+            }
         }
     }
-    if (use_json) {
-        std::cout << "]" << std::endl;
-    }
 
-    // Cleanup
+    // Cleanup on shutdown
+    std::cerr << "\nShutting down gracefully..." << std::endl;
     std::flush(std::cout);
     g_ndi.find_destroy(pNDI_find);
     g_ndi.destroy();
     g_ndi.unloadLibrary();
+    std::cerr << "Cleanup complete." << std::endl;
 
     return 0;
 }
