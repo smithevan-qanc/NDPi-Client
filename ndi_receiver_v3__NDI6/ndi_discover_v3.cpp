@@ -56,23 +56,23 @@ struct NDILib {
     bool loadLibrary() {
         // Try to load NDI library from common locations
         const char* lib_paths[] = {
-            "lib/libndi.so",                         // Local dir
-            "/usr/local/lib/libndi.dylib",           // macOS Homebrew
-            "/opt/homebrew/lib/libndi.dylib",        // macOS M1/M2 Homebrew
-            "/usr/lib/libndi.so.6",                  // Linux v6
-            "/usr/local/lib/libndi.so.6",            // Linux v6 alt
-            "/usr/lib/libndi.so",                    // Linux fallback
-            "/usr/local/lib/libndi.so",              // Linux alt fallback
-            "libndi.dylib",                          // macOS system
-            "libndi.so.6",                           // Linux v6 system
-            "libndi.so",                             // Linux system fallback
+            "lib/libndi.so.6",                  // Local v6
+            "lib/libndi.so",                    // Local dir
+            "/usr/local/lib/libndi.dylib",      // macOS Homebrew
+            "/opt/homebrew/lib/libndi.dylib",   // macOS M1/M2 Homebrew
+            "/usr/local/lib/libndi.so.6",       // Linux v6 alt
+            "/usr/lib/libndi.so",               // Linux fallback
+            "/usr/local/lib/libndi.so",         // Linux alt fallback
+            "libndi.dylib",                     // macOS system
+            "libndi.so.6",                      // Linux v6 system
+            "libndi.so",                        // Linux system fallback
             nullptr
         };
         
         for (int i = 0; lib_paths[i] != nullptr; i++) {
             handle = dlopen(lib_paths[i], RTLD_LAZY | RTLD_LOCAL);
             if (handle) {
-                //std::cout << "Loaded NDI library from: " << lib_paths[i] << std::endl;
+                std::cout << "Loaded NDI library from: " << lib_paths[i] << std::endl;
                 break;
             }
         }
@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
         std::string obj_line_end = i < no_sources - 1 ? ", " : "";
 
         if (use_json) {
-            std::cout << "{\"name\":\"" << source_name << "\", \"url\":\"" << source_url << "\"}" << obj_line_end;
+            std::cout << "{\"name\":\"" << source_name << "\", \"url\":\"" << source_url << "\"}" << obj_line_end << std::endl;
         } else {
             std::cout << source_name << options.separator << source_url << "\n";
         }
