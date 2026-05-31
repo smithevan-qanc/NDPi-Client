@@ -420,6 +420,7 @@ const { exec, spawn } = require('node:child_process');
                 }, (error, stdout, stderr) => {
                     if (error)
                     { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ focusChromium() ][ ERROR ]`, stderr); }
+                    { if (stdout) { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusChromium() ]`, stdout); } }
                     resolve();
                 });
             });
@@ -434,6 +435,7 @@ const { exec, spawn } = require('node:child_process');
                 }, (error, stdout, stderr) => {
                     if (error)
                     { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ focusNdi() ][ ERROR ]`, stderr); }
+                    { if (stdout) { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusNdi() ]`, stdout); } }
                     resolve();
                 });
             });

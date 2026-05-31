@@ -10,10 +10,53 @@ set -e
 # xcompmgr -d :0 -fFCnR &
 # sleep 1
 
+fadeInVolume() {
+    current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
+    target=255
+
+    if [ "$current" -lt "$target" ]; then
+        while [ "$current" -lt "$target" ]; do
+            current=$((current + 5))
+            [ "$current" -gt "$target" ] && current=$target
+            amixer set PCM "$current" >/dev/null
+            sleep 0.05
+        done
+    else
+        while [ "$current" -gt "$target" ]; do
+            current=$((current - 5))
+            [ "$current" -lt "$target" ] && current=$target
+            amixer set PCM "$current" >/dev/null
+            sleep 0.05
+        done
+    fi
+}
+
+fadeOutVolume() {
+    current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
+    target=0
+
+    if [ "$current" -lt "$target" ]; then
+        while [ "$current" -lt "$target" ]; do
+            current=$((current + 5))
+            [ "$current" -gt "$target" ] && current=$target
+            amixer set PCM "$current" >/dev/null
+            sleep 0.05
+        done
+    else
+        while [ "$current" -gt "$target" ]; do
+            current=$((current - 5))
+            [ "$current" -lt "$target" ] && current=$target
+            amixer set PCM "$current" >/dev/null
+            sleep 0.05
+        done
+    fi
+}
+
 activateWindow() {
     WINDOW_ID="$(xdotool search --onlyvisible --class 'Chromium' | head -n 1)"
 
     if [[ -z "$WINDOW_ID" ]]; then
+        fadeInVolume
         echo "$1 FAILED to find visible window."
         echo "---------"
         echo "[Results]"
@@ -45,6 +88,7 @@ activateWindow() {
 }
 
 # Start
+fadeOutVolume
 
 activateWindow
 
