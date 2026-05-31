@@ -12,35 +12,59 @@ customInstallInstructions() {
     sleep 0.1
 }
 
+DEBUG=false
+if [ "$1" == "-debug" ]; then
+    DEBUG=true
+fi
+
+debug() {
+    if [ "$DEBUG" == "true" ]; then
+        if [[ "$1" == "-n" ]]; then
+            echo -ne "$2"
+        else
+            echo "$1"
+        fi
+    fi
+}
+
 install() {
     echo "PREPARING TO INSTALL UPDATE"
+
     cd $HOME
     sleep 0.5
+
     local TMP="$(pwd)/TMP_ndpi"
     local PGM="$(pwd)/ndpi"
-    echo "    [FROM] $TMP"
-    echo "      [TO] $PGM"
+    debug "    [FROM] $TMP"
+    debug "      [TO] $PGM"
+
     # read -rp "Install? (y/n) " confirm
     # if [[ "$confirm" = [yY] ]]; then
-        sudo rsync -rvu \
-          --exclude .git \
-          --exclude sh/git-update \
-          "$TMP"/ "$PGM"
-        sleep 0.5
-        cd $PGM
-        echo "$(pwd)"
-        customInstallInstructions
-        
-        # echo "Restarting NDPi Client" && sudo systemctl restart ndpi
-        # echo "INSTALLATION COMPLETE"
-        printf "Restarting NDPi Client" && sudo systemctl restart ndpi
-        printf "INSTALLATION COMPLETE 
 
-"
-        # sudo reboot
+    sudo rsync -rvu \
+        --exclude .git \
+        --exclude sh/git-update \
+        "$TMP"/ "$PGM"
+    
+    sleep 0.5
+
+    cd $PGM
+    
+    debug "[Current Dir] $(pwd)"
+    
+    customInstallInstructions
+    
+    # echo "Restarting NDPi Client" && sudo systemctl restart ndpi
+    # echo "INSTALLATION COMPLETE"
+
+    echo       "Restarting NDPi Client" && sudo systemctl restart ndpi
+    echo -ne "\rINSTALLATION COMPLETE "
+
+    # sudo reboot
     # else
     #     echo "INSTALLATION ABORTED"
     # fi
+    
 }
 
 install
