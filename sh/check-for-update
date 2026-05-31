@@ -26,14 +26,14 @@ if [ "$CURRENT_VERSION" != "$NEWEST_VERSION" ]; then
 fi
 
 printf "{
-    \"update_available\":${UPDATE_AVAILABLE},
-    \"newest_version\":{
-        \"ndpi\":\"$NEWEST_VERSION\",
-        \"git\":\"$REMOTE\"
+    \"update_available\": ${UPDATE_AVAILABLE},
+    \"newest_version\": {
+        \"ndpi\": \"$NEWEST_VERSION\",
+        \"git\": \"$REMOTE\"
     },
-    \"installed_version\":{
-        \"ndpi\":\"$CURRENT_VERSION\",
-        \"git\":\"$LOCAL\"
+    \"installed_version\": {
+        \"ndpi\": \"$CURRENT_VERSION\",
+        \"git\": \"$LOCAL\"
     }
 }
 "
