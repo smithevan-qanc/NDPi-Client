@@ -30,13 +30,6 @@
 #include <dlfcn.h>
 #include "Processing.NDI.Lib.h"
 
-// NDIlib_frame_type_compressed_video is not part of the public NDI SDK v6 enum.
-// NDI HX sources deliver compressed frames with a compressed FourCC via the
-// regular NDIlib_frame_type_video path. We keep this value for forward-compat.
-#ifndef NDIlib_frame_type_compressed_video
-#  define NDIlib_frame_type_compressed_video ((NDIlib_frame_type_e)5)
-#endif
-
 
 // NDI SDK v6 Dynamic Loading
 struct NDILib {
@@ -47,7 +40,7 @@ struct NDILib {
     void (*destroy)(void) = nullptr;
     const char* (*version)(void) = nullptr;
     
-    // Finder functions (v6 compatible)
+    // Finder functions
     NDIlib_find_instance_t (*find_create_v2)(const NDIlib_find_create_t* p_create_settings) = nullptr;
     void (*find_destroy)(NDIlib_find_instance_t p_instance) = nullptr;
     bool (*find_wait_for_sources)(NDIlib_find_instance_t p_instance, uint32_t timeout_in_ms) = nullptr;
@@ -56,16 +49,16 @@ struct NDILib {
     bool loadLibrary() {
         // Try to load NDI library from common locations
         const char* lib_paths[] = {
-            "lib/libndi.so.6",                  // Local v6
-            "lib/libndi.so",                    // Local dir
-            "/usr/local/lib/libndi.dylib",      // macOS Homebrew
-            "/opt/homebrew/lib/libndi.dylib",   // macOS M1/M2 Homebrew
-            "/usr/local/lib/libndi.so.6",       // Linux v6 alt
-            "/usr/lib/libndi.so",               // Linux fallback
-            "/usr/local/lib/libndi.so",         // Linux alt fallback
-            "libndi.dylib",                     // macOS system
-            "libndi.so.6",                      // Linux v6 system
-            "libndi.so",                        // Linux system fallback
+            "lib/aarch64-rpi4-linux-gnueabi/libndi.so.6",   // Local v6
+            "lib/aarch64-rpi4-linux-gnueabi/libndi.so",     // Local dir
+            "/usr/local/lib/libndi.dylib",                  // macOS Homebrew
+            "/opt/homebrew/lib/libndi.dylib",               // macOS M1/M2 Homebrew
+            "/usr/local/lib/libndi.so.6",                   // Linux v6 alt
+            "/usr/lib/libndi.so",                           // Linux fallback
+            "/usr/local/lib/libndi.so",                     // Linux alt fallback
+            "libndi.dylib",                                 // macOS system
+            "libndi.so.6",                                  // Linux v6 system
+            "libndi.so",                                    // Linux system fallback
             nullptr
         };
         
@@ -147,6 +140,7 @@ int main(int argc, char* argv[])
             }
         } else if (arg == "-v" || arg == "--version") {
             std::cout << options.version << std::endl;
+            std::cout << g_ndi.version() << std::endl;
             return 0;
         } 
         else if (arg == "-h" || arg == "--help") {
