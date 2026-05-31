@@ -1,5 +1,5 @@
 /**
- * NDI Discover - NDI SDK v6 with Dynamic Library Loading
+ * NDPi Discover - NDI SDK v6 with Dynamic Library Loading
  * 
  * Features:
  * - NDI SDK v6 support with dynamic library loading
@@ -11,15 +11,6 @@
  *   g++ -o ndi_discover_v3 ndi_discover_v3.cpp -I"/opt/NDI SDK for Linux/include" -ldl -std=c++11
  *   g++ -o ndpi_discover ndi_discover_v3.cpp -I"include" -ldl -std=c++11
  * 
- * 
- * Usage:
- *   ./ndi_discover [timeout_seconds]
- *   Default timeout: 5 seconds
- *   Example: ./ndi_discover 10
- * 
- * Requirements:
- * - NDI SDK v6 installed (library will be dynamically loaded)
- * - Library paths: /usr/lib/libndi.so.6, /usr/local/lib/libndi.so.6, etc.
  */
 
 #include <cstdio>
@@ -108,18 +99,17 @@ struct NDILib {
     }
 };
 
-// Global NDI library instance
 NDILib g_ndi;
 
-// Signal handling for graceful shutdown
 static volatile bool g_shutdown = false;
 
 void signal_handler(int signum) {
+    printf("Closing...\n");
     g_shutdown = true;
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.4)";
+    std::string version = "NDPi Discover (3.0.5)";
     std::string separator = "^";
     int timeout = 5;
 };
@@ -144,9 +134,8 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // Setup signal handlers for graceful shutdown
-    signal(SIGINT, signal_handler);   // Ctrl+C
-    signal(SIGTERM, signal_handler);  // Termination signal
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
 
     Options options;
 
@@ -174,20 +163,20 @@ int main(int argc, char* argv[])
             return 0;
         } 
         else if (arg == "-h" || arg == "--help") {
-            std::cout << "Usage: " << argv[0] << "[OPTIONS]" << std::endl;
-            std::cout << "\t" << "OPTIONS:";
-            std::cout << "\t" << "[-s|--single-line [<separator>]]" << "\t" << "Outputs one(1) source per line. E.g.:'NAME<seperator>URL'. (Default: '^')" << std::endl;
-            std::cout << "\t" << "[-t|--timeout [<seconds>]]" << "\t" << "How long to search for available sources before giving up. (Default: 5)" << std::endl;
-            std::cout << "\t" << "[-v|--version]" << "\t" << "\t" << "NDPi Discover Version." << std::endl;
-            std::cout << "\t" << "[-h|--help]" << "\t" << "\t" << "This help menu." << std::endl;
+            std::cout << "Usage: " << argv[0] << "[OPTIONS]\n";
+            std::cout << "\t" << "OPTIONS:\n";
+            std::cout << "\t\t" << "[-s|--single-line [<separator>]]" << "\t" << "Outputs one(1) source per line. E.g.:'NAME<seperator>URL'. (Default: '^')\n";
+            std::cout << "\t\t" << "[-t|--timeout [<seconds>]]" << "\t" << "How long to search for available sources before giving up. (Default: 5)\n";
+            std::cout << "\t\t" << "[-v|--version]" << "\t\t" << "NDPi Discover Version.\n";
+            std::cout << "\t\t" << "[-h|--help]" << "\t\t" << "This help menu." << std::endl;
             return 0;
         } 
     }
 
-    // Main discovery loop - runs until signal is received
     while (!g_shutdown) {
-        if (g_ndi.find_wait_for_sources(pNDI_find, 5000)) {
-            // Get the current sources
+        if (g_ndi.find_wait_for_sources(pNDI_find, timeout_seconds)) {
+
+            // Get sources
             uint32_t no_sources = 0;
             const NDIlib_source_t* p_sources = g_ndi.find_get_current_sources(pNDI_find, &no_sources);
 
@@ -201,7 +190,7 @@ int main(int argc, char* argv[])
                 std::string obj_line_end = i < no_sources - 1 ? ", " : "";
 
                 if (use_json) {
-                    std::cout << "{\"name\":\"" << source_name << "\", \"url\":\"" << source_url << "\"}" << obj_line_end << std::endl;
+                    std::cout << "  { \"name\": \"" << source_name << "\", \"url\": \"" << source_url << "\" }" << obj_line_end << std::endl;
                 } else {
                     std::cout << source_name << options.separator << source_url << "\n";
                 }
@@ -213,8 +202,6 @@ int main(int argc, char* argv[])
     }
 
     // Cleanup on shutdown
-    std::cerr << "\nShutting down gracefully..." << std::endl;
-    std::flush(std::cout);
     g_ndi.find_destroy(pNDI_find);
     g_ndi.destroy();
     g_ndi.unloadLibrary();
