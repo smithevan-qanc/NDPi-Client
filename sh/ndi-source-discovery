@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
 while true; do
-    echo "$(./../ndi_discover_v2)"
+    echo "$(./ndpi/ndi_discover_v2)"
     sleep 5
 done
