@@ -109,7 +109,7 @@ void signal_handler(int signum) {
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.5)";
+    std::string version = "NDPi Discover (3.0.6)";
     std::string separator = "^";
     int timeout = 5;
 };
@@ -163,12 +163,12 @@ int main(int argc, char* argv[])
             return 0;
         } 
         else if (arg == "-h" || arg == "--help") {
-            std::cout << "Usage: " << argv[0] << "[OPTIONS]\n";
-            std::cout << "\t" << "OPTIONS:\n";
-            std::cout << "\t\t" << "[-s|--single-line [<separator>]]" << "\t" << "Outputs one(1) source per line. E.g.:'NAME<seperator>URL'. (Default: '^')\n";
-            std::cout << "\t\t" << "[-t|--timeout [<seconds>]]" << "\t" << "How long to search for available sources before giving up. (Default: 5)\n";
-            std::cout << "\t\t" << "[-v|--version]" << "\t\t" << "NDPi Discover Version.\n";
-            std::cout << "\t\t" << "[-h|--help]" << "\t\t" << "This help menu." << std::endl;
+            std::cout << "Usage: " << argv[0] << "[OPTIONS]\n\n";
+            std::cout << "[OPTIONS]:\n";
+            std::cout << "\t" << "[-s|--single-line [<separator>]]" << "\t" << "Outputs one(1) source per line. E.g.:'NAME<seperator>URL'. (Default: '^')\n";
+            std::cout << "\t" << "[-t|--timeout [<seconds>]]" << "\t\t" << "How long to search for available sources before giving up. (Default: 5)\n";
+            std::cout << "\t" << "[-v|--version]" << "\t\t\t\t" << "NDPi Discover Version.\n";
+            std::cout << "\t" << "[-h|--help]" << "\t\t\t\t" << "This help menu." << std::endl;
             return 0;
         } 
     }
