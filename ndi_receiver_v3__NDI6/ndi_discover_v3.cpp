@@ -104,12 +104,12 @@ NDILib g_ndi;
 static volatile bool g_shutdown = false;
 
 void signal_handler(int signum) {
-    printf("\nClosing...\n");
+    printf("\n");
     g_shutdown = true;
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.7)";
+    std::string version = "NDPi Discover (3.0.8)";
     std::string separator = "^";
     int timeout = 5;
 };
@@ -202,10 +202,10 @@ int main(int argc, char* argv[])
 
                 std::string source_name = p_sources[i].p_ndi_name ? p_sources[i].p_ndi_name : "";
                 std::string source_url = p_sources[i].p_url_address ? p_sources[i].p_url_address : "";
-                std::string obj_line_end = i < no_sources - 1 ? ",\n" : "";
+                std::string obj_line_end = i < no_sources - 1 ? ", " : "";
 
                 if (use_json) {
-                    std::cout << "  { \"name\": \"" << source_name << "\", \"url\": \"" << source_url << "\" }" << obj_line_end;
+                    std::cout << "{\"name\":\"" << source_name << "\", \"url\":\"" << source_url << "\"}" << obj_line_end;
                 } else {
                     std::cout << source_name << options.separator << source_url << "\n";
                 }
@@ -220,7 +220,6 @@ int main(int argc, char* argv[])
     g_ndi.find_destroy(pNDI_find);
     g_ndi.destroy();
     g_ndi.unloadLibrary();
-    std::cerr << "Cleanup complete." << std::endl;
 
     return 0;
 }
