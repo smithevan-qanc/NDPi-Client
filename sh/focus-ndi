@@ -29,7 +29,7 @@ set -e
 
 activateWindow() {
     WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
-    
+
     if [[ -z "$WINDOW_ID" ]]; then
         echo "$1 FAILED to find visible window."
         echo "---------"
@@ -40,14 +40,14 @@ activateWindow() {
     fi
 
     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
-    picom -f -D 6 -i 0 --backend xrender --no-fading-openclose --no-vsync &
-    sleep 1
+    # picom -f -D 6 -i 0 --backend xrender --no-fading-openclose --no-vsync &
+    # sleep 1
 
-    xdotool windowminimize $WINDOW_ID
-    sleep 0.5
+    # xdotool windowminimize $WINDOW_ID
+    # sleep 0.5
 
-    xdotool windowraise $WINDOW_ID
-    sleep 0.5
+    # xdotool windowraise $WINDOW_ID
+    # sleep 0.5
 
     xdotool windowactivate $WINDOW_ID
     sleep 1

@@ -183,7 +183,13 @@ class NDPi {
 
         //  Device Name
         this.settings.on('device_name', (data) => {
-            const output = String(data || this.settings.defaultDeviceName);
+            if (data.toString() === '')
+            { 
+                fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'device_name'), this.settings.defaultDeviceName, 'utf8');
+                return;
+            }
+
+            const output = String(data);
 
             try
             {

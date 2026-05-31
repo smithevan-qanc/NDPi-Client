@@ -2,7 +2,7 @@
 - These are API endpoints that are available to external origins.
 - Primary Path: `http://[IP]:[PORT]/api/v1`
 ---
-1. `/command` 
+1. `/rpc` 
     - **Method: `GET`**
        - `type={Type}`
        - `data={Data}`
@@ -11,7 +11,6 @@
          - `show-overlay`
          - `set-overlay`
          - `set-source`
-
 
 
 # Internal

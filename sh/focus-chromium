@@ -40,6 +40,6 @@ activateWindow() {
 
 activateWindow
 
-killall picom
+# killall picom
 
 exit 0

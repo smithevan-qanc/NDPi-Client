@@ -230,13 +230,11 @@ const { exec, spawn } = require('node:child_process');
                     break;
                 
                 case 'focus-chromium':
-                    // response = await focusWindow('chromium', response);
                     await focusChromium();
                     return response;
                     break;
                 
                 case 'focus-ndi':
-                    // response = await focusWindow('gstreamer', response, { onlyVisible: false });
                     await focusNdi();
                     return response;
                     break;
@@ -280,9 +278,14 @@ const { exec, spawn } = require('node:child_process');
                     return response;
                     break;
                 
+                    // NOT Complete
+                    // This case is complete, but needs implemented.
                 case 'rename-device':
-                    console.log(`PROCESSING: ${command.type}`);
-
+                    const commandData = command.data || null;
+                    if (typeof commandData === 'string')
+                    { 
+                        fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'device_name'))
+                    }
                     response.success = true;
                     return response;
                     break;

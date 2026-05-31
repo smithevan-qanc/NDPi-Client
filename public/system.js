@@ -232,10 +232,10 @@ async function sendCommand(command = {}, viaWebSocket = true) {
     
     // const searchParams = new URLSearchParams(command).toString();
     // const url = new URLPattern(window.location.href);
-    // const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/command?${searchParams}`;
+    // const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/rpc?${searchParams}`;
 
     const url = new URLPattern(window.location.href);
-    const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/command`;
+    const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/rpc`;
 
     let data = null;
     try
