@@ -24,7 +24,7 @@ activateWindow() {
 
     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --realtime --vsync &
-    xcompmgr -d :0 -fF
+    picom -d :0 -fF
 
     sleep 0.1
     sleep 0.1
