@@ -118,6 +118,24 @@ struct Options {
 
 int main(int argc, char* argv[])
 {
+    
+    if (!g_ndi.loadLibrary()) {
+        std::cerr << "Failed to load NDI library. Please ensure NDI SDK v6 is installed." << std::endl;
+        return 1;
+    }
+    
+    if (!g_ndi.initialize()) {
+        g_ndi.unloadLibrary();
+        return 1;
+    }
+
+    NDIlib_find_instance_t pNDI_find = g_ndi.find_create_v2(nullptr);
+    if (!pNDI_find) {
+        g_ndi.destroy();
+        g_ndi.unloadLibrary();
+        return 1;
+    }
+
     Options options;
 
     int timeout_seconds = options.timeout;
@@ -153,24 +171,6 @@ int main(int argc, char* argv[])
             return 0;
         } 
     }
-    
-    // Load NDI library dynamically
-    if (!g_ndi.loadLibrary()) {
-        std::cerr << "Failed to load NDI library. Please ensure NDI SDK v6 is installed." << std::endl;
-        return 1;
-    }
-    
-    if (!g_ndi.initialize()) {
-        g_ndi.unloadLibrary();
-        return 1;
-    }
-
-    NDIlib_find_instance_t pNDI_find = g_ndi.find_create_v2(nullptr);
-    if (!pNDI_find) {
-        g_ndi.destroy();
-        g_ndi.unloadLibrary();
-        return 1;
-    }
 
     g_ndi.find_wait_for_sources(pNDI_find, timeout_seconds * 1000);
 
@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
     const NDIlib_source_t* p_sources = g_ndi.find_get_current_sources(pNDI_find, &no_sources);
 
     if (use_json) {
-        std::cout << "[";
+        std::cout << "[" << std::endl;
     }
     for (uint32_t i = 0; i < no_sources; i++) {
 
@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
         }
     }
     if (use_json) {
-        std::cout << "]";
+        std::cout << "]" << std::endl;
     }
 
     // Cleanup
