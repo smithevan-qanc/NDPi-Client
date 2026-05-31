@@ -111,7 +111,7 @@ struct NDILib {
 NDILib g_ndi;
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.1)";
+    std::string version = "NDPi Discover (3.0.3)";
     std::string separator = "^";
     int timeout = 5;
 };
@@ -164,8 +164,8 @@ int main(int argc, char* argv[])
         else if (arg == "-h" || arg == "--help") {
             std::cout << "Usage: " << argv[0] << "[OPTIONS]" << std::endl;
             std::cout << "\t" << "OPTIONS:";
-            std::cout << "\t" << "[-s|--single-line <separator>]" << "\t" << "Outputs one(1) source per line. E.g.:'NAME<seperator>URL'. (Default: JSON string array)" << std::endl;
-            std::cout << "\t" << "[-t|--timeout <seconds>]" << "\t" << "How long to search for available sources before giving up. (Default: 5)" << std::endl;
+            std::cout << "\t" << "[-s|--single-line [<separator>]]" << "\t" << "Outputs one(1) source per line. E.g.:'NAME<seperator>URL'. (Default: '^')" << std::endl;
+            std::cout << "\t" << "[-t|--timeout [<seconds>]]" << "\t" << "How long to search for available sources before giving up. (Default: 5)" << std::endl;
             std::cout << "\t" << "[-v|--version]" << "\t" << "\t" << "NDPi Discover Version." << std::endl;
             std::cout << "\t" << "[-h|--help]" << "\t" << "\t" << "This help menu." << std::endl;
             return 0;
