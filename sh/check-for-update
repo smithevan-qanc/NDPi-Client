@@ -9,12 +9,14 @@ CURRENT_VERSION="$(head -n 1 version/current)"
 cd $HOME/TMP_ndpi
 BRANCH="$(head -n 1 version/git)"
 
+echo "Fetch Origin"
 git fetch origin $BRANCH &>/dev/null
 
 LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse origin/$BRANCH)
 
 if [ "$LOCAL" != "$REMOTE" ]; then
+    echo "Reset"
     git reset --hard origin/$BRANCH
     chmod +x ./sh/*
 fi
