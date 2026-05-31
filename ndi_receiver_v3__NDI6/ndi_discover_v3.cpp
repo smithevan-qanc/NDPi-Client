@@ -8,8 +8,8 @@
  * - Outputs results in JSON format for easy parsing
  * 
  * Compilation:
- *   g++ -o ndi_discover_v2 ndi_discover_v2.cpp -I"/opt/NDI SDK for Linux/include" -ldl -std=c++11
- *   g++ -o test_discover NDIlib_Find.cpp -I"/opt/NDI SDK for Linux/include" -ldl -std=c++11
+ *   g++ -o ndi_discover_v3 ndi_discover_v3.cpp -I"/opt/NDI SDK for Linux/include" -ldl -std=c++11
+ * 
  * 
  * Usage:
  *   ./ndi_discover [timeout_seconds]
@@ -36,6 +36,13 @@
 #  define NDIlib_frame_type_compressed_video ((NDIlib_frame_type_e)5)
 #endif
 
+
+struct Options {
+    std::string version = "NDPi Discover (3.0.0)";
+    std::string separator = "^";
+    int timeout = 5;
+};
+
 // NDI SDK v6 Dynamic Loading
 struct NDILib {
     void* handle = nullptr;
@@ -54,6 +61,7 @@ struct NDILib {
     bool loadLibrary() {
         // Try to load NDI library from common locations
         const char* lib_paths[] = {
+            "lib/libndi.so",                         // Local dir
             "/usr/local/lib/libndi.dylib",           // macOS Homebrew
             "/opt/homebrew/lib/libndi.dylib",        // macOS M1/M2 Homebrew
             "/usr/lib/libndi.so.6",                  // Linux v6
@@ -115,10 +123,39 @@ struct NDILib {
 NDILib g_ndi;
 
 int main(int argc, char* argv[])
-{   
-    int timeout_seconds = 5;
-    if (argc > 1) {
-        timeout_seconds = std::atoi(argv[1]);
+{
+    Options options;
+
+    int timeout_seconds = options.timeout;
+    bool use_json = true;
+    
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        
+        if (arg == "-s" || arg == "--single-line") {
+            use_json = false;
+            if (i + 1 < argc) {
+                options.separator = argv[++i];
+            }
+        } else if (arg == "-t" || arg == "--timeout") {
+            if (i + 1 < argc) {
+                timeout_seconds = std::atoi(argv[++i]);
+            } else {
+                std::cerr << "Error: " << arg << " requires a value.\n" << std::endl;
+                return 1;
+            }
+        } else if (arg == "-v" || arg == "--version") {
+            std::cout << options.version << std::endl;
+            return 0;
+        } 
+        else if (arg == "-h" || arg == "--help") {
+            std::cout << "Usage: " << argv[0] << "\n" << std::endl;
+            std::cout << "\t" << "[-s|--single-line <separator>]" << "\t" << "Outputs one(1) source per line. E.g.:'NAME<seperator>URL'. (Default: JSON string array)" << "\n" << std::endl;
+            std::cout << "\t" << "[-t|--timeout <seconds>]" << "\t" << "How long to search for available sources before giving up. (Default: 5)" << "\n" << std::endl;
+            std::cout << "\t" << "[-v|--version]" << "\t" << "\t" << "NDPi Discover Version." << "\n" << std::endl;
+            std::cout << "\t" << "[-h|--help]" << "\t" << "\t" << "This help menu." << "\n" << std::endl;
+            return 0;
+        } 
     }
     
     // Load NDI library dynamically
@@ -127,13 +164,11 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    // Initialize NDI
     if (!g_ndi.initialize()) {
         g_ndi.unloadLibrary();
         return 1;
     }
 
-    // Create NDI finder
     NDIlib_find_instance_t pNDI_find = g_ndi.find_create_v2(nullptr);
     if (!pNDI_find) {
         g_ndi.destroy();
@@ -141,23 +176,33 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // Wait for sources with specified timeout
     g_ndi.find_wait_for_sources(pNDI_find, timeout_seconds * 1000);
 
     // Get the current sources
     uint32_t no_sources = 0;
     const NDIlib_source_t* p_sources = g_ndi.find_get_current_sources(pNDI_find, &no_sources);
 
-    // Output JSON format for easy parsing
-    // printf("[\n");
-    for (uint32_t i = 0; i < no_sources; i++) {
-        printf("%s^%s", p_sources[i].p_url_address ? p_sources[i].p_url_address : "", p_sources[i].p_ndi_name ? p_sources[i].p_ndi_name : "");
-        // if (i < no_sources - 1) printf(",");
-        printf("\n");
+    if (use_json) {
+        std::cout << "[" << std::endl;
     }
-    // printf("]\n");
+    for (uint32_t i = 0; i < no_sources; i++) {
+
+        std::string source_name = p_sources[i].p_ndi_name ? p_sources[i].p_ndi_name : "";
+        std::string source_url = p_sources[i].p_url_address ? p_sources[i].p_url_address : "";
+        std::string obj_line_end = i < no_sources - 1 ? "," : "";
+
+        if (use_json) {
+            std::cout << "{\"name\":\"" << source_name << "\", \"url\":\"" << source_url << "\"}" << obj_line_end << std::endl;
+        } else {
+            std::cout << source_name << options.separator << source_url << "\n" << std::endl;
+        }
+    }
+    if (use_json) {
+        std::cout << "]";
+    }
 
     // Cleanup
+    std::flush(std::cout);
     g_ndi.find_destroy(pNDI_find);
     g_ndi.destroy();
     g_ndi.unloadLibrary();
