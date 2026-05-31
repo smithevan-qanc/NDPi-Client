@@ -77,7 +77,12 @@ class NDI_Receiver_v3 extends EventEmitter {
 
     connect() {
 
-        this.receiver = spawn(`${this.parentDirectory}/${this.receiverName}`, [this.ndiSource, this.ndiBandwidth, this.ndiColorFormat], {
+        this.receiver = spawn(`${this.parentDirectory}/${this.receiverName}`, [
+            '--source', this.ndiSource,
+            '--bandwidth', this.ndiBandwidth,
+            '--color-format', this.ndiColorFormat,
+            '--framesync'
+        ], {
             env: {
                 ...process.env,
                 DISPLAY: ':0',

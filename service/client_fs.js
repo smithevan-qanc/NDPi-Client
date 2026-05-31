@@ -229,7 +229,7 @@ class FileSystemMonitor extends EventEmitter {
             },
             {
                 key: "ndi_receiver_exec",
-                value: `ndi_receiver_v3`,
+                value: `ndi_receiver_v4`,
                 group: ``,
                 allowEditInternal: false,
                 allowEditExternal: false,
@@ -431,7 +431,7 @@ class FileSystemMonitor extends EventEmitter {
     async start() {
         const startWatcher = () => { this.watcher = fs.watch(this.dataDir); }
         startWatcher();
-        
+
         this.watcher.on('change', (eventType, filename) => { if (this.fileMap.has(filename)) { this._fsEvent(filename); } });
         this.watcher.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error); });
         this.watcher.on('close', () => {
