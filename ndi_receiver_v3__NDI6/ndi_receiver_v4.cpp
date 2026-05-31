@@ -71,29 +71,31 @@ struct NDILib {
                                               NDIlib_audio_frame_interleaved_16s_t* p_dst) = nullptr;
     
     // FrameSync functions
-    NDIlib_framesync_instance_t (*framesync_create_v2)(const NDIlib_framesync_create_t* p_create_settings) = nullptr;
+    NDIlib_framesync_instance_t (*framesync_create)(NDIlib_recv_instance_t p_receiver) = nullptr;
     void (*framesync_destroy)(NDIlib_framesync_instance_t p_instance) = nullptr;
-    void (*framesync_add_source)(NDIlib_framesync_instance_t p_instance, const NDIlib_source_t* p_source) = nullptr;
-    void (*framesync_remove_source)(NDIlib_framesync_instance_t p_instance, const NDIlib_source_t* p_source) = nullptr;
-    NDIlib_frame_type_e (*framesync_capture_video)(NDIlib_framesync_instance_t p_instance,
-                                                    NDIlib_video_frame_v2_t* p_video_data,
-                                                    NDIlib_audio_frame_v3_t* p_audio_data,
-                                                    uint32_t timeout_in_ms) = nullptr;
-    void (*framesync_free_video)(NDIlib_framesync_instance_t p_instance, const NDIlib_video_frame_v2_t* p_video_data) = nullptr;
-    void (*framesync_free_audio)(NDIlib_framesync_instance_t p_instance, const NDIlib_audio_frame_v3_t* p_audio_data) = nullptr;
+    void (*framesync_capture_video)(NDIlib_framesync_instance_t p_instance,
+                                    NDIlib_video_frame_v2_t* p_video_data,
+                                    NDIlib_frame_format_type_e field_type) = nullptr;
+    void (*framesync_free_video)(NDIlib_framesync_instance_t p_instance, NDIlib_video_frame_v2_t* p_video_data) = nullptr;
+    void (*framesync_capture_audio_v2)(NDIlib_framesync_instance_t p_instance,
+                                       NDIlib_audio_frame_v3_t* p_audio_data,
+                                       int sample_rate, int no_channels, int no_samples) = nullptr;
+    void (*framesync_free_audio_v2)(NDIlib_framesync_instance_t p_instance, NDIlib_audio_frame_v3_t* p_audio_data) = nullptr;
     
     bool loadLibrary() {
         // Try to load NDI library from common locations
         const char* lib_paths[] = {
-            "/usr/local/lib/libndi.dylib",           // macOS Homebrew
-            "/opt/homebrew/lib/libndi.dylib",        // macOS M1/M2 Homebrew
-            "/usr/local/lib/libndi.so.6",            // Linux 
-            "/usr/local/lib/libndi.so",              // Linux fallback
-            "/usr/lib/libndi.so.6",                  // Linux alt
-            "/usr/lib/libndi.so",                    // Linux alt fallback
-            "libndi.dylib",                          // macOS system
-            "libndi.so.6",                           // Linux v6 system
-            "libndi.so",                             // Linux system fallback
+            "lib/aarch64-rpi4-linux-gnueabi/libndi.so.6",   // Local v6
+            "lib/aarch64-rpi4-linux-gnueabi/libndi.so",     // Local dir
+            "/usr/local/lib/libndi.dylib",                  // macOS Homebrew
+            "/opt/homebrew/lib/libndi.dylib",               // macOS M1/M2 Homebrew
+            "/usr/local/lib/libndi.so.6",                   // Linux 
+            "/usr/local/lib/libndi.so",                     // Linux fallback
+            "/usr/lib/libndi.so.6",                         // Linux alt
+            "/usr/lib/libndi.so",                           // Linux alt fallback
+            "libndi.dylib",                                 // macOS system
+            "libndi.so.6",                                  // Linux v6 system
+            "libndi.so",                                    // Linux system fallback
             nullptr
         };
         
@@ -134,13 +136,12 @@ struct NDILib {
         LOAD_FUNC(find_wait_for_sources);
         LOAD_FUNC(find_get_current_sources);
         LOAD_FUNC(util_audio_to_interleaved_16s_v3);
-        LOAD_FUNC(framesync_create_v2);
+        LOAD_FUNC(framesync_create);
         LOAD_FUNC(framesync_destroy);
-        LOAD_FUNC(framesync_add_source);
-        LOAD_FUNC(framesync_remove_source);
         LOAD_FUNC(framesync_capture_video);
         LOAD_FUNC(framesync_free_video);
-        LOAD_FUNC(framesync_free_audio);
+        LOAD_FUNC(framesync_capture_audio_v2);
+        LOAD_FUNC(framesync_free_audio_v2);
         
         #undef LOAD_FUNC
         
@@ -321,22 +322,16 @@ public:
         recv_desc.allow_video_fields = false;  // Disable interlaced - reduces latency
         recv_desc.p_ndi_recv_name = "NDPi-Monitor-Client";
         
+        ndi_recv = g_ndi.recv_create_v3(&recv_desc);
+        if (!ndi_recv) {
+            throw std::runtime_error("Failed to create NDI receiver");
+        }
+        
         if (use_framesync) {
-            // Create framesync receiver
-            NDIlib_framesync_create_t framesync_desc;
-            framesync_desc.p_ndi_recv_name = "NDPi-Monitor-FrameSync";
-            framesync_desc.frame_rate_N = 0;  // Auto-detect
-            framesync_desc.frame_rate_D = 1;
-            framesync_desc.interlaced_fields = false;
-            
-            ndi_framesync = g_ndi.framesync_create_v2(&framesync_desc);
+            // Wrap the receiver with a framesync instance
+            ndi_framesync = g_ndi.framesync_create(ndi_recv);
             if (!ndi_framesync) {
-                throw std::runtime_error("Failed to create NDI framesync receiver");
-            }
-        } else {
-            ndi_recv = g_ndi.recv_create_v3(&recv_desc);
-            if (!ndi_recv) {
-                throw std::runtime_error("Failed to create NDI receiver");
+                throw std::runtime_error("Failed to create NDI framesync instance");
             }
         }
         
@@ -392,12 +387,8 @@ public:
             for (uint32_t i = 0; i < num_sources; i++) {
                 if (source_name == sources[i].p_ndi_name) {
                     std::cout << "- Target source found: " << source_name << std::endl;
-                    // Connect to source
-                    if (use_framesync) {
-                        g_ndi.framesync_add_source(ndi_framesync, (NDIlib_source_t*)&sources[i]);
-                    } else {
-                        g_ndi.recv_connect(ndi_recv, &sources[i]);
-                    }
+                    // Connect to source (both standard and framesync use the same receiver)
+                    g_ndi.recv_connect(ndi_recv, &sources[i]);
                     current_source = source_name;
                     g_ndi.find_destroy(finder);
                     return true;
@@ -632,11 +623,26 @@ private:
         GstElement* comp_appsrc = nullptr;
         
         while (is_running) {
-            // Use framesync_capture_video or recv_capture_v3 depending on mode
-            NDIlib_frame_type_e frame_type;
+            NDIlib_frame_type_e frame_type = NDIlib_frame_type_none;
+            
             if (use_framesync) {
-                frame_type = g_ndi.framesync_capture_video(ndi_framesync, &video_frame, &audio_frame, 50);
+                // Framesync mode: capture video and audio separately
+                // framesync_capture_video always returns immediately (returns void)
+                g_ndi.framesync_capture_video(ndi_framesync, &video_frame, NDIlib_frame_format_type_progressive);
+                
+                // Check if we have valid video data
+                if (video_frame.xres > 0 && video_frame.yres > 0) {
+                    frame_type = NDIlib_frame_type_video;
+                    
+                    // Also capture audio (48000 Hz, 2 channels, 2400 samples)
+                    g_ndi.framesync_capture_audio_v2(ndi_framesync, &audio_frame, 48000, 2, 2400);
+                } else {
+                    // No video data yet
+                    frame_type = NDIlib_frame_type_none;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                }
             } else {
+                // Standard receiver mode
                 frame_type = g_ndi.recv_capture_v3(ndi_recv, &video_frame, &audio_frame, nullptr, 50);
             }
             
@@ -801,7 +807,7 @@ private:
                     }
 
                     if (use_framesync) {
-                        g_ndi.framesync_free_audio(ndi_framesync, &audio_frame);
+                        g_ndi.framesync_free_audio_v2(ndi_framesync, &audio_frame);
                     } else {
                         g_ndi.recv_free_audio_v3(ndi_recv, &audio_frame);
                     }
