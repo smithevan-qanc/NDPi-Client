@@ -196,16 +196,16 @@ int main(int argc, char* argv[])
             const NDIlib_source_t* p_sources = g_ndi.find_get_current_sources(pNDI_find, &no_sources);
 
             if (use_json) {
-                std::cout << "[" << std::endl;
+                std::cout << "[";
             }
             for (uint32_t i = 0; i < no_sources; i++) {
 
                 std::string source_name = p_sources[i].p_ndi_name ? p_sources[i].p_ndi_name : "";
                 std::string source_url = p_sources[i].p_url_address ? p_sources[i].p_url_address : "";
-                std::string obj_line_end = i < no_sources - 1 ? ", " : "";
+                std::string obj_line_end = i < no_sources - 1 ? ",\n" : "";
 
                 if (use_json) {
-                    std::cout << "  { \"name\": \"" << source_name << "\", \"url\": \"" << source_url << "\" }" << obj_line_end << std::endl;
+                    std::cout << "  { \"name\": \"" << source_name << "\", \"url\": \"" << source_url << "\" }" << obj_line_end;
                 } else {
                     std::cout << source_name << options.separator << source_url << "\n";
                 }
