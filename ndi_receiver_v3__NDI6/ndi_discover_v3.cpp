@@ -109,9 +109,9 @@ void signal_handler(int signum) {
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.14)";
+    std::string version = "NDPi Discover (3.0.15)";
     std::string separator = "^";
-    int timeout = 1;
+    int timeout = 2;
 };
 
 int main(int argc, char* argv[])
@@ -191,6 +191,8 @@ int main(int argc, char* argv[])
 
         if (elapsed >= 1000 && !output_pending) {
             output_pending = true;
+
+            timeout_seconds = 0;
             
             uint32_t no_sources = 0;
             const NDIlib_source_t* p_sources = g_ndi.find_get_current_sources(pNDI_find, &no_sources);
