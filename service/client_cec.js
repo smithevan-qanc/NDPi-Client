@@ -194,7 +194,7 @@ class CecController extends EventEmitter {
             if (cmd === 'h')
             { this.debug = true; }
             else 
-            { this.debug = true; }
+            { this.debug = false; }
             this.proc.stdin.write(cmd + '\n');
         }
     }
