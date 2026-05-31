@@ -109,7 +109,7 @@ void signal_handler(int signum) {
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.15)";
+    std::string version = "NDPi Discover (3.0.16)";
     std::string separator = "^";
     int timeout = 2;
 };
@@ -175,22 +175,22 @@ int main(int argc, char* argv[])
         } 
     }
 
-    static auto last_discovery_time = std::chrono::steady_clock::now() - std::chrono::seconds(5);
-    static bool output_pending = false;
+    // static auto last_discovery_time = std::chrono::steady_clock::now() - std::chrono::seconds(5);
+    // static bool output_pending = false;
 
     while (!g_shutdown) {
 
-        auto current_time = std::chrono::steady_clock::now();
+        // auto current_time = std::chrono::steady_clock::now();
         
         if (g_ndi.find_wait_for_sources(pNDI_find, timeout_seconds * 1000)) {
-            last_discovery_time = current_time;
-            output_pending = false;
-        }
+        //     last_discovery_time = current_time;
+        //     output_pending = false;
+        // }
 
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_discovery_time).count();
+        // auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_discovery_time).count();
 
-        if (elapsed >= 1000 && !output_pending) {
-            output_pending = true;
+        // if (elapsed >= 1000 && !output_pending) {
+        //     output_pending = true;
 
             timeout_seconds = 0;
             
