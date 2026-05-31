@@ -20,11 +20,10 @@ install() {
     local PGM="$(pwd)/ndpi"
     echo "    [FROM] $TMP"
     echo "      [TO] $PGM"
-    read -rp "Install? (y/n) " confirm
-    if [[ "$confirm" = [yY] ]]; then
+    # read -rp "Install? (y/n) " confirm
+    # if [[ "$confirm" = [yY] ]]; then
         sudo rsync -rvu \
           --exclude .git \
-          --exclude sh/install-update \
           --exclude sh/git-update \
           "$TMP"/ "$PGM"
         sleep 0.5
@@ -32,12 +31,13 @@ install() {
         echo "$(pwd)"
         customInstallInstructions
         
-        echo "Restarting NDPi Client" && sudo systemctl restart ndpi
-        echo "INSTALLATION COMPLETE"
+        printf "Restarting NDPi Client" && sudo systemctl restart ndpi
+        printf "INSTALLATION COMPLETE \n\n"
+
         # sudo reboot
-    else
-        echo "INSTALLATION ABORTED"
-    fi
+    # else
+    #     echo "INSTALLATION ABORTED"
+    # fi
 }
 
 install
