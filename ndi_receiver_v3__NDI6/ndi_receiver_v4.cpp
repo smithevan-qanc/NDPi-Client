@@ -643,7 +643,7 @@ private:
                 }
             } else {
                 // Standard receiver mode
-                frame_type = g_ndi.recv_capture_v3(ndi_recv, &video_frame, &audio_frame, nullptr, 10);
+                frame_type = g_ndi.recv_capture_v3(ndi_recv, &video_frame, &audio_frame, nullptr, 60);
             }
             
             switch (frame_type) {
