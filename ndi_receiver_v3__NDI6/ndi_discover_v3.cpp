@@ -110,9 +110,9 @@ void signal_handler(int signum) {
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.17)";
+    std::string version = "NDPi Discover (3.0.18)";
     std::string separator = "^";
-    int timeout = 2;
+    int timeout = 5;
 };
 
 int main(int argc, char* argv[])
