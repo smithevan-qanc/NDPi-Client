@@ -102,7 +102,7 @@ struct NDILib {
         for (int i = 0; lib_paths[i] != nullptr; i++) {
             handle = dlopen(lib_paths[i], RTLD_LAZY | RTLD_LOCAL);
             if (handle) {
-                std::cout << "- Loaded NDI library from: " << lib_paths[i] << std::endl;
+                // std::cout << "- Loaded NDI library from: " << lib_paths[i] << std::endl;
                 break;
             }
         }
@@ -145,7 +145,7 @@ struct NDILib {
         
         #undef LOAD_FUNC
         
-        std::cout << "- " << version() << std::endl;
+        // std::cout << "- " << version() << std::endl;
         return true;
     }
     
@@ -643,7 +643,7 @@ private:
                 }
             } else {
                 // Standard receiver mode
-                frame_type = g_ndi.recv_capture_v3(ndi_recv, &video_frame, &audio_frame, nullptr, 50);
+                frame_type = g_ndi.recv_capture_v3(ndi_recv, &video_frame, &audio_frame, nullptr, 10);
             }
             
             switch (frame_type) {
@@ -925,7 +925,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string version = "NDPi Receiver [GStreamer] (4.0.0)";
+    std::string version = "NDPi Receiver [GStreamer] (4.0.1)";
     std::string source_name = "";
     NDIlib_recv_bandwidth_e bandwidth = NDIlib_recv_bandwidth_max;
     NDIlib_recv_color_format_e color_format = NDIlib_recv_color_format_fastest;
@@ -975,10 +975,7 @@ int main(int argc, char* argv[]) {
             std::cout << "                                                  '100' -> fastest                       " << "\n";
             std::cout << "                                                  '101' -> best                          " << "\n";
             std::cout << "                                                                                         " << "\n";
-            std::cout << "    [-f|--framesync] --------------------------- Enable frame-synchronized receiver.      " << "\n";
-            std::cout << "                                                  (Provides synchronized frames from one " << "\n";
-            std::cout << "                                                   or multiple NDI sources)              " << "\n";
-            std::cout << "                                                                                         " << "\n";
+            std::cout << "    [-f|--framesync] ---------------------------- Enable frame-synchronized receiver.    " << "\n";
             std::cout << "    [-v|--version] ------------------------------ NDPi Receiver Version.                 " << "\n";
             std::cout << "    [-h|--help] --------------------------------- This help menu.                        " << std::endl;
 
@@ -988,6 +985,7 @@ int main(int argc, char* argv[]) {
 
 
     std::cout << "- NDPi - Custom NDI Tools (" << __FILE_NAME__ << ")" << std::endl;
+    std::cout << "- " << g_ndi.version() << std::endl;
 
     // if (argc > 1) {
     //     source_name = argv[1];
