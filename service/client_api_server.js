@@ -106,7 +106,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             
             ws.on('close', () => {
                 this.ws_conn_sources.delete(ws);
-                
+
                 if (this.ws_conn_sources.size === 0)
                 { this.discoveryExec.kill('SIGKILL'); }
             });
@@ -326,9 +326,9 @@ class NDPiCommandServer_Client extends EventEmitter {
     startDiscovery() {
         if (this.discoveryExec)
         { return; }
-        const discoveryPath = `.${path.join(__dirname, '..', 'ndi_receiver_v3__NDI6', 'ndpi_discover')}`;
+        const discoveryPath = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
         console.log('Discovery exec path', discoveryPath)
-        this.discoveryExec = spawn(discoveryPath);
+        this.discoveryExec = spawn('./ndpi_discover', { cwd: discoveryPath });
         this.discoveryExec.stdout.on('data', (data) => {
             const output = data.toString() || '[]';
             try
