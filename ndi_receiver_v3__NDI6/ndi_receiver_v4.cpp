@@ -9,8 +9,8 @@
  * - Audio conversion from NDI float to 16-bit PCM
  * 
  * Compilation:
- *    g++ -o ndi_receiver_v3 ndi_receiver_v3.cpp $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0) -I"/opt/NDI SDK for Linux/include" -ldl -std=c++11
- *    g++ -o ndi_receiver_v3 ndi_receiver_v3.cpp $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0) -I"/opt/NDI SDK for Linux/include" -ldl -std=c++11
+ *    g++ -o ndi_receiver_v4 ndi_receiver_v4.cpp $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0) -I"/opt/NDI SDK for Linux/include" -ldl -std=c++11
+ *    g++ -o ndi_receiver_v4 ndi_receiver_v4.cpp $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0) -I"include" -ldl -std=c++11
  * 
  * Usage:
  *    ./ndi_receiver_v# "NDI Source Name"
@@ -188,64 +188,6 @@ private:
         
         /**
          * Method 1:
-         * wlr-randr for Wayland
-         * Get display model name and resolution
-         * /
-        FILE* namePipe = popen("wlr-randr 2>/dev/null | grep 'Model:' | head -1 | sed 's/.*Model: //'", "r");
-        if (namePipe) {
-            char nameBuffer[256];
-            if (fgets(nameBuffer, sizeof(nameBuffer), namePipe)) {
-                nameBuffer[strcspn(nameBuffer, "\n")] = 0; // Remove trailing newline
-                if (strlen(nameBuffer) > 0) {
-                    display_name = nameBuffer;
-                }
-            }
-            pclose(namePipe);
-        }
-        
-        // Try to get resolution from wlr-randr
-        FILE* pipe = popen("wlr-randr 2>/dev/null | grep current | grep -oE '[0-9]+x[0-9]+' | head -1", "r");
-        if (pipe) {
-            char buffer[128];
-            if (fgets(buffer, sizeof(buffer), pipe)) {
-                int w, h;
-                if (sscanf(buffer, "%dx%d", &w, &h) == 2 && w > 100 && h > 100) {
-                    display_width = w;
-                    display_height = h;
-                    pclose(pipe);
-                    std::cout << "Display: " << display_width << "x" << display_height << " (wlr-randr)" << std::endl;
-                    std::cout << "Monitor: " << display_name << std::endl;
-                    return;
-                }
-            }
-            pclose(pipe);
-            pipe = nullptr;  // Mark as closed
-        }
-        
-        /**
-         * Method 2:
-         * fbset for framebuffer
-         * /
-        pipe = popen("fbset 2>/dev/null | grep geometry | awk '{print $2 \"x\" $3}'", "r");
-        if (pipe) {
-            char buffer[128];
-            if (fgets(buffer, sizeof(buffer), pipe)) {
-                int w, h;
-                if (sscanf(buffer, "%dx%d", &w, &h) == 2 && w > 100 && h > 100) {
-                    display_width = w;
-                    display_height = h;
-                    pclose(pipe);
-                    std::cout << "Display: " << display_width << "x" << display_height << " (fbset)" << std::endl;
-                    return;
-                }
-            }
-            pclose(pipe);
-            pipe = nullptr;  // Mark as closed
-        }
-            */
-        
-        /**
-         * Method 3:
          *  xrandr
          */
         FILE* pipe = popen("xrandr | grep '*'", "r");
@@ -264,11 +206,12 @@ private:
             pclose(pipe);
             pipe = nullptr;  // Mark as closed
         }
+
         /**
-         * Method 3.2:
-         * use '/sys/class/drm' for HDMI - 2
-         * /
-        pipe = popen("cat /sys/class/drm/card1-HDMI-A-2/modes 2>/dev/null | head -1", "r");
+         * Method 2:
+         * use '/sys/class/drm' for HDMI 
+         */
+        pipe = popen("cat /sys/class/drm/card*-HDMI-A-1/modes 2>/dev/null | head -1", "r");
         if (pipe) {
             char buffer[128];
             if (fgets(buffer, sizeof(buffer), pipe)) {
@@ -285,26 +228,9 @@ private:
             pipe = nullptr;  // Mark as closed
         }
         
-        /**
-         * Method 4:
-         * Check environment variable 'DISPLAY_RESOLUTION'
-         * Format: WxH (e.g. 1920x1080)
-         */
-        const char* res = getenv("DISPLAY_RESOLUTION");
-        if (res) {
-            int w, h;
-            if (sscanf(res, "%dx%d", &w, &h) == 2 && w > 100 && h > 100) {
-                display_width = w;
-                display_height = h;
-                //std::cout << "Display_Resolution " << display_width << "x" << display_height << " (.env)" << std::endl;
-                return;
-            }
-        }
         
         /**
          * Fallback:
-         * 4K for last resort
-         * Maybe change to 2K (2560x1440) if compatibility issues occur frequently
          */
         display_width = 1920;
         display_height = 1080;
@@ -354,9 +280,6 @@ public:
         std::cout << "- Bandwidth: " << bandwidth_setting << std::endl;
         // recv_desc.bandwidth = NDIlib_recv_bandwidth_max;
 
-            // recv_desc.bandwidth = NDIlib_recv_bandwidth_lowest;
-            // recv_desc.bandwidth = NDIlib_recv_bandwidth_highest;
-
 
         /**
          * 
@@ -370,11 +293,9 @@ public:
          */
         recv_desc.color_format = color_format_setting;
         std::cout << "- Color Format: " << color_format_setting << std::endl;
-        // recv_desc.color_format = NDIlib_recv_color_format_fastest;
-
-            // recv_desc.color_format = NDIlib_recv_color_format_UYVY_RGBA;
-            // recv_desc.color_format = NDIlib_recv_color_format_max;
-
+        // recv_desc.color_format = NDIlib_recv_color_format_UYVY_RGBA;
+        
+        
         recv_desc.allow_video_fields = false;  // Disable interlaced - reduces latency
         recv_desc.p_ndi_recv_name = "NDPi-Monitor-Client";
         
@@ -944,9 +865,6 @@ int main(int argc, char* argv[]) {
 
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
-
-    //std::cout << "- NDPi - Custom NDI Tools - ndi_receiver_v3" << std::endl;
-    std::cout << "- NDPi - Custom NDI Tools (" << __FILE_NAME__ << ")" << std::endl;
     
     // Load NDI library dynamically
     if (!g_ndi.loadLibrary()) {
@@ -954,20 +872,72 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Parse command line arguments
+    std::string version = "NDPi Receiver [GStreamer] (4.0.0)";
     std::string source_name = "";
     NDIlib_recv_bandwidth_e bandwidth = NDIlib_recv_bandwidth_max;
     NDIlib_recv_color_format_e color_format = NDIlib_recv_color_format_fastest;
 
-    if (argc > 1) {
-        source_name = argv[1];
+
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        
+        if (arg == "-s" || arg == "--source") {
+            if (i + 1 < argc) {
+                source_name = argv[++i];
+            }
+        } else if (arg == "-b" || arg == "--bandwidth") {
+            if (i + 1 < argc) {
+                bandwidth = (NDIlib_recv_bandwidth_e)std::stol(argv[++i], nullptr, 0);
+            }
+        } else if (arg == "-c" || arg == "--color-format") {
+            if (i + 1 < argc) {
+                color_format = (NDIlib_recv_color_format_e)std::stol(argv[++i], nullptr, 0);
+            }
+        } else if (arg == "-v" || arg == "--version") {
+            std::cout << version << std::endl;
+            std::cout << g_ndi.version() << std::endl;
+            return 0;
+        } 
+        else if (arg == "-h" || arg == "--help") {
+            std::cout << "\nUsage: " << argv[0] << "[OPTIONS]\n";
+            std::cout << "[OPTIONS]:\n";
+            std::cout << "    [-s|--source [<name>]] ---------------------- NDI source name to open.               " << "\n";
+            std::cout << "    [-b|--bandwidth [<CHOICE>]] ----------------- Bandwidth ENUM  (Default: '0x7fffffff')" << "\n";
+            std::cout << "                                                  [CHOICES]                              " << "\n";
+            std::cout << "                                                  '-10'        -> metadata_only          " << "\n";
+            std::cout << "                                                  '10'         -> audio_only             " << "\n";
+            std::cout << "                                                  '0'          -> lowest                 " << "\n";
+            std::cout << "                                                  '100'        -> highest                " << "\n";
+            std::cout << "                                                  '0x7fffffff' -> max                    " << "\n";
+            std::cout << "                                                                                         " << "\n";
+            std::cout << "    [-c|--color-format [<CHOICE>]] -------------- Color Format ENUM  (Default: '100')    " << "\n";
+            std::cout << "                                                  [CHOICES]                              " << "\n";
+            std::cout << "                                                  '0'   -> BGRX_BGRA                     " << "\n";
+            std::cout << "                                                  '1'   -> UYVY_BGRA                     " << "\n";
+            std::cout << "                                                  '2'   -> RGBX_RGBA                     " << "\n";
+            std::cout << "                                                  '3'   -> UYVY_RGBA                     " << "\n";
+            std::cout << "                                                  '100' -> fastest                       " << "\n";
+            std::cout << "                                                  '101' -> best                          " << "\n";
+            std::cout << "                                                                                         " << "\n";
+            std::cout << "    [-v|--version] ------------------------------ NDPi Receiver Version.                 " << "\n";
+            std::cout << "    [-h|--help] --------------------------------- This help menu.                        " << std::endl;
+
+            return 0;
+        } 
     }
-    if (argc > 2) {
-        bandwidth = (NDIlib_recv_bandwidth_e)std::stol(argv[2], nullptr, 0);
-    }
-    if (argc > 3) {
-        color_format = (NDIlib_recv_color_format_e)std::stol(argv[3], nullptr, 0);
-    }
+
+
+    std::cout << "- NDPi - Custom NDI Tools (" << __FILE_NAME__ << ")" << std::endl;
+
+    // if (argc > 1) {
+    //     source_name = argv[1];
+    // }
+    // if (argc > 2) {
+    //     bandwidth = (NDIlib_recv_bandwidth_e)std::stol(argv[2], nullptr, 0);
+    // }
+    // if (argc > 3) {
+    //     color_format = (NDIlib_recv_color_format_e)std::stol(argv[3], nullptr, 0);
+    // }
     
     try {
         g_receiver = new NDIReceiver(bandwidth, color_format);
