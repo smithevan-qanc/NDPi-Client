@@ -28,7 +28,7 @@ debug() {
 }
 
 install() {
-    echo "PREPARING TO INSTALL UPDATE"
+    echo -ne "INSTALLING UPDATE...\n\n"
 
     cd $HOME
     sleep 0.5
@@ -57,10 +57,10 @@ install() {
     # echo "Restarting NDPi Client" && sudo systemctl restart ndpi
     # echo "INSTALLATION COMPLETE"
 
-    echo -ne "Restarting NDPi Client"
+    echo -ne "\nRestarting NDPi Client"
     sudo systemctl restart ndpi
-    echo -ne "\rINSTALLATION COMPLETE  \n"
-    # echo ""
+    echo -ne "\rINSTALLATION COMPLETE  "
+    echo ""
 
     # sudo reboot
     # else
