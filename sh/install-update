@@ -59,8 +59,8 @@ install() {
 
     echo -ne "Restarting NDPi Client"
     sudo systemctl restart ndpi
-    echo -ne "\rINSTALLATION COMPLETE  "
-    echo ""
+    echo -ne "\rINSTALLATION COMPLETE  \n"
+    # echo ""
 
     # sudo reboot
     # else
