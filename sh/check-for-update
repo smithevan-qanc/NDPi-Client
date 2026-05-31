@@ -17,9 +17,13 @@ REMOTE=$(git rev-parse origin/$BRANCH)
 if [ "$LOCAL" != "$REMOTE" ]; then
     git reset --hard origin/$BRANCH
     chmod +x ./sh/*
+fi
+
+NEWEST_VERSION="$(head -n 1 version/current)"
+
+if [ "$CURRENT_VERSION" != "$NEWEST_VERSION" ]; then
     UPDATE_AVAILABLE=true
 fi
-NEWEST_VERSION="$(head -n 1 version/current)"
 
 printf "{
     \"update_available\": ${UPDATE_AVAILABLE},
