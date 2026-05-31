@@ -119,7 +119,7 @@ void signal_handler(int signum) {
 }
 
 struct Options {
-    std::string version = "NDPi Discover (3.0.3)";
+    std::string version = "NDPi Discover (3.0.4)";
     std::string separator = "^";
     int timeout = 5;
 };
