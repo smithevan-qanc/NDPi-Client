@@ -339,10 +339,9 @@ class NDPiCommandServer_Client extends EventEmitter {
                 if (Array.isArray(sources))
                 { this.ws_conn_sources.forEach((ws) => { ws.send(JSON.stringify(sources)); }); }
             }
-            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Misformed Data Received from ${programName}\n`, output, '\n', e); }
+            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Corrupted Data Received from ${programName}\n`, output, '\n', e); }
         });
         this.discoveryExec.on('exit', () => {
-            console.log('Discovery Exited.')
             this.discoveryExec = null;
         });
     }

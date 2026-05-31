@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-export DISPLAY=':0'
-
-WINDOW_ID="$(xdotool search --onlyvisible --class 'Chromium' | head -n 1)"
+# export DISPLAY=':0'
 
 # xsetroot -solid '#000000' -name 'ndi_receiver_v3' &
 
@@ -11,22 +9,37 @@ WINDOW_ID="$(xdotool search --onlyvisible --class 'Chromium' | head -n 1)"
 
 # xcompmgr -d :0 -fFCnR &
 # sleep 1
-    
-activateWindow() {
-    if [[ -z "$WINDOW_ID" ]]; then
-        return
-    fi
-    picom -f -D 6 -i 0 --backend xrender --no-fading-openclose --no-vsync &
-    # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
 
-    # xdotool windowminimize $WINDOW_ID
-    # sleep 1
-    # xdotool windowraise $WINDOW_ID
-    
+activateWindow() {
+    WINDOW_ID="$(xdotool search --onlyvisible --class 'Chromium' | head -n 1)"
+
+    if [[ -z "$WINDOW_ID" ]]; then
+        echo "$1 FAILED to find visible window."
+        echo "---------"
+        echo "[Results]"
+        echo "$(xdotool search --onlyvisible --class 'chromium')"
+        echo "---------"
+        exit 1
+    fi
+
+    # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
+    picom -f -D 6 -i 0 --backend xrender --no-fading-openclose --no-vsync &
     sleep 1
+
+    xdotool windowminimize $WINDOW_ID
+    sleep 0.5
+
+    xdotool windowraise $WINDOW_ID
+    sleep 0.5
+
     xdotool windowactivate $WINDOW_ID
     sleep 1
 }
 
+# Start
+
 activateWindow
+
 killall picom
+
+exit 0

@@ -48,7 +48,6 @@ try:
     
     print("Display initialized. Starting loop...")
     
-    # Loop forever, reading files every 5 seconds
     while True:
 
         # date_time_string = datetime.now().strftime("%m-%d-%Y %H:%M")
@@ -128,6 +127,7 @@ except KeyboardInterrupt:
     disp.clear()
     disp.module_exit()
 except Exception as e:
+    print(e)
     logging.error(f"Error: {e}")
     errImg = Image.new("RGB", (disp.height, disp.width), "RED")
     drawErr = ImageDraw.Draw(errImg)

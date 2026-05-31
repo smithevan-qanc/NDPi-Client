@@ -53,6 +53,7 @@ class NDPi {
                     .forEach((line) => { console.log(line) });
             });
             startup.on('exit', () => {
+                console.info(process.env);
                 this.startFsData();
             });
         };
@@ -82,7 +83,7 @@ class NDPi {
         setTimeout(() => {
             execStartup();
             //spawnCompositor();
-        }, 100);
+        }, 10);
 
         // this.compMgr = spawn('picom', ['-d', ':0', '-f'], {
         //     env: { DISPLAY: ':0' }

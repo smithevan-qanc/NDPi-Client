@@ -231,6 +231,13 @@ const { exec, spawn } = require('node:child_process');
                 
                 case 'focus-chromium':
                     response = await focusWindow('chromium', response);
+                    await new Promise((resolve) => {
+                        exec(path.join(__dirname, '..', 'sh', 'focus-chromium'),{
+                            env: {
+                                ...process.env,
+                            }
+                        })
+                    });
                     return response;
                     break;
                 
