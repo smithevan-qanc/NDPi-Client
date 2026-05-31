@@ -326,8 +326,9 @@ class NDPiCommandServer_Client extends EventEmitter {
     startDiscovery() {
         if (this.discoveryExec)
         { return; }
+
         const discoveryPath = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
-        console.log('Discovery exec path', discoveryPath)
+        
         this.discoveryExec = spawn('./ndpi_discover', { cwd: discoveryPath });
         this.discoveryExec.stdout.on('data', (data) => {
             const output = data.toString() || '[]';
@@ -336,9 +337,10 @@ class NDPiCommandServer_Client extends EventEmitter {
                 const sources = JSON.parse(output);
                 if (Array.isArray(sources))
                 {
-                    sources.forEach((obj) => {
-                        console.log('Source Name:', obj.name, `[[ ${obj.url || 'n/a'} ]]`);
-                    });
+                    // sources.forEach((obj) => {
+                    //     console.log('Source Name:', obj.name, `[[ ${obj.url || 'n/a'} ]]`);
+                    // });
+                    this.ws_conn_sources.forEach((ws) => { ws.send(JSON.stringify(sources)); });
                 }
                 /// Add this.ws_conn_sources.forEach(ws) Send(Array) HERE 'output'
             }
