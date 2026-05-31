@@ -35,9 +35,9 @@
 // NDIlib_frame_type_compressed_video is not part of the public NDI SDK v6 enum.
 // NDI HX sources deliver compressed frames with a compressed FourCC via the
 // regular NDIlib_frame_type_video path. We keep this value for forward-compat.
-#ifndef NDIlib_frame_type_compressed_video
-#  define NDIlib_frame_type_compressed_video ((NDIlib_frame_type_e)5)
-#endif
+// #ifndef NDIlib_frame_type_compressed_video
+// #  define NDIlib_frame_type_compressed_video ((NDIlib_frame_type_e)5)
+// #endif
 
 // NDI SDK v6 Dynamic Loading
 struct NDILib {
