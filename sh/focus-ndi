@@ -115,13 +115,13 @@ fi
 picom-trans -o 0 -w $NDI_WINDOW_ID
 
 # Chromium
-WINDOW_ID="$(xdotool search --class 'chromium' | head -n 1)"
+WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
 
 if [[ -z "$WINDOW_ID" ]]; then
     echo "$1 FAILED to find visible window."
     echo "---------"
     echo "[Results]"
-    echo "$(xdotool search --class 'chromium')"
+    echo "$(xdotool search --onlyvisible --class 'chromium')"
     echo "---------"
     exit 1
 fi
