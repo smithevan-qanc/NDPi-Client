@@ -10,7 +10,7 @@ set -e
 # xcompmgr -d :0 -fFCnR &
 # sleep 1
 
-FADE_TIME=0.5
+FADE_TIME=0.05
 
 activateWindow() {
     WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
@@ -43,7 +43,7 @@ activateWindow() {
 }
 
 fadeIn() {
-    local current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
+    local current=0 # $(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
     local target=100
 
     if [ "$current" -lt "$target" ]; then
@@ -65,7 +65,7 @@ fadeIn() {
     fi
 }
 fadeOut() {
-    local current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
+    local current=100 # $(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
     local target=0
 
     if [ "$current" -lt "$target" ]; then
