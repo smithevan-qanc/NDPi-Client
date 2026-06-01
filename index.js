@@ -252,23 +252,31 @@ class NDPi {
         });
 
         this.lcdDisplay.on('exit', (code, signal) => {
-            lcdDisplayClose('exit', code, signal.toString());
+            if (!this.shutdown)
+            {
+                lcdDisplayClose('exit', code, signal.toString());
+                this.startLcdDisplay();
+            }
         });
 
         this.lcdDisplay.on('disconnect', () => {
-            lcdDisplayClose('disconnect');
+            if (!this.shutdown)
+            {
+                lcdDisplayClose('disconnect');
+                this.startLcdDisplay();
+            }
         });
 
         this.lcdDisplay.on('close', (code, signal) => {
-            lcdDisplayClose('close', code, signal.toString());
+            if (!this.shutdown)
+            {
+                lcdDisplayClose('close', code, signal.toString());
+                this.startLcdDisplay();
+            }
         });
 
         function lcdDisplayClose(source = '', code = 0 | null, signal = '') {
-            if (!this.shutdown)
-            {
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ update_lcd ] Closed: [ Code: ${code || 'N/A'} ], [ Signal: ${signal || 'N/A'} ]`);
-                this.startLcdDisplay();
-            }
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ update_lcd ] Closed: [ Code: ${code || 'N/A'} ], [ Signal: ${signal || 'N/A'} ]`);
         }
     }
 
@@ -372,7 +380,7 @@ class NDPi {
 
         if (this.ndiReceiver)
         {
-            await new Promise((resolve) => {
+            await new Promise( async (resolve) => {
                 if (this.targetSource === 'none')
                 {
                     console.log('focusing chromium', this.targetSource);

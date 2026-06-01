@@ -108,7 +108,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                 this.ws_conn_sources.delete(ws);
 
                 if (this.ws_conn_sources.size === 0)
-                { this.discoveryExec.kill('SIGKILL'); }
+                { this.discoveryExec.kill('SIGTERM'); }
             });
         });
 
@@ -328,9 +328,12 @@ class NDPiCommandServer_Client extends EventEmitter {
         { return; }
 
         const discoveryPath = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
-        const programName = './ndpi_discover';
+        const programName = 'ndpi_discover';
         
-        this.discoveryExec = spawn(programName, { cwd: discoveryPath });
+        this.discoveryExec = spawn(programName, {
+            cwd: discoveryPath
+        });
+
         this.discoveryExec.stdout.on('data', (data) => {
             const output = data.toString() || '[]';
             try
@@ -339,8 +342,9 @@ class NDPiCommandServer_Client extends EventEmitter {
                 if (Array.isArray(sources))
                 { this.ws_conn_sources.forEach((ws) => { ws.send(JSON.stringify(sources)); }); }
             }
-            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Corrupted Data Received from ${programName}\n`, output, '\n', e); }
+            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Corrupted Data Received from ${programName}`); }
         });
+
         this.discoveryExec.on('exit', () => {
             this.discoveryExec = null;
         });
