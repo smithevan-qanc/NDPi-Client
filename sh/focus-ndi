@@ -102,6 +102,8 @@ fadeOut() {
 # Start
 picom -b&
 
+sleep 2
+
 NDI_WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
 
 if [[ -z "$NDI_WINDOW_ID" ]]; then
@@ -125,6 +127,7 @@ if [[ -z "$WINDOW_ID" ]]; then
     echo "---------"
     exit 1
 fi
+
 picom-trans -o 0 -w $WINDOW_ID
 
 xdotool windowactivate $NDI_WINDOW_ID
@@ -132,6 +135,8 @@ xdotool windowactivate $NDI_WINDOW_ID
 picom-trans -o 100 -w $NDI_WINDOW_ID
 
 fadeIn
+
+sleep 2
 
 killall picom
 
