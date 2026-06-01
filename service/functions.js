@@ -360,6 +360,9 @@ const { exec, spawn } = require('node:child_process');
 
         async function focusChromium() {
             return await new Promise((resolve) => {
+                resolve();
+                return;
+
                 const proc = spawn(path.join(__dirname, '..', 'sh', 'focus-chromium'), {
                     env: { ...process.env }
                 });
@@ -386,6 +389,9 @@ const { exec, spawn } = require('node:child_process');
 
         async function focusNdi() {
             return await new Promise((resolve) => {
+                resolve();
+                return;
+                
                 const proc = spawn(path.join(__dirname, '..', 'sh', 'focus-ndi'), {
                     env: { ...process.env }
                 });

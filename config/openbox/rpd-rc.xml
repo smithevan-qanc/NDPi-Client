@@ -25,7 +25,7 @@
     <!--  NDI Receiver <<Must Be: name="ndi_receiver_v3*">>  -->
     <application class="GStreamer">
       <decor>no</decor>
-      <layer>below</layer>
+      <layer>normal</layer>
       <focus>no</focus>
       <maximized>true</maximized>
       <fullscreen>yes</fullscreen>
@@ -35,8 +35,8 @@
     <application class="Chromium">
       <fullscreen>yes</fullscreen>
       <layer>above</layer>
-      <!-- <focus>no</focus>
-      <maximized>false</maximized> -->
+      <focus>yes</focus>
+      <maximized>true</maximized>
     </application>
 
     <application name="*">
