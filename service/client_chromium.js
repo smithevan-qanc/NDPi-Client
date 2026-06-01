@@ -33,6 +33,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         // const command = 'chromium';
         const command = 'picom';
         const args = [
+            '-b',
             '--config',
             `${process.env.HOME}/.config/picom/picom.conf`,
             '&',
@@ -89,7 +90,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         // });
 
         console.log('launching chromium');
-        this.service = spawn(command, args, {
+        this.service = exec(command, args, {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
