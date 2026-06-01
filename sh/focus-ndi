@@ -10,7 +10,7 @@ set -e
 # xcompmgr -d :0 -fFCnR &
 # sleep 1
 
-FADE_TIME=0.02
+FADE_TIME=0.05
     
 # activateWindow() {
 #     if [[ -z "$WINDOW_ID" ]]; then
@@ -84,10 +84,11 @@ activateWindow() {
     xdotool windowminimize $WINDOW_ID
     sleep 0.5
 
-    xdotool windowraise $WINDOW_ID
-    sleep 0.5
+    # xdotool windowraise $WINDOW_ID
+    # sleep 0.5
 
     xdotool windowactivate $WINDOW_ID
+    sleep 0.5
 }
 
 # Start
