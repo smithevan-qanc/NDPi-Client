@@ -42,8 +42,8 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         this.Server = http.createServer(this.App)
             .listen(this.port, '0.0.0.0', () => {
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'API/Display Server Online');
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`,`PORT: ${this.port}`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, `API/Display Server Online`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, `PORT: ${this.port}`);
                 process.nextTick(() => { this.emit('online'); });
             })
             .on('upgrade', (request, socket, head) => {

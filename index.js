@@ -303,9 +303,9 @@ class NDPi {
         this.server_api.on('online', () => {
             if (!this.isInitialized)
             {
-                this.startChromium();
                 this.openCecController();
                 this.connectToNDPiServer();
+                this.startChromium();
                 this.targetSource = this.settings.get('ndpi_status_ndi_source_target');
                 if (String(this.targetSource || 'none').toLowerCase() !== 'none')
                 {

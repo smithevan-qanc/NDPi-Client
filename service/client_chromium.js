@@ -20,14 +20,8 @@ class ChromiumOverlayDisplay extends EventEmitter {
     close() {
         console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module');
         try { this.service.kill(); }
-        catch (err)
-        {
-            exec('killall chromium', (error, stdout, stderr) => {
-                if (error)
-                { console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ ERROR ]', stderr.toString()); }
-            });
-        }
-        this.service = null;
+        catch {}
+        finally { this.service = null; }
     }
 
     async launch() {
@@ -63,9 +57,10 @@ class ChromiumOverlayDisplay extends EventEmitter {
         ];
 
         await new Promise((resolve) => {
+            console.log('launching PICOM');
             exec(`picom --config ${process.env.HOME}/.config/picom/picom.conf`, (error, stdout, stderr) => {
                 if (error)
-                { console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ ERROR ]', stderr.toString()); }
+                { console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', stderr.toString()); }
                 setTimeout(() => {
                     resolve();
                 }, 1000);
@@ -81,7 +76,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         });
         
         this.service.on('error', (err) => {
-            console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ ERROR ]', err);
+            console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ SERVICE ERROR ]', err);
         });
 
         this.service.on('exit', () => {
