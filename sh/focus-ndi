@@ -131,9 +131,9 @@ xdotool windowactivate $NDI_WINDOW_ID
 
 picom-trans -o 100 -w $NDI_WINDOW_ID
 
-killall picom
-
 fadeIn
+
+killall picom
 
 exit 0
 
