@@ -10,6 +10,8 @@ set -e
 # xcompmgr -d :0 -fFCnR &
 # sleep 1
 
+FADE_TIME= 0.02
+
 fadeInVolume() {
     current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
     target=255
@@ -19,18 +21,17 @@ fadeInVolume() {
             current=$((current + 5))
             [ "$current" -gt "$target" ] && current=$target
             amixer set PCM "$current" >/dev/null
-            sleep 0.05
+            sleep $FADE_TIME
         done
     else
         while [ "$current" -gt "$target" ]; do
             current=$((current - 5))
             [ "$current" -lt "$target" ] && current=$target
             amixer set PCM "$current" >/dev/null
-            sleep 0.05
+            sleep $FADE_TIME
         done
     fi
 }
-
 fadeOutVolume() {
     current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
     target=0
@@ -40,14 +41,14 @@ fadeOutVolume() {
             current=$((current + 5))
             [ "$current" -gt "$target" ] && current=$target
             amixer set PCM "$current" >/dev/null
-            sleep 0.05
+            sleep $FADE_TIME
         done
     else
         while [ "$current" -gt "$target" ]; do
             current=$((current - 5))
             [ "$current" -lt "$target" ] && current=$target
             amixer set PCM "$current" >/dev/null
-            sleep 0.05
+            sleep $FADE_TIME
         done
     fi
 }
@@ -67,7 +68,7 @@ activateWindow() {
 
     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --realtime --vsync &
-    picom --config "${HOME}/.config/picom/picom.conf"
+    picom --config "${HOME}/.config/picom/picom.conf" &
 
     sleep 0.1
     sleep 0.1

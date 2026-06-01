@@ -9,6 +9,8 @@ set -e
 
 # xcompmgr -d :0 -fFCnR &
 # sleep 1
+
+FADE_TIME= 0.02
     
 # activateWindow() {
 #     if [[ -z "$WINDOW_ID" ]]; then
@@ -35,18 +37,17 @@ fadeInVolume() {
             current=$((current + 5))
             [ "$current" -gt "$target" ] && current=$target
             amixer set PCM "$current" >/dev/null
-            sleep 0.05
+            sleep $FADE_TIME
         done
     else
         while [ "$current" -gt "$target" ]; do
             current=$((current - 5))
             [ "$current" -lt "$target" ] && current=$target
             amixer set PCM "$current" >/dev/null
-            sleep 0.05
+            sleep $FADE_TIME
         done
     fi
 }
-
 fadeOutVolume() {
     current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
     target=0
@@ -56,14 +57,14 @@ fadeOutVolume() {
             current=$((current + 5))
             [ "$current" -gt "$target" ] && current=$target
             amixer set PCM "$current" >/dev/null
-            sleep 0.05
+            sleep $FADE_TIME
         done
     else
         while [ "$current" -gt "$target" ]; do
             current=$((current - 5))
             [ "$current" -lt "$target" ] && current=$target
             amixer set PCM "$current" >/dev/null
-            sleep 0.05
+            sleep $FADE_TIME
         done
     fi
 }
@@ -80,14 +81,13 @@ activateWindow() {
         exit 1
     fi
 
-    # xdotool windowminimize $WINDOW_ID
-    # sleep 0.5
+    xdotool windowminimize $WINDOW_ID
+    sleep 0.5
 
-    # xdotool windowraise $WINDOW_ID
-    # sleep 0.5
+    xdotool windowraise $WINDOW_ID
+    sleep 0.5
 
     xdotool windowactivate $WINDOW_ID
-    sleep 1
 }
 
 # Start
@@ -95,6 +95,8 @@ activateWindow
 
 fadeInVolume
 
-killall picom >/dev/null 2>&1
+if ! [[ -z "$(pgrep picom)" ]]; then
+    killall picom >/dev/null 2>&1
+fi
 
 exit 0

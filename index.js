@@ -75,21 +75,7 @@ class NDPi {
         //  NDI Source Target
         this.settings.on('ndpi_status_ndi_source_target', (data) => {
             const output = String(data || 'none');
-            if (output !== this.targetSource)
-            {
-                this.targetSource = output;
-                if (String(this.targetSource).toLowerCase() !== 'none')
-                {
-                    try { this.ndiReceiver.close(); }
-                    catch {}
-                    finally { setTimeout(() => { this.startNdiReceiver(); }, 1000); }
-                }
-                else
-                {
-                    func.focusChromium();
-                    setTimeout(() => { try { this.ndiReceiver.close(); } catch {} }, 1000);
-                }
-            }
+            this.startNdiReceiver(output);
         });
 
         //  No Source Display Mode
@@ -339,10 +325,12 @@ class NDPi {
             this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
             
             this.service_chromium.on('spawn', () => {
-                this.targetSource = this.settings.get('ndpi_status_ndi_source_target');
+                this.targetSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
+
+                console.log('chromium spawn signal received', 'source:', this.targetSource);
                 
-                if (String(this.targetSource || 'none').toLowerCase() !== 'none')
-                { func.setNdi({ id: 'ChromiumSpawn', data: this.targetSource }); }
+                if (String(this.targetSource).toLowerCase() !== 'none')
+                { this.startNdiReceiver(); }
             });
         }
         else
@@ -378,12 +366,47 @@ class NDPi {
     }
 
     /** LAUNCH NDI RECEIVER */
-    startNdiReceiver() {
+    async startNdiReceiver(source = 'none') {
+        if (source !== this.targetSource)
+        { this.targetSource = source; }
+
         if (this.ndiReceiver)
         {
-            this.ndiReceiver.close();
-            return;
+            await new Promise((resolve) => {
+                if (this.targetSource === 'none')
+                {
+                    console.log('focusing chromium', this.targetSource);
+                    await func.focusChromium();
+                    console.log('Done focusing chromium', this.targetSource);
+
+                    setTimeout(() => {
+                        console.log('closing receiver', this.targetSource);
+                        try { this.ndiReceiver.close(); } catch {}
+                        console.log('done closing receiver', this.targetSource);
+                        resolve();
+                    }, 1000);
+                }
+                else
+                {
+                    console.log('focusing chromium', this.targetSource);
+                    await func.focusChromium();
+                    console.log('Done focusing chromium', this.targetSource);
+
+                    try
+                    {
+                        console.log('killing receiver', this.targetSource);
+                        this.ndiReceiver.enabled = false;
+                        this.ndiReceiver.receiver.kill('SIGKILL');
+                        console.log('done killing receiver', this.targetSource);
+                    } catch {}
+
+                    setTimeout(() => {
+                        resolve();
+                    }, 5000);
+                }
+            });
         }
+
         const NDI_Receiver_v3 = require('./service/client_ndiReceiver.js');
         this.ndiReceiver = new NDI_Receiver_v3(this.settings, this.server_api, this.service_chromium);
 
@@ -393,6 +416,7 @@ class NDPi {
         // });
 
         this.ndiReceiver.on('close', () => {
+            console.log('close signal received in "index"', 'Module Enabled', this.ndiReceiver.enabled);
             if (this.ndiReceiver.enabled) 
             { this.__restartNdiReceiver(); }
             this.ndiReceiver = null;

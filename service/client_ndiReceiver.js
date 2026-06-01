@@ -84,7 +84,6 @@ class NDI_Receiver_v3 extends EventEmitter {
         });
 
         this.receiver.stdout.on('data', (data) => {
-
             const showNDI = (delay = 1000) => {
                 setTimeout(async () => {
                     await func.focusNdi();
@@ -149,6 +148,8 @@ class NDI_Receiver_v3 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_resolution', '');
             
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] - [ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
+            
+            if (signal === 'SIGKILL') { this.emit('close'); }
         });
     }
 

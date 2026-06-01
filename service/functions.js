@@ -360,14 +360,25 @@ const { exec, spawn } = require('node:child_process');
 
         async function focusChromium() {
             return await new Promise((resolve) => {
-                exec(path.join(__dirname, '..', 'sh', 'focus-chromium'),{
-                    env: {
-                        ...process.env,
-                    }
-                }, (error, stdout, stderr) => {
-                    if (error)
-                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ focusChromium() ][ ERROR ]`, stderr); }
-                    { if (stdout) { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusChromium() ]`, stdout); } }
+                const proc = spawn(path.join(__dirname, '..', 'sh', 'focus-chromium'), {
+                    env: { ...process.env }
+                });
+
+                proc.stdout.on('data', (data) => {
+                    stdoutToArray(data.toString().trim()).forEach((line) => {
+                        console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusChromium() ]`, line);
+                    })
+                });
+
+                proc.stderr.on('data', (data) => {
+                    stdoutToArray(data.toString().trim()).forEach((line) => {
+                        console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusChromium() ]`, line);
+                    })
+                });
+                
+                proc.on('exit', (code) => {
+                    if (code !== 0)
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ focusChromium() ][ EXIT ] Code:`, code); }
                     resolve();
                 });
             });
@@ -375,14 +386,25 @@ const { exec, spawn } = require('node:child_process');
 
         async function focusNdi() {
             return await new Promise((resolve) => {
-                exec(path.join(__dirname, '..', 'sh', 'focus-ndi'),{
-                    env: {
-                        ...process.env,
-                    }
-                }, (error, stdout, stderr) => {
-                    if (error)
-                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ focusNdi() ][ ERROR ]`, stderr); }
-                    { if (stdout) { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusNdi() ]`, stdout); } }
+                const proc = spawn(path.join(__dirname, '..', 'sh', 'focus-ndi'), {
+                    env: { ...process.env }
+                });
+
+                proc.stdout.on('data', (data) => {
+                    stdoutToArray(data.toString().trim()).forEach((line) => {
+                        console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusNdi() ]`, line);
+                    })
+                });
+
+                proc.stderr.on('data', (data) => {
+                    stdoutToArray(data.toString().trim()).forEach((line) => {
+                        console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusNdi() ]`, line);
+                    })
+                });
+                
+                proc.on('exit', (code) => {
+                    if (code !== 0)
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ focusNdi() ][ EXIT ] Code:`, code); }
                     resolve();
                 });
             });
