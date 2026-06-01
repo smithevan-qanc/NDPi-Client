@@ -575,7 +575,7 @@ process.on('unhandledRejection', (reason) => {
 process.on('SIGTERM', () => quitNDPi('SIGTERM'));
 process.on('SIGINT',  () => quitNDPi('SIGINT'));
 
-process.on('exit', () => {
+process.on('exit', (code) => {
     console.log(`[ EXIT CODE: ${code} ]`);
     console.log('══════════════════════════════════════════  N D P i - M O N I T O R  ═══');
 });

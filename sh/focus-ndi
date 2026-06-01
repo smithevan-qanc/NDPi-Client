@@ -30,7 +30,7 @@ FADE_TIME=0.02
 
 activateWindow() {
     WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
-    # NDI_WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
+    NDI_WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
 
     if [[ -z "$WINDOW_ID" ]]; then
         echo "$1 FAILED to find visible window."
@@ -54,13 +54,17 @@ activateWindow() {
     # xdotool windowraise $WINDOW_ID
     # sleep 0.5
 
-    # xdotool windowactivate $WINDOW_ID --sync
+    picom-trans -o 0 -w $NDI_WINDOW_ID
+
+    xdotool windowactivate $NDI_WINDOW_ID --sync
     # sleep 0.5
 }
 
 fadeIn() {
     local current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
     local target=255
+
+    picom-trans -o 100 -w $NDI_WINDOW_ID
 
     if [ "$current" -lt "$target" ]; then
         while [ "$current" -lt "$target" ]; do
@@ -83,7 +87,7 @@ fadeIn() {
 fadeOut() {
     local current=100  # $(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
     local target=0
-    
+
     picom-trans -o $target -w $WINDOW_ID
 
     # if [ "$current" -lt "$target" ]; then
