@@ -28,137 +28,7 @@ set -e
 
 FADE_TIME=0.02
 
-activateWindow() {
-    WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
-    NDI_WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
-
-    if [[ -z "$WINDOW_ID" ]]; then
-        echo "$1 FAILED to find visible window."
-        echo "---------"
-        echo "[Results]"
-        echo "$(xdotool search --onlyvisible --class 'chromium')"
-        echo "---------"
-        exit 1
-    fi
-
-    # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
-    # picom -f -D 6 -i 0 --backend xrender --force-win-blend --realtime --vsync &
-    # picom --config "${HOME}/.config/picom/picom.conf" &
-    
-    # sleep 2
-
-    
-    # xdotool windowminimize $WINDOW_ID
-    # sleep 0.5
-
-    # xdotool windowraise $WINDOW_ID
-    # sleep 0.5
-
-    picom-trans -o 0 -w $NDI_WINDOW_ID
-
-    xdotool windowactivate $NDI_WINDOW_ID --sync
-    # sleep 0.5
-}
-
-fadeIn() {
-    local current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
-    local target=255
-
-    picom-trans -o 100 -w $NDI_WINDOW_ID
-
-    if [ "$current" -lt "$target" ]; then
-        while [ "$current" -lt "$target" ]; do
-            current=$((current + 1))
-            [ "$current" -gt "$target" ] && current=$target
-            amixer set PCM "$current" >/dev/null
-            # picom-trans -w $WINDOW_ID $current >/dev/null
-            sleep $FADE_TIME
-        done
-    else
-        while [ "$current" -gt "$target" ]; do
-            current=$((current - 1))
-            [ "$current" -lt "$target" ] && current=$target
-            amixer set PCM "$current" >/dev/null
-            # picom-trans -w $WINDOW_ID $current >/dev/null
-            sleep $FADE_TIME
-        done
-    fi
-}
-fadeOut() {
-    local current=100  # $(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
-    local target=0
-
-    picom-trans -o $target -w $WINDOW_ID
-
-    # if [ "$current" -lt "$target" ]; then
-    #     while [ "$current" -lt "$target" ]; do
-    #         current=$((current + 1))
-    #         [ "$current" -gt "$target" ] && current=$target
-    #         # amixer set PCM "${current}%" >/dev/null
-    #         picom-trans -w $WINDOW_ID $current >/dev/null
-    #         sleep $FADE_TIME
-    #     done
-    # else
-    #     while [ "$current" -gt "$target" ]; do
-    #         current=$((current - 1))
-    #         [ "$current" -lt "$target" ] && current=$target
-    #         # amixer set PCM "${current}%" >/dev/null
-    #         picom-trans -w $WINDOW_ID $current >/dev/null
-    #         sleep $FADE_TIME
-    #     done
-    # fi
-}
-
-# Start
-activateWindow
-fadeOut
-fadeIn
-# killall picom
-exit 0
-
-# fadeInVolume() {
-#     current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
-#     target=255
-
-#     if [ "$current" -lt "$target" ]; then
-#         while [ "$current" -lt "$target" ]; do
-#             current=$((current + 5))
-#             [ "$current" -gt "$target" ] && current=$target
-#             amixer set PCM "$current" >/dev/null
-#             sleep $FADE_TIME
-#         done
-#     else
-#         while [ "$current" -gt "$target" ]; do
-#             current=$((current - 5))
-#             [ "$current" -lt "$target" ] && current=$target
-#             amixer set PCM "$current" >/dev/null
-#             sleep $FADE_TIME
-#         done
-#     fi
-# }
-# fadeOutVolume() {
-#     current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
-#     target=0
-
-#     if [ "$current" -lt "$target" ]; then
-#         while [ "$current" -lt "$target" ]; do
-#             current=$((current + 5))
-#             [ "$current" -gt "$target" ] && current=$target
-#             amixer set PCM "$current" >/dev/null
-#             sleep $FADE_TIME
-#         done
-#     else
-#         while [ "$current" -gt "$target" ]; do
-#             current=$((current - 5))
-#             [ "$current" -lt "$target" ] && current=$target
-#             amixer set PCM "$current" >/dev/null
-#             sleep $FADE_TIME
-#         done
-#     fi
-# }
-
-# activateWindow() {
-#     CHROMIUM_WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
+# ndi() {
 #     NDI_WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
 
 #     if [[ -z "$NDI_WINDOW_ID" ]]; then
@@ -170,22 +40,175 @@ exit 0
 #         exit 1
 #     fi
 
-#     # xdotool windowraise $NDI_WINDOW_ID
+#     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
+#     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --realtime --vsync &
+#     # picom --config "${HOME}/.config/picom/picom.conf" &
+    
+#     # sleep 2
+
+    
+#     # xdotool windowminimize $WINDOW_ID
 #     # sleep 0.5
 
-#     xdotool windowactivate $NDI_WINDOW_ID --sync
+#     # xdotool windowraise $WINDOW_ID
+#     # sleep 0.5
 
-#     xdotool windowminimize $CHROMIUM_WINDOW_ID --sync
+#     picom-trans -o 0 -w $NDI_WINDOW_ID
+
 #     # sleep 0.5
 # }
 
-# # Start
-# fadeInVolume
+fadeIn() {
+    local current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
+    local target=255
 
-# activateWindow
+    if [ "$current" -lt "$target" ]; then
+        while [ "$current" -lt "$target" ]; do
+            current=$((current + 5))
+            [ "$current" -gt "$target" ] && current=$target
+            amixer set PCM "$current" >/dev/null
+            sleep $FADE_TIME
+        done
+    else
+        while [ "$current" -gt "$target" ]; do
+            current=$((current - 5))
+            [ "$current" -lt "$target" ] && current=$target
+            amixer set PCM "$current" >/dev/null
+            sleep $FADE_TIME
+        done
+    fi
+}
+fadeOut() {
+    local current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
+    local target=0
 
-# if ! [[ -z "$(pgrep picom)" ]]; then
-#     killall picom >/dev/null 2>&1
-# fi
+    if [ "$current" -lt "$target" ]; then
+        while [ "$current" -lt "$target" ]; do
+            current=$((current + 5))
+            [ "$current" -gt "$target" ] && current=$target
+            amixer set PCM "$current" >/dev/null
+            sleep $FADE_TIME
+        done
+    else
+        while [ "$current" -gt "$target" ]; do
+            current=$((current - 5))
+            [ "$current" -lt "$target" ] && current=$target
+            amixer set PCM "$current" >/dev/null
+            sleep $FADE_TIME
+        done
+    fi
+}
 
-# exit 0
+# Start
+picom -b&
+
+NDI_WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
+
+if [[ -z "$NDI_WINDOW_ID" ]]; then
+    echo "$1 FAILED to find visible window."
+    echo "---------"
+    echo "[Results]"
+    echo "$(xdotool search --class 'gstreamer')"
+    echo "---------"
+    exit 1
+fi
+picom-trans -o 0 -w $NDI_WINDOW_ID
+
+# Chromium
+WINDOW_ID="$(xdotool search --class 'chromium' | head -n 1)"
+
+if [[ -z "$WINDOW_ID" ]]; then
+    echo "$1 FAILED to find visible window."
+    echo "---------"
+    echo "[Results]"
+    echo "$(xdotool search --class 'chromium')"
+    echo "---------"
+    exit 1
+fi
+picom-trans -o 0 -w $WINDOW_ID
+
+xdotool windowactivate $NDI_WINDOW_ID
+
+picom-trans -o 100 -w $NDI_WINDOW_ID
+
+killall picom
+
+fadeIn
+
+exit 0
+
+#
+    # fadeInVolume() {
+    #     current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
+    #     target=255
+
+    #     if [ "$current" -lt "$target" ]; then
+    #         while [ "$current" -lt "$target" ]; do
+    #             current=$((current + 5))
+    #             [ "$current" -gt "$target" ] && current=$target
+    #             amixer set PCM "$current" >/dev/null
+    #             sleep $FADE_TIME
+    #         done
+    #     else
+    #         while [ "$current" -gt "$target" ]; do
+    #             current=$((current - 5))
+    #             [ "$current" -lt "$target" ] && current=$target
+    #             amixer set PCM "$current" >/dev/null
+    #             sleep $FADE_TIME
+    #         done
+    #     fi
+    # }
+    # fadeOutVolume() {
+    #     current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
+    #     target=0
+
+    #     if [ "$current" -lt "$target" ]; then
+    #         while [ "$current" -lt "$target" ]; do
+    #             current=$((current + 5))
+    #             [ "$current" -gt "$target" ] && current=$target
+    #             amixer set PCM "$current" >/dev/null
+    #             sleep $FADE_TIME
+    #         done
+    #     else
+    #         while [ "$current" -gt "$target" ]; do
+    #             current=$((current - 5))
+    #             [ "$current" -lt "$target" ] && current=$target
+    #             amixer set PCM "$current" >/dev/null
+    #             sleep $FADE_TIME
+    #         done
+    #     fi
+    # }
+
+    # activateWindow() {
+    #     CHROMIUM_WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
+    #     NDI_WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
+
+    #     if [[ -z "$NDI_WINDOW_ID" ]]; then
+    #         echo "$1 FAILED to find visible window."
+    #         echo "---------"
+    #         echo "[Results]"
+    #         echo "$(xdotool search --class 'gstreamer')"
+    #         echo "---------"
+    #         exit 1
+    #     fi
+
+    #     # xdotool windowraise $NDI_WINDOW_ID
+    #     # sleep 0.5
+
+    #     xdotool windowactivate $NDI_WINDOW_ID --sync
+
+    #     xdotool windowminimize $CHROMIUM_WINDOW_ID --sync
+    #     # sleep 0.5
+    # }
+
+    # # Start
+    # fadeInVolume
+
+    # activateWindow
+
+    # if ! [[ -z "$(pgrep picom)" ]]; then
+    #     killall picom >/dev/null 2>&1
+    # fi
+
+    # exit 0
+#
