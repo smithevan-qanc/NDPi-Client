@@ -340,9 +340,14 @@ class NDPiCommandServer_Client extends EventEmitter {
             {
                 const sources = JSON.parse(output);
                 if (Array.isArray(sources))
-                { this.ws_conn_sources.forEach((ws) => { ws.send(JSON.stringify(sources)); }); }
+                {
+                    this.ws_conn_sources.forEach((ws) => {
+                        ws.send(JSON.stringify(sources));
+                    });
+                }
             }
-            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Corrupted Data Received from ${programName}`); }
+            catch {}
+            // catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Corrupted Data Received from ${programName}`); }
         });
 
         this.discoveryExec.on('exit', () => {
