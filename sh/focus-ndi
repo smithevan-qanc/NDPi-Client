@@ -95,6 +95,6 @@ activateWindow
 
 fadeInVolume
 
-killall picom &>/dev/null
+killall picom >/dev/null 2>&1
 
 exit 0
