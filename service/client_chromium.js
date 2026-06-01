@@ -82,7 +82,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         });
 
         console.log('launching chromium');
-        this.service = exec(command, args, {
+        this.service = spawn(command, args, {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
