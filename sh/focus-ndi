@@ -26,7 +26,7 @@ set -e
 #     sleep 1
 # }
 
-FADE_TIME=0.05
+FADE_TIME=0.02
 
 activateWindow() {
     WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
@@ -59,14 +59,14 @@ activateWindow() {
 }
 
 fadeIn() {
-    local current=0 #  $(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
-    local target=100
+    local current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
+    local target=255
 
     if [ "$current" -lt "$target" ]; then
         while [ "$current" -lt "$target" ]; do
             current=$((current + 1))
             [ "$current" -gt "$target" ] && current=$target
-            amixer set PCM "${current}%" >/dev/null
+            amixer set PCM "$current" >/dev/null
             # picom-trans -w $WINDOW_ID $current >/dev/null
             sleep $FADE_TIME
         done
@@ -74,7 +74,7 @@ fadeIn() {
         while [ "$current" -gt "$target" ]; do
             current=$((current - 1))
             [ "$current" -lt "$target" ] && current=$target
-            amixer set PCM "${current}%" >/dev/null
+            amixer set PCM "$current" >/dev/null
             # picom-trans -w $WINDOW_ID $current >/dev/null
             sleep $FADE_TIME
         done
@@ -83,24 +83,26 @@ fadeIn() {
 fadeOut() {
     local current=100  # $(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
     local target=0
+    
+    picom-trans -o $target -w $WINDOW_ID
 
-    if [ "$current" -lt "$target" ]; then
-        while [ "$current" -lt "$target" ]; do
-            current=$((current + 1))
-            [ "$current" -gt "$target" ] && current=$target
-            # amixer set PCM "${current}%" >/dev/null
-            picom-trans -w $WINDOW_ID $current >/dev/null
-            sleep $FADE_TIME
-        done
-    else
-        while [ "$current" -gt "$target" ]; do
-            current=$((current - 1))
-            [ "$current" -lt "$target" ] && current=$target
-            # amixer set PCM "${current}%" >/dev/null
-            picom-trans -w $WINDOW_ID $current >/dev/null
-            sleep $FADE_TIME
-        done
-    fi
+    # if [ "$current" -lt "$target" ]; then
+    #     while [ "$current" -lt "$target" ]; do
+    #         current=$((current + 1))
+    #         [ "$current" -gt "$target" ] && current=$target
+    #         # amixer set PCM "${current}%" >/dev/null
+    #         picom-trans -w $WINDOW_ID $current >/dev/null
+    #         sleep $FADE_TIME
+    #     done
+    # else
+    #     while [ "$current" -gt "$target" ]; do
+    #         current=$((current - 1))
+    #         [ "$current" -lt "$target" ] && current=$target
+    #         # amixer set PCM "${current}%" >/dev/null
+    #         picom-trans -w $WINDOW_ID $current >/dev/null
+    #         sleep $FADE_TIME
+    #     done
+    # fi
 }
 
 # Start
