@@ -10,7 +10,7 @@ set -e
 # xcompmgr -d :0 -fFCnR &
 # sleep 1
 
-FADE_TIME= 0.02
+FADE_TIME=0.02
 
 fadeInVolume() {
     current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')

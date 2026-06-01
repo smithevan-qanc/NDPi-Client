@@ -338,7 +338,11 @@ class NDPi {
                 console.log('chromium spawn signal received', 'source:', this.targetSource);
                 
                 if (String(this.targetSource).toLowerCase() !== 'none')
-                { this.startNdiReceiver(); }
+                {
+                    setTimeout(() => {
+                        this.startNdiReceiver();
+                    }, 5000);
+                }
             });
         }
         else
@@ -425,7 +429,7 @@ class NDPi {
 
         this.ndiReceiver.on('close', () => {
             console.log('close signal received in "index"', 'Module Enabled', this.ndiReceiver.enabled);
-            if (this.ndiReceiver.enabled) 
+            if (this.ndiReceiver.enabled)
             { this.__restartNdiReceiver(); }
             this.ndiReceiver = null;
         });

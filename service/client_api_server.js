@@ -328,7 +328,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         { return; }
 
         const discoveryPath = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
-        const programName = 'ndpi_discover';
+        const programName = './ndpi_discover';
         
         this.discoveryExec = spawn(programName, {
             cwd: discoveryPath

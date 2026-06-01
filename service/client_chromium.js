@@ -19,7 +19,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
 
     close() {
         console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module');
-        try { this.service.kill(); }
+        try { this.service.kill('SIGTERM'); }
         catch {}
         finally { this.service = null; }
     }
@@ -81,6 +81,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
             picom.unref();
         });
 
+        console.log('launching chromium');
         this.service = spawn(command, args, {
             env: {
                 ...process.env,
@@ -89,9 +90,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
             }
         });
 
-        this.service.on('spawn', () => {
-            this.emit('spawn');
-        });
+        this.service.on('spawn', () => { this.emit('spawn'); });
         
         this.service.on('error', (err) => {
             console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ SERVICE ERROR ]', err);
@@ -100,7 +99,6 @@ class ChromiumOverlayDisplay extends EventEmitter {
         this.service.on('exit', (code, signal) => {
             this.service = null;
             console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited', `[ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
-            this.emit('close');
         });
     }
 }

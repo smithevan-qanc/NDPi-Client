@@ -148,7 +148,7 @@ class NDI_Receiver_v3 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_resolution', '');
             
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] - [ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
-            
+
             if (signal === 'SIGKILL') { this.emit('close'); }
         });
     }
@@ -181,7 +181,7 @@ class NDI_Receiver_v3 extends EventEmitter {
 
         await new Promise((resolve) => {
             setTimeout(() => {
-                try { this.receiver.kill('SIGTERM'); }
+                try { this.receiver?.kill('SIGTERM'); }
                 catch {}
                 finally { setTimeout(() => { resolve(); }, 500); }
             }, shutdown ? 500 : 1000);
