@@ -81,7 +81,7 @@ const { exec, spawn } = require('node:child_process');
         async function processCommand(message = {}) {
             // ... Reference For Building
             let command = {
-                id:     message?.id,     // UUID of command for tracking
+                id:     message?.id || '',     // UUID of command for tracking
                 type:   message?.type,
                 data:   message?.data,  // data can be of any type
             };
@@ -117,7 +117,7 @@ const { exec, spawn } = require('node:child_process');
                             'blank',
                             'utf8'
                         );
-                        response = await setNdi(response, command);
+                        response = await setNdi(command, response);
                     }
                     catch (error)
                     {
@@ -135,7 +135,7 @@ const { exec, spawn } = require('node:child_process');
                             'overlay',
                             'utf8'
                         );
-                        response = await setNdi(response, command);
+                        response = await setNdi(command, response);
                     }
                     catch (error)
                     {
@@ -172,7 +172,7 @@ const { exec, spawn } = require('node:child_process');
                     break;
                 
                 case 'set-source':
-                    response = await setNdi(response, command);
+                    response = await setNdi(command, response);
                     return response;
                     break;
                 
@@ -324,7 +324,16 @@ const { exec, spawn } = require('node:child_process');
         }
 
         /** SET NDI SOURCE */
-        async function setNdi(res = {}, command = {}) {
+        /**
+         * Set the target NDI source. This will trigger the fsWatcher to launch the NDI Stream.
+         * @param {object} command - Command contains the source information and UUID of the command.
+         * @param {string} [command.id] - UUID of the Command/Request. Used for tracking.
+         * @param {string} [command.data] - The name of the NDI source to connect to.
+         * @param {object} res - This function will overwrite an existing response object for API. Optional.
+         * 
+         * @returns 
+         */
+        async function setNdi(command, res = {}) {
             let response = { ...res };
             try
             {
@@ -346,68 +355,6 @@ const { exec, spawn } = require('node:child_process');
                 response.data.message = error;
                 response.success = false;
             }
-            return response;
-        }
-
-        /** FOCUS WINDOW */
-        /**
-         * Set focus to a window by class name.
-         * @param {string} className - Window class name of the window to focus. Discover the class name using xprop.
-         * @param {object} res - Response object. This function will use and update a response object from an API call. This is optional.
-         * @param {object} options - Additional configuration.
-         * @param {boolean} [options.onlyVisible] - Search for windows that are Visible. (excludes background processes from attempting to focus.)
-         * @returns {object} - Response object
-         */
-        async function focusWindow(className, res = { data: {} }, options = { onlyVisible: true }) {
-            let response = { ...res };
-            await new Promise((resolve) => {
-                exec(`xdotool search ${options.onlyVisible ? '--onlyvisible' : ''} --class "${className}" | head -n 1`, {
-                    env: {
-                        ...process.env,
-                        DISPLAY: ':0',
-                    }
-                }, (error, stdout, stderr) => {
-                    if (error)
-                    {
-                        // console.log('⚠️ [ functions ] Could NOT find window:', stderr.toString().trim());
-                        response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
-                        response.success = false;
-                        resolve();
-                        return;
-                    }
-                    else 
-                    {
-                        console.info(`[ ${path.basename(__filename).split('.')[0]} ] Focusing Window ID:`, stdout.toString().trim());
-                        if (!stdout.toString().trim())
-                        {
-                            // console.log(`⚠️ [ functions ] ${className} NOT running.`);
-                            response.data.message = `${className} is NOT running.`;
-                            response.success = false;
-                            resolve();
-                            return;
-                        }
-                        const a = `xdotool windowminimize ${stdout.toString().trim()} && xdotool windowraise ${stdout.toString().trim()} && xdotool windowactivate ${stdout.toString().trim()}` ;
-                        exec(a, {
-                            env: { ...process.env }
-                        }, (error, stdout, stderr) => {
-                            if (error)
-                            {
-                                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] Could NOT activate window:`, stderr.toString().trim() || 'null');
-                                response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
-                                response.success = false;
-                                resolve();
-                                return;
-                            }
-                            else 
-                            {
-                                response.success = true;
-                                resolve();
-                                return;
-                            }
-                        });
-                    }
-                });
-            });
             return response;
         }
 
@@ -521,13 +468,13 @@ const { exec, spawn } = require('node:child_process');
 
 module.exports = {
     processCommand,
-    // focusWindow,
     stdoutToArray,
     setDisplayResolution,
     checkCecCompliance,
     waitForNetwork,
     focusChromium,
-    focusNdi
+    focusNdi,
+    setNdi,
 };
 
 
@@ -547,3 +494,65 @@ module.exports = {
 
     /** COMPLETED */
 
+
+        /** FOCUS WINDOW */
+        /**
+         * Set focus to a window by class name.
+         * @param {string} className - Window class name of the window to focus. Discover the class name using xprop.
+         * @param {object} res - Response object. This function will use and update a response object from an API call. This is optional.
+         * @param {object} options - Additional configuration.
+         * @param {boolean} [options.onlyVisible] - Search for windows that are Visible. (excludes background processes from attempting to focus.)
+         * @returns {object} - Response object
+         */
+        async function focusWindow(className, res = { data: {} }, options = { onlyVisible: true }) {
+            let response = { ...res };
+            await new Promise((resolve) => {
+                exec(`xdotool search ${options.onlyVisible ? '--onlyvisible' : ''} --class "${className}" | head -n 1`, {
+                    env: {
+                        ...process.env,
+                        DISPLAY: ':0',
+                    }
+                }, (error, stdout, stderr) => {
+                    if (error)
+                    {
+                        // console.log('⚠️ [ functions ] Could NOT find window:', stderr.toString().trim());
+                        response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
+                        response.success = false;
+                        resolve();
+                        return;
+                    }
+                    else 
+                    {
+                        console.info(`[ ${path.basename(__filename).split('.')[0]} ] Focusing Window ID:`, stdout.toString().trim());
+                        if (!stdout.toString().trim())
+                        {
+                            // console.log(`⚠️ [ functions ] ${className} NOT running.`);
+                            response.data.message = `${className} is NOT running.`;
+                            response.success = false;
+                            resolve();
+                            return;
+                        }
+                        const a = `xdotool windowminimize ${stdout.toString().trim()} && xdotool windowraise ${stdout.toString().trim()} && xdotool windowactivate ${stdout.toString().trim()}` ;
+                        exec(a, {
+                            env: { ...process.env }
+                        }, (error, stdout, stderr) => {
+                            if (error)
+                            {
+                                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] Could NOT activate window:`, stderr.toString().trim() || 'null');
+                                response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
+                                response.success = false;
+                                resolve();
+                                return;
+                            }
+                            else 
+                            {
+                                response.success = true;
+                                resolve();
+                                return;
+                            }
+                        });
+                    }
+                });
+            });
+            return response;
+        }

@@ -43,7 +43,6 @@ class NDPi {
 
     /** INITIATE */
     async initiate() {
-
         const execStartup = async () => {
             const startup = exec(`./sh/startup`);
             startup.stdout.on('data', (data) => {
@@ -57,37 +56,8 @@ class NDPi {
                 this.startFsData();
             });
         };
-
-        const spawnXsetroot = () => {
-            return spawn(`xsetroot`, [ '-solid', '#000000' ], {
-                env: {
-                    ...process.env,
-                    DISPLAY: ':0',
-                }
-            });
-        };
-
-        const spawnCompositor = () => {
-            try { this.compMgr.kill() }
-            catch {}
-            finally { this.compMgr = null; }
-            this.compMgr = spawn('xcompmgr', ['-d', ':0', '-fFCnR'], {
-                env: { DISPLAY: ':0' }
-            });
-            this.compMgr.on('exit', () => {
-                if (!this.shutdown) { spawnCompositor(); }
-            });
-        };
-
-        //spawnXsetroot().once('error', (err) => { console.error(`⚠️ [ xsetroot ][ ERROR ]`, err); });
-        setTimeout(() => {
-            execStartup();
-            //spawnCompositor();
-        }, 10);
-
-        // this.compMgr = spawn('picom', ['-d', ':0', '-f'], {
-        //     env: { DISPLAY: ':0' }
-        // });
+        
+        execStartup();
     }
 
     /** START FILE SYSTEM WATCHER */
@@ -97,8 +67,8 @@ class NDPi {
 
         //  FS System Ready
         this.settings.on('ready', () => {
-            this.startLcdDisplay();
             func.setDisplayResolution();
+            this.startLcdDisplay();
             this.startApi();
         });
 
@@ -112,7 +82,7 @@ class NDPi {
                 {
                     try { this.ndiReceiver.close(); }
                     catch {}
-                    finally { setTimeout(() => { this.startNdiReceiver(); }, 500); }
+                    finally { setTimeout(() => { this.startNdiReceiver(); }, 1000); }
                 }
                 else
                 {
@@ -238,39 +208,41 @@ class NDPi {
             finally { this.startApi(); }
         });
 
-        const setResolutionResetNDI = async () => {
-            await func.setDisplayResolution();
-            try
-            {
-                if (this.ndiReceiver.ndiStatus !== 'idle')
-                {
-                    this.ndiReceiver.softClose();
-                    setTimeout(async () => { this.ndiReceiver.connect(); }, 1000);
-                }
-            }
-            catch {}
-        };
-
         //  HDMI Port
-        this.settings.on('output_display_port', (data) => {
+        this.settings.on('output_display_port', async (data) => {
             const output = String(data || '').trim() || null;
             if (!output)
             {
-                try { this.ndiReceiver.softClose(); }
-                catch {}
-                finally { return; }
+                if (this.ndiReceiver.ndiStatus !== 'idle')
+                { this.ndiReceiver.softClose(); }
             }
-            setResolutionResetNDI();
+            else
+            {
+                await func.setDisplayResolution();
+                this.ndiReceiver.connect();
+            }
         });
 
         //  HDMI Resolution
-        this.settings.on('output_display_resolution_preference', (data) => { setResolutionResetNDI() });
+        this.settings.on('output_display_resolution_preference', async (data) => {
+            const output = String(data || '').trim() || null;
+            if (!output)
+            {
+                if (this.ndiReceiver.ndiStatus !== 'idle')
+                { this.ndiReceiver.softClose(); }
+            }
+            else
+            {
+                await func.setDisplayResolution();
+                this.ndiReceiver.connect();
+            }
+        });
 
         //  HDMI Framerate
-        this.settings.on('output_display_framerate_preference', (data) => { setResolutionResetNDI(); });
+        this.settings.on('output_display_framerate_preference', (data) => { func.setDisplayResolution(); });
 
-        // DRM Update
-        this.settings.on('drm', () => { setResolutionResetNDI(); });
+        //  DRM Update
+        // this.settings.on('drm', () => { setResolutionResetNDI(); });
 
     }
 
@@ -280,19 +252,38 @@ class NDPi {
         catch {}
         finally { this.lcdDisplay = null; }
 
-        this.lcdDisplay = spawn('python3', ['update_lcd.py'], { cwd: this.settings.lcdDisplayScriptPath });
+        this.lcdDisplay = spawn('python3', ['update_lcd.py'], {
+            cwd: this.settings.lcdDisplayScriptPath,
+            env: { ...process.env }
+        });
 
-        this.lcdDisplay.on('error', (error) => { console.error(`⚠️ [ python ][ ERROR ] ${error.toString()}`); });
+        this.lcdDisplay.stderr.on('data', (data) => {
+            console.error(`⚠️ [ update_lcd ][ ERROR ]`, data);
+        });
 
-        this.lcdDisplay.stderr.on('data', (data) => { console.error(`⚠️ [ python ][ ERROR ]`, data); });
+        this.lcdDisplay.on('error', (err) => {
+            console.error(`⚠️ [ update_lcd ][ ERROR ] ${err.toString()}`);
+        });
 
-        this.lcdDisplay.on('exit', () => {
+        this.lcdDisplay.on('exit', (code, signal) => {
+            lcdDisplayClose('exit', code, signal.toString());
+        });
+
+        this.lcdDisplay.on('disconnect', () => {
+            lcdDisplayClose('disconnect');
+        });
+
+        this.lcdDisplay.on('close', (code, signal) => {
+            lcdDisplayClose('close', code, signal.toString());
+        });
+
+        function lcdDisplayClose(source = '', code = 0 | null, signal = '') {
             if (!this.shutdown)
             {
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ update_lcd ] Closed: [ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ update_lcd ] Closed: [ Code: ${code || 'N/A'} ], [ Signal: ${signal || 'N/A'} ]`);
                 this.startLcdDisplay();
             }
-        });
+        }
     }
 
     /** START API */
@@ -306,13 +297,6 @@ class NDPi {
                 this.openCecController();
                 this.connectToNDPiServer();
                 this.startChromium();
-                this.targetSource = this.settings.get('ndpi_status_ndi_source_target');
-                if (String(this.targetSource || 'none').toLowerCase() !== 'none')
-                {
-                    setTimeout(() => {
-                        this.startNdiReceiver();
-                    }, 5000);
-                }
                 this.isInitialized = true;
             }
             else 
@@ -332,11 +316,11 @@ class NDPi {
             }
         });
 
-        this.server_api.on('shutdown', () => {
+        this.server_api.on('shutdown-command', () => {
             setTimeout(() => { shutdownDevice(); }, 1000);
         });
 
-        this.server_api.on('reboot', () => {
+        this.server_api.on('reboot-command', () => {
             setTimeout(() => { rebootDevice(); }, 1000);
         });
     }
@@ -353,11 +337,18 @@ class NDPi {
         {
             const ChromiumOverlayDisplay = require('./service/client_chromium.js');
             this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
-        } 
+            
+            this.service_chromium.on('spawn', () => {
+                this.targetSource = this.settings.get('ndpi_status_ndi_source_target');
+                
+                if (String(this.targetSource || 'none').toLowerCase() !== 'none')
+                { func.setNdi({ id: 'ChromiumSpawn', data: this.targetSource }); }
+            });
+        }
         else
         {
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] Skipping Chromium display launch.`);
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] -- Missing binary: /usr/bin/chromium`);
+            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] Skipping Chromium display launch.`);
+            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] -- Missing binary: /usr/bin/chromium`);
         }
     }
 
@@ -488,7 +479,7 @@ async function quitNDPi(signal, exit = true) {
         try { await index.ndiReceiver.close(); }
         catch {}
 
-        try { index.lcdDisplay.kill('SIGTERM'); }
+        try { index.lcdDisplay.kill('SIGINT'); }
         catch {}
 
         try { await index.controller_cec.close(); }
@@ -547,8 +538,9 @@ process.on('unhandledRejection', (reason) => {
 
 process.on('SIGTERM', () => quitNDPi('SIGTERM'));
 process.on('SIGINT',  () => quitNDPi('SIGINT'));
+process.on('SIGKILL',  () => quitNDPi('SIGKILL'));
 
-process.on('exit', (code) => {
+process.on('exit', () => {
     console.log(`[ EXIT CODE: ${code} ]`);
     console.log('══════════════════════════════════════════  N D P i - M O N I T O R  ═══');
 });

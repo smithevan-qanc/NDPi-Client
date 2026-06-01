@@ -40,7 +40,8 @@ class CecController extends EventEmitter {
         this.proc = spawn('cec-client', ['-o', this.deviceName, '-t', 'r', '-d', '4'], { stdio: ['pipe', 'pipe', 'pipe'] });
         this.proc.stdout.on('data', (data) => this._handleStdout(data));
         this.proc.stderr.on('data', (data) => this._handleStderr(data));
-        this.proc.on('close', () => {
+        
+        this.proc.on('exit', (code, signal) => {
             this.isReady = false;
             this.proc = null;
 
@@ -57,6 +58,9 @@ class CecController extends EventEmitter {
                     this.debounceMap.clear();
                 }
             }
+
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited', `[ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
+            
         });
         this.proc.on('error', () => {
             this.isReady = false;
@@ -93,22 +97,16 @@ class CecController extends EventEmitter {
      * @param {boolean} shutdown - Set as true when exiting the entire NDPi Process.
      */
     async close(shutdown = false) {
-        console.info(
-            `[ ${path.basename(__filename).split('.')[0]} ]`,
-            'Closing Module'
-        );
-
         this.enabled = false;
         this.isReady = false;
 
-        this.proc.kill();
+        console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module');
+
+        console.log('CEC sigint');
+        this.proc.kill('SIGINT');
+        console.log('CEC sigint Complete');
 
         await new Promise((resolve) => { setTimeout(() => { resolve(); }, shutdown ? 50 : 500); });
-
-        console.info(
-            `[ ${path.basename(__filename).split('.')[0]} ]`,
-            'Module Exited'
-        );
         return;
     }
 
@@ -177,7 +175,7 @@ class CecController extends EventEmitter {
             const last = this.debounceMap.get(staticDebounceKey) || 0;
             const now = Date.now();
             if (now - last < debounceMs)
-                { return }
+            { return; }
             this.debounceMap.set(staticDebounceKey, now);
         }
         this.queue.push(command);

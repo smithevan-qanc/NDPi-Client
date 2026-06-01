@@ -224,12 +224,12 @@ class NDPiCommandServer_Client extends EventEmitter {
 
                     case 'shutdown':
                         res.sendStatus(200);
-                        this.emit('shutdown');
+                        this.emit('shutdown-command');
                         break;
 
                     case 'reboot':
                         res.sendStatus(200);
-                        this.emit('reboot');
+                        this.emit('reboot-command');
                         break;
 
                     default:

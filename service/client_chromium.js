@@ -58,13 +58,27 @@ class ChromiumOverlayDisplay extends EventEmitter {
 
         await new Promise((resolve) => {
             console.log('launching PICOM');
-            exec(`picom --config ${process.env.HOME}/.config/picom/picom.conf`, (error, stdout, stderr) => {
-                if (error)
-                { console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', stderr.toString()); }
-                setTimeout(() => {
-                    resolve();
-                }, 1000);
+
+            const picom = spawn('picom', [
+                '--config',
+                `${process.env.HOME}/.config/picom/picom.conf`
+            ],{
+                env: { ...process.env },
+                detached: true,
             });
+
+            picom.stderr.on('data', (data) => {
+                console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', data.toString());
+            });
+
+            picom.on('spawn', () => {
+                setTimeout(() => {
+                    console.log('PICOM spawned');
+                    resolve();
+                }, 500);
+            });
+
+            picom.unref();
         });
 
         this.service = spawn(command, args, {
@@ -74,14 +88,18 @@ class ChromiumOverlayDisplay extends EventEmitter {
                 XAUTHORITY: `${process.env.HOME}/.Xauthority`,
             }
         });
+
+        this.service.on('spawn', () => {
+            this.emit('spawn');
+        });
         
         this.service.on('error', (err) => {
             console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ SERVICE ERROR ]', err);
         });
 
-        this.service.on('exit', () => {
+        this.service.on('exit', (code, signal) => {
             this.service = null;
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited');
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited', `[ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
             this.emit('close');
         });
     }
