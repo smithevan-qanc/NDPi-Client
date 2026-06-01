@@ -29,8 +29,15 @@ class ChromiumOverlayDisplay extends EventEmitter {
         { return; }
 
         const connectionPort = this.settings.get('local_port_number_api');
-        const command = 'chromium';
+        //picom --config /path/to/single-app-picom.conf
+        // const command = 'chromium';
+        const command = 'picom';
         const args = [
+            '--config',
+            `${process.env.HOME}/.config/picom/picom.conf`,
+            '&',
+            'chromium',
+
             // '--kiosk',
             '--aggressive-cache-discard',
             '--deny-permission-prompts',
