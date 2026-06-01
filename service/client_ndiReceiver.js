@@ -149,7 +149,7 @@ class NDI_Receiver_v3 extends EventEmitter {
             
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] - [ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
 
-            if (signal === 'SIGKILL') { this.emit('close'); }
+            // if (signal === 'SIGKILL') { this.emit('close'); }
         });
     }
 
