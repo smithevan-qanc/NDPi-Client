@@ -50,7 +50,7 @@ fadeIn() {
         while [ "$current" -lt "$target" ]; do
             current=$((current + 1))
             [ "$current" -gt "$target" ] && current=$target
-            amixer set PCM "${current}%" >/dev/null
+            # amixer set PCM "${current}%" >/dev/null
             picom-trans -w $WINDOW_ID $current >/dev/null
             sleep $FADE_TIME
         done
@@ -58,7 +58,7 @@ fadeIn() {
         while [ "$current" -gt "$target" ]; do
             current=$((current - 1))
             [ "$current" -lt "$target" ] && current=$target
-            amixer set PCM "${current}%" >/dev/null
+            # amixer set PCM "${current}%" >/dev/null
             picom-trans -w $WINDOW_ID $current >/dev/null
             sleep $FADE_TIME
         done
@@ -73,7 +73,7 @@ fadeOut() {
             current=$((current + 1))
             [ "$current" -gt "$target" ] && current=$target
             amixer set PCM "${current}%" >/dev/null
-            picom-trans -w $WINDOW_ID $current >/dev/null
+            # picom-trans -w $WINDOW_ID $current >/dev/null
             sleep $FADE_TIME
         done
     else
@@ -81,7 +81,7 @@ fadeOut() {
             current=$((current - 1))
             [ "$current" -lt "$target" ] && current=$target
             amixer set PCM "${current}%" >/dev/null
-            picom-trans -w $WINDOW_ID $current >/dev/null
+            # picom-trans -w $WINDOW_ID $current >/dev/null
             sleep $FADE_TIME
         done
     fi
@@ -90,5 +90,6 @@ fadeOut() {
 # Start
 activateWindow
 fadeIn
+fadeOut
 # killall picom
 exit 0
