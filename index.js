@@ -397,11 +397,9 @@ class NDPi {
         const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
         const receiver = new NDI_Receiver_v4(this.settings, this.server_api, this.service_chromium);
 
-        receiver.receiver.on('spawn', () => {
-            this.ndiReceiver.add(receiver);
-        });
+        this.ndiReceiver.add(receiver);
 
-        receiver.on('close', () => {
+        receiver.once('close', () => {
             this.ndiReceiver.delete(receiver);
         });
 
