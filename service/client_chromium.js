@@ -29,16 +29,8 @@ class ChromiumOverlayDisplay extends EventEmitter {
         { return; }
 
         const connectionPort = this.settings.get('local_port_number_api');
-        //picom --config /path/to/single-app-picom.conf
-        // const command = 'chromium';
-        const command = 'picom';
+        const command = 'chromium';
         const args = [
-            '-b',
-            '--config',
-            `${process.env.HOME}/.config/picom/picom.conf`,
-            '&',
-            'chromium',
-
             // '--kiosk',
             '--aggressive-cache-discard',
             '--deny-permission-prompts',
@@ -64,30 +56,30 @@ class ChromiumOverlayDisplay extends EventEmitter {
             `http://localhost:${connectionPort}/`
         ];
 
-        // await new Promise((resolve) => {
-        //     console.log('launching PICOM');
+        await new Promise((resolve) => {
+            console.log('launching PICOM');
 
-        //     const picom = spawn('picom', [
-        //         '--config',
-        //         `${process.env.HOME}/.config/picom/picom.conf`
-        //     ],{
-        //         env: { ...process.env },
-        //         detached: true,
-        //     });
+            const picom = spawn('picom', [
+                '--config',
+                `${process.env.HOME}/.config/picom/picom.conf`
+            ],{
+                env: { ...process.env },
+                detached: true,
+            });
 
-        //     picom.stderr.on('data', (data) => {
-        //         console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', data.toString());
-        //     });
+            picom.stderr.on('data', (data) => {
+                console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', data.toString());
+            });
 
-        //     picom.on('spawn', () => {
-        //         setTimeout(() => {
-        //             console.log('PICOM spawned');
-        //             resolve();
-        //         }, 500);
-        //     });
+            picom.on('spawn', () => {
+                setTimeout(() => {
+                    console.log('PICOM spawned');
+                    resolve();
+                }, 500);
+            });
 
-        //     picom.unref();
-        // });
+            picom.unref();
+        });
 
         console.log('launching chromium');
         this.service = exec(command, args, {
