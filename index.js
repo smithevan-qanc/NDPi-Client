@@ -353,10 +353,6 @@ class NDPi {
         {
             const ChromiumOverlayDisplay = require('./service/client_chromium.js');
             this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
-            setTimeout(() => {
-                try { spawn('picom', ['--config', `${process.env.HOME}/.config/picom/picom.conf`], { env: { ...process.env } }); }
-                catch {}
-            }, 1000);
         } 
         else
         {

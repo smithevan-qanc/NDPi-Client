@@ -8,7 +8,6 @@ class ChromiumOverlayDisplay extends EventEmitter {
         this.service = null;
         this.settings = fsData;
         this.server = api;
-        this.homeDirectory = path.join(__dirname, '..', '..');
         this.start();
     }
 
@@ -19,29 +18,19 @@ class ChromiumOverlayDisplay extends EventEmitter {
     }
 
     close() {
-        console.info(
-            `[ ${path.basename(__filename).split('.')[0]} ]`,
-            'Closing Module'
-        );
-        try {
-            this.service?.kill();
-        } catch (err) {
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module');
+        try { this.service.kill(); }
+        catch (err)
+        {
             exec('killall chromium', (error, stdout, stderr) => {
                 if (error)
-                {
-                    console.error(
-                        '⚠️',
-                        `[ ${path.basename(__filename).split('.')[0]} ]`,
-                        '[ ERROR ]',
-                        stderr
-                    );
-                }
+                { console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ ERROR ]', stderr.toString()); }
             });
         }
         this.service = null;
     }
 
-    launch() {
+    async launch() {
         if (this.service)
         { return; }
 
@@ -69,33 +58,30 @@ class ChromiumOverlayDisplay extends EventEmitter {
             '--no-first-run',
             '--start-fullscreen',
             '--touch-events=enabled',
-            `--user-data-dir=${this.homeDirectory}/.config/chromium/Default`,
+            `--user-data-dir=${process.env.HOME}/.config/chromium/Default`,
             `http://localhost:${connectionPort}/`
         ];
+
+        await new Promise((resolve) => {
+            exec(`picom --config ${process.env.HOME}/.config/picom/picom.conf`, (error, stdout, stderr) => {
+                if (error)
+                { console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ ERROR ]', stderr.toString()); }
+                setTimeout(() => {
+                    resolve();
+                }, 1000);
+            });
+        });
 
         this.service = spawn(command, args, {
             env: {
                 ...process.env,
                 DISPLAY: ':0',
-                XAUTHORITY: `${this.homeDirectory}/.Xauthority`,
+                XAUTHORITY: `${process.env.HOME}/.Xauthority`,
             }
         });
-
-        // this.service = exec(command.join(' '), {
-        //     env: {
-        //         ...process.env,
-        //         DISPLAY: ':0',
-        //         XAUTHORITY: `${this.homeDirectory}/.Xauthority`,
-        //     },
-        // });
         
         this.service.on('error', (err) => {
-            console.error(
-                '⚠️',
-                `[ ${path.basename(__filename).split('.')[0]} ]`,
-                '[ ERROR ]',
-                err
-            );
+            console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ ERROR ]', err);
         });
 
         this.service.on('close', () => {
