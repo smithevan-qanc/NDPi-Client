@@ -1,11 +1,9 @@
-const { EventEmitter } = require('events');
-const { spawn } = require('node:child_process');
-const { setTimeout, clearTimeout } = require('node:timers');
+const { EventEmitter } = require('node:events');
+const { spawn, exec } = require('node:child_process');
 const path = require('path');
 const func = require('./functions');
-const { OutgoingMessage } = require('node:http');
 
-class NDI_Receiver_v3 extends EventEmitter {
+class NDI_Receiver_v4 extends EventEmitter {
     constructor(
         fsData,
         api,
@@ -60,14 +58,11 @@ class NDI_Receiver_v3 extends EventEmitter {
         this.closing = false;
         this.secondsInactive = 0;
 
-        if (this.ndiSource.toLowerCase() === 'none')
-        { this.close(); }
-        else
+        if (this.ndiSource.toLowerCase() !== 'none')
         { this.connect(); }
     }
 
     connect() {
-
         this.receiver = spawn(`${this.parentDirectory}/${this.receiverName}`, [
             '--source', this.ndiSource,
             '--bandwidth', this.ndiBandwidth,
@@ -85,9 +80,13 @@ class NDI_Receiver_v3 extends EventEmitter {
 
         this.receiver.stdout.on('data', (data) => {
             const showNDI = (delay = 1000) => {
-                setTimeout(async () => {
-                    await func.focusNdi();
-                    this.server.updateDisplay({ type: `show-ndi` });
+                setTimeout(() => {
+                    func.focusNdi();
+                    func.fadeVolume(255);
+
+                    setTimeout(() => {
+                        this.server.updateDisplay({ type: `show-ndi` });
+                    }, 10000);
                 }, delay);
             }
 
@@ -108,7 +107,8 @@ class NDI_Receiver_v3 extends EventEmitter {
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
             }
 
-            if (output.includes('Connected to:')) { showNDI(1000); }
+            if (output.includes('Connected to:'))
+                { showNDI(500); }
 
             if (output.includes('Reconnected to:'))
             {
@@ -129,7 +129,7 @@ class NDI_Receiver_v3 extends EventEmitter {
             this.emit('error');
         });
 
-        this.receiver.on('exit', (code, signal) => {
+        this.receiver.on('close', (code, signal) => {
             this.receiver = null;
 
             this.ndiActiveSource = null;
@@ -148,8 +148,6 @@ class NDI_Receiver_v3 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_resolution', '');
             
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] - [ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
-
-            // if (signal === 'SIGKILL') { this.emit('close'); }
         });
     }
 
@@ -157,13 +155,12 @@ class NDI_Receiver_v3 extends EventEmitter {
      * Kill the NDI Receiver without resetting the target source.
      * To reactivate the source, call 'thisModule.connect();'
      */
-    softClose() {
+    async softClose() {
+        func.fadeVolume(0);
+        await func.focusChromium();
+        
         try { this.receiver.kill('SIGTERM'); }
-        catch (error) {
-            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ softClose() ]`, error);
-            console.info (`➡️ [ ${path.basename(__filename).split('.')[0]} ] Executing 'killall'`);
-            exec(`killall ${this.receiverName}`);
-        }
+        catch {}
     }
     
     /**
@@ -171,27 +168,37 @@ class NDI_Receiver_v3 extends EventEmitter {
      * @param {boolean} shutdown - Set as true when exiting the entire NDPi Process.
      */
     async close(shutdown = false) {
-        if (this.closing)
-        { return; }
-        
-        this.closing = true;
         this.enabled = false;
 
-        console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module' );
+        func.fadeVolume(0);
+        await func.focusChromium();
 
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                try { this.receiver?.kill('SIGTERM'); }
-                catch {}
-                finally { setTimeout(() => { resolve(); }, 500); }
-            }, shutdown ? 500 : 1000);
+        return new Promise((resolve) => {
+
+            if (this.receiver.exitCode !== null || this.receiver.killed) {
+                resolve();
+                return;
+            }
+
+            this.receiver.once('exit', (code, signal) => {
+                console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited' );
+                this.emit('close');
+                resolve();
+                return;
+            });
+
+            try 
+            {
+                console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module' );
+                this.receiver.kill('SIGTERM');
+            }
+            catch
+            { 
+                if (!this.receiver.killed)
+                { this.receiver.kill('SIGKILL'); }
+            }
+
         });
-
-        console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited' );
-
-        this.closing = false;
-        this.emit('close');
-        return;
     }
 
     logInfo(data) {
@@ -277,4 +284,4 @@ class NDI_Receiver_v3 extends EventEmitter {
     }
 }
 
-module.exports = NDI_Receiver_v3;
+module.exports = NDI_Receiver_v4;

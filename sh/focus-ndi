@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+# set -e
 
 # export DISPLAY=':0'
 
@@ -10,53 +10,64 @@ set -e
 # xcompmgr -d :0 -fFCnR &
 # sleep 1
     
-# activateWindow() {
-#     if [[ -z "$WINDOW_ID" ]]; then
-#         return
-#     fi
-#     picom -f -D 6 -i 0 --backend xrender --no-fading-openclose --no-vsync &
-#     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
+activateWindow() {
+
+    sleep 1
+
+    WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
+
+    if [[ -z "$WINDOW_ID" ]]; then
+        echo "$1 FAILED to find visible window."
+        echo "---------"
+        echo "[Results]"
+        echo "$(xdotool search --onlyvisible --class 'chromium')"
+        echo "---------"
+        exit 1
+        return
+    fi
+    # picom -f -D 6 -i 0 --backend xrender --no-fading-openclose --no-vsync &
+    # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
     
-#     # xdotool windowminimize $WINDOW_ID
-#     # sleep 1
-#     # xdotool windowraise $WINDOW_ID
+    # xdotool windowminimize $WINDOW_ID
+    # sleep 1
+    # xdotool windowraise $WINDOW_ID
     
-#     sleep 1
-#     xdotool windowactivate $WINDOW_ID
-#     sleep 1
-# }
+    sleep 1
+    xdotool windowactivate $WINDOW_ID
+    sleep 1
+}
 
 FADE_TIME=0.02
 
-# ndi() {
-#     NDI_WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
+ndi() {
+    NDI_WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
 
-#     if [[ -z "$NDI_WINDOW_ID" ]]; then
-#         echo "$1 FAILED to find visible window."
-#         echo "---------"
-#         echo "[Results]"
-#         echo "$(xdotool search --class 'gstreamer')"
-#         echo "---------"
-#         exit 1
-#     fi
+    if [[ -z "$NDI_WINDOW_ID" ]]; then
+        echo "$1 FAILED to find visible window."
+        echo "---------"
+        echo "[Results]"
+        echo "$(xdotool search --class 'gstreamer')"
+        echo "---------"
+        exit 1
+    fi
 
-#     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
-#     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --realtime --vsync &
-#     # picom --config "${HOME}/.config/picom/picom.conf" &
+    # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
+    # picom -f -D 6 -i 0 --backend xrender --force-win-blend --realtime --vsync &
+    # picom --config "${HOME}/.config/picom/picom.conf" &
     
-#     # sleep 2
+    # sleep 2
 
     
-#     # xdotool windowminimize $WINDOW_ID
-#     # sleep 0.5
+    # xdotool windowminimize $WINDOW_ID
+    # sleep 0.5
 
-#     # xdotool windowraise $WINDOW_ID
-#     # sleep 0.5
+    # xdotool windowraise $WINDOW_ID
+    # sleep 0.5
 
-#     picom-trans -o 0 -w $NDI_WINDOW_ID
+    picom-trans -o 0 -w $NDI_WINDOW_ID
 
-#     # sleep 0.5
-# }
+    # sleep 0.5
+}
 
 fadeIn() {
     local current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
@@ -100,9 +111,6 @@ fadeOut() {
 }
 
 # Start
-picom -b&
-
-sleep 2
 
 NDI_WINDOW_ID="$(xdotool search --class 'gstreamer' | head -n 1)"
 
@@ -114,27 +122,27 @@ if [[ -z "$NDI_WINDOW_ID" ]]; then
     echo "---------"
     exit 1
 fi
-picom-trans -o 0 -w $NDI_WINDOW_ID
+# picom-trans -o 0 -w $NDI_WINDOW_ID
 
-# Chromium
-WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
+# # Chromium
+# WINDOW_ID="$(xdotool search --onlyvisible --class 'chromium' | head -n 1)"
 
-if [[ -z "$WINDOW_ID" ]]; then
-    echo "$1 FAILED to find visible window."
-    echo "---------"
-    echo "[Results]"
-    echo "$(xdotool search --onlyvisible --class 'chromium')"
-    echo "---------"
-    exit 1
-fi
+# if [[ -z "$WINDOW_ID" ]]; then
+#     echo "$1 FAILED to find visible window."
+#     echo "---------"
+#     echo "[Results]"
+#     echo "$(xdotool search --onlyvisible --class 'chromium')"
+#     echo "---------"
+#     exit 1
+# fi
 
-picom-trans -o 0 -w $WINDOW_ID
+# picom-trans -o 0 -w $WINDOW_ID
 
 xdotool windowactivate $NDI_WINDOW_ID
 
-picom-trans -o 100 -w $NDI_WINDOW_ID
+# picom-trans -o 100 -w $NDI_WINDOW_ID
 
-fadeIn
+# fadeIn
 
 sleep 2
 

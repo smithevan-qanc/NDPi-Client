@@ -26,6 +26,7 @@ class NDPi {
         this.service_chromium = null;
         this.controller_cec = null;
         this.lcdDisplay = null;
+        this.ndiReceiver = new Set();
 
         this.wsConnection_ndpiServer = null;
         this.ndpiServerStatusUpdate = null; // Interval Timer
@@ -79,18 +80,18 @@ class NDPi {
         });
 
         //  No Source Display Mode
-        this.settings.on('ndpi_status_no_source_display_mode', (data) => {
-            try
-            {
-                if (this.ndiReceiver.ndiStatus == 'idle')
-                {
-                    const output = String(data || 'overlay');
-                    try { this.server_api.updateDisplay({ type: `show-${output}` }); }
-                    catch {}
-                }
-            }
-            catch {}
-        });
+        // this.settings.on('ndpi_status_no_source_display_mode', (data) => {
+        //     try
+        //     {
+        //         if (this.ndiReceiver.ndiStatus == 'idle')
+        //         {
+        //             const output = String(data || 'overlay');
+        //             try { this.server_api.updateDisplay({ type: `show-${output}` }); }
+        //             catch {}
+        //         }
+        //     }
+        //     catch {}
+        // });
 
         //  NDPi Hub Server IP
         this.settings.on('ndpi_command_server_host', (data) => {
@@ -197,35 +198,40 @@ class NDPi {
         //  HDMI Port
         this.settings.on('output_display_port', async (data) => {
             const output = String(data || '').trim() || null;
-            if (!output)
+            if (!output && this.ndiReceiver.size >= 1)
             {
-                if (this.ndiReceiver.ndiStatus !== 'idle')
-                { this.ndiReceiver.softClose(); }
+                // if (this.ndiReceiver.ndiStatus !== 'idle')
+                // { this.ndiReceiver.softClose(); }
+                this.ndiReceiver.forEach(rec => rec.softClose());
             }
             else
             {
                 await func.setDisplayResolution();
-                this.ndiReceiver.connect();
+                this.ndiReceiver.forEach(rec => rec.connect());
+                // this.ndiReceiver.connect();
             }
         });
 
         //  HDMI Resolution
-        this.settings.on('output_display_resolution_preference', async (data) => {
-            const output = String(data || '').trim() || null;
-            if (!output)
-            {
-                if (this.ndiReceiver.ndiStatus !== 'idle')
-                { this.ndiReceiver.softClose(); }
-            }
-            else
-            {
-                await func.setDisplayResolution();
-                this.ndiReceiver.connect();
-            }
+        this.settings.on('output_display_resolution_preference', (data) => {
+            func.setDisplayResolution(); 
+            // const output = String(data || '').trim() || null;
+            // if (!output && this.ndiReceiver.size >= 1)
+            // {
+            //     // if (this.ndiReceiver.ndiStatus !== 'idle')
+            //     // { this.ndiReceiver.softClose(); }
+            //     this.ndiReceiver.forEach(rec => rec.softClose());
+            // }
+            // else
+            // {
+            //     await func.setDisplayResolution();
+            //     this.ndiReceiver.forEach(rec => rec.connect());
+            //     // this.ndiReceiver.connect();
+            // }
         });
 
         //  HDMI Framerate
-        this.settings.on('output_display_framerate_preference', (data) => { func.setDisplayResolution(); });
+        this.settings.on('output_display_framerate_preference', () => { func.setDisplayResolution(); });
 
         //  DRM Update
         // this.settings.on('drm', () => { setResolutionResetNDI(); });
@@ -377,62 +383,39 @@ class NDPi {
         });
     }
 
+    
     /** LAUNCH NDI RECEIVER */
     async startNdiReceiver(source = 'none') {
         if (source !== this.targetSource)
         { this.targetSource = source; }
 
-        if (this.ndiReceiver)
-        {
-            await new Promise( async (resolve) => {
-                if (this.targetSource === 'none')
-                {
-                    console.log('focusing chromium', this.targetSource);
-                    await func.focusChromium();
-                    console.log('Done focusing chromium', this.targetSource);
+        // this.ndiReceiver.forEach(rec => rec.close());
 
-                    setTimeout(() => {
-                        console.log('closing receiver', this.targetSource);
-                        try { this.ndiReceiver.close(); } catch {}
-                        console.log('done closing receiver', this.targetSource);
-                        resolve();
-                    }, 1000);
-                }
-                else
-                {
-                    console.log('focusing chromium', this.targetSource);
-                    await func.focusChromium();
-                    console.log('Done focusing chromium', this.targetSource);
+        for (const rec of this.ndiReceiver)
+            { rec.close(); }
 
-                    try
-                    {
-                        console.log('killing receiver', this.targetSource);
-                        this.ndiReceiver.enabled = false;
-                        this.ndiReceiver.receiver.kill('SIGKILL');
-                        console.log('done killing receiver', this.targetSource);
-                    } catch {}
+        const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
+        const receiver = new NDI_Receiver_v4(this.settings, this.server_api, this.service_chromium);
 
-                    setTimeout(() => {
-                        resolve();
-                    }, 5000);
-                }
-            });
-        }
+        receiver.receiver.on('spawn', () => {
+            this.ndiReceiver.add(receiver);
+        });
 
-        const NDI_Receiver_v3 = require('./service/client_ndiReceiver.js');
-        this.ndiReceiver = new NDI_Receiver_v3(this.settings, this.server_api, this.service_chromium);
+        receiver.on('close', () => {
+            this.ndiReceiver.delete(receiver);
+        });
 
         // this.ndiReceiver.on('connected', () => {
         //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
         //     this.server_api.updateDisplay({ type: `show-ndi` });
         // });
 
-        this.ndiReceiver.on('close', () => {
-            console.log('close signal received in "index"', 'Module Enabled', this.ndiReceiver.enabled);
-            if (this.ndiReceiver.enabled)
-            { this.__restartNdiReceiver(); }
-            this.ndiReceiver = null;
-        });
+        // this.ndiReceiver.on('close', () => {
+        //     console.log('close signal received in "index"', 'Module Enabled', this.ndiReceiver.enabled);
+        //     if (this.ndiReceiver.enabled)
+        //     { this.__restartNdiReceiver(); }
+        //     this.ndiReceiver = null;
+        // });
     }
 
     /** RELAUNCH NDI RECEIVER */
@@ -512,8 +495,8 @@ async function quitNDPi(signal, exit = true) {
         catch {}
         finally { index.ndpiServerStatusUpdate = null; }
 
-        try { await index.ndiReceiver.close(); }
-        catch {}
+        for (const rec of index.ndiReceiver)
+            { rec.close(); }
 
         try { index.lcdDisplay.kill('SIGINT'); }
         catch {}

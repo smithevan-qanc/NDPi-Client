@@ -27,9 +27,9 @@ activateWindow() {
 
     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --no-fading-openclose --realtime --no-vsync &
     # picom -f -D 6 -i 0 --backend xrender --force-win-blend --realtime --vsync &
-    # picom --config "${HOME}/.config/picom/picom.conf" &
+    picom -b --config "${HOME}/.config/picom/picom.conf"
     
-    # sleep 2
+    sleep 2
 
     
     # xdotool windowminimize $WINDOW_ID
@@ -38,8 +38,7 @@ activateWindow() {
     # xdotool windowraise $WINDOW_ID
     # sleep 0.5
 
-    # xdotool windowactivate $WINDOW_ID --sync
-    # sleep 0.5
+    xdotool windowactivate $WINDOW_ID
 }
 
 fadeIn() {
@@ -90,7 +89,8 @@ fadeOut() {
 
 # Start
 activateWindow
-fadeIn
-fadeOut
+sleep 2
+# fadeIn
+# fadeOut
 # killall picom
 exit 0
