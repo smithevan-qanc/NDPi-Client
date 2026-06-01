@@ -286,7 +286,7 @@ class NDPi {
 
         this.lcdDisplay.stderr.on('data', (data) => { console.error(`⚠️ [ python ][ ERROR ]`, data); });
 
-        this.lcdDisplay.on('close', (code, signal) => {
+        this.lcdDisplay.on('exit', () => {
             if (!this.shutdown)
             {
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ][ update_lcd ] Closed: [ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
