@@ -378,7 +378,7 @@ const { exec, spawn } = require('node:child_process');
 
                 exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
                     if (error)
-                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, stderr); }
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, stderr); }
                     else
                     {
                         const output = stdoutToArray(stdout);
@@ -397,7 +397,7 @@ const { exec, spawn } = require('node:child_process');
                     }
 
                     if (!focusSuccess)
-                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, focusError); }
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError); }
 
                     resolve();
                 });
@@ -436,29 +436,26 @@ const { exec, spawn } = require('node:child_process');
 
                 exec(`xdotool search --class 'gstreamer'`, (error, stdout, stderr) => {
                     if (error)
-                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, stderr); }
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr); }
                     else
                     {
                         const output = stdoutToArray(stdout);
                         for (const line of output)
                         {
-                            exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
-                                if (error)
-                                {
-                                    focusError = stderr.toString().trim();
-                                    continue;
-                                }
-                                else
-                                {
-                                    focusSuccess = true;
-                                    break;
-                                }
-                            });
+                            if (!focusSuccess)
+                            {
+                                exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+                                    if (error)
+                                    { focusError = stderr.toString().trim(); }
+                                    else
+                                    { focusSuccess = true; }
+                                });
+                            }
                         }
                     }
 
                     if (!focusSuccess)
-                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, focusError); }
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError); }
 
                     resolve();
                 });
