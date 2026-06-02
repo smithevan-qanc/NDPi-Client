@@ -1042,6 +1042,13 @@ NDIReceiver* g_receiver = nullptr;
 
 void signalHandler(int sig) {
     std::cout << "\nShutting down..." << std::endl;
+    
+    // Close stdin to force any blocking getline() to unblock
+    std::cin.setstate(std::ios_base::badbit);
+    
+    // Give stdin thread time to exit
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    
     if (g_receiver) {
         g_receiver->stop();
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -1187,6 +1194,11 @@ int main(int argc, char* argv[]) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(200));
                     
                     if (receiver_ptr->connectToSource(line)) {
+                        if (lower_line == "none") {
+                            std::cout << "- Idle state active. " << std::endl;
+                        } else {
+                            std::cout << "- Source connection initiated." << std::endl;
+                        }
                         receiver_ptr->start();
                     } else {
                         std::cerr << "Failed to connect to: " << line << std::endl;
