@@ -375,6 +375,8 @@ const { exec, spawn } = require('node:child_process');
             let focusSuccess = true;
             let focusError = '';
 
+            console.log('trying to focus chromium.');
+
             await new Promise((resolve) => {
 
                 exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
@@ -408,6 +410,8 @@ const { exec, spawn } = require('node:child_process');
                 });
             });
 
+            console.log('DONE trying to focus chromium.');
+
             if (!focusSuccess)
             { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError); }
         }
@@ -417,6 +421,8 @@ const { exec, spawn } = require('node:child_process');
 
             let focusSuccess = true;
             let focusError = '';
+
+            console.log('trying to focus gstreamer.');
 
             await new Promise((resolve) => {
                 exec(`xdotool search --class 'gstreamer'`, (error, stdout, stderr) => {
@@ -449,6 +455,8 @@ const { exec, spawn } = require('node:child_process');
                     }
                 });
             });
+
+            console.log('DONE trying to focus gstreamer.');
 
             if (!focusSuccess)
             { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError); }
