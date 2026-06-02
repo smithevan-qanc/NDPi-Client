@@ -372,8 +372,8 @@ const { exec, spawn } = require('node:child_process');
         }
 
         async function focusChromium() {
-            let focusSuccess = false;
-            let focusError = '[ FOCUS ERROR N/A ]';
+            let focusSuccess = true;
+            let focusError = '';
 
             await new Promise((resolve) => {
 
@@ -393,6 +393,7 @@ const { exec, spawn } = require('node:child_process');
                                 exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
                                     if (error)
                                     {
+                                        focusSuccess = false;
                                         focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`;
                                     }
                                     else
@@ -405,29 +406,6 @@ const { exec, spawn } = require('node:child_process');
                         resolve();
                     }
                 });
-                // exec(path.join(__dirname, '..', 'sh', 'focus-chromium')).once('exit', () => { resolve(); });
-
-                // const proc = spawn(path.join(__dirname, '..', 'sh', 'focus-chromium'), {
-                //     env: { ...process.env }
-                // });
-
-                // proc.stdout.on('data', (data) => {
-                //     stdoutToArray(data.toString().trim()).forEach((line) => {
-                //         console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusChromium() ]`, line);
-                //     })
-                // });
-
-                // proc.stderr.on('data', (data) => {
-                //     stdoutToArray(data.toString().trim()).forEach((line) => {
-                //         console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusChromium() ]`, line);
-                //     })
-                // });
-                
-                // proc.on('exit', (code) => {
-                //     if (code !== 0)
-                //     { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ focusChromium() ][ EXIT ] Code:`, code); }
-                //     resolve();
-                // });
             });
 
             if (!focusSuccess)
@@ -436,8 +414,9 @@ const { exec, spawn } = require('node:child_process');
 
         async function focusNdi() {
             await launchPicom();
-            let focusSuccess = false;
-            let focusError = '[ FOCUS ERROR N/A ]';
+            
+            let focusSuccess = true;
+            let focusError = '';
 
             await new Promise((resolve) => {
                 exec(`xdotool search --class 'gstreamer'`, (error, stdout, stderr) => {
@@ -456,6 +435,7 @@ const { exec, spawn } = require('node:child_process');
                                 exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
                                     if (error)
                                     {
+                                        focusSuccess = false;
                                         focusError = stderr.toString().trim() || `None of the GStreamer instances are focusable. ${output.join(', ')}`;
                                     }
                                     else
