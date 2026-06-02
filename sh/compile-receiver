@@ -1,13 +1,22 @@
 #!/usr/bin/env bash
 set -e
 
+if [ "$LOGNAME" != "root" ]; then
+    echo "Error: MUST run as root user."
+    exit 1
+fi
+
+_OUTPUT_NAME="ndi_receiver_v5"
+_SOURCE_CODE="ndi_receiver_v5.cpp"
 _CWD="$(pwd)"
 
 cd $HOME/ndpi/ndi_receiver_v3__NDI6
 
+rm -f $_OUTPUT_NAME
+
 if ! g++ \
-    -o ndi_receiver_v5 ndi_receiver_v5.cpp \
-    $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0 webkit2gtk-4.0) \
+    -o $_OUTPUT_NAME $_SOURCE_CODE \
+    $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0 webkit2gtk-4.1) \
     -I"include" \
     -ldl \
     -std=c++11 \
@@ -15,6 +24,10 @@ if ! g++ \
     cd $_CWD
     exit 1
 else
+    echo ""
+    echo "Successful Compilation"
+    echo "Use the following line to execute."
+    echo ".$(pwd)/${_OUTPUT_NAME}"
     cd $_CWD
     exit 0
 fi

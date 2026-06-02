@@ -556,7 +556,7 @@ public:
                 g_object_set(webkit_src, "uri", webkit_uri.c_str(), nullptr);
                 
                 // Get the sink pad for webkit (pad 1 on compositor) to control opacity
-                webkit_sink_pad = gst_element_get_request_pad(compositor, "sink_1");
+                webkit_sink_pad = gst_element_request_pad_simple(compositor, "sink_1");
                 if (webkit_sink_pad) {
                     // Set initial opacity (start fully visible)
                     setWebkitOpacity(webkit_opacity);
@@ -1157,7 +1157,7 @@ int main(int argc, char* argv[]) {
         }
         
         // Thread to listen for source change commands on stdin
-        std::thread([g_receiver]() {
+        std::thread([&g_receiver]() {
             std::string line;
             while (std::getline(std::cin, line)) {
                 // Trim whitespace
