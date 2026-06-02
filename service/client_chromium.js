@@ -52,14 +52,16 @@ class ChromiumOverlayDisplay extends EventEmitter {
                 XAUTHORITY: `${process.env.HOME}/.Xauthority`,
             }
         });
-
-        this.service.stdout.once('data', () => {
-            process.nextTick(() => { this.emit('ready'); });
-        });
         
         this.service.on('error', (err) => {
             console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ]`, '[ SERVICE ERROR ]', err);
         });
+
+        this.service.on('exit', () => {
+            this.emit('close');
+        });
+        
+        process.nextTick(() => { this.emit('ready'); });
     }
 
     async close() {

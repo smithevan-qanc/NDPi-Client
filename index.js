@@ -324,27 +324,28 @@ class NDPi {
             const ChromiumOverlayDisplay = require('./service/client_chromium.js');
             this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
 
-            this.service_chromium.on('ready', async () => {
+            this.service_chromium.on('ready', () => {
                 console.log('chromium ready signal received');
-
-                func.fadeVolume(0, `${path.basename(__filename)} startChromium() service_chromium.on(ready)`);
-                await func.focusChromium();
-                
-                if (String(this.targetSource).toLowerCase() !== 'none')
-                {
-                    setTimeout(() => {
-                        this.startNdiReceiver(this.targetSource);
-                    }, 5000);
-                }
+                this._afterChromiumStart();
             });
-
         }
         else
         {
             console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] Skipping Chromium display launch.`);
             console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] -- Missing binary: /usr/bin/chromium`);
         }
-        return;
+    }
+    
+    async _afterChromiumStart() {
+        func.fadeVolume(0, `${path.basename(__filename)} startChromium() service_chromium.on(ready)`);
+        await func.focusChromium();
+        
+        if (String(this.targetSource).toLowerCase() !== 'none')
+        {
+            setTimeout(() => {
+                this.startNdiReceiver(this.targetSource);
+            }, 5000);
+        }
     }
 
     /** OPEN CEC CONTROLER */
