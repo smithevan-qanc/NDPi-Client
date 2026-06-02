@@ -414,7 +414,7 @@ const { exec, spawn } = require('node:child_process');
 
         async function focusNdi() {
             await launchPicom();
-            
+
             let focusSuccess = true;
             let focusError = '';
 
@@ -473,6 +473,7 @@ const { exec, spawn } = require('node:child_process');
                         resolve();
                     });
                 });
+                console.log('PICOM launch');
             }
             return;
         }
