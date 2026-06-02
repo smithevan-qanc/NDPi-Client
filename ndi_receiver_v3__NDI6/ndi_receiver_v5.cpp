@@ -470,6 +470,25 @@ public:
             return; // Pipeline already matches
         }
         
+        // Check if webkitsrc is actually available
+        bool webkit_available = false;
+        if (use_webkit_overlay) {
+            GstElementFactory *factory = gst_element_factory_find("webkitsrc");
+            webkit_available = (factory != nullptr);
+            if (factory) gst_object_unref(factory);
+            
+            if (!webkit_available) {
+                static bool warned = false;
+                if (!warned) {
+                    std::cerr << "WARNING: webkitsrc not found. webkit2gtk plugin not installed or not registered." << std::endl;
+                    std::cerr << "         Install: sudo apt install gstreamer1.0-plugins-bad gstreamer1.0-gl" << std::endl;
+                    std::cerr << "         Falling back to video-only mode." << std::endl;
+                    warned = true;
+                }
+                use_webkit_overlay = false;
+            }
+        }
+        
         // Stop and destroy existing pipeline
         if (pipeline) {
             gst_element_set_state(pipeline, GST_STATE_NULL);
@@ -501,45 +520,22 @@ public:
         }
         std::flush(std::cout);
         
-        // Create GStreamer pipeline with optional webkit2gtk overlay using compositor
-        char pipeline_str[2048];
+        // Create GStreamer pipeline - video only mode (webkit requires separate linking)
+        char pipeline_str[1024];
+        snprintf(pipeline_str, sizeof(pipeline_str),
+            "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
+            "caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
+            "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
+            "videoconvert ! "
+            "videoscale method=bilinear add-borders=false ! "
+            "video/x-raw,width=%d,height=%d ! "
+            "autovideosink sync=false "
+            "appsrc name=audio_src format=time is-live=true block=false do-timestamp=true "
+            "caps=audio/x-raw,format=S16LE,channels=2,rate=48000,layout=interleaved ! "
+            "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
+            width, height, framerate_n, framerate_d,
+            display_width, display_height);
         
-        if (use_webkit_overlay) {
-            // Pipeline with compositor: NDI video (pad 0) + webkit overlay (pad 1)
-            snprintf(pipeline_str, sizeof(pipeline_str),
-                "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
-                "caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
-                "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
-                "videoconvert ! video/x-raw,format=RGBA ! "
-                "compositor name=comp sink_0::zorder=0 ! "
-                "videoscale method=bilinear add-borders=false ! "
-                "video/x-raw,width=%d,height=%d ! "
-                "autovideosink sync=false "
-                "webkitsrc name=webkit_src ! "
-                "queue ! videoconvert ! video/x-raw,format=RGBA ! "
-                "compositor.sink_1 "
-                "appsrc name=audio_src format=time is-live=true block=false do-timestamp=true "
-                "caps=audio/x-raw,format=S16LE,channels=2,rate=48000,layout=interleaved ! "
-                "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
-                width, height, framerate_n, framerate_d,
-                display_width, display_height);
-        } else {
-            // Standard pipeline without webkit overlay
-            snprintf(pipeline_str, sizeof(pipeline_str),
-                "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
-                "caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
-                "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
-                "videoconvert ! "
-                "videoscale method=bilinear add-borders=false ! "
-                "video/x-raw,width=%d,height=%d ! "
-                "autovideosink sync=false "
-                "appsrc name=audio_src format=time is-live=true block=false do-timestamp=true "
-                "caps=audio/x-raw,format=S16LE,channels=2,rate=48000,layout=interleaved ! "
-                "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
-                width, height, framerate_n, framerate_d,
-                display_width, display_height);
-        }
-            
         GError *error = nullptr;
         pipeline = gst_parse_launch(pipeline_str, &error);
         
@@ -554,23 +550,6 @@ public:
         // Get references to elements
         appsrc = gst_bin_get_by_name(GST_BIN(pipeline), "ndi_src");
         audio_appsrc = gst_bin_get_by_name(GST_BIN(pipeline), "audio_src");
-        
-        if (use_webkit_overlay) {
-            compositor = gst_bin_get_by_name(GST_BIN(pipeline), "comp");
-            webkit_src = gst_bin_get_by_name(GST_BIN(pipeline), "webkit_src");
-            
-            if (webkit_src && !webkit_uri.empty()) {
-                g_object_set(webkit_src, "uri", webkit_uri.c_str(), nullptr);
-                
-                // Get the sink pad for webkit (pad 1 on compositor) to control opacity
-                webkit_sink_pad = gst_element_request_pad_simple(compositor, "sink_1");
-                if (webkit_sink_pad) {
-                    // Set initial opacity (start fully visible)
-                    setWebkitOpacity(webkit_opacity);
-                    std::cout << "WebKit_Source_URI^" << webkit_uri << std::endl;
-                }
-            }
-        }
         
         gst_element_set_state(pipeline, GST_STATE_PLAYING);
         std::flush(std::cout);
