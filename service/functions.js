@@ -361,9 +361,10 @@ const { exec, spawn } = require('node:child_process');
         /**
          * Fade the volume from it's current level.
          * @param {number} level - Level to fade the volume to. Starting from it's current setpoint. [Range: 0 - 255]
+         * @param {string} source - Description of where the function was called. For debugging.
          * @returns
          */
-        function fadeVolume(level) {
+        function fadeVolume(level, source = 'Default') {
             if (!level.toString()) return;
 
             const commandLine = `${path.join(__dirname, '..', 'sh', 'fade-volume')} ${level}` ;

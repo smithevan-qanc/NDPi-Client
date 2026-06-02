@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 set -e
 
+FUNC_CALLED_FROM=$2
 FADE_TIME=0.02
 target=$1
 current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
 
 printLog() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "${HOME}/volFadeLog.txt" > /dev/null
+    echo "[ $(date '+%Y-%m-%d %H:%M:%S') ][ $FUNC_CALLED_FROM ] $*" | tee -a "${HOME}/volFadeLog.txt" > /dev/null
 }
 
 printLog '-----------------'
-printLog Start.
+printLog Start
 
 if [[ -z "$target" ]]; then
     printLog "No target level provided."
@@ -19,7 +20,6 @@ if [[ -z "$target" ]]; then
     echo "Usage: $0 <LVL>"
     echo "           LVL Range: 0-255"
     printLog "Exiting."
-    printLog '-----------------'
     exit 1
 fi
 
@@ -46,6 +46,5 @@ fi
 
 
 printLog "Exiting."
-printLog '-----------------'
 
 exit 0
