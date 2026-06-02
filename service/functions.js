@@ -366,10 +366,8 @@ const { exec, spawn } = require('node:child_process');
         function fadeVolume(level) {
             if (!level) return;
 
-            const commandLine = path.join(__dirname, '..', 'sh', 'fade-volume', `${level}`);
-            exec(commandLine).once('error', (err) => {
-                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ fadeVolume() ][ ERROR ]`, err);
-            });
+            const commandLine = `${path.join(__dirname, '..', 'sh', 'fade-volume')} ${level}` ;
+            exec(commandLine);
         }
 
         async function focusChromium() {
