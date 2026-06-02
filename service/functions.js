@@ -372,8 +372,8 @@ const { exec, spawn } = require('node:child_process');
         }
 
         async function focusChromium() {
-            let focusSuccess = true;
-            let focusError = '';
+            let focusSuccess = false;
+            let focusError = null;
 
             console.log('trying to focus chromium.');
 
@@ -395,7 +395,6 @@ const { exec, spawn } = require('node:child_process');
                                 exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
                                     if (error)
                                     {
-                                        focusSuccess = false;
                                         focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`;
                                     }
                                     else
@@ -412,15 +411,15 @@ const { exec, spawn } = require('node:child_process');
 
             console.log('DONE trying to focus chromium.');
 
-            if (!focusSuccess)
+            if (focusError)
             { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError); }
         }
 
         async function focusNdi() {
             await launchPicom();
 
-            let focusSuccess = true;
-            let focusError = '';
+            let focusSuccess = false;
+            let focusError = null;
 
             console.log('trying to focus gstreamer.');
 
@@ -441,7 +440,6 @@ const { exec, spawn } = require('node:child_process');
                                 exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
                                     if (error)
                                     {
-                                        focusSuccess = false;
                                         focusError = stderr.toString().trim() || `None of the GStreamer instances are focusable. ${output.join(', ')}`;
                                     }
                                     else
@@ -458,7 +456,7 @@ const { exec, spawn } = require('node:child_process');
 
             console.log('DONE trying to focus gstreamer.');
 
-            if (!focusSuccess)
+            if (focusError)
             { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError); }
         }
 
