@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-FADE_TIME=0.05
+FADE_TIME=0.02
 target=$1
 current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
 
@@ -9,15 +9,17 @@ printLog() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | sudo tee -a "${HOME}/volFadeLog.txt" > /dev/null
 }
 
-printLog "Start."
+printLog '-----------------'
+printLog Start.
 
 if [[ -z "$target" ]]; then
-    printLog No target level provided.
+    printLog "No target level provided."
     echo "Please provide a target volume setpoint."
     echo ""
     echo "Usage: $0 <LVL>"
     echo "           LVL Range: 0-255"
     printLog "Exiting."
+    printLog '-----------------'
     exit 1
 fi
 
@@ -42,6 +44,8 @@ else
     done
 fi
 
+
 printLog "Exiting."
+printLog '-----------------'
 
 exit 0
