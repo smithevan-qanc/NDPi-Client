@@ -67,6 +67,8 @@ class NDI_Receiver_v4 extends EventEmitter {
             '--source', this.ndiSource,
             '--bandwidth', this.ndiBandwidth,
             '--color-format', this.ndiColorFormat,
+            '--webkit',
+            'http://localhost:3080/',
             //'--framesync'
         ], {
             env: {
