@@ -120,12 +120,12 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         this.receiver.stderr.on('data', (data) => {
             func.stdoutToArray(data.toString().trim()).forEach((line) => {
-                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ NDI ] -`, line);
+                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] -`, line);
             });
         });
 
         this.receiver.on('error', (error) => {
-            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ RECEIVER ERROR ][ NDI ] -`, error);
+            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ RECEIVER ERROR ] -`, error);
             this.emit('error');
         });
 
@@ -146,8 +146,6 @@ class NDI_Receiver_v4 extends EventEmitter {
 
             this.ndiResolution = null;
             this.settings.put('ndpi_status_ndi_source_resolution', '');
-            
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] - [ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
         });
     }
 
@@ -170,8 +168,8 @@ class NDI_Receiver_v4 extends EventEmitter {
     async close(shutdown = false) {
         this.enabled = false;
 
-        func.fadeVolume(0);
         await func.focusChromium();
+        func.fadeVolume(0);
 
         return new Promise((resolve) => {
 
@@ -203,7 +201,7 @@ class NDI_Receiver_v4 extends EventEmitter {
 
     logInfo(data) {
         const log = (line = '') => {
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] ${line}`);
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] ⎯→ ${line}`);
         }
         data.split(/\r?\n/).forEach((stdout) => {
             const str = String(stdout || '');
@@ -252,27 +250,27 @@ class NDI_Receiver_v4 extends EventEmitter {
                 return;
                 break;
             case 10:
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             case 20:
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             case 30:
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             case 40:
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             case 50:
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             case 60:
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
                 return;
                 break;
             default:
