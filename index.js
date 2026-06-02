@@ -296,6 +296,7 @@ class NDPi {
             {
                 this.openCecController();
                 this.connectToNDPiServer();
+                this.startNdiReceiver();
                 // this.startChromium();
                 this.isInitialized = true;
             }
@@ -396,8 +397,11 @@ class NDPi {
 
         // this.ndiReceiver.forEach(rec => rec.close());
 
-        for (const rec of this.ndiReceiver)
+        if (this.ndiReceiver.size >= 1)
+        {
+            for (const rec of this.ndiReceiver)
             { rec.close(); }
+        }
 
         const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
         const receiver = new NDI_Receiver_v4(this.settings, this.server_api);
