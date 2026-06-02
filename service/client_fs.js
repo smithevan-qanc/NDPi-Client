@@ -229,7 +229,7 @@ class FileSystemMonitor extends EventEmitter {
             },
             {
                 key: "ndi_receiver_exec",
-                value: `ndi_receiver_v4`,
+                value: `ndi_receiver_v5`,
                 group: ``,
                 allowEditInternal: false,
                 allowEditExternal: false,
