@@ -17,14 +17,14 @@ class NDI_Receiver_v4 extends EventEmitter {
         this.server = api;
         this.chromium = chromium;
 
-        this.parentDirectory = path.join(__dirname, '..');
+        this.receiverDirectory = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
 
         this.reconnectTimer = null;
 
         this.receiver = null;
 
         this.receiverName = this.settings.get('ndi_receiver_exec');
-        this.libraryPath = libraryPath || `/opt/NDI SDK for Linux/lib/aarch64-rpi4-linux-gnueabi:${process.env.LD_LIBRARY_PATH}`;
+        this.libraryPath = libraryPath || `${this.receiverDirectory}/lib/aarch64-rpi4-linux-gnueabi:${process.env.LD_LIBRARY_PATH}`;
         this.xAuth = xAuthority || `${process.env.HOME}/.Xauthority`;
 
         this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
@@ -63,7 +63,7 @@ class NDI_Receiver_v4 extends EventEmitter {
     }
 
     connect() {
-        this.receiver = spawn(`${this.parentDirectory}/${this.receiverName}`, [
+        this.receiver = spawn(`${this.receiverDirectory}/${this.receiverName}`, [
             '--source', this.ndiSource,
             '--bandwidth', this.ndiBandwidth,
             '--color-format', this.ndiColorFormat,
@@ -172,11 +172,8 @@ class NDI_Receiver_v4 extends EventEmitter {
      */
     async close(shutdown = false) {
         this.enabled = false;
-
-        setTimeout(() => {
-            func.fadeVolume(0, `${path.basename(__filename)} close()`);
-        }, 3000);
-
+        
+        func.fadeVolume(0, `${path.basename(__filename)} close()`);
         await func.focusChromium();
 
         if (this.receiver)

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -e
+
+_CWD="$(pwd)"
+
+cd $HOME/ndpi/ndi_receiver_v3__NDI6
+
+if ! g++ \
+    -o ndi_receiver_v5 ndi_receiver_v5.cpp \
+    $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0 webkit2gtk-4.0) \
+    -I"include" \
+    -ldl \
+    -std=c++11
+; then
+    cd $_CWD
+    exit 1
+else
+    cd $_CWD
+    exit 0
+fi

@@ -9,8 +9,9 @@
  * - Audio conversion from NDI float to 16-bit PCM
  * 
  * Compilation:
- *    g++ -o ndi_receiver_v4 ndi_receiver_v4.cpp $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0) -I"/opt/NDI SDK for Linux/include" -ldl -std=c++11
- *    g++ -o ndi_receiver_v4 ndi_receiver_v4.cpp $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0) -I"include" -ldl -std=c++11
+ *    g++ -o ndi_receiver_v5 ndi_receiver_v5.cpp $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0 webkit2gtk-4.0) -I"include" -ldl -std=c++11
+ * 
+ *    g++ -o ndi_receiver_v5 ndi_receiver_v5.cpp $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0 webkit2gtk-4.0) -I"/opt/NDI SDK for Linux/include" -ldl -std=c++11
  * 
  * Usage:
  *    ./ndi_receiver_v# "NDI Source Name"
@@ -25,6 +26,7 @@
 #include <cstring>
 #include <thread>
 #include <chrono>
+#include <mutex>
 #include <signal.h>
 #include <cstdlib>
 #include <dlfcn.h>
@@ -169,7 +171,16 @@ private:
     GstElement *pipeline = nullptr;
     GstElement *appsrc = nullptr;
     GstElement *audio_appsrc = nullptr;
+    GstElement *compositor = nullptr;
+    GstElement *webkit_src = nullptr;
     GMainLoop *main_loop = nullptr;
+    GstPad *webkit_sink_pad = nullptr;
+    
+    // Webkit overlay state
+    bool use_webkit_overlay = false;
+    double webkit_opacity = 1.0;
+    std::string webkit_uri = "";
+    std::mutex webkit_opacity_mutex;
 
     std::string current_source;
 
@@ -263,8 +274,14 @@ public:
     NDIReceiver(
         NDIlib_recv_bandwidth_e bandwidth = NDIlib_recv_bandwidth_max,
         NDIlib_recv_color_format_e color_format = NDIlib_recv_color_format_fastest,
-        bool enable_framesync = false
-    ) : bandwidth_setting(bandwidth), color_format_setting(color_format), use_framesync(enable_framesync) {
+        bool enable_framesync = false,
+        bool enable_webkit = false,
+        const std::string& webkit_html_uri = ""
+    ) : bandwidth_setting(bandwidth), 
+        color_format_setting(color_format), 
+        use_framesync(enable_framesync),
+        use_webkit_overlay(enable_webkit),
+        webkit_uri(webkit_html_uri) {
     //NDIReceiver() {
         // Initialize GStreamer
         gst_init(nullptr, nullptr);
@@ -342,8 +359,39 @@ public:
         stop();
         if (ndi_recv) g_ndi.recv_destroy(ndi_recv);
         if (ndi_framesync) g_ndi.framesync_destroy(ndi_framesync);
+        if (webkit_sink_pad) gst_object_unref(webkit_sink_pad);
         if (main_loop) g_main_loop_unref(main_loop);
         g_ndi.destroy();
+    }
+    
+    void setWebkitOpacity(double opacity) {
+        std::lock_guard<std::mutex> lock(webkit_opacity_mutex);
+        webkit_opacity = (opacity < 0.0) ? 0.0 : (opacity > 1.0) ? 1.0 : opacity;
+        
+        if (webkit_sink_pad && compositor) {
+            g_object_set(webkit_sink_pad, "alpha", webkit_opacity, nullptr);
+        }
+    }
+    
+    double getWebkitOpacity() {
+        std::lock_guard<std::mutex> lock(webkit_opacity_mutex);
+        return webkit_opacity;
+    }
+    
+    void fadeWebkitOverlay(double target_opacity, int duration_ms) {
+        if (!use_webkit_overlay) return;
+        
+        double steps = 20.0;
+        double step_duration = duration_ms / steps;
+        double current = getWebkitOpacity();
+        double increment = (target_opacity - current) / steps;
+        
+        for (int i = 0; i < (int)steps; i++) {
+            current += increment;
+            setWebkitOpacity(current);
+            std::this_thread::sleep_for(std::chrono::milliseconds((int)step_duration));
+        }
+        setWebkitOpacity(target_opacity);
     }
     
     bool connectToSource(const std::string& source_name) {
@@ -441,43 +489,84 @@ public:
         std::cout << "Display_Resolution^"    << display_width << "x" << display_height << std::endl;
         std::cout << "NDI_Source_Resolution^" << width << "x" << height << std::endl;
         std::cout << "NDI_Source_Framerate^"  << fps << std::endl;
+        if (use_webkit_overlay) {
+            std::cout << "WebKit_Overlay^enabled" << std::endl;
+        }
         std::flush(std::cout);
         
-        // Create GStreamer pipeline with autovideosink - OPTIMIZED FOR LOW LATENCY
-        // - queue max-size-buffers=1: minimal buffering
-        // - leaky=downstream: drop frames if backed up rather than buffering
-        // - sync=false: don't wait for clock sync
-        //"caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
-        char pipeline_str[1024];
-        snprintf(pipeline_str, sizeof(pipeline_str),
-            "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
-            "caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
-            "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
-            "videoconvert ! "
-            "videoscale method=bilinear add-borders=false ! "
-            "video/x-raw,width=%d,height=%d ! "
-            "autovideosink sync=false "
-            "appsrc name=audio_src format=time is-live=true block=false do-timestamp=true "
-            "caps=audio/x-raw,format=S16LE,channels=2,rate=48000,layout=interleaved ! "
-            "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
-            width, height, framerate_n, framerate_d,
-            display_width, display_height);
+        // Create GStreamer pipeline with optional webkit2gtk overlay using compositor
+        char pipeline_str[2048];
+        
+        if (use_webkit_overlay) {
+            // Pipeline with compositor: NDI video (pad 0) + webkit overlay (pad 1)
+            snprintf(pipeline_str, sizeof(pipeline_str),
+                "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
+                "caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
+                "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
+                "videoconvert ! video/x-raw,format=RGBA ! "
+                "compositor name=comp sink_0::zorder=0 ! "
+                "videoscale method=bilinear add-borders=false ! "
+                "video/x-raw,width=%d,height=%d ! "
+                "autovideosink sync=false "
+                "webkitsrc name=webkit_src ! "
+                "queue ! videoconvert ! video/x-raw,format=RGBA ! "
+                "compositor.sink_1 "
+                "appsrc name=audio_src format=time is-live=true block=false do-timestamp=true "
+                "caps=audio/x-raw,format=S16LE,channels=2,rate=48000,layout=interleaved ! "
+                "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
+                width, height, framerate_n, framerate_d,
+                display_width, display_height);
+        } else {
+            // Standard pipeline without webkit overlay
+            snprintf(pipeline_str, sizeof(pipeline_str),
+                "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
+                "caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
+                "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
+                "videoconvert ! "
+                "videoscale method=bilinear add-borders=false ! "
+                "video/x-raw,width=%d,height=%d ! "
+                "autovideosink sync=false "
+                "appsrc name=audio_src format=time is-live=true block=false do-timestamp=true "
+                "caps=audio/x-raw,format=S16LE,channels=2,rate=48000,layout=interleaved ! "
+                "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
+                width, height, framerate_n, framerate_d,
+                display_width, display_height);
+        }
             
         GError *error = nullptr;
         pipeline = gst_parse_launch(pipeline_str, &error);
         
         if (error) {
-            std::cerr << "Pipeline Error " << error->message << std::endl;
+            std::cerr << "Pipeline Error: " << error->message << std::endl;
             g_error_free(error);
             return;
         }
         
         pipeline_created = true;
         
+        // Get references to elements
+        appsrc = gst_bin_get_by_name(GST_BIN(pipeline), "ndi_src");
         audio_appsrc = gst_bin_get_by_name(GST_BIN(pipeline), "audio_src");
+        
+        if (use_webkit_overlay) {
+            compositor = gst_bin_get_by_name(GST_BIN(pipeline), "comp");
+            webkit_src = gst_bin_get_by_name(GST_BIN(pipeline), "webkit_src");
+            
+            if (webkit_src && !webkit_uri.empty()) {
+                g_object_set(webkit_src, "uri", webkit_uri.c_str(), nullptr);
+                
+                // Get the sink pad for webkit (pad 1 on compositor) to control opacity
+                webkit_sink_pad = gst_element_get_request_pad(compositor, "sink_1");
+                if (webkit_sink_pad) {
+                    // Set initial opacity (start fully visible)
+                    setWebkitOpacity(webkit_opacity);
+                    std::cout << "WebKit_Source_URI^" << webkit_uri << std::endl;
+                }
+            }
+        }
+        
         gst_element_set_state(pipeline, GST_STATE_PLAYING);
-        // block=false on both appsrcs means push-buffer never blocks regardless of pipeline state.
-        // Let preroll complete naturally as the first frame flows through to autovideosink.
+        std::flush(std::cout);
         
     }
 
@@ -592,21 +681,46 @@ public:
         if (!is_running) return;
         is_running = false;
         
+        // Give receiveLoop time to see is_running=false and exit gracefully
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        
         // Stop the GLib main loop before tearing down pipelines
         if (main_loop && g_main_loop_is_running(main_loop))
             g_main_loop_quit(main_loop);
         
+        // Give main loop time to quit
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        
+        // Stop and destroy raw pipeline
         if (pipeline) {
             gst_element_set_state(pipeline, GST_STATE_NULL);
+            gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
             gst_object_unref(pipeline);
             pipeline = nullptr;
         }
+        
+        // Stop and destroy compressed pipeline
+        if (comp_pipeline) {
+            gst_element_set_state(comp_pipeline, GST_STATE_NULL);
+            gst_element_get_state(comp_pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
+            gst_object_unref(comp_pipeline);
+            comp_pipeline = nullptr;
+        }
+        
+        // Release appsrc references
+        if (appsrc) {
+            gst_object_unref(appsrc);
+            appsrc = nullptr;
+        }
+        
         // Release audio_appsrc if it exists
         if (audio_appsrc) {
             gst_object_unref(audio_appsrc);
             audio_appsrc = nullptr;
         }
+        
         pipeline_created = false;
+        comp_pipeline_created = false;
         
         std::cout << "- NDI Receiver stopped" << std::endl;
     }
@@ -736,6 +850,13 @@ private:
                             if (!first_frame_logged) {
                                 std::cout << "- Connected to: " << current_source << std::endl;
                                 first_frame_logged = true;
+                                
+                                // If webkit overlay is enabled, fade it out when NDI source becomes active
+                                if (use_webkit_overlay && getWebkitOpacity() > 0.1) {
+                                    std::thread([this]() {
+                                        fadeWebkitOverlay(0.0, 500);
+                                    }).detach();
+                                }
                             }
                         }
 
@@ -743,6 +864,13 @@ private:
                             is_stalled = false;
                             std::cout << "- Reconnected to: " << current_source << std::endl;
                             std::flush(std::cout);
+                            
+                            // If webkit overlay is enabled, fade it out when NDI source becomes active
+                            if (use_webkit_overlay && getWebkitOpacity() > 0.1) {
+                                std::thread([this]() {
+                                    fadeWebkitOverlay(0.0, 500);
+                                }).detach();
+                            }
                         }
 
                         if (appsrc) {
@@ -884,6 +1012,11 @@ private:
                         std::flush(std::cout);
                         last_print_time = current_time;
                         is_stalled = true;
+                        
+                        // If webkit overlay is enabled, fade it back in when NDI source is inactive
+                        if (use_webkit_overlay && getWebkitOpacity() < 0.9) {
+                            fadeWebkitOverlay(1.0, 500);
+                        }
                     }
                     break;
                 }
@@ -906,6 +1039,7 @@ void signalHandler(int sig) {
     std::cout << "\nShutting down..." << std::endl;
     if (g_receiver) {
         g_receiver->stop();
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
         delete g_receiver;
         g_receiver = nullptr;
     }
@@ -925,11 +1059,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string version = "NDPi Receiver [GStreamer] (4.0.2)";
+    std::string version = "NDPi Receiver [GStreamer] (5.0.0)";
     std::string source_name = "";
     NDIlib_recv_bandwidth_e bandwidth = NDIlib_recv_bandwidth_max;
     NDIlib_recv_color_format_e color_format = NDIlib_recv_color_format_fastest;
     bool use_framesync = false;
+    bool use_webkit = false;
+    std::string webkit_uri = "file:///opt/ndpi/overlay.html";
 
 
     for (int i = 1; i < argc; ++i) {
@@ -949,6 +1085,11 @@ int main(int argc, char* argv[]) {
             }
         } else if (arg == "-f" || arg == "--framesync") {
             use_framesync = true;
+        } else if (arg == "-w" || arg == "--webkit") {
+            use_webkit = true;
+            if (i + 1 < argc) {
+                webkit_uri = argv[++i];
+            }
         } else if (arg == "-v" || arg == "--version") {
             std::cout << version << std::endl;
             std::cout << g_ndi.version() << std::endl;
@@ -976,6 +1117,9 @@ int main(int argc, char* argv[]) {
             std::cout << "                                                  '101' -> best                          " << "\n";
             std::cout << "                                                                                         " << "\n";
             std::cout << "    [-f|--framesync] ---------------------------- Enable frame-synchronized receiver.    " << "\n";
+            std::cout << "    [-w|--webkit [<uri>]] ---------------------- Enable webkit2gtk overlay with HTML URI." << "\n";
+            std::cout << "                                                  (Fade in when NDI inactive, fade out   " << "\n";
+            std::cout << "                                                   when NDI becomes active)              " << "\n";
             std::cout << "    [-v|--version] ------------------------------ NDPi Receiver Version.                 " << "\n";
             std::cout << "    [-h|--help] --------------------------------- This help menu.                        " << std::endl;
 
@@ -998,33 +1142,49 @@ int main(int argc, char* argv[]) {
     // }
     
     try {
-        g_receiver = new NDIReceiver(bandwidth, color_format, use_framesync);
+        g_receiver = new NDIReceiver(bandwidth, color_format, use_framesync, use_webkit, webkit_uri);
         
-        //if (argc > 1) {
+        // Initial connection if source provided
         if (!source_name.empty()) {
-            //std::string source_name = argv[1];
             std::cout << "- Connecting to source: " << source_name << std::endl;
             
-            if (g_receiver->connectToSource(source_name)) {
-                g_receiver->start();
-                
-                // Keep running
-                while (true) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                }
-            } else {
+            if (!g_receiver->connectToSource(source_name)) {
                 std::cerr << "Failed to connect to source: " << source_name << std::endl;
                 g_ndi.unloadLibrary();
                 return 1;
             }
+            g_receiver->start();
         }
-        // else {
-        //     std::cout << "- NDI Receiver ready. Waiting for source..." << std::endl;
-        //     // Keep running for commands
-        //     while (true) {
-        //         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        //     }
-        // }
+        
+        // Thread to listen for source change commands on stdin
+        std::thread([g_receiver]() {
+            std::string line;
+            while (std::getline(std::cin, line)) {
+                // Trim whitespace
+                line.erase(0, line.find_first_not_of(" \t\r\n"));
+                line.erase(line.find_last_not_of(" \t\r\n") + 1);
+                
+                if (!line.empty()) {
+                    std::cout << "- Switching source to: " << line << std::endl;
+                    std::flush(std::cout);
+                    
+                    g_receiver->stop();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                    
+                    if (g_receiver->connectToSource(line)) {
+                        g_receiver->start();
+                    } else {
+                        std::cerr << "Failed to connect to: " << line << std::endl;
+                        std::flush(std::cerr);
+                    }
+                }
+            }
+        }).detach();
+        
+        // Keep running
+        while (true) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         g_ndi.unloadLibrary();
