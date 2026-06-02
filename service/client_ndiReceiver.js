@@ -79,8 +79,10 @@ class NDI_Receiver_v4 extends EventEmitter {
         });
 
         this.receiver.stdout.on('data', (data) => {
+
             const showNDI = (delay = 1000) => {
                 setTimeout(() => {
+
                     func.focusNdi();
                     func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
 
@@ -154,7 +156,10 @@ class NDI_Receiver_v4 extends EventEmitter {
      * To reactivate the source, call 'thisModule.connect();'
      */
     async softClose() {
-        func.fadeVolume(0, `${path.basename(__filename)} softClose()`);
+
+        setTimeout(() => {
+            func.fadeVolume(0, `${path.basename(__filename)} softClose()`);
+        }, 2000);
         await func.focusChromium();
         
         try { this.receiver.kill('SIGTERM'); }
@@ -168,8 +173,10 @@ class NDI_Receiver_v4 extends EventEmitter {
     async close(shutdown = false) {
         this.enabled = false;
 
-        setTimeout(() => {});
-        func.fadeVolume(0, `${path.basename(__filename)} close()`);
+        setTimeout(() => {
+            func.fadeVolume(0, `${path.basename(__filename)} close()`);
+        }, 2000);
+
         await func.focusChromium();
 
         if (this.receiver)
