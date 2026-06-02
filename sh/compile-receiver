@@ -8,9 +8,9 @@ fi
 
 _OUTPUT_NAME="ndi_receiver_v5"
 _SOURCE_CODE="ndi_receiver_v5.cpp"
-_CWD="$(pwd)"
+_HOME="/home/ndpi-client"
 
-cd $HOME/ndpi/ndi_receiver_v3__NDI6
+cd $_HOME/ndpi/ndi_receiver_v3__NDI6
 
 rm -f $_OUTPUT_NAME
 
@@ -21,13 +21,13 @@ if ! g++ \
     -ldl \
     -std=c++11 \
 ; then
-    cd $_CWD
+    cd $_HOME
     exit 1
 else
     echo ""
-    echo "Successful Compilation"
+    echo "-- Successful Compilation"
     echo "Use the following line to execute."
-    echo ".$(pwd)/${_OUTPUT_NAME}"
-    cd $_CWD
+    echo "cd $(pwd) && ./${_OUTPUT_NAME}"
+    cd $_HOME
     exit 0
 fi
