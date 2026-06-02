@@ -1157,7 +1157,8 @@ int main(int argc, char* argv[]) {
         }
         
         // Thread to listen for source change commands on stdin
-        std::thread([&g_receiver]() {
+        NDIReceiver* receiver_ptr = g_receiver;
+        std::thread([receiver_ptr]() {
             std::string line;
             while (std::getline(std::cin, line)) {
                 // Trim whitespace
@@ -1168,11 +1169,11 @@ int main(int argc, char* argv[]) {
                     std::cout << "- Switching source to: " << line << std::endl;
                     std::flush(std::cout);
                     
-                    g_receiver->stop();
+                    receiver_ptr->stop();
                     std::this_thread::sleep_for(std::chrono::milliseconds(200));
                     
-                    if (g_receiver->connectToSource(line)) {
-                        g_receiver->start();
+                    if (receiver_ptr->connectToSource(line)) {
+                        receiver_ptr->start();
                     } else {
                         std::cerr << "Failed to connect to: " << line << std::endl;
                         std::flush(std::cerr);
