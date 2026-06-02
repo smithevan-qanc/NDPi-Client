@@ -78,22 +78,14 @@ class NDPi {
         //  NDI Source Target
         this.settings.on('ndpi_status_ndi_source_target', (data) => {
             const output = String(data || 'none');
-            // this.startNdiReceiver(output);
+            this.server_api.sendUpdateToDisplay();
+            this.startNdiReceiver(output);
         });
 
         //  No Source Display Mode
-        // this.settings.on('ndpi_status_no_source_display_mode', (data) => {
-        //     try
-        //     {
-        //         if (this.ndiReceiver.ndiStatus == 'idle')
-        //         {
-        //             const output = String(data || 'overlay');
-        //             try { this.server_api.updateDisplay({ type: `show-${output}` }); }
-        //             catch {}
-        //         }
-        //     }
-        //     catch {}
-        // });
+        this.settings.on('ndpi_status_no_source_display_mode', (data) => {
+            this.server_api.sendUpdateToDisplay();
+        });
 
         //  NDPi Hub Server IP
         this.settings.on('ndpi_command_server_host', (data) => {
@@ -142,23 +134,14 @@ class NDPi {
 
         //  Device Name
         this.settings.on('device_name', (data) => {
-            if (data.toString() === '')
-            { 
+            const output = String(data.toString().trim() || '') || null;
+            if (!output)
+            {
                 fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'device_name'), this.settings.defaultDeviceName, 'utf8');
                 return;
             }
 
-            const output = String(data);
-
-            try
-            {
-                this.server_api.updateDisplay({
-                    type: 'update-details',
-                    thisDevice: { name: output }
-                });
-            }
-            catch {}
-
+            this.server_api.sendUpdateToDisplay();
             try { this.controller_cec.updateDeviceName(output); }
             catch {}
         });
@@ -167,61 +150,42 @@ class NDPi {
         this.settings.on('device_ip', (data) => {
             const output = String(data || '').trim() || null;
             if (!output)
-            { return }
-            try
-            {
-                this.server_api.updateDisplay({
-                    type: 'update-details',
-                    thisDevice: { address: output }
-                });
-            }
-            catch {}
+            { return; }
+            this.server_api.sendUpdateToDisplay();
         });
 
         //  API Port Number
-        this.settings.on('local_port_number_api', (data) => {
+        this.settings.on('local_port_number_api', async (data) => {
             const output = String(data || '').trim() || null;
-            if (!output)
-            { return; }
 
-            try { this.server_api.close(); }
-            catch {}
-            finally { this.startApi(); }
+            if (!output) { return; }
+
+            if (this.service_chromium) { await this.service_chromium.close(); }
+            if (this.server_api) { this.server_api.close(); }
+
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ] Updated API/Display Server PORT.`);
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ] Restarting API/Display Server.`);
+
+            setTimeout(() => {
+                this.startApi();
+            }, 1000);
         });
 
         //  HDMI Port
         this.settings.on('output_display_port', async (data) => {
             const output = String(data || '').trim() || null;
+
+            if (output) { await func.setDisplayResolution(); }
+
             if (!output && this.ndiReceiver.size >= 1)
-            {
-                // if (this.ndiReceiver.ndiStatus !== 'idle')
-                // { this.ndiReceiver.softClose(); }
-                this.ndiReceiver.forEach(rec => rec.softClose());
-            }
+            { this.ndiReceiver.forEach(rec => rec.softClose()); }
             else
-            {
-                await func.setDisplayResolution();
-                this.ndiReceiver.forEach(rec => rec.connect());
-                // this.ndiReceiver.connect();
-            }
+            { this.ndiReceiver.forEach(rec => rec.connect()); }
         });
 
         //  HDMI Resolution
         this.settings.on('output_display_resolution_preference', (data) => {
-            func.setDisplayResolution(); 
-            // const output = String(data || '').trim() || null;
-            // if (!output && this.ndiReceiver.size >= 1)
-            // {
-            //     // if (this.ndiReceiver.ndiStatus !== 'idle')
-            //     // { this.ndiReceiver.softClose(); }
-            //     this.ndiReceiver.forEach(rec => rec.softClose());
-            // }
-            // else
-            // {
-            //     await func.setDisplayResolution();
-            //     this.ndiReceiver.forEach(rec => rec.connect());
-            //     // this.ndiReceiver.connect();
-            // }
+            func.setDisplayResolution();
         });
 
         //  HDMI Framerate
@@ -326,7 +290,7 @@ class NDPi {
 
             this.service_chromium.on('ready', () => {
                 console.log('chromium ready signal received');
-                setTimeout(() => { this._afterChromiumStart(); }, 2000);
+                setTimeout(() => { this._afterChromiumStart(); }, 1000);
             });
         }
         else
@@ -339,7 +303,8 @@ class NDPi {
     async _afterChromiumStart() {
         func.fadeVolume(0, `${path.basename(__filename)} startChromium() service_chromium.on(ready)`);
         await func.focusChromium();
-        
+        this.server_api.sendUpdateToDisplay();
+
         if (String(this.targetSource).toLowerCase() !== 'none')
         {
             setTimeout(() => {

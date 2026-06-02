@@ -265,6 +265,13 @@ class NDPiCommandServer_Client extends EventEmitter {
         console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited');
     }
 
+    /**
+     * This function is depricated. Use 'module.sendUpdateToDisplay()'
+     * @param {object} message - This function is depricated. Use 'module.sendUpdateToDisplay()'
+     * @param {boolean} sendAll - This function is depricated. Use 'module.sendUpdateToDisplay()'
+     * @param {object} options - This function is depricated. Use 'module.sendUpdateToDisplay()'
+     * @returns 
+     */
     broadcastToDisplay(message = {}, sendAll = false, options = {}) {
 
         const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
@@ -308,9 +315,29 @@ class NDPiCommandServer_Client extends EventEmitter {
         }
     }
 
+    /**
+     * This function is depricated. Use 'module.sendUpdateToDisplay()'
+     * @param {object} message - This function is depricated. Use 'module.sendUpdateToDisplay()'
+     * @returns 
+     */
     updateDisplay(message = {}) {
         if (!message.type)
         { return; }
+        this.ws_conn_display.forEach(client => {
+            try { client.send(JSON.stringify(message)); }
+            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', message, '\n', e); }
+        });
+    }
+
+    /**
+     * This replaces two functions: updateDisplay() and broadcastToDisplay()
+     */
+    sendUpdateToDisplay() {
+        let message = {
+            type: 'settings-update',
+            data: Array.from(this.settings.fileMap),
+        };
+        
         this.ws_conn_display.forEach(client => {
             try { client.send(JSON.stringify(message)); }
             catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', message, '\n', e); }
