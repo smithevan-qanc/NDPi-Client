@@ -7,7 +7,6 @@ class NDI_Receiver_v4 extends EventEmitter {
     constructor(
         fsData,
         api,
-        chromium,
         libraryPath = '',
         xAuthority = ''
     ) {
@@ -15,7 +14,6 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         this.settings = fsData;
         this.server = api;
-        this.chromium = chromium;
 
         this.receiverDirectory = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
 
@@ -28,6 +26,10 @@ class NDI_Receiver_v4 extends EventEmitter {
         this.xAuth = xAuthority || `${process.env.HOME}/.Xauthority`;
 
         this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
+        fsData.on('ndpi_status_ndi_source_target', (data) => {
+            this.ndiSource = String(data || 'none');
+            this.updateSource(this.ndiSource);
+        });
         
         /**
          * NDIlib_recv_bandwidth_metadata_only  = -10,          // Receive metadata.
@@ -58,13 +60,15 @@ class NDI_Receiver_v4 extends EventEmitter {
         this.closing = false;
         this.secondsInactive = 0;
 
-        if (this.ndiSource.toLowerCase() !== 'none')
-        { this.connect(); }
+        // if (this.ndiSource.toLowerCase() !== 'none')
+        // { 
+            this.connect();
+        // }
     }
 
     connect() {
         this.receiver = spawn(`${this.receiverDirectory}/${this.receiverName}`, [
-            '--source', this.ndiSource,
+            '--source', 'none',
             '--bandwidth', this.ndiBandwidth,
             '--color-format', this.ndiColorFormat,
             '--webkit',
@@ -80,14 +84,19 @@ class NDI_Receiver_v4 extends EventEmitter {
             stdio: ['ignore', 'pipe', 'pipe']
         });
 
-        this.receiver.stdout.on('data', (data) => {
+        this.receiver.on('spawn', () => {
+            const sourceOnSpawn = this.ndiSource;
+            setTimeout(() => {
+                if (this.ndiSource === sourceOnSpawn && String(this.ndiSource).toLowerCase() !== 'none')
+                { this.updateSource(this.ndiSource); }
+            }, 5000);
+        });
 
+        this.receiver.stdout.on('data', (data) => {
             const showNDI = (delay = 1000) => {
                 setTimeout(() => {
-
-                    func.focusNdi();
+                    // func.focusNdi();
                     func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
-
                     setTimeout(() => {
                         this.server.updateDisplay({ type: `show-ndi` });
                     }, 10000);
@@ -151,6 +160,15 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.ndiResolution = null;
             this.settings.put('ndpi_status_ndi_source_resolution', '');
         });
+    }
+
+    /**
+     * Update the active NDI source.
+     * @param {string} name - Updates the NDI source of the monitor. Set to 'none' to STOP viewing a source.
+     */
+    updateSource(name = 'none') {
+        try { this.receiver.stdin.write(`${name}\n`); }
+        catch {}
     }
 
     /**
@@ -239,6 +257,12 @@ class NDI_Receiver_v4 extends EventEmitter {
                     case 'NDI_Source_Not_Active':
                         this.secondsInactive++;
                         this.processInactiveStream();
+                        break;
+                    case 'WebKit_Overlay':
+                        log(`${KeyValues[0]} = ${KeyValues[1]}`);
+                        break;
+                    case 'WebKit_Source_URI':
+                        log(`${KeyValues[0]} = ${KeyValues[1]}`);
                         break;
                     default:
                         //

@@ -30,6 +30,7 @@
 #include <signal.h>
 #include <cstdlib>
 #include <dlfcn.h>
+#include <algorithm>
 #include <gst/gst.h>
 #include <gst/app/gstappsrc.h>
 #include <Processing.NDI.Lib.h>
@@ -395,7 +396,11 @@ public:
     }
     
     bool connectToSource(const std::string& source_name) {
-        if (source_name == "None" || source_name.empty()) {
+        // Convert to lowercase for case-insensitive comparison
+        std::string lower_name = source_name;
+        std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
+        
+        if (lower_name == "none" || source_name.empty()) {
             stop();
             return true;
         }
@@ -1166,8 +1171,17 @@ int main(int argc, char* argv[]) {
                 line.erase(line.find_last_not_of(" \t\r\n") + 1);
                 
                 if (!line.empty()) {
-                    std::cout << "- Switching source to: " << line << std::endl;
-                    std::flush(std::cout);
+                    // Convert to lowercase for comparison
+                    std::string lower_line = line;
+                    std::transform(lower_line.begin(), lower_line.end(), lower_line.begin(), ::tolower);
+                    
+                    if (lower_line == "none") {
+                        std::cout << "- Entering idle state" << std::endl;
+                        std::flush(std::cout);
+                    } else {
+                        std::cout << "- Switching source to: " << line << std::endl;
+                        std::flush(std::cout);
+                    }
                     
                     receiver_ptr->stop();
                     std::this_thread::sleep_for(std::chrono::milliseconds(200));

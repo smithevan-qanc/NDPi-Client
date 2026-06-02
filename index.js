@@ -76,7 +76,7 @@ class NDPi {
         //  NDI Source Target
         this.settings.on('ndpi_status_ndi_source_target', (data) => {
             const output = String(data || 'none');
-            this.startNdiReceiver(output);
+            // this.startNdiReceiver(output);
         });
 
         //  No Source Display Mode
@@ -296,7 +296,7 @@ class NDPi {
             {
                 this.openCecController();
                 this.connectToNDPiServer();
-                this.startChromium();
+                // this.startChromium();
                 this.isInitialized = true;
             }
             else 
@@ -306,13 +306,15 @@ class NDPi {
                     this.service_bonjour.commandPort = output;
                     this.service_bonjour._tryPublish();
                 }
-                try { this.service_chromium.close(); }
-                catch {}
-                finally
-                { 
-                    this.service_chromium = null;
-                    this.startChromium();
-                }
+
+                // try { this.service_chromium.close(); }
+                // catch {}
+                // finally
+                // { 
+                //     this.service_chromium = null;
+                //     this.startChromium();
+                // }
+
             }
         });
 
@@ -339,7 +341,7 @@ class NDPi {
             this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
             
             this.service_chromium.on('spawn', () => {
-                
+
                 func.fadeVolume(0, `${path.basename(__filename)} startChromium() service_chromium.on(spawn)`);
 
                 this.targetSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
@@ -398,7 +400,8 @@ class NDPi {
             { rec.close(); }
 
         const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
-        const receiver = new NDI_Receiver_v4(this.settings, this.server_api, this.service_chromium);
+        const receiver = new NDI_Receiver_v4(this.settings, this.server_api);
+        // const receiver = new NDI_Receiver_v4(this.settings, this.server_api, this.service_chromium);
 
         this.ndiReceiver.add(receiver);
 
@@ -516,10 +519,10 @@ async function quitNDPi(signal, exit = true) {
 
         try { index.settings.close(); }
         catch {}
-
-        try { index.service_chromium.close(); }
-        catch {}
         finally { resolve(); }
+
+        // try { index.service_chromium.close(); }
+        // catch {}
     });
 
     if (exit)
