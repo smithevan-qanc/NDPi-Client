@@ -10,8 +10,6 @@ set -e
 # xcompmgr -d :0 -fFCnR &
 # sleep 1
 
-printf "$(date +%Y-%m-%d)" > "${HOME}/"
-
 FADE_TIME=0.02
 
 activateWindow() {

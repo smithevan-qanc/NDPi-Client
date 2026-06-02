@@ -5,12 +5,25 @@ FADE_TIME=0.05
 target=$2
 current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
 
+printLog() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | sudo tee -a "${HOME}/volFadeLog.txt"
+}
+
+printLog "Start."
+
 if [[ -z "$target" ]]; then
+    printLog "No target level provided."
     echo "Please provide a target volume setpoint."
     echo "Usage: $1 <LVL>"
     echo "           LVL Range: 0-255"
+    printLog "Exiting."
     exit 1
 fi
+
+
+printLog "Fading Volume"
+printLog " ↳ From: $current"
+printLog "   ↳ To: $target"
 
 if [ "$current" -lt "$target" ]; then
     while [ "$current" -lt "$target" ]; do
@@ -27,5 +40,7 @@ else
         sleep $FADE_TIME
     done
 fi
+
+printLog "Exiting."
 
 exit 0
