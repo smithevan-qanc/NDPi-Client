@@ -386,10 +386,7 @@ const { exec, spawn } = require('node:child_process');
                         {
                             exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
                                 if (error)
-                                {
-                                    focusError = stderr.toString().trim();
-                                    continue;
-                                }
+                                { focusError = stderr.toString().trim(); }
                                 else
                                 {
                                     focusSuccess = true;
