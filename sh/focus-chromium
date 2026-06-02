@@ -31,7 +31,6 @@ activateWindow() {
     
     sleep 2
 
-    
     xdotool windowminimize $WINDOW_ID
     sleep 0.5
 

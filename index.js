@@ -322,17 +322,27 @@ class NDPi {
             { await this.service_chromium.close(); }
 
             await new Promise((resolve) => {
+
+
                 const ChromiumOverlayDisplay = require('./service/client_chromium.js');
                 this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
 
-                this.service_chromium.once('ready', () => {
-                    func.fadeVolume(0, `${path.basename(__filename)} startChromium() service_chromium.on(ready)`);
-
+                this.service_chromium.once('ready', async () => {
                     console.log('chromium ready signal received');
+
+                    func.fadeVolume(0, `${path.basename(__filename)} startChromium() service_chromium.on(ready)`);
+                    await func.focusChromium();
                     
                     if (String(this.targetSource).toLowerCase() !== 'none')
-                    { setTimeout(() => { this.startNdiReceiver(); }, 5000); }
+                    {
+                        setTimeout(() => {
+                            this.startNdiReceiver(this.targetSource);
+                        }, 5000);
+                    }
+                    resolve();
                 });
+
+
             });
         }
         else

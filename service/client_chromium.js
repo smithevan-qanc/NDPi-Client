@@ -1,6 +1,7 @@
 const path = require('path');
 const { exec, spawn } = require('node:child_process');
 const { EventEmitter } = require('events');
+const func = require('./functions');
 
 class ChromiumOverlayDisplay extends EventEmitter {
     constructor(fsData, api) {
@@ -12,50 +13,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
     }
 
     async launch() {
-        let picomNotRunning = false;
-        await new Promise((resolve) => {
-            exec('pgrep picom', (error, stdout, stderr) => {
-                if (error) { picomNotRunning = true; }
-                resolve();
-            });
-        });
-
-        if (picomNotRunning)
-        {
-            console.log('launching PICOM');
-            await new Promise((resolve) => {
-                exec(`picom -b --config "${process.env.HOME}/.config/picom/picom.conf"`, (error, stdout, stderr) => {
-                    if (error)
-                    { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', stderr.toString()); }
-                    resolve();
-                });
-                // const picom = spawn('picom', [
-                //     '-b',
-                //     '--config',
-                //     `${process.env.HOME}/.config/picom/picom.conf`
-                // ],{
-                //     env: { ...process.env },
-                //     // detached: true,
-                // });
-
-                // picom.stderr.on('data', (data) => {
-                //     console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', data.toString());
-                // });
-
-                // picom.on('spawn', () => {
-                //     console.log('PICOM spawned in chromium.js');
-                //     setTimeout(() => {
-                //         console.log('PICOM spawned in chromium.js: Continuing...');
-                //         resolve();
-                //     }, 2000);
-                // });
-
-                // picom.on('exit', () => { console.log('picom in chromium.js has exited.'); });
-                // picom.on('close', () => { console.log('picom in chromium.js has closed.'); });
-
-                // picom.unref();
-            });
-        }
+        await func.launchPicom();
 
         const connectionPort = this.settings.get('local_port_number_api');
         const command = 'chromium';

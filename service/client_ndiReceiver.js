@@ -55,7 +55,7 @@ class NDI_Receiver_v4 extends EventEmitter {
         if (this.ndiSource.toLowerCase() !== 'none')
         { this.connect(); }
         else
-        { this.emit('close') }
+        { process.nextTick(() => { this.emit('close'); }); }
     }
 
     connect() {
@@ -115,39 +115,37 @@ class NDI_Receiver_v4 extends EventEmitter {
      * @param {string} stdout - CONVERT TO STRING FIRST [ data.toString().trim() ]
      */
     _handleReceiverData(stdout) {
-            const showNDI = (delay = 1000) => {
-                setTimeout(() => {
-                    // func.focusNdi();
-                    func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
-                    this.emit('show', 'ndi');
-                }, delay);
-            }
+        const showNDI = (delay = 1000) => {
+            setTimeout(() => {
+                // func.focusNdi();
+                func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
+                this.emit('show', 'ndi');
+            }, delay);
+        }
 
-            this.logInfo(stdout);
+        this.logInfo(stdout);
 
-            if (stdout.includes('NDI Receiver started:'))
-            {
-                this.secondsInactive = 0;
-                this.ndiConnectedAt = new Date().toISOString();
-                this.ndiActiveSource = this.ndiSource;
-                this.ndiStatus = 'streaming';
+        if (stdout.includes('NDI Receiver started:'))
+        {
+            this.secondsInactive = 0;
+            this.ndiConnectedAt = new Date().toISOString();
+            this.ndiActiveSource = this.ndiSource;
+            this.ndiStatus = 'streaming';
 
-                this.settings.put('ndpi_status_ndi', this.ndiStatus);
-                this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
-                this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
+            this.settings.put('ndpi_status_ndi', this.ndiStatus);
+            this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
+            this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
 
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
-            }
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
+            showNDI(500);
+        }
 
-            if (stdout.includes('Connected to:'))
-                { showNDI(500); }
-
-            if (stdout.includes('Reconnected to:'))
-            {
-                this.ndiStatus = 'streaming';
-                this.settings.put('ndpi_status_ndi', this.ndiStatus);
-                this.secondsInactive = 0;
-            }
+        if (stdout.includes('Reconnected to:'))
+        {
+            this.ndiStatus = 'streaming';
+            this.settings.put('ndpi_status_ndi', this.ndiStatus);
+            this.secondsInactive = 0;
+        }
 
     }
 

@@ -1,10 +1,15 @@
+let displayMode = 'blank';
+let customOverlay = '';
+
 const waitingForServer   = (show = true) => { document.getElementById('waiting-for-server-svg').style.opacity = show ? 1 : 0; }
 const connectingToSource = (show = true) => { document.getElementById('attempting-ndi-connection-svg').style.opacity = show ? 1 : 0; }
 const displayDetails     = (show = true) => { document.getElementById('sys-details').style.opacity = show ? 1 : 0; }
 
 const displayOverlay = async (show = true, imagePath = '') => {
     const svgContainer = document.getElementById('overlay-svg');
+
     let overlayImageSrc = imagePath || null;
+
     if (show && overlayImageSrc) 
     {
         svgContainer.style.opacity = 0; 
@@ -135,15 +140,18 @@ function handleDisplayCommand(msg) {
         case 'show-ndi':
             hideAll();
             break;
+        case 'show-display':
+            displayOverlay();
+            break;
         case 'show-overlay':
-            displayOverlay(true);
+            displayMode = 'overlay';
             updateDetails(msg);
             break;
         case 'show-blank':
-            displayOverlay(false);
+            displayMode = 'blank';
             updateDetails(msg);
             break;
-        case 'show-custom-overlay':
+        case 'set-custom-overlay':
             displayOverlay(true, msg.data);
             break;
         default:

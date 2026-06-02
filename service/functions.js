@@ -373,8 +373,38 @@ const { exec, spawn } = require('node:child_process');
 
         async function focusChromium() {
             return await new Promise((resolve) => {
+                let focusSuccess = false;
+                let focusError = '';
 
-                exec(path.join(__dirname, '..', 'sh', 'focus-chromium')).once('exit', () => { resolve(); });
+                exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
+                    if (error)
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, stderr); }
+                    else
+                    {
+                        const output = stdoutToArray(stdout);
+                        for (const line of output)
+                        {
+                            exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+                                if (error)
+                                {
+                                    focusError = stderr.toString().trim();
+                                    continue;
+                                }
+                                else
+                                {
+                                    focusSuccess = true;
+                                    break;
+                                }
+                            });
+                        }
+                    }
+
+                    if (!focusSuccess)
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, focusError); }
+
+                    resolve();
+                });
+                // exec(path.join(__dirname, '..', 'sh', 'focus-chromium')).once('exit', () => { resolve(); });
 
                 // const proc = spawn(path.join(__dirname, '..', 'sh', 'focus-chromium'), {
                 //     env: { ...process.env }
@@ -401,9 +431,42 @@ const { exec, spawn } = require('node:child_process');
         }
 
         async function focusNdi() {
-            return await new Promise((resolve) => {
+            await launchPicom();
 
-                exec(path.join(__dirname, '..', 'sh', 'focus-ndi')).once('exit', () => { resolve(); });
+            return await new Promise((resolve) => {
+                let focusSuccess = false;
+                let focusError = '';
+
+                exec(`xdotool search --class 'gstreamer'`, (error, stdout, stderr) => {
+                    if (error)
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, stderr); }
+                    else
+                    {
+                        const output = stdoutToArray(stdout);
+                        for (const line of output)
+                        {
+                            exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+                                if (error)
+                                {
+                                    focusError = stderr.toString().trim();
+                                    continue;
+                                }
+                                else
+                                {
+                                    focusSuccess = true;
+                                    break;
+                                }
+                            });
+                        }
+                    }
+
+                    if (!focusSuccess)
+                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, focusError); }
+
+                    resolve();
+                });
+
+                // exec(path.join(__dirname, '..', 'sh', 'focus-ndi')).once('exit', () => { resolve(); });
 
                 // const proc = spawn(path.join(__dirname, '..', 'sh', 'focus-ndi'), {
                 //     env: { ...process.env }
@@ -427,6 +490,29 @@ const { exec, spawn } = require('node:child_process');
                 //     resolve();
                 // });
             });
+        }
+
+        async function launchPicom() {
+            let picomNotRunning = false;
+            await new Promise((resolve) => {
+                exec('pgrep picom', (error, stdout, stderr) => {
+                    if (error) { picomNotRunning = true; }
+                    resolve();
+                });
+            });
+
+            if (picomNotRunning)
+            {
+                console.log('launching PICOM');
+                await new Promise((resolve) => {
+                    exec(`picom -b --config "${process.env.HOME}/.config/picom/picom.conf"`, (error, stdout, stderr) => {
+                        if (error)
+                        { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', stderr.toString()); }
+                        resolve();
+                    });
+                });
+            }
+            return;
         }
 
         /** STDOUT TO ARRAY */
@@ -517,6 +603,7 @@ module.exports = {
     focusNdi,
     setNdi,
     fadeVolume,
+    launchPicom,
 };
 
 
