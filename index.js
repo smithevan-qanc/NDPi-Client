@@ -340,7 +340,7 @@ class NDPi {
         {
             if (this.ndiReceiver.has(source))
             { await this.ndiReceiver.get(source).close(); }
-            
+
             process.nextTick(() => {
                 for (const rec of this.ndiReceiver)
                 { openNdiReceivers.push(rec); }
@@ -427,6 +427,8 @@ class NDPi {
     }
 }
 
+// ************************************************** START PROCESS *************
+let quitAttempts = 0;
 const index = new NDPi();
 
 async function shutdownDevice() {
@@ -496,6 +498,7 @@ process.on('uncaughtException', (err) => {
     console.log('🔴');
     console.log(' ');
 });
+
 process.on('unhandledRejection', (reason) => {
     console.log(' ');
     console.log('🔴');
@@ -509,7 +512,13 @@ process.on('unhandledRejection', (reason) => {
     console.log('🔴🔴');
     console.log('🔴');
     console.log(' ');
-    quitNDPi('unhandledRejection');
+    if (quitAttempts < 10)
+    {
+        quitAttempts++;
+        quitNDPi('unhandledRejection');
+    }
+    else
+    { process.exit(1); }
 });
 
 process.on('SIGTERM', () => quitNDPi('SIGTERM'));
