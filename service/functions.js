@@ -384,15 +384,15 @@ const { exec, spawn } = require('node:child_process');
                         const output = stdoutToArray(stdout);
                         for (const line of output)
                         {
-                            exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
-                                if (error)
-                                { focusError = stderr.toString().trim(); }
-                                else
-                                {
-                                    focusSuccess = true;
-                                    break;
-                                }
-                            });
+                            if (!focusSuccess)
+                            {
+                                exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+                                    if (error)
+                                    { focusError = stderr.toString().trim(); }
+                                    else
+                                    { focusSuccess = true; }
+                                });
+                            }
                         }
                     }
 
