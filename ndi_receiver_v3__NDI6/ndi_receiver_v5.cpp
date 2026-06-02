@@ -402,14 +402,8 @@ public:
         std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
         
         if (lower_name == "none" || source_name.empty()) {
-            // Idle mode: disconnect from any NDI source but keep pipeline running
-            // This allows webkit overlay to show and receiveLoop to fade it in/out
-            if (ndi_recv) {
-                g_ndi.recv_connect(ndi_recv, nullptr);  // Disconnect without stopping pipeline
-            }
             current_source = "none";
-            std::cout << "- Disconnected from NDI source (idle mode)" << std::endl;
-            return true;
+            return true;  // Signal caller to start() for idle mode
         }
         
         // Find the source using v2 struct
@@ -1218,7 +1212,7 @@ int main(int argc, char* argv[]) {
                         std::flush(std::cout);
                         
                         if (receiver_ptr->connectToSource(line)) {
-                            receiver_ptr->start();  // Start to keep pipeline/webkit running
+                            receiver_ptr->start();
                         }
                     } else {
                         std::cout << "- Switching source to: " << line << std::endl;
