@@ -10,7 +10,7 @@ if ! g++ \
     $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0 webkit2gtk-4.0) \
     -I"include" \
     -ldl \
-    -std=c++11
+    -std=c++11 \
 ; then
     cd $_CWD
     exit 1
