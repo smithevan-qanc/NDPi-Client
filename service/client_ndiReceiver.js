@@ -257,8 +257,11 @@ class NDI_Receiver_v4 extends EventEmitter {
                         this.settings.put('ndpi_status_ndi_source_framerate', String(this.ndiFramerate || ''));
                         break;
                     case 'NDI_Source_Not_Active':
-                        this.secondsInactive++;
-                        this.processInactiveStream();
+                        if (this.ndiSource !== 'none')
+                        {
+                            this.secondsInactive++;
+                            this.processInactiveStream();
+                        }
                         break;
                     case 'WebKit_Overlay':
                         log(`${KeyValues[0]} = ${KeyValues[1]}`);

@@ -402,8 +402,13 @@ public:
         std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
         
         if (lower_name == "none" || source_name.empty()) {
-            stop();
+            // Idle mode: disconnect from any NDI source but keep pipeline running
+            // This allows webkit overlay to show and receiveLoop to fade it in/out
+            if (ndi_recv) {
+                g_ndi.recv_connect(ndi_recv, nullptr);  // Disconnect without stopping pipeline
+            }
             current_source = "none";
+            std::cout << "- Disconnected from NDI source (idle mode)" << std::endl;
             return true;
         }
         
@@ -520,21 +525,44 @@ public:
         }
         std::flush(std::cout);
         
-        // Create GStreamer pipeline - video only mode (webkit requires separate linking)
-        char pipeline_str[1024];
-        snprintf(pipeline_str, sizeof(pipeline_str),
-            "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
-            "caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
-            "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
-            "videoconvert ! "
-            "videoscale method=bilinear add-borders=false ! "
-            "video/x-raw,width=%d,height=%d ! "
-            "autovideosink sync=false "
-            "appsrc name=audio_src format=time is-live=true block=false do-timestamp=true "
-            "caps=audio/x-raw,format=S16LE,channels=2,rate=48000,layout=interleaved ! "
-            "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
-            width, height, framerate_n, framerate_d,
-            display_width, display_height);
+        // Create GStreamer pipeline with compositor for webkit overlay blending
+        char pipeline_str[2048];
+        
+        if (webkit_available && use_webkit_overlay) {
+            // Compositor pipeline: NDI video (pad 0) blended with webkit (pad 1)
+            snprintf(pipeline_str, sizeof(pipeline_str),
+                "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
+                "caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
+                "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
+                "videoconvert ! video/x-raw,format=RGBA ! "
+                "compositor name=comp sink_0::zorder=0 ! "
+                "videoscale method=bilinear add-borders=false ! "
+                "video/x-raw,width=%d,height=%d ! "
+                "autovideosink sync=false "
+                "webkitsrc name=webkit_src ! "
+                "videoconvert ! video/x-raw,format=RGBA ! "
+                "comp.sink_1 "
+                "appsrc name=audio_src format=time is-live=true block=false do-timestamp=true "
+                "caps=audio/x-raw,format=S16LE,channels=2,rate=48000,layout=interleaved ! "
+                "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
+                width, height, framerate_n, framerate_d,
+                display_width, display_height);
+        } else {
+            // Fallback: video-only pipeline without webkit
+            snprintf(pipeline_str, sizeof(pipeline_str),
+                "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
+                "caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
+                "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
+                "videoconvert ! "
+                "videoscale method=bilinear add-borders=false ! "
+                "video/x-raw,width=%d,height=%d ! "
+                "autovideosink sync=false "
+                "appsrc name=audio_src format=time is-live=true block=false do-timestamp=true "
+                "caps=audio/x-raw,format=S16LE,channels=2,rate=48000,layout=interleaved ! "
+                "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
+                width, height, framerate_n, framerate_d,
+                display_width, display_height);
+        }
         
         GError *error = nullptr;
         pipeline = gst_parse_launch(pipeline_str, &error);
@@ -550,6 +578,24 @@ public:
         // Get references to elements
         appsrc = gst_bin_get_by_name(GST_BIN(pipeline), "ndi_src");
         audio_appsrc = gst_bin_get_by_name(GST_BIN(pipeline), "audio_src");
+        
+        if (webkit_available && use_webkit_overlay) {
+            compositor = gst_bin_get_by_name(GST_BIN(pipeline), "comp");
+            webkit_src = gst_bin_get_by_name(GST_BIN(pipeline), "webkit_src");
+            
+            if (webkit_src && !webkit_uri.empty()) {
+                g_object_set(webkit_src, "uri", webkit_uri.c_str(), nullptr);
+                
+                // Request the webkit sink pad (pad 1 on compositor) for opacity control
+                if (compositor) {
+                    webkit_sink_pad = gst_element_request_pad_simple(compositor, "sink_1");
+                    if (webkit_sink_pad) {
+                        setWebkitOpacity(webkit_opacity);
+                        std::cout << "WebKit_Source_URI^" << webkit_uri << std::endl;
+                    }
+                }
+            }
+        }
         
         gst_element_set_state(pipeline, GST_STATE_PLAYING);
         std::flush(std::cout);
@@ -1168,8 +1214,12 @@ int main(int argc, char* argv[]) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(200));
                     
                     if (lower_line == "none") {
-                        std::cout << "- Entering idle state" << std::endl;
+                        std::cout << "- Entering idle mode (webkit overlay active)" << std::endl;
                         std::flush(std::cout);
+                        
+                        if (receiver_ptr->connectToSource(line)) {
+                            receiver_ptr->start();  // Start to keep pipeline/webkit running
+                        }
                     } else {
                         std::cout << "- Switching source to: " << line << std::endl;
                         std::flush(std::cout);
