@@ -175,7 +175,7 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         setTimeout(() => {
             func.fadeVolume(0, `${path.basename(__filename)} close()`);
-        }, 2000);
+        }, 3000);
 
         await func.focusChromium();
 
