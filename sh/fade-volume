@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-FADE_TIME=0.02
+FADE_TIME=0.06
 target=$2
 current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
 
