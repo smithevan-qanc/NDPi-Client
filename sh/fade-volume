@@ -6,7 +6,7 @@ target=$1
 current=$(amixer sget PCM | awk '/Front Left:/ {print $4; exit}')
 
 printLog() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | sudo tee -a "${HOME}/volFadeLog.txt" > /dev/null
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | sudo tee -a "${HOME}/volFadeLog.txt" >/dev/null 2>&1
 }
 
 printLog '-----------------'

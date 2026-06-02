@@ -171,32 +171,34 @@ class NDI_Receiver_v4 extends EventEmitter {
         await func.focusChromium();
         func.fadeVolume(0);
 
-        return new Promise((resolve) => {
+        if (this.receiver)
+        {
+            return new Promise((resolve) => {
+                if (this.receiver?.exitCode !== null || this.receiver?.killed) {
+                    resolve();
+                    return;
+                }
 
-            if (this.receiver.exitCode !== null || this.receiver.killed) {
-                resolve();
-                return;
-            }
+                this.receiver.once('exit', (code, signal) => {
+                    console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited' );
+                    this.emit('close');
+                    resolve();
+                    return;
+                });
 
-            this.receiver.once('exit', (code, signal) => {
-                console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited' );
-                this.emit('close');
-                resolve();
-                return;
+                try 
+                {
+                    console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module' );
+                    this.receiver.kill('SIGTERM');
+                }
+                catch
+                { 
+                    if (!this.receiver.killed)
+                    { this.receiver.kill('SIGKILL'); }
+                }
+
             });
-
-            try 
-            {
-                console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module' );
-                this.receiver.kill('SIGTERM');
-            }
-            catch
-            { 
-                if (!this.receiver.killed)
-                { this.receiver.kill('SIGKILL'); }
-            }
-
-        });
+        }
     }
 
     logInfo(data) {
