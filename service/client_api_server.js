@@ -71,7 +71,8 @@ class NDPiCommandServer_Client extends EventEmitter {
             
             this.ws_conn_display.add(ws);
             
-            setTimeout(() => { this.broadcastToDisplay(undefined, true, { ws }); }, 1000);
+            setTimeout(() => { this.sendUpdateToDisplay(); }, 1000);
+            // setTimeout(() => { this.broadcastToDisplay(undefined, true, { ws }); }, 1000);
 
             ws.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Display WebSocket Server`, error); });
             
@@ -200,23 +201,25 @@ class NDPiCommandServer_Client extends EventEmitter {
                         break;
 
                     case 'ndi':
-                        let source;
+                        let source = String(data || 'none');
 
-                        if (String(data || 'none').toLowerCase() === 'none')
-                        {
-                            source = 'none';
-                            setTimeout(() => {
-                                const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
-                                this.updateDisplay({ type: `show-${displayMode}` });
-                            }, 2000);
-                        }
-                        else
-                        {
-                            source = String(data);
-                            this.updateDisplay({ type: `ndi-init` });
-                        }
+                        // if (String(data || 'none').toLowerCase() === 'none')
+                        // {
+                        //     source = 'none';
+                        //     setTimeout(() => {
+                        //         const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
+                        //         // this.updateDisplay({ type: `show-${displayMode}` });
+                        //     }, 2000);
+                        // }
+                        // else
+                        // {
+                        //     source = String(data);
+                        //     // this.updateDisplay({ type: `ndi-init` });
+                        // }
 
                         this.settings.put('ndpi_status_ndi_source_target', source);
+
+                        this.sendUpdateToDisplay();
 
                         res.status(200);
                         res.json({ success: true, message: `NDI Source Set: ${source}` });

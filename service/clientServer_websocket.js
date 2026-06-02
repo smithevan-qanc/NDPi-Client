@@ -57,7 +57,8 @@ class ClientServerWebSocket extends EventEmitter {
             
         this.socket.on('open', () => {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ] Connected NDPi Server`);
-            this.server.broadcastToDisplay({ type: 'ndpi-server-connected' }, true);
+            this.server.sendUpdateToDisplay();
+            // this.server.broadcastToDisplay({ type: 'ndpi-server-connected' }, true);
             this.emit('connected');
         });
         

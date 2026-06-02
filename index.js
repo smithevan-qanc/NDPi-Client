@@ -90,17 +90,11 @@ class NDPi {
         //  NDPi Hub Server IP
         this.settings.on('ndpi_command_server_host', (data) => {
             const output = String(data || '').trim() || null;
+
             if (!output)
             { return; }
             
-            try
-            {
-                this.server_api.updateDisplay({
-                    type: 'update-details',
-                    serverIp: output
-                });
-            }
-            catch {}
+            if (this.server_api) { this.server_api.sendUpdateToDisplay(); }
 
             try
             {
@@ -340,25 +334,17 @@ class NDPi {
 
     /** LAUNCH NDI RECEIVER */
     async startNdiReceiver(source = 'none') {
-        const clearNdiSettings = () => {
-            if (this.settings)
-            {
-                this.settings.put('ndpi_status_ndi', 'idle');
-                this.settings.put('ndpi_status_ndi_source_active', '');
-                this.settings.put('ndpi_status_ndi_source_connected_time', '');
-                this.settings.put('ndpi_status_ndi_source_framerate', '');
-                this.settings.put('ndpi_status_ndi_source_resolution', '');
-            }
-        }
-
         let openNdiReceivers = [];
+
         if (this.ndiReceiver.size >= 1)
         {
             if (this.ndiReceiver.has(source))
             { await this.ndiReceiver.get(source).close(); }
-
-            for (const rec of this.ndiReceiver)
-            { openNdiReceivers.push(rec); }
+            
+            process.nextTick(() => {
+                for (const rec of this.ndiReceiver)
+                { openNdiReceivers.push(rec); }
+            })
         }
 
         if (source !== this.targetSource)
@@ -369,11 +355,12 @@ class NDPi {
 
         this.ndiReceiver.add(source, receiver);
 
+        for (const rec of openNdiReceivers)
+        { await rec.close(); }
+
         receiver.once('close', () => {
             this.ndiReceiver.delete(source);
         });
-
-        openNdiReceivers.forEach(receiver => receiver.close());
 
         // this.ndiReceiver.on('connected', () => {
         //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);

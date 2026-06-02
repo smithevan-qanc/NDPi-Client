@@ -55,7 +55,14 @@ class NDI_Receiver_v4 extends EventEmitter {
         if (this.ndiSource.toLowerCase() !== 'none')
         { this.connect(); }
         else
-        { process.nextTick(() => { this.emit('close'); }); }
+        {
+            this.settings.put('ndpi_status_ndi', 'idle');
+            this.settings.put('ndpi_status_ndi_source_active', '');
+            this.settings.put('ndpi_status_ndi_source_connected_time', '');
+            this.settings.put('ndpi_status_ndi_source_framerate', '');
+            this.settings.put('ndpi_status_ndi_source_resolution', '');
+            process.nextTick(() => { this.emit('close'); });
+        }
     }
 
     connect() {
@@ -117,9 +124,9 @@ class NDI_Receiver_v4 extends EventEmitter {
     _handleReceiverData(stdout) {
         const showNDI = (delay = 1000) => {
             setTimeout(() => {
-                // func.focusNdi();
                 func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
-                this.emit('show', 'ndi');
+                func.focusNdi();
+                this.server.upd
             }, delay);
         }
 
