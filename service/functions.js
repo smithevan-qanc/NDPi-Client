@@ -367,7 +367,7 @@ const { exec, spawn } = require('node:child_process');
         function fadeVolume(level, source = 'Default') {
             if (!level.toString()) return;
 
-            const commandLine = `${path.join(__dirname, '..', 'sh', 'fade-volume')} ${level}` ;
+            const commandLine = `${path.join(__dirname, '..', 'sh', 'fade-volume')} ${level} "${source}"` ;
             exec(commandLine);
         }
 

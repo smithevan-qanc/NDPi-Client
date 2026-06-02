@@ -32,8 +32,8 @@ activateWindow() {
     sleep 2
 
     
-    # xdotool windowminimize $WINDOW_ID
-    # sleep 0.5
+    xdotool windowminimize $WINDOW_ID
+    sleep 0.5
 
     # xdotool windowraise $WINDOW_ID
     # sleep 0.5
@@ -89,7 +89,7 @@ fadeOut() {
 
 # Start
 activateWindow
-sleep 2
+sleep 1
 # fadeIn
 # fadeOut
 # killall picom
