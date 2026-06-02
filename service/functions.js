@@ -372,13 +372,17 @@ const { exec, spawn } = require('node:child_process');
         }
 
         async function focusChromium() {
-            return await new Promise((resolve) => {
-                let focusSuccess = false;
-                let focusError = '';
+            let focusSuccess = false;
+            let focusError = '[ FOCUS ERROR N/A ]';
+
+            await new Promise((resolve) => {
 
                 exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
                     if (error)
-                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, stderr); }
+                    {
+                        console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, stderr.toString() || 'No Instances of Chromium when trying to focus.');
+                        resolve();
+                    }
                     else
                     {
                         const output = stdoutToArray(stdout);
@@ -388,18 +392,18 @@ const { exec, spawn } = require('node:child_process');
                             {
                                 exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
                                     if (error)
-                                    { focusError = stderr.toString().trim(); }
+                                    {
+                                        focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`;
+                                    }
                                     else
-                                    { focusSuccess = true; }
+                                    {
+                                        focusSuccess = true;
+                                    }
                                 });
                             }
                         }
+                        resolve();
                     }
-
-                    if (!focusSuccess)
-                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError); }
-
-                    resolve();
                 });
                 // exec(path.join(__dirname, '..', 'sh', 'focus-chromium')).once('exit', () => { resolve(); });
 
@@ -425,18 +429,23 @@ const { exec, spawn } = require('node:child_process');
                 //     resolve();
                 // });
             });
+
+            if (!focusSuccess)
+            { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError); }
         }
 
         async function focusNdi() {
             await launchPicom();
+            let focusSuccess = false;
+            let focusError = '[ FOCUS ERROR N/A ]';
 
-            return await new Promise((resolve) => {
-                let focusSuccess = false;
-                let focusError = '';
-
+            await new Promise((resolve) => {
                 exec(`xdotool search --class 'gstreamer'`, (error, stdout, stderr) => {
                     if (error)
-                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr); }
+                    {
+                        console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr.toString() || 'No Instances of Chromium when trying to focus.');
+                        resolve();
+                    }
                     else
                     {
                         const output = stdoutToArray(stdout);
@@ -446,44 +455,23 @@ const { exec, spawn } = require('node:child_process');
                             {
                                 exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
                                     if (error)
-                                    { focusError = stderr.toString().trim(); }
+                                    {
+                                        focusError = stderr.toString().trim() || `None of the GStreamer instances are focusable. ${output.join(', ')}`;
+                                    }
                                     else
-                                    { focusSuccess = true; }
+                                    {
+                                        focusSuccess = true;
+                                    }
                                 });
                             }
                         }
+                        resolve();
                     }
-
-                    if (!focusSuccess)
-                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError); }
-
-                    resolve();
                 });
-
-                // exec(path.join(__dirname, '..', 'sh', 'focus-ndi')).once('exit', () => { resolve(); });
-
-                // const proc = spawn(path.join(__dirname, '..', 'sh', 'focus-ndi'), {
-                //     env: { ...process.env }
-                // });
-
-                // proc.stdout.on('data', (data) => {
-                //     stdoutToArray(data.toString().trim()).forEach((line) => {
-                //         console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusNdi() ]`, line);
-                //     })
-                // });
-
-                // proc.stderr.on('data', (data) => {
-                //     stdoutToArray(data.toString().trim()).forEach((line) => {
-                //         console.info(`[ ${path.basename(__filename).split('.')[0]} ][ focusNdi() ]`, line);
-                //     })
-                // });
-                
-                // proc.on('exit', (code) => {
-                //     if (code !== 0)
-                //     { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ focusNdi() ][ EXIT ] Code:`, code); }
-                //     resolve();
-                // });
             });
+
+            if (!focusSuccess)
+            { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError); }
         }
 
         async function launchPicom() {
