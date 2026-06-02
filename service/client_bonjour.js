@@ -81,21 +81,26 @@ class NDPiBonjourService {
         };
     }
 
-    _tryPublish() {
+    async _tryPublish() {
         if (!this._isReady())
         { return; }
 
         if (this.service) {
-            this.service.stop();
-            this.service = null;
+            await new Promise((resolve) => {
+                this.service.stop();
+                this.service = null;
+                setTimeout(() => { resolve(); }, 1500);
+            });
         }
 
-        const options = this._buildOptions();
+        this.publish();
+    }
 
-        setTimeout(() => {
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Publishing Service');
-            this.service = bonjour.publish(options);
-        }, 1500);
+    publish() {
+        const options = this._buildOptions();
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Publishing Service');
+
+        this.service = bonjour.publish(options);
 
         this.service.on('error', (err) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, err.message); });
     }
