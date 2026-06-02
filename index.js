@@ -326,7 +326,7 @@ class NDPi {
 
             this.service_chromium.on('ready', () => {
                 console.log('chromium ready signal received');
-                this._afterChromiumStart();
+                setTimeout(() => { this._afterChromiumStart(); }, 2000);
             });
         }
         else
