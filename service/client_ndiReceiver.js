@@ -81,7 +81,9 @@ class NDI_Receiver_v4 extends EventEmitter {
                 XAUTHORITY: this.xAuth,
                 LD_LIBRARY_PATH: this.libraryPath
             },
-            stdio: ['ignore', 'pipe', 'pipe']
+            cwd: this.receiverDirectory,
+            stdio: ['pipe', 'pipe', 'pipe'],
+            // stdio: ['ignore', 'pipe', 'pipe'],
         });
 
         this.receiver.on('spawn', () => {
