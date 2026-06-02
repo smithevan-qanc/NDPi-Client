@@ -23,10 +23,10 @@
   <applications>
     
     <!--  NDI Receiver <<Must Be: name="ndi_receiver_v3*">>  -->
-    <application class="GStreamer">
+    <application class="GStreamer" name="ndi_receiver_*">
       <decor>no</decor>
-      <layer>normal</layer>
-      <focus>no</focus>
+      <layer>above</layer>
+      <focus>yes</focus>
       <maximized>true</maximized>
       <fullscreen>yes</fullscreen>
     </application>
