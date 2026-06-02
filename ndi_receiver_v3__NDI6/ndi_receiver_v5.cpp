@@ -31,6 +31,7 @@
 #include <cstdlib>
 #include <dlfcn.h>
 #include <algorithm>
+#include <unistd.h>
 #include <gst/gst.h>
 #include <gst/app/gstappsrc.h>
 #include <Processing.NDI.Lib.h>
@@ -402,6 +403,7 @@ public:
         
         if (lower_name == "none" || source_name.empty()) {
             stop();
+            current_source = "none";
             return true;
         }
         
@@ -1043,8 +1045,8 @@ NDIReceiver* g_receiver = nullptr;
 void signalHandler(int sig) {
     std::cout << "\nShutting down..." << std::endl;
     
-    // Close stdin to force any blocking getline() to unblock
-    std::cin.setstate(std::ios_base::badbit);
+    // Close stdin file descriptor to unblock any getline() calls
+    close(STDIN_FILENO);
     
     // Give stdin thread time to exit
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -1056,6 +1058,7 @@ void signalHandler(int sig) {
         g_receiver = nullptr;
     }
     g_ndi.unloadLibrary();
+    std::cout << "libs unloaded." << std::endl;
     exit(0);
 }
 
@@ -1182,27 +1185,24 @@ int main(int argc, char* argv[]) {
                     std::string lower_line = line;
                     std::transform(lower_line.begin(), lower_line.end(), lower_line.begin(), ::tolower);
                     
+                    receiver_ptr->stop();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                    
                     if (lower_line == "none") {
                         std::cout << "- Entering idle state" << std::endl;
                         std::flush(std::cout);
                     } else {
                         std::cout << "- Switching source to: " << line << std::endl;
                         std::flush(std::cout);
-                    }
-                    
-                    receiver_ptr->stop();
-                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-                    
-                    if (receiver_ptr->connectToSource(line)) {
-                        if (lower_line == "none") {
-                            std::cout << "- Idle state active. " << std::endl;
+                        
+                        if (receiver_ptr->connectToSource(line)) {
+                            std::cout << "- Connected to source, starting receiver." << std::endl;
+                            std::flush(std::cout);
+                            receiver_ptr->start();
                         } else {
-                            std::cout << "- Source connection initiated." << std::endl;
+                            std::cerr << "Failed to connect to: " << line << std::endl;
+                            std::flush(std::cerr);
                         }
-                        receiver_ptr->start();
-                    } else {
-                        std::cerr << "Failed to connect to: " << line << std::endl;
-                        std::flush(std::cerr);
                     }
                 }
             }
