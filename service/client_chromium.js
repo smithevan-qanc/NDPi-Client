@@ -8,56 +8,27 @@ class ChromiumOverlayDisplay extends EventEmitter {
         this.service = null;
         this.settings = fsData;
         this.server = api;
-        this.start();
-    }
-
-    start() {
-        if (this.service)
-        {
-            try { this.service.kill('SIGKILL'); }
-            catch {}
-            finally { this.service = null; }
-        }
-        // setTimeout(() => { this.launch(); }, 1000);
         this.launch();
     }
 
-    close() {
-        console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module');
-        try { this.service.kill('SIGTERM'); }
-        catch {}
-        finally { this.service = null; }
-    }
-
     async launch() {
-        if (this.service)
-        {
-            try { this.service.kill('SIGKILL'); }
-            catch {}
-            finally { this.service = null; }
-        }
-
         let picomNotRunning = false;
-
         await new Promise((resolve) => {
             exec('pgrep picom', (error, stdout, stderr) => {
-                if (error) {
-                    picomNotRunning = true;
-                    resolve();
-                }
+                if (error) { picomNotRunning = true; }
+                resolve();
             });
         });
 
         if (picomNotRunning)
         {
+            console.log('launching PICOM');
             await new Promise((resolve) => {
-                console.log('launching PICOM');
-
                 exec(`picom -b --config "${process.env.HOME}/.config/picom/picom.conf"`, (error, stdout, stderr) => {
-                    if (error) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', stderr.toString()); }
-                    setTimeout(() => { resolve(); }, 2000);
+                    if (error)
+                    { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', stderr.toString()); }
+                    resolve();
                 });
-
                 // const picom = spawn('picom', [
                 //     '-b',
                 //     '--config',
@@ -89,7 +60,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         const connectionPort = this.settings.get('local_port_number_api');
         const command = 'chromium';
         const args = [
-            // '--kiosk',
+            '--kiosk',
             '--aggressive-cache-discard',
             '--deny-permission-prompts',
             '--disable-component-extensions-with-background-pages',
@@ -124,20 +95,43 @@ class ChromiumOverlayDisplay extends EventEmitter {
             }
         });
 
-        this.service.on('spawn', () => {
-            setTimeout(() => {
-                try { this.emit('spawn'); } catch {}
-            }, 2000);
+        return;
+
+        this.service.stdout.once('data', () => {
+            process.nextTick(() => { this.emit('ready'); });
         });
         
         this.service.on('error', (err) => {
-            console.error('⚠️', `[ ${path.basename(__filename).split('.')[0]} ]`, '[ SERVICE ERROR ]', err);
+            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ]`, '[ SERVICE ERROR ]', err);
+        });
+    }
+
+    async close() {
+        console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
+        
+        if (this.service)
+        {
+            await new Promise((resolve) => {
+                this.service.once('exit', () => {
+                    this.service = null;
+                    resolve();
+                });
+                this.service.kill('SIGTERM');
+            });
+        }
+
+        await new Promise((resolve) => {
+            exec('pgrep chromium', (error, stdout, stderr) => {
+                if (!error) {
+                    try { exec('killall chromium'); }
+                    catch {}
+                }
+                resolve();
+            });
         });
 
-        this.service.on('exit', (code, signal) => {
-            try { this.service = null; } catch {}
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited', `[ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
-        });
+        console.info(`[  CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+        return;
     }
 }
 

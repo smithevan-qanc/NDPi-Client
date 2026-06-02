@@ -26,29 +26,21 @@ class NDI_Receiver_v4 extends EventEmitter {
         this.xAuth = xAuthority || `${process.env.HOME}/.Xauthority`;
 
         this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
-        fsData.on('ndpi_status_ndi_source_target', (data) => {
-            this.ndiSource = String(data || 'none');
-            this.updateSource(this.ndiSource);
-        });
-        
-        /**
-         * NDIlib_recv_bandwidth_metadata_only  = -10,          // Receive metadata.
-         * NDIlib_recv_bandwidth_audio_only     = 10,           // Receive metadata, audio.
-         * NDIlib_recv_bandwidth_lowest         = 0,            // Receive metadata, audio, video at a lower bandwidth and resolution.
-         * NDIlib_recv_bandwidth_highest        = 100,          // Receive metadata, audio, video at full resolution.
-         * NDIlib_recv_bandwidth_max            = 0x7fffffff
-         */
+
         this.ndiBandwidth = this.settings.get('ndi_receiver_bandwidth') || '0';
+            // -10 = metadata_only -> Receive metadata.
+            //  10 = audio_only    -> Receive metadata, audio.
+            //   0 = lowest        -> Receive metadata, audio, video at a lower bandwidth and resolution.
+            // 100 = highest       -> Receive metadata, audio, video at full resolution.
+            // 0x7fffffff = max
         
-        /**
-         * NDIlib_recv_color_format_BGRX_BGRA   = 0
-         * NDIlib_recv_color_format_UYVY_BGRA   = 1
-         * NDIlib_recv_color_format_RGBX_RGBA   = 2
-         * NDIlib_recv_color_format_UYVY_RGBA   = 3
-         * NDIlib_recv_color_format_fastest     = 100
-         * NDIlib_recv_color_format_best        = 101
-         */
         this.ndiColorFormat = this.settings.get('ndi_receiver_color_format') || '100';
+            //   0 = BGRX_BGRA
+            //   1 = UYVY_BGRA
+            //   2 = RGBX_RGBA
+            //   3 = UYVY_RGBA
+            // 100 = fastest  
+            // 101 = best     
 
         this.ndiActiveSource = null;
         this.ndiConnectedAt = null;
@@ -60,78 +52,31 @@ class NDI_Receiver_v4 extends EventEmitter {
         this.closing = false;
         this.secondsInactive = 0;
 
-        // if (this.ndiSource.toLowerCase() !== 'none')
-        // { 
-            this.connect();
-        // }
+        if (this.ndiSource.toLowerCase() !== 'none')
+        { this.connect(); }
+        else
+        { this.emit('close') }
     }
 
     connect() {
-        // this.receiver = spawn(`${this.receiverDirectory}/${this.receiverName}`, [
         this.receiver = spawn(`./${this.receiverName}`, [
             '--source', this.ndiSource,
             '--bandwidth', this.ndiBandwidth,
             '--color-format', this.ndiColorFormat,
-            '--webkit',
-            'http://localhost:3080/',
             //'--framesync'
         ], {
+            cwd: this.receiverDirectory,
             env: {
                 ...process.env,
                 DISPLAY: ':0',
                 XAUTHORITY: this.xAuth,
                 LD_LIBRARY_PATH: this.libraryPath
             },
-            cwd: this.receiverDirectory,
-            stdio: ['pipe', 'pipe', 'pipe'],
-            // stdio: ['ignore', 'pipe', 'pipe'],
-        });
-
-        this.receiver.on('spawn', () => {
-            const sourceOnSpawn = this.ndiSource;
-            setTimeout(() => {
-                if (this.ndiSource === sourceOnSpawn && String(this.ndiSource).toLowerCase() !== 'none')
-                { this.updateSource(this.ndiSource); }
-            }, 5000);
+            stdio: ['ignore', 'pipe', 'pipe'],
         });
 
         this.receiver.stdout.on('data', (data) => {
-            const showNDI = (delay = 1000) => {
-                setTimeout(() => {
-                    // func.focusNdi();
-                    func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
-                    setTimeout(() => {
-                        this.server.updateDisplay({ type: `show-ndi` });
-                    }, 10000);
-                }, delay);
-            }
-
-            const output = data.toString().trim();
-            this.logInfo(output);
-
-            if (output.includes('NDI Receiver started:'))
-            {
-                this.secondsInactive = 0;
-                this.ndiConnectedAt = new Date().toISOString();
-                this.ndiActiveSource = this.ndiSource;
-                this.ndiStatus = 'streaming';
-
-                this.settings.put('ndpi_status_ndi', this.ndiStatus);
-                this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
-                this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
-
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
-            }
-
-            if (output.includes('Connected to:'))
-                { showNDI(500); }
-
-            if (output.includes('Reconnected to:'))
-            {
-                this.ndiStatus = 'streaming';
-                this.settings.put('ndpi_status_ndi', this.ndiStatus);
-                this.secondsInactive = 0;
-            }
+            this._handleReceiverData(data.toString().trim());
         });
 
         this.receiver.stderr.on('data', (data) => {
@@ -166,12 +111,44 @@ class NDI_Receiver_v4 extends EventEmitter {
     }
 
     /**
-     * Update the active NDI source.
-     * @param {string} name - Updates the NDI source of the monitor. Set to 'none' to STOP viewing a source.
+     * Handle data from 'receiver.stdout.on('data')'
+     * @param {string} stdout - CONVERT TO STRING FIRST [ data.toString().trim() ]
      */
-    updateSource(name = 'none') {
-        try { this.receiver.stdin.write(`${name}\n`); }
-        catch {}
+    _handleReceiverData(stdout) {
+            const showNDI = (delay = 1000) => {
+                setTimeout(() => {
+                    // func.focusNdi();
+                    func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
+                    this.emit('show', 'ndi');
+                }, delay);
+            }
+
+            this.logInfo(stdout);
+
+            if (stdout.includes('NDI Receiver started:'))
+            {
+                this.secondsInactive = 0;
+                this.ndiConnectedAt = new Date().toISOString();
+                this.ndiActiveSource = this.ndiSource;
+                this.ndiStatus = 'streaming';
+
+                this.settings.put('ndpi_status_ndi', this.ndiStatus);
+                this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
+                this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
+
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
+            }
+
+            if (stdout.includes('Connected to:'))
+                { showNDI(500); }
+
+            if (stdout.includes('Reconnected to:'))
+            {
+                this.ndiStatus = 'streaming';
+                this.settings.put('ndpi_status_ndi', this.ndiStatus);
+                this.secondsInactive = 0;
+            }
+
     }
 
     /**
@@ -179,10 +156,7 @@ class NDI_Receiver_v4 extends EventEmitter {
      * To reactivate the source, call 'thisModule.connect();'
      */
     async softClose() {
-
-        setTimeout(() => {
-            func.fadeVolume(0, `${path.basename(__filename)} softClose()`);
-        }, 2000);
+        func.fadeVolume(0, `${path.basename(__filename)} softClose()`);
         await func.focusChromium();
         
         try { this.receiver.kill('SIGTERM'); }
@@ -227,6 +201,8 @@ class NDI_Receiver_v4 extends EventEmitter {
 
             });
         }
+        else
+        { return; }
     }
 
     logInfo(data) {

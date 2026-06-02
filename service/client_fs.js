@@ -15,7 +15,7 @@ class FileSystemMonitor extends EventEmitter {
         super();
 
         this.watcherEnable = true;
-        this.watcher;
+        this.watcher = null;
         this.setMaxListeners(100)
 
         this.defaultDeviceName = 'NDPi Client';
@@ -229,7 +229,7 @@ class FileSystemMonitor extends EventEmitter {
             },
             {
                 key: "ndi_receiver_exec",
-                value: `ndi_receiver_v5`,
+                value: `ndi_receiver_v4`,
                 group: ``,
                 allowEditInternal: false,
                 allowEditExternal: false,
@@ -429,21 +429,29 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     async start() {
-        const startWatcher = () => { this.watcher = fs.watch(this.dataDir); }
-        startWatcher();
-
-        this.watcher.on('change', (eventType, filename) => { if (this.fileMap.has(filename)) { this._fsEvent(filename); } });
-        this.watcher.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error); });
-        this.watcher.on('close', () => {
-            this.__flushQueue();
-            if (this.watcherEnable) { startWatcher(); }
-        });
-
-        this.emit('ready');
+        this.startWatcher();
         this.startDrmMonitor();
-
+        this.emit('ready');
         await func.waitForNetwork();
         this.updateLocalIp();
+    }
+
+    startWatcher() {
+        this.watcher = fs.watch(this.dataDir);
+
+        this.watcher.on('change', (eventType, filename) => {
+            if (this.fileMap.has(filename))
+            { this._fsEvent(filename); }
+        });
+        
+        this.watcher.on('error', (error) => {
+            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error);
+        });
+
+        this.watcher.on('close', () => {
+            if (this.watcherEnable)
+            { setTimeout(() => { this.startWatcher(); }, 1000); }
+        });
     }
     
     _fsEvent(name, debounceMs = 800) {
@@ -459,7 +467,9 @@ class FileSystemMonitor extends EventEmitter {
         setTimeout(() => { this.__flushQueue(); }, debounceMs);
     }
 
-    __flushQueue() {
+    async __flushQueue() {
+        let updated = false;
+        
         while (this.queue.length > 0)
         {
             const { name } = this.queue.shift();
@@ -481,9 +491,14 @@ class FileSystemMonitor extends EventEmitter {
                 { fs.writeFileSync(path.join(this.lcdDisplayScriptPath, name), fsValue, 'utf8'); }
 
                 this.emit(name, fsValue);
-                this.emit('update', JSON.stringify(Array.from(this.fileMap)));
+                updated = true;
             }
         }
+
+        if (updated)
+        { this.emit('update', JSON.stringify(Array.from(this.fileMap))); }
+
+        return;
     }
 
     poll() {
@@ -509,24 +524,94 @@ class FileSystemMonitor extends EventEmitter {
         catch (error) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving to FileSystem`); }
     }
 
-    close() {
+    startDrmMonitor() {
+        this.drmEnable = false;
+
+        try
+        { exec('killall udevadm'); }
+        catch {}
+        finally
+        {
+            this.drmMonitor = null;
+            this.drmEnable = true;
+        }
+
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ] Starting DRM Event Monitor`);
+
+        this.drmMonitor = spawn('udevadm', ['monitor', '--subsystem-match=drm', '--kernel']);
+
+        this.drmMonitor.stdout.on('data', (data) => {
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ] DRM Update`);
+            this.debounceDrm();
+        });
+
+        this.drmMonitor.on('error', (error) => {
+            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] 'udevadm' DRM monitor disabled`, error.toString());
+            this.drmMonitor = null;
+        });
+
+        this.drmMonitor.on('close', () => {
+            if (this.drmEnable)
+            { setTimeout(() => { this.startDrmMonitor(); }, 1000); }
+            else
+            { try { clearTimeout(this.debounceTimerDrmEvents) } catch {} }
+        });
+    }
+
+    debounceDrm(debounceMs = 1000) {
+        if (this.debounceTimerDrmEvents)
+        {
+            clearTimeout(this.debounceTimerDrmEvents);
+            this.debounceTimerDrmEvents = null;
+        }
+
+        this.debounceTimerDrmEvents = setTimeout(() => {
+            this.updateOutputDisplayFiles();
+            this.debounceTimerDrmEvents = null;
+        }, debounceMs);
+    }
+
+    async close() {
         this.watcherEnable = false;
         this.drmEnable = false;
 
-        console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module');
+        console.info( `[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
 
-        try { this.watcher.close(); }
-        catch {}
+        if (this.watcher)
+        {
+            try { clearInterval(this.#fsPoll); }
+            catch {}
+            finally { this.#fsPoll = null; }
 
-        try { clearInterval(this.#fsPoll); }
-        catch {}
-        finally { this.#fsPoll = null; }
+            await new Promise((resolve) => {
+                this.watcher.once('close', async () => {
+                    await this.__flushQueue();
+                    resolve();
+                });
 
-        try { this.drmMonitor.kill(); }
-        catch {}
-        finally { this.drmMonitor = null; }
-        
-        console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited');
+                this.watcher.close();
+            });
+        }
+
+        if (this.drmMonitor)
+        {
+            await new Promise((resolve) => {
+                this.drmMonitor.once('exit', () => {
+                    this.drmMonitor = null;
+                    resolve();
+                });
+                this.drmMonitor.kill('SIGINT');
+            });
+        }
+
+        if (this.debounceTimerDrmEvents)
+        {
+            clearTimeout(this.debounceTimerDrmEvents);
+            this.debounceTimerDrmEvents = null;
+        }
+
+        console.info( `[  CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+        return;
     }
 
     /**
@@ -593,43 +678,7 @@ class FileSystemMonitor extends EventEmitter {
             this.fsPollInterval = 1000;
             this.poll();
         }
-    }
-
-    startDrmMonitor() {
-        try { this.drmMonitor.kill() }
-        catch {}
-        finally { this.drmMonitor = null; }
-
-        console.info(`[ ${path.basename(__filename).split('.')[0]} ] Starting DRM Monitor`);
-
-        this.drmMonitor = spawn('udevadm', ['monitor', '--subsystem-match=drm', '--kernel']);
-
-        this.drmMonitor.stdout.on('data', (data) => {
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ] DRM Update`);
-            this.debounceDrm();
-        });
-
-        this.drmMonitor.on('error', (error) => {
-            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] 'udevadm' DRM monitor disabled`, error.toString());
-            this.drmMonitor = null;
-        });
-
-        this.drmMonitor.on('close', () => {
-            if (this.drmEnable)
-            { setTimeout(() => { this.startDrmMonitor(); }, 1000); }
-            else
-            { try { clearTimeout(this.debounceTimerDrmEvents) } catch {} }
-        });
-    }
-
-    debounceDrm(debounceMs = 1000) {
-        try { clearTimeout(this.debounceTimerDrmEvents) }
-        catch {}
-        finally { this.debounceTimerDrmEvents = null; }
-
-        this.debounceTimerDrmEvents = setTimeout(() => {
-            this.updateOutputDisplayFiles();
-        }, debounceMs);
+        return;
     }
 
     async updateOutputDisplayFiles() {
@@ -639,9 +688,7 @@ class FileSystemMonitor extends EventEmitter {
         await new Promise((resolve) => {
             exec('cat /sys/class/drm/card*HDMI*/status', (error, stdout, stderr) => {
                 if (error)
-                {
-                    console.error(`⚠️ [ functions ][ updateOutputDisplayFiles() ][ ERROR ]`, stderr.toString().trim());
-                }
+                { console.error(`⚠️ [ functions ][ updateOutputDisplayFiles() ][ ERROR ]`, stderr.toString().trim()); }
                 else
                 {
                     const output = func.stdoutToArray(stdout);
@@ -736,6 +783,7 @@ class FileSystemMonitor extends EventEmitter {
                 }
             });
         }
+        return;
     }
 }
 

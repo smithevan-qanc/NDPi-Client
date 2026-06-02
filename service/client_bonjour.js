@@ -4,14 +4,50 @@ const path = require('path');
 class NDPiBonjourService {
     constructor(fsData) {
 
-        this.service        = null;
-        this.bonjourPort    = fsData.get('local_port_number_bonjour') || process.env.PORT_MDNS || 3053;
-        this.deviceId       = fsData.get('device_id')                 || null;
-        this.deviceName     = fsData.get('device_name')               || null;
-        this.localIp        = fsData.get('device_ip')                 || null;
-        this.commandPort    = fsData.get('local_port_number_api')     || process.env.PORT_API || 3080;
-        this.deviceType     = fsData.get('device_type')               || null;
-        this.programVersion = fsData.get('ndpi_version')              || null;
+        this.service = null;
+        this.settings = fsData;
+
+        this.localIp = this.settings.get('device_ip') || null;
+        this.settings.on('device_ip', (data) => {
+            this.localIp = String(data || '').trim() || null;
+            this._tryPublish();
+        });
+
+        this.deviceId = this.settings.get('device_id') || null;
+        this.settings.on('device_id', (data) => {
+            this.deviceId = String(data || '').trim() || null;
+            this._tryPublish();
+        });
+
+        this.bonjourPort = this.settings.get('local_port_number_bonjour') || process.env.PORT_MDNS || 3053;
+        this.settings.on('local_port_number_bonjour', (data) => {
+            this.bonjourPort = String(data || '').trim() || process.env.PORT_MDNS || 3053;
+            this._tryPublish();
+        });
+
+        this.deviceName = this.settings.get('device_name') || null;
+        this.settings.on('device_name', (data) => {
+            this.deviceName = String(data || '').trim() || null;
+            this._tryPublish();
+        });
+
+        this.commandPort = this.settings.get('local_port_number_api') || process.env.PORT_API || 3080;
+        this.settings.on('local_port_number_api', (data) => {
+            this.commandPort = String(data || '').trim() || process.env.PORT_API || 3080;
+            this._tryPublish();
+        });
+
+        this.deviceType = this.settings.get('device_type') || null;
+        this.settings.on('device_type', (data) => {
+            this.deviceType = String(data || '').trim() || null;
+            this._tryPublish();
+        });
+
+        this.programVersion = this.settings.get('ndpi_version') || null;
+        this.settings.on('ndpi_version', (data) => {
+            this.programVersion = String(data || '').trim() || null;
+            this._tryPublish();
+        });
 
         this._tryPublish();
     }
@@ -49,7 +85,6 @@ class NDPiBonjourService {
         if (!this._isReady())
         { return; }
 
-        // Stop existing service before republishing with updated data
         if (this.service) {
             this.service.stop();
             this.service = null;
@@ -58,39 +93,11 @@ class NDPiBonjourService {
         const options = this._buildOptions();
 
         setTimeout(() => {
-            try
-            {
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Publishing Service');
-                this.service = bonjour.publish(options);
-            }
-            catch {}
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Publishing Service');
+            this.service = bonjour.publish(options);
         }, 1500);
 
         this.service.on('error', (err) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, err.message); });
-    }
-
-    /**
-     * Update the device name on mDNS.
-     * @param {string} name 
-     */
-    updateDeviceName(name) {
-        if (this.deviceName !== name && typeof name == 'string')
-        {
-            this.deviceName = name;
-            this._tryPublish();
-        }
-    }
-
-    /**
-     * Update the device IP address on mDNS.
-     * @param {string} address 
-     */
-    updateDeviceIp(address) {
-        if (this.localIp !== address && typeof address == 'string')
-        {
-            this.localIp = address;
-            this._tryPublish();
-        }
     }
 
     /**

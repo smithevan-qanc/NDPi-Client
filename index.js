@@ -68,8 +68,10 @@ class NDPi {
 
         //  FS System Ready
         this.settings.on('ready', () => {
+            this.targetSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
             func.setDisplayResolution();
             this.startLcdDisplay();
+            this.startMdns();
             this.startApi();
         });
 
@@ -157,9 +159,6 @@ class NDPi {
             }
             catch {}
 
-            try { this.service_bonjour.updateDeviceName(output); }
-            catch {}
-
             try { this.controller_cec.updateDeviceName(output); }
             catch {}
         });
@@ -167,10 +166,8 @@ class NDPi {
         //  Device IP
         this.settings.on('device_ip', (data) => {
             const output = String(data || '').trim() || null;
-
             if (!output)
             { return }
-
             try
             {
                 this.server_api.updateDisplay({
@@ -178,9 +175,6 @@ class NDPi {
                     thisDevice: { address: output }
                 });
             }
-            catch {}
-
-            try { this.service_bonjour.updateDeviceIp(output); }
             catch {}
         });
 
@@ -231,7 +225,9 @@ class NDPi {
         });
 
         //  HDMI Framerate
-        this.settings.on('output_display_framerate_preference', () => { func.setDisplayResolution(); });
+        this.settings.on('output_display_framerate_preference', () => {
+            func.setDisplayResolution();
+        });
 
         //  DRM Update
         // this.settings.on('drm', () => { setResolutionResetNDI(); });
@@ -294,29 +290,13 @@ class NDPi {
         this.server_api.on('online', () => {
             if (!this.isInitialized)
             {
+                this.isInitialized = true;
                 this.openCecController();
                 this.connectToNDPiServer();
-                this.startNdiReceiver();
-                // this.startChromium();
-                this.isInitialized = true;
+                this.startChromium();
             }
             else 
-            {
-                if (this.service_bonjour)
-                {
-                    this.service_bonjour.commandPort = output;
-                    this.service_bonjour._tryPublish();
-                }
-
-                // try { this.service_chromium.close(); }
-                // catch {}
-                // finally
-                // { 
-                //     this.service_chromium = null;
-                //     this.startChromium();
-                // }
-
-            }
+            { this.startChromium(); }
         });
 
         this.server_api.on('shutdown-command', () => {
@@ -335,26 +315,24 @@ class NDPi {
     }
 
     /** LAUNCH LOCAL CHROMIUM DISPLAY */
-    startChromium() {
+    async startChromium() {
         if (fs.existsSync('/usr/bin/chromium'))
         {
-            const ChromiumOverlayDisplay = require('./service/client_chromium.js');
-            this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
-            
-            this.service_chromium.on('spawn', () => {
+            if (this.service_chromium)
+            { await this.service_chromium.close(); }
 
-                func.fadeVolume(0, `${path.basename(__filename)} startChromium() service_chromium.on(spawn)`);
+            await new Promise((resolve) => {
+                const ChromiumOverlayDisplay = require('./service/client_chromium.js');
+                this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
 
-                this.targetSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
+                this.service_chromium.once('ready', () => {
+                    func.fadeVolume(0, `${path.basename(__filename)} startChromium() service_chromium.on(ready)`);
 
-                console.log('chromium spawn signal received', 'source:', this.targetSource);
-                
-                if (String(this.targetSource).toLowerCase() !== 'none')
-                {
-                    setTimeout(() => {
-                        this.startNdiReceiver();
-                    }, 5000);
-                }
+                    console.log('chromium ready signal received');
+                    
+                    if (String(this.targetSource).toLowerCase() !== 'none')
+                    { setTimeout(() => { this.startNdiReceiver(); }, 5000); }
+                });
             });
         }
         else
@@ -362,6 +340,7 @@ class NDPi {
             console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] Skipping Chromium display launch.`);
             console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] -- Missing binary: /usr/bin/chromium`);
         }
+        return;
     }
 
     /** OPEN CEC CONTROLER */
@@ -389,29 +368,42 @@ class NDPi {
         });
     }
 
-    
     /** LAUNCH NDI RECEIVER */
     async startNdiReceiver(source = 'none') {
+        const clearNdiSettings = () => {
+            if (this.settings)
+            {
+                this.settings.put('ndpi_status_ndi', 'idle');
+                this.settings.put('ndpi_status_ndi_source_active', '');
+                this.settings.put('ndpi_status_ndi_source_connected_time', '');
+                this.settings.put('ndpi_status_ndi_source_framerate', '');
+                this.settings.put('ndpi_status_ndi_source_resolution', '');
+            }
+        }
+
+        let openNdiReceivers = [];
+        if (this.ndiReceiver.size >= 1)
+        {
+            if (this.ndiReceiver.has(source))
+            { await this.ndiReceiver.get(source).close(); }
+
+            for (const rec of this.ndiReceiver)
+            { openNdiReceivers.push(rec); }
+        }
+
         if (source !== this.targetSource)
         { this.targetSource = source; }
 
-        // this.ndiReceiver.forEach(rec => rec.close());
-
-        if (this.ndiReceiver.size >= 1)
-        {
-            for (const rec of this.ndiReceiver)
-            { rec.close(); }
-        }
-
         const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
         const receiver = new NDI_Receiver_v4(this.settings, this.server_api);
-        // const receiver = new NDI_Receiver_v4(this.settings, this.server_api, this.service_chromium);
 
-        this.ndiReceiver.add(receiver);
+        this.ndiReceiver.add(source, receiver);
 
         receiver.once('close', () => {
-            this.ndiReceiver.delete(receiver);
+            this.ndiReceiver.delete(source);
         });
+
+        openNdiReceivers.forEach(receiver => receiver.close());
 
         // this.ndiReceiver.on('connected', () => {
         //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
