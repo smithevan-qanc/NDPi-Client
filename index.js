@@ -339,6 +339,8 @@ class NDPi {
             this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
             
             this.service_chromium.on('spawn', () => {
+                func.fadeVolume(0);
+                
                 this.targetSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
 
                 console.log('chromium spawn signal received', 'source:', this.targetSource);
