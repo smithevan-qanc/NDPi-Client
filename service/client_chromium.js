@@ -53,8 +53,6 @@ class ChromiumOverlayDisplay extends EventEmitter {
             }
         });
 
-        return;
-
         this.service.stdout.once('data', () => {
             process.nextTick(() => { this.emit('ready'); });
         });
