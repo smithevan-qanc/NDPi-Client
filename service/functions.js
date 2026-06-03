@@ -146,23 +146,7 @@ const { exec, spawn } = require('node:child_process');
                     break;
 
                 case 'set-overlay':
-                    // const base64String = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...";
-                    // // Remove the header (e.g., "data:image/png;base64,")
-                    // const base64Data = base64String.replace(/^data:image\/\w+;base64,/, "");
-                    // const buffer = Buffer.from(base64Data, 'base64'); // Create buffer from base64
-
-                    // fs.writeFile('output.png', buffer, (err) => {
-                    // if (err) console.error(err);
-                    // else console.log('Saved Base64 image!');
-                    // });
-                    try
-                    {
-                        fs.writeFileSync(
-                            path.join(process.env.DATA_NDPI_PATH, 'media_overlay_image'),
-                            JSON.stringify(command.data, null, 2),
-                            'utf8'
-                        );
-                    }
+                    try { fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'media_overlay_image'), JSON.stringify(command.data, null, 2), 'utf8'); }
                     catch (error)
                     {
                         response.data.message = error;
@@ -289,6 +273,9 @@ const { exec, spawn } = require('node:child_process');
                     response.success = true;
                     return response;
                     break;
+                
+                case 'set-setting':
+
 
                 // Default Fallback
                 default:
@@ -533,7 +520,7 @@ const { exec, spawn } = require('node:child_process');
                 
                 await wait(1500);
 
-                console.log('Attempting to wake display. CEC');
+                console.log('Attempting to activate device. CEC');
                 let f2 = await fetch('http://localhost:3080/api/v1/__internal/cec', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -551,6 +538,14 @@ const { exec, spawn } = require('node:child_process');
         }
 
         /** STDOUT TO ARRAY */
+        /**
+         * **Convert line returns to an Array**
+         * 
+         * ---
+         * ### NDPi Function
+         * @param {string} stdout >**stdout**: Output from `node:child_process`
+         * @returns {array}
+         */
         function stdoutToArray(stdout) {
             let a = [];
             let stdin = stdout.trim() || '';
@@ -561,7 +556,8 @@ const { exec, spawn } = require('node:child_process');
         }
 
         /**
-         * **Asynchronous inline blocking tool.**
+         * @async 
+         * **Inline blocking tool.**
          * 
          * Call this funciton using 'await' for the process to block.
          * 
@@ -667,6 +663,61 @@ const { exec, spawn } = require('node:child_process');
             });
         }
 
+        /**
+         * 
+         * **Updates FS Setting**
+         * 
+         * Provide **'*name*'** and **'*value*'**
+         * 
+         * ```json
+         * {
+         *   "success": true, //boolean
+         *   "message": ""    //string
+         * }
+         * ```
+         * 
+         * ---
+         * 
+         * #### NDPi Function
+         * 
+         * @param {string} name >**name**: Exact match to the fsSetting name.
+         * @param {string} value >**value**: Value to write to the fsSetting. Must be of type string.
+         * @returns {object} 
+         * 
+         */
+        async function updateSetting(name, value) {
+            let response = {
+                success: false,
+                message: '',
+            };
+
+            if (!name || !value)
+            {
+                response.message = `Missing 'name' and/or 'value'.`;
+                return response;
+            }
+            if (fs.existsSync(path.join(process.env.DATA_NDPI_PATH, name)))
+            {
+                const currentValue = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, name), 'utf8');
+                if (currentValue === value)
+                { response.message = 'Setting not modified. No change.'; }
+                else
+                {
+                    try
+                    {
+                        fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, name), String(value), 'utf8');
+                        response.message = `Successfully updated '${name}' from '${currentValue}' to '${value}'.`;
+                        response.success = true;
+                    }
+                    catch (error)
+                    { response.message = `Failed to update setting: ${name}. Reason: ${error}`; }
+                }
+            }
+            else
+            { response.message = `Invalid setting: ${name}`; }
+            return response;
+        }
+
 
 module.exports = {
     processCommand,
@@ -679,84 +730,5 @@ module.exports = {
     setNdi,
     fadeVolume,
     launchPicom,
+    updateSetting,
 };
-
-
-/** ---- Helper Functions ---- */
-
-    /** TODO */
-
-        function displayForceBlank() {
-            ///
-        }
-        function displayForceOverlay() {
-            ///
-        }
-        function updateOverlay(data) {
-            /// write image base 64 to file 'media_overlay_image'
-        }
-
-    /** COMPLETED */
-
-
-        /** FOCUS WINDOW */
-        /**
-         * Set focus to a window by class name.
-         * @param {string} className - Window class name of the window to focus. Discover the class name using xprop.
-         * @param {object} res - Response object. This function will use and update a response object from an API call. This is optional.
-         * @param {object} options - Additional configuration.
-         * @param {boolean} [options.onlyVisible] - Search for windows that are Visible. (excludes background processes from attempting to focus.)
-         * @returns {object} - Response object
-         */
-        async function focusWindow(className, res = { data: {} }, options = { onlyVisible: true }) {
-            let response = { ...res };
-            await new Promise((resolve) => {
-                exec(`xdotool search ${options.onlyVisible ? '--onlyvisible' : ''} --class "${className}" | head -n 1`, {
-                    env: {
-                        ...process.env,
-                        DISPLAY: ':0',
-                    }
-                }, (error, stdout, stderr) => {
-                    if (error)
-                    {
-                        // console.log('⚠️ [ functions ] Could NOT find window:', stderr.toString().trim());
-                        response.data.message = `Could NOT find window: ${stderr.toString().trim()}`;
-                        response.success = false;
-                        resolve();
-                        return;
-                    }
-                    else 
-                    {
-                        console.info(`[ ${path.basename(__filename).split('.')[0]} ] Focusing Window ID:`, stdout.toString().trim());
-                        if (!stdout.toString().trim())
-                        {
-                            // console.log(`⚠️ [ functions ] ${className} NOT running.`);
-                            response.data.message = `${className} is NOT running.`;
-                            response.success = false;
-                            resolve();
-                            return;
-                        }
-                        const a = `xdotool windowminimize ${stdout.toString().trim()} && xdotool windowraise ${stdout.toString().trim()} && xdotool windowactivate ${stdout.toString().trim()}` ;
-                        exec(a, {
-                            env: { ...process.env }
-                        }, (error, stdout, stderr) => {
-                            if (error)
-                            {
-                                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] Could NOT activate window:`, stderr.toString().trim() || 'null');
-                                response.data.message = `Could NOT activate window: ${stderr.toString().trim()}`;
-                                response.success = false;
-                                resolve();
-                                return;
-                            }
-                            else 
-                            {
-                                response.success = true;
-                                resolve();
-                                return;
-                            }
-                        });
-                    }
-                });
-            });
-            return response;
-        }

@@ -47,24 +47,50 @@ server._ws.onmessage = (message) => {
                 finally { return; }
             }
 
-            const settingInnerHTML = `
-                <div class="div-label">${String(id.split('_').join(' '))}</div>
-                <input type="text" id="${id}" value="${String(object.value).replaceAll('"', "'")}" ${object.allowEditExternal ? '' : 'disabled'}>
-            `;
-
-            if (id === 'ndpi_status_ndi_source_target') 
+            if (id === 'ndpi_status_ndi_source_target')
             { document.getElementById('source_selection').value = object.value || 'none'; }
 
             let settingEl = document.getElementById(`__${id}`);
-            if (!settingEl)
+            const settingDoesNotExist = !settingEl;
+
+            if (object.options)
             {
-                settingEl = document.createElement('div');
+                if (settingDoesNotExist)
+                {
+                    settingEl = document.createElement('select');
+                    // settingEl.id = `__${id}`;
+                }
+                
+                settingEl.innerHTML = '';
+                
+                for (const [ key, value ] of object.options)
+                {
+                    const opt = document.createElement('option');
+                    opt.value = value;
+                    opt.textContent = key;
+                    settingEl.appendChild(opt);
+                }
+            }
+            else
+            {
+                let settingInnerHTML = ``;
+                settingInnerHTML += `<div class="div-label">${String(id.split('_').join(' '))}</div>`;
+                settingInnerHTML += `<input type="text" id="${id}" value="${String(object.value).replaceAll('"', "'")}" ${object.allowEditExternal ? '' : 'disabled'}>`;
+
+                if (settingDoesNotExist)
+                {
+                    settingEl = document.createElement('div');
+                    // settingEl.id = `__${id}`;
+                    // settingEl.innerHTML = settingInnerHTML;
+                }
+                // else
+                // { settingEl.innerHTML = settingInnerHTML; }
+                settingEl.innerHTML = settingInnerHTML;
+            }
+            if (settingDoesNotExist)
+            {
                 settingEl.id = `__${id}`;
-                settingEl.innerHTML = settingInnerHTML;
                 document.getElementById('settings').appendChild(settingEl);
-            } else
-            {
-                settingEl.innerHTML = settingInnerHTML;
             }
         }
     }
