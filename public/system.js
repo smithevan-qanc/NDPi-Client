@@ -215,8 +215,8 @@ async function handleFiles() {
     if (!file.type.startsWith("image/"))
     { return; }
 
-    const img = document.createElement("img");
-    uploaderPreviewEl.file = file;
+    const img = document.getElementById('media_overlay_image');
+    img.file = file;
     // uploaderPreviewEl.appendChild(img);
 
     overlayUploadCommand.data.name = file.name || '';
@@ -228,7 +228,7 @@ async function handleFiles() {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-        uploaderPreviewEl.src = e.target.result;
+        img.src = e.target.result;
         overlayUploadCommand.data.src = e.target.result;
         if (overlayUploadCommand.data.src)
         { document.getElementById('save_overlay').disabled = false; }
