@@ -33,17 +33,17 @@
     
     <!--  NDI Receiver -->
     <application class="GStreamer">
-      <layer>normal</layer>
+      <layer>above</layer>
+      <fullscreen>yes</fullscreen>
       <focus>no</focus>
       <iconic>no</iconic>
       <maximized>true</maximized>
-      <fullscreen>yes</fullscreen>
     </application>
 
     <!--  Display Browser  -->
     <application class="Chromium">
-      <fullscreen>yes</fullscreen>
       <layer>normal</layer>
+      <fullscreen>yes</fullscreen>
       <iconic>no</iconic>
       <focus>no</focus>
       <maximized>true</maximized>

@@ -356,7 +356,7 @@ class NDPi {
         this.ndiReceiver.add(source, receiver);
 
         for (const rec of openNdiReceivers)
-        { await rec.close(); }
+        { await this.ndiReceiver.get(rec).close(); }
 
         receiver.once('close', () => {
             this.ndiReceiver.delete(source);
@@ -454,8 +454,14 @@ async function quitNDPi(signal, exit = true) {
         catch {}
         finally { index.ndpiServerStatusUpdate = null; }
 
-        for (const rec of index.ndiReceiver)
-            { rec.close(); }
+        // index.startNdiReceiver('none');
+        if (index.ndiReceiver.size >= 1) 
+        {
+            for (const rec of index.ndiReceiver)
+            {
+                await index.ndiReceiver.get(rec).close();
+            }
+        }
 
         try { index.lcdDisplay.kill('SIGINT'); }
         catch {}
