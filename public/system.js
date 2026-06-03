@@ -84,9 +84,11 @@ server._ws.onclose = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'ping' })
             });
-            window.location.reload();
+            if (res.ok)
+            { window.location.reload(); }
         }
-        catch { setTimeout(() => { pingServer(); }, 2000); }
+        catch {}
+        finally { setTimeout(() => { pingServer(); }, 2000); }
     }
     pingServer();
 }
