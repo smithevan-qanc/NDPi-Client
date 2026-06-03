@@ -372,6 +372,7 @@ const { exec, spawn } = require('node:child_process');
         }
 
         async function focusChromium() {
+            await launchPicom();
             let focusSuccess = false;
             let focusError = null;
 
@@ -416,8 +417,6 @@ const { exec, spawn } = require('node:child_process');
         }
 
         async function focusNdi() {
-            await launchPicom();
-
             let focusSuccess = false;
             let focusError = null;
 
@@ -455,6 +454,16 @@ const { exec, spawn } = require('node:child_process');
             });
 
             console.log('DONE trying to focus gstreamer.');
+
+            setTimeout(() => {
+                console.log('trying to kill picom.');
+                exec('killall picom', (error, stdout, stderr) => {
+                    if (error)
+                    { console.log('Picom was not running.'); }
+                    else
+                    { console.log('Picom has been killed.'); }
+                });
+            }, 5000);
 
             if (focusError)
             { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError); }
