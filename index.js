@@ -356,13 +356,13 @@ class NDPi {
         this.ndiReceiver.add(source, new NDI_Receiver_v4(this.settings, this.server_api));
         console.log(Array.from(this.ndiReceiver));
 
-        for (const rec of openNdiReceivers)
-        { await this.ndiReceiver.get(rec).close(); }
+        // for (const rec of openNdiReceivers)
+        // { await this.ndiReceiver.get(rec).close(); }
 
-        receiver.once('close', () => {
-            console.log('closing receivers');
-            this.ndiReceiver.delete(source);
-        });
+        // receiver.once('close', () => {
+        //     console.log('closing receivers');
+        //     this.ndiReceiver.delete(source);
+        // });
 
         // this.ndiReceiver.on('connected', () => {
         //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
