@@ -415,7 +415,7 @@ const { exec, spawn } = require('node:child_process');
                 return;
             }
 
-            await new Promise((resolve) => { setTimeout(() => { resolve(); }, 500); });
+            await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
 
             console.log('trying to focus chromium.');
 
