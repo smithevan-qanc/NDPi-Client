@@ -414,8 +414,6 @@ const { exec, spawn } = require('node:child_process');
             else
             { await launchPicom(); }
 
-            await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
-
             console.log('trying to focus chromium.');
 
             await new Promise((resolve) => {
@@ -436,14 +434,36 @@ const { exec, spawn } = require('node:child_process');
                                     if (error)
                                     { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
                                     else
-                                    {
-                                        exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
-                                            if (error)
-                                            { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
-                                            else
-                                            { focusSuccess = true; }
-                                        });
-                                    }
+                                    { focusSuccess = true; }
+                                });
+                            }
+                        }
+                        resolve();
+                    }
+                });
+            });
+
+            await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
+            
+            await new Promise((resolve) => {
+                exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
+                    if (error)
+                    {
+                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, stderr.toString() || 'No Instances of Chromium when trying to activate.');
+                        resolve();
+                    }
+                    else
+                    {
+                        const output = stdoutToArray(stdout);
+                        for (const line of output)
+                        {
+                            if (!focusSuccess)
+                            {
+                                exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+                                    if (error)
+                                    { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
+                                    else
+                                    { focusSuccess = true; }
                                 });
                             }
                         }
