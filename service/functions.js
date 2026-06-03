@@ -5,6 +5,14 @@ const fs = require('fs');
 const path = require('path');
 const { exec, spawn } = require('node:child_process');
 
+/**
+ * @typedef  {Object}  FunctionResponse
+ * @property {boolean} success - Indicates if the operation completed without errors.
+ * @property {string}  message - A human-readable status message.
+ * @property {Object|Array|null} data - The payload returned from the operation, if any.
+ */
+
+
 /** ---- Export Functions ---- */
 
     /** TODO */
@@ -275,7 +283,19 @@ const { exec, spawn } = require('node:child_process');
                     break;
                 
                 case 'set-setting':
+                    const setSetting = updateSetting(command.data?.name || null, command.data?.value);
+                    response.success = setSetting.success  //.success;
+                    response.data.message = setSetting.message;
+                    return response;
+                    break;
 
+                case 'install-update':
+                    const installUpdate = updateInstall();
+                    response.success = installUpdate.success;
+                    response.data.message = installUpdate.message;
+                    response.data.log = installUpdate.data;
+                    return response;
+                    break;
 
                 // Default Fallback
                 default:
@@ -544,7 +564,7 @@ const { exec, spawn } = require('node:child_process');
          * ---
          * ### NDPi Function
          * @param {string} stdout >**stdout**: Output from `node:child_process`
-         * @returns {array}
+         * @returns {Array}
          */
         function stdoutToArray(stdout) {
             let a = [];
@@ -663,18 +683,12 @@ const { exec, spawn } = require('node:child_process');
             });
         }
 
+
         /**
          * 
          * **Updates FS Setting**
          * 
          * Provide **'*name*'** and **'*value*'**
-         * 
-         * ```json
-         * {
-         *   "success": true, //boolean
-         *   "message": ""    //string
-         * }
-         * ```
          * 
          * ---
          * 
@@ -682,7 +696,7 @@ const { exec, spawn } = require('node:child_process');
          * 
          * @param {string} name >**name**: Exact match to the fsSetting name.
          * @param {string} value >**value**: Value to write to the fsSetting. Must be of type string.
-         * @returns {object} 
+         * @returns {FunctionResponse} 
          * 
          */
         async function updateSetting(name, value) {
@@ -717,6 +731,42 @@ const { exec, spawn } = require('node:child_process');
             { response.message = `Invalid setting: ${name}`; }
             return response;
         }
+        
+        /**
+         * **Installs Update from GIT**
+         * 
+         * ---
+         * 
+         * #### NDPi Function
+         * 
+         * @returns {FunctionResponse} 
+         * 
+         */
+        async function updateInstall() {
+            let response = {
+                success: false,
+                message: '',
+            };
+            await new Promise((resolve) => {
+                exec(path.join(__dirname, '..', 'sh', 'install-update'), (error, stdout, stderr) => {
+                    if (error)
+                    {
+                        response.message = stdoutToArray(stderr).join('. ').toString();
+                        resolve();
+                        return;
+                    }
+                    else
+                    {
+                        response.data = stdoutToArray(stdout);
+                        response.success = true;
+                        response.message = 'Update Installed';
+                        resolve();
+                        return;
+                    }
+                });
+            });
+            return response;
+        }
 
 
 module.exports = {
@@ -731,4 +781,5 @@ module.exports = {
     fadeVolume,
     launchPicom,
     updateSetting,
+    installUpdate,
 };

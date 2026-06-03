@@ -52,6 +52,14 @@ server._ws.onmessage = (message) => {
             {
                 document.getElementById('source_selection').value = object.value || 'none';
             }
+
+            if (id === 'ndpi_version_update_available')
+            {
+                if (object.value === 'true')
+                { document.getElementById('device_update').disabled = false; }
+                else
+                { document.getElementById('device_update').disabled = true; }
+            }
             
             if (!document.getElementById(`__${id}`))
             {
@@ -220,6 +228,14 @@ function addEvents() {
         this.textContent = 'SHUTTING DOWN...'
         await sendCommand({
             type: 'shutdown-device'
+        });
+    });
+    document.getElementById('device_update').addEventListener('click', async function(e) {
+        e.preventDefault();
+        this.disabled = true;
+        this.textContent = 'Installing Update...'
+        await sendCommand({
+            type: 'install-update'
         });
     });
     

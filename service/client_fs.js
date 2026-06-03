@@ -55,11 +55,11 @@ class FileSystemMonitor extends EventEmitter {
             'ndpi_status_ndi_source_target',
         ];
 
-        this.init();
+        process.nextTick(() => { this.init(); });
     }
 
     async init() {
-        console.info(`[ ${path.basename(__filename).split('.')[0]} ] NDPi Data Management Module - v${this.#pgmVersion} - ${this.#pgmVersionDate}`);
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ][  INITIATE ] NDPi Data Management Module - v${this.#pgmVersion} - ${this.#pgmVersionDate}`);
 
         // Create directory if it doesn't exist.
         if (!fs.existsSync(this.dataDir))
@@ -77,12 +77,12 @@ class FileSystemMonitor extends EventEmitter {
         {
             try
             {
-                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim();
+                deviceId = fs.readFileSync(deviceIdPaths[0], 'utf8').replace(/\0/g, '').trim().toUpperCase();
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ][ DEVICE ID ] ${deviceId}`);
             }
             catch 
             {
-                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim();
+                deviceId = fs.readFileSync(deviceIdPaths[1], 'utf8').replace(/\0/g, '').trim().toUpperCase();
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ][ FALLBACK DEVICE ID ] ${deviceId}`);
             }
         }
@@ -91,7 +91,7 @@ class FileSystemMonitor extends EventEmitter {
             await new Promise((resolve) => {
                 exec(`ioreg -l | grep IOPlatformSerialNumber | awk '{print $4}' | tr -d '"'`, (error, stdout) => {
                     if (!error)
-                    { deviceId = stdout.trim(); }
+                    { deviceId = stdout.trim().toUpperCase(); }
                     resolve();
                 });
             })
@@ -116,7 +116,7 @@ class FileSystemMonitor extends EventEmitter {
             },
             {
                 key: "device_id",
-                value: deviceId.toUpperCase(),
+                value: `${deviceId}`,
                 group: ``,
                 allowEditInternal: false,
                 allowEditExternal: false,
@@ -451,7 +451,7 @@ class FileSystemMonitor extends EventEmitter {
             { fs.writeFileSync(path.join(__dirname, '..', 'python', 'script', setting.key), setting.value, 'utf8'); }
         };
 
-        process.nextTick(() => { this.start(); });
+        this.start();
     }
 
     async start() {
