@@ -410,10 +410,7 @@ const { exec, spawn } = require('node:child_process');
             console.log('DONE trying to minimize gstreamer.');
 
             if (focusError)
-            {
-                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError);
-                return;
-            }
+            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError); }
             else
             { await launchPicom(); }
 
@@ -435,7 +432,7 @@ const { exec, spawn } = require('node:child_process');
                         {
                             if (!focusSuccess)
                             {
-                                exec(`xdotool windowraise ${line}`, (error, stdout, stderr) => {
+                                exec(`xdotool windowraise ${line} && xdotool windowactivate ${line}`, (error, stdout, stderr) => {
                                     if (error)
                                     { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
                                     else
