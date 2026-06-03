@@ -98,19 +98,14 @@
             text-decoration: none;
             transition: box-shadow ease-in-out 200ms, border ease-in-out 200ms;
         }
-        input::grammar-error {
-            display: none;
-        }
+        textarea:focus,
         select:focus,
         input:focus {
             box-shadow: 0px 0px 1px 2.5px rgba(0, 130, 200, 0.8);
             border-color: rgba(0, 130, 200, 0.8);
             border-style: solid;
         }
-        input[type=file] {
-            cursor: pointer;
-            align-content: center;
-        }
+        textarea:disabled,
         select:disabled,
         input:disabled {
             border-color: #777;
@@ -121,6 +116,18 @@
             cursor: not-allowed;
 
         }
+        textarea::spelling-error,
+        textarea::grammar-error,
+        input::spelling-error,
+        input::grammar-error {
+            display: none;
+        }
+
+        input[type=file] {
+            cursor: pointer;
+            align-content: center;
+        }
+
         button {
             background: rgba(129, 193, 39, 1);
             border-color: rgba(103, 167, 14, 1);
@@ -188,6 +195,7 @@
             border-color: rgba(200, 170, 0, 1);
         }
 
+        textarea,
         button,
         input,
         select {
