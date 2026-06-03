@@ -781,5 +781,5 @@ module.exports = {
     fadeVolume,
     launchPicom,
     updateSetting,
-    installUpdate,
+    updateInstall,
 };
