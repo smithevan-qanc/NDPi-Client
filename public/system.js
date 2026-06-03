@@ -29,12 +29,26 @@ server._ws.onmessage = (message) => {
     try
     {
         const msg = JSON.parse(message.data);
+        const overlayPreviewEl = document.getElementById('media_overlay_image');
         for (const [id, object] of msg)
         {
-            if (id === 'media_overlay_image' && String(object.value).includes('src'))
+            if (id === 'media_overlay_image')
             {
-                document.getElementById('media_overlay_image').src = JSON.parse(object.value).src;
-                return;
+                try
+                {
+                    const parse = JSON.parse(object.value).src || null;
+                    if (parse)
+                    {
+                        overlayPreviewEl.src = parse;
+                        overlayPreviewEl.style.boxShadow = '0px 0px 5px -1px rgba(250, 250, 250, 0.6)';
+                    }
+                }
+                catch
+                {
+                    overlayPreviewEl.style.boxShadow = 'none';
+                    overlayPreviewEl.src = '';
+                }
+                finally { return; }
             }
 
             const settingInnerHTML = `
@@ -153,9 +167,7 @@ function addEvents() {
         e.preventDefault();
         this.disabled = true;
         const res = await sendCommand(overlayUploadCommand);
-        if (res?.success)
-        { resetOverlayUpload(); }
-        else
+        if (!res?.success)
         { console.error('Failed to upload overlay.', res) }
     });
     document.getElementById('device_reboot').addEventListener('click', async function(e) {
@@ -192,6 +204,7 @@ function resetOverlayUpload() {
             src: '',
         }
     };
+    sendCommand(overlayUploadCommand);
 }
 
 async function handleFiles() {
