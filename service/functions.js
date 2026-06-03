@@ -415,6 +415,8 @@ const { exec, spawn } = require('node:child_process');
             let focusSuccess = false;
             let focusError = null;
 
+            activateDisplay();
+
             console.log('trying to focus gstreamer.');
 
             await new Promise((resolve) => {
@@ -521,6 +523,7 @@ const { exec, spawn } = require('node:child_process');
         async function activateDisplay() {
             try
             {
+                console.log('Attempting to wake display. CEC');
                 const f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -530,6 +533,7 @@ const { exec, spawn } = require('node:child_process');
                 
                 await wait(1500);
 
+                console.log('Attempting to wake display. CEC');
                 const f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -537,7 +541,13 @@ const { exec, spawn } = require('node:child_process');
                 });
                 if (!f.ok) { throw new Error() }
             }
-            catch { await setDisplayResolution(); }
+            catch
+            {
+                console.log('CEC could not wake display. Trying RandR.');
+                await setDisplayResolution().catch(() => {
+                    console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ activateDisplay() ][ setDisplayResolution() ]`, reason);
+                });
+            }
         }
 
         /** STDOUT TO ARRAY */
@@ -594,10 +604,12 @@ const { exec, spawn } = require('node:child_process');
             { config.framerate = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_framerate_preference'), 'utf8').trim() }
             catch {}
 
-            if (config.displayPort == '')
-            { return; }
-
-            return await new Promise((resolve) => {
+            return await new Promise((resolve, reject) => {
+                if (config.displayPort == '')
+                {
+                    reject('No Display Port Configured');
+                    return;
+                }
                 exec(`xrandr \
                     --output ${config.displayPort} \
                     ${config.resolution ? `--mode ${config.resolution}` : '--auto'} \
@@ -608,7 +620,8 @@ const { exec, spawn } = require('node:child_process');
                     if (error)
                     {
                         console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Resolution Set:`, config, stderr);
-                        resolve();
+                        reject(`XRandR Failed to set resolution. Reason: ${stderr.toString()}`);
+                        return;
                     }
                     else
                     {
@@ -616,8 +629,13 @@ const { exec, spawn } = require('node:child_process');
                             env: { ...process.env }
                         }, (error, stdout, stderr) => {
                             if (error)
-                            { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`); }
-                            resolve();
+                            {
+                                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`);
+                                reject(`Openbox Failed to restart after setting resolution. Reason: ${stderr.toString()}`);
+                                return;
+                            }
+                            resolve('');
+                            return;
                         });
                     }
                 });
