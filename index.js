@@ -351,9 +351,9 @@ class NDPi {
         { this.targetSource = source; }
 
         const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
-        const receiver = new NDI_Receiver_v4(this.settings, this.server_api);
+        // const receiver = new NDI_Receiver_v4(this.settings, this.server_api);
 
-        this.ndiReceiver.add(source, receiver);
+        this.ndiReceiver.add(source, new NDI_Receiver_v4(this.settings, this.server_api));
         console.log(Array.from(this.ndiReceiver));
 
         for (const rec of openNdiReceivers)
