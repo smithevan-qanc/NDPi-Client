@@ -10,7 +10,10 @@ const { setTimeout } = require('node:timers');
 class FileSystemMonitor extends EventEmitter {
     #pgmVersion;
     #pgmVersionDate;
-    #fsPoll;
+    #ipPoll;
+    #ipPollInterval;
+    #updatePoll;
+    #updatePollInterval;
     constructor(version = '1.0.0', versionDate = '1970-01-01') {
         super();
 
@@ -20,9 +23,13 @@ class FileSystemMonitor extends EventEmitter {
 
         this.defaultDeviceName = 'NDPi Client';
 
-        // Data Poll Timer
-        this.#fsPoll = null;
-        this.fsPollInterval = 1000;
+        this.#ipPoll = null;
+        this.#ipPollInterval = 1000;
+        this.ipPollEnable = true;
+
+        this.#updatePoll = null;
+        this.#updatePollInterval = 10000;
+        this.updatePollEnable = true;
 
         this.dataDir = process.env.DATA_NDPI_PATH;
         this.fileMap = null;
@@ -135,6 +142,20 @@ class FileSystemMonitor extends EventEmitter {
                 group: ``,
                 allowEditInternal: true,
                 allowEditExternal: true,
+            },
+            {
+                key: "ndpi_version_update_available",
+                value: `false`,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "ndpi_version_update_version",
+                value: ``,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: false,
             },
             {
                 key: "ndpi_version",
@@ -379,6 +400,8 @@ class FileSystemMonitor extends EventEmitter {
         const retainDefaultValue = [
             'ndpi_version',
             'ndpi_version_date',
+            'ndpi_version_update_available',
+            'ndpi_version_update_version',
             'device_id',
             'device_type',
             'device_ip',
@@ -435,9 +458,10 @@ class FileSystemMonitor extends EventEmitter {
     async start() {
         this.startWatcher();
         this.startDrmMonitor();
+        this.pollUpdate();
         this.emit('ready');
         await func.waitForNetwork();
-        this.updateLocalIp();
+        this.pollIp();
     }
 
     startWatcher() {
@@ -505,16 +529,6 @@ class FileSystemMonitor extends EventEmitter {
         return;
     }
 
-    poll() {
-        try { clearInterval(this.#fsPoll); }
-        catch {}
-        finally { this.#fsPoll = null; }
-
-        this.#fsPoll = setInterval(() => {
-            this.updateLocalIp();
-        }, this.fsPollInterval);
-    }
-
     get(fileName) {
         if (!fileName || !this.fileMap.has(fileName))
         { return null; }
@@ -578,14 +592,21 @@ class FileSystemMonitor extends EventEmitter {
     async close() {
         this.watcherEnable = false;
         this.drmEnable = false;
+        this.ipPollEnable = false;
+        this.updatePollEnable = false;
 
         console.info( `[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
 
+        try { clearTimeout(this.#ipPoll); }
+        catch {}
+        finally { this.#ipPoll = null; }
+
+        try { clearTimeout(this.#updatePoll); }
+        catch {}
+        finally { this.#updatePoll = null; }
+
         if (this.watcher)
         {
-            try { clearInterval(this.#fsPoll); }
-            catch {}
-            finally { this.#fsPoll = null; }
 
             await new Promise((resolve) => {
                 this.watcher.once('close', async () => {
@@ -618,15 +639,54 @@ class FileSystemMonitor extends EventEmitter {
         return;
     }
 
+
+
+    async pollIp() {
+        console.log('Checking IP Address');
+        try
+        {
+            await this.updateLocalIp();
+            console.log(`Checking IP Address In: ${this.#ipPollInterval / 1000}s`);
+        }
+        catch {}
+        finally
+        {
+            if (this.ipPollEnable)
+            { this.#ipPoll = setTimeout(this.pollIp, this.#ipPollInterval); }
+        }
+
+        // try { clearTimeout(this.#ipPoll); }
+        // catch {}
+        // finally { this.#ipPoll = null; }
+
+        // this.#ipPoll = setTimeout(() => {
+        //     this.updateLocalIp()
+        // }, this.#ipPollInterval);
+    }
+
+    async pollUpdate() {
+        console.log('Checking GIT for Update');
+        try
+        {
+            await this.checkForUpdate();
+            console.log(`Checking GIT for Update In: ${this.#updatePollInterval / 1000}s`);
+        }
+        catch {}
+        finally
+        {
+            if (this.updatePollEnable)
+            { this.#updatePoll = setTimeout(this.pollUpdate, this.#updatePollInterval); }
+        }
+    }
+
     /**
      *  Helper Functions
      */
 
     async updateLocalIp() {
         let fileName = 'device_ip';
-        let deviceIP = null;
+        let valueUpdate = null;
 
-        let ipObj = {};
         await new Promise((resolve) => {
             exec('ip -j address', (error, stdout, stderr) => {
                 if (error)
@@ -639,7 +699,6 @@ class FileSystemMonitor extends EventEmitter {
                     try
                     {
                         let output = JSON.parse(String(stdout));
-                        
                         if (Array.isArray(output))
                         {
                             output = output
@@ -653,7 +712,7 @@ class FileSystemMonitor extends EventEmitter {
                                 {
                                     let output_addr_info = output_obj.addr_info.filter(addr => addr.family == 'inet');
                                     if (output_addr_info.length === 1)
-                                    { deviceIP = output_addr_info[0].local; }
+                                    { valueUpdate = output_addr_info[0].local; }
                                 }
                             }
                         }
@@ -666,21 +725,19 @@ class FileSystemMonitor extends EventEmitter {
             });
         });
 
-        if (deviceIP)
+        if (valueUpdate)
         {
             const storedValue = this.fileMap.get(fileName).value;
-            if (deviceIP !== storedValue)
+            if (valueUpdate !== storedValue)
             {
-                this.put(fileName, deviceIP);
-                this.fsPollInterval = 10000;
-                this.poll();
+                this.put(fileName, valueUpdate);
+                this.#ipPollInterval = 10000;
             }
         }
         else
         {
             this.put(fileName, '');
-            this.fsPollInterval = 1000;
-            this.poll();
+            this.#ipPollInterval = 1000;
         }
         return;
     }
@@ -692,7 +749,7 @@ class FileSystemMonitor extends EventEmitter {
         await new Promise((resolve) => {
             exec('cat /sys/class/drm/card*HDMI*/status', (error, stdout, stderr) => {
                 if (error)
-                { console.error(`⚠️ [ functions ][ updateOutputDisplayFiles() ][ ERROR ]`, stderr.toString().trim()); }
+                { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ updateOutputDisplayFiles() ][ ERROR ]`, stderr.toString().trim()); }
                 else
                 {
                     const output = func.stdoutToArray(stdout);
@@ -722,7 +779,7 @@ class FileSystemMonitor extends EventEmitter {
             const commandPath = path.join(__dirname, '..', 'sh', 'current-resolution');
             exec(commandPath, (error, stdout, stderr) => {
                 if (error)
-                { console.error(`⚠️ [ functions ][ updateOutputDisplayFiles() ][ ERROR ] ${stderr.toString().trim()}`); }
+                { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ updateOutputDisplayFiles() ][ ERROR ] ${stderr.toString().trim()}`); }
                 else
                 {
                     let resolutionOptions = [];
@@ -788,6 +845,36 @@ class FileSystemMonitor extends EventEmitter {
             });
         }
         return;
+    }
+
+    async checkForUpdate() {
+        return new Promise((resolve) => {
+            exec(path.join(__dirname, '..', 'sh', 'check-for-update'), (error, stdout) => {
+                if (error)
+                {
+                    console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error when checking for update. {{ ./sh/check-for-update }}`);
+                    resolve();
+                }
+                else
+                {
+                    const output = String(stdout.toString());
+                    try
+                    {
+                        const update = JSON.parse(output);
+                        if (update.update_available)
+                        { this.put('ndpi_version_update_available', String(update.update_available)); }
+                        if (update.newest_version?.ndpi)
+                        { this.put('ndpi_version_update_version', String(update.newest_version.ndpi)); }
+                    }
+                    catch (err) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error parsing update.`, err); }
+                    finally
+                    {
+                        resolve();
+                        return;
+                    }
+                }
+            });
+        });
     }
 }
 
