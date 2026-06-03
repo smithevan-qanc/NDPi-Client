@@ -414,7 +414,7 @@ const { exec, spawn } = require('node:child_process');
             else
             { await launchPicom(); }
 
-            // await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
+            await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
 
             console.log('trying to focus chromium.');
 
@@ -432,11 +432,18 @@ const { exec, spawn } = require('node:child_process');
                         {
                             if (!focusSuccess)
                             {
-                                exec(`xdotool windowraise ${line} && xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+                                exec(`xdotool windowraise ${line}`, (error, stdout, stderr) => {
                                     if (error)
                                     { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
                                     else
-                                    { focusSuccess = true; }
+                                    {
+                                        exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+                                            if (error)
+                                            { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
+                                            else
+                                            { focusSuccess = true; }
+                                        });
+                                    }
                                 });
                             }
                         }
