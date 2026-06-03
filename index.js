@@ -359,6 +359,7 @@ class NDPi {
         { await this.ndiReceiver.get(rec).close(); }
 
         receiver.once('close', () => {
+            console.log('closing receivers');
             this.ndiReceiver.delete(source);
         });
 
@@ -454,14 +455,15 @@ async function quitNDPi(signal, exit = true) {
         catch {}
         finally { index.ndpiServerStatusUpdate = null; }
 
+
         // index.startNdiReceiver('none');
-        if (index.ndiReceiver.size >= 1) 
-        {
-            for (const rec of index.ndiReceiver)
-            {
-                await index.ndiReceiver.get(rec).close();
-            }
-        }
+        // if (index.ndiReceiver.size >= 1) 
+        // {
+        //     for (const rec of index.ndiReceiver)
+        //     {
+        //         await index.ndiReceiver.get(rec).close();
+        //     }
+        // }
 
         try { index.lcdDisplay.kill('SIGINT'); }
         catch {}
