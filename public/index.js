@@ -63,7 +63,7 @@ server._ws.onmessage = (message) => {
                     { document.getElementById('waiting-for-server-svg').style.opacity = 1; }
                     else
                     { document.getElementById('waiting-for-server-svg').style.opacity = 0; }
-                    document.getElementById(id).textContent = output || '⎯';
+                    document.getElementById(id).textContent = output || '';
                     document.getElementById(`div__${id}`).hidden = !output;
                     break;
                     return;
@@ -81,10 +81,8 @@ server._ws.onmessage = (message) => {
                 case 'ndpi_status_ndi':
                     if (output == 'idle' || output == 'stalled')
                     {
-                        setTimeout(() => {
-                            overlayEl.style.opacity = 1;
-                            detailsEl.style.opacity = 1;
-                        }, 1000);
+                        overlayEl.style.opacity = 1;
+                        detailsEl.style.opacity = 1;
                     }
                     else
                     {

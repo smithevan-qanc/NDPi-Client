@@ -372,7 +372,6 @@ const { exec, spawn } = require('node:child_process');
         }
 
         async function focusChromium() {
-            await launchPicom();
             let focusSuccess = false;
             let focusError = null;
 
@@ -414,6 +413,8 @@ const { exec, spawn } = require('node:child_process');
 
             if (focusError)
             { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError); }
+            else
+            { await launchPicom(); }
         }
 
         async function focusNdi() {
@@ -463,7 +464,7 @@ const { exec, spawn } = require('node:child_process');
                     else
                     { console.log('Picom has been killed.'); }
                 });
-            }, 5000);
+            }, 2000);
 
             if (focusError)
             { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError); }
