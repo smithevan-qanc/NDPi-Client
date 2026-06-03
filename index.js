@@ -326,7 +326,7 @@ class NDPi {
     /** LAUNCH NDI RECEIVER */
     async startNdiReceiver(source = 'none') {
 
-        await func.launchPicom();
+        // await func.launchPicom();
         
         if (source == 'none')
         {
