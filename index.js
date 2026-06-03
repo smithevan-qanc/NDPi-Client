@@ -353,8 +353,11 @@ class NDPi {
         const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
         // const receiver = new NDI_Receiver_v4(this.settings, this.server_api);
 
-        this.ndiReceiver.add(source, new NDI_Receiver_v4(this.settings, this.server_api));
-        console.log(Array.from(this.ndiReceiver));
+        this.ndiReceiver.add(new NDI_Receiver_v4(this.settings, this.server_api));
+        setTimeout(() => {
+            console.log(Array.from(this.ndiReceiver));
+        }, 2000);
+        
 
         // for (const rec of openNdiReceivers)
         // { await this.ndiReceiver.get(rec).close(); }
