@@ -126,8 +126,8 @@ class NDI_Receiver_v4 extends EventEmitter {
      */
     _handleReceiverData(stdout) {
         const showNDI = (delay = 1000) => {
+            func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
             setTimeout(() => {
-                func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
                 func.focusNdi();
             }, delay);
         }
@@ -163,8 +163,10 @@ class NDI_Receiver_v4 extends EventEmitter {
      * To reactivate the source, call 'thisModule.connect();'
      */
     async softClose() {
-        func.fadeVolume(0, `${path.basename(__filename)} softClose()`);
-        await func.focusChromium();
+        await Promise.all([
+            func.fadeVolume(0, `${path.basename(__filename)} close()`),
+            func.focusChromium()
+        ]);
         
         try { this.receiver.kill('SIGTERM'); }
         catch {}

@@ -414,8 +414,10 @@ const { exec, spawn } = require('node:child_process');
                 console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError);
                 return;
             }
+            else
+            { await launchPicom(); }
 
-            await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
+            // await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
 
             console.log('trying to focus chromium.');
 
@@ -449,9 +451,10 @@ const { exec, spawn } = require('node:child_process');
             console.log('DONE trying to focus chromium.');
 
             if (focusError)
-            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError); }
-            else
-            { await launchPicom(); }
+            {
+                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError);
+                return;
+            }
         }
 
         async function focusNdi() {
