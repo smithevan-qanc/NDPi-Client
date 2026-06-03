@@ -42,7 +42,7 @@
 
     <!--  Display Browser  -->
     <application class="Chromium">
-      <layer>below</layer>
+      <layer>normal</layer>
       <fullscreen>yes</fullscreen>
       <iconic>no</iconic>
       <focus>no</focus>
