@@ -57,8 +57,6 @@ class ClientServerWebSocket extends EventEmitter {
             
         this.socket.on('open', () => {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ] Connected NDPi Server`);
-            this.server.sendUpdateToDisplay();
-            // this.server.broadcastToDisplay({ type: 'ndpi-server-connected' }, true);
             this.emit('connected');
         });
         
@@ -82,6 +80,7 @@ class ClientServerWebSocket extends EventEmitter {
         
         this.socket.on('close', () => {
             console.info(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] NDPi Server Disconnected`);
+            this.server.sendUpdateToDisplay({ type: 'server-hub-connected', data: false });
             this.scheduleReconnect();
         });
     }

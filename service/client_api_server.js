@@ -21,6 +21,10 @@ class NDPiCommandServer_Client extends EventEmitter {
                 try { client.send(data); }
                 catch {}
             });
+            this.ws_conn_display.forEach(client => {
+                try { client.send(data); }
+                catch {}
+            });
         });
 
         this.discoveryExec = null;
@@ -72,7 +76,6 @@ class NDPiCommandServer_Client extends EventEmitter {
             this.ws_conn_display.add(ws);
             
             setTimeout(() => { this.sendUpdateToDisplay(); }, 1000);
-            // setTimeout(() => { this.broadcastToDisplay(undefined, true, { ws }); }, 1000);
 
             ws.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Display WebSocket Server`, error); });
             
@@ -219,8 +222,6 @@ class NDPiCommandServer_Client extends EventEmitter {
 
                         this.settings.put('ndpi_status_ndi_source_target', source);
 
-                        this.sendUpdateToDisplay();
-
                         res.status(200);
                         res.json({ success: true, message: `NDI Source Set: ${source}` });
                         break;
@@ -257,6 +258,12 @@ class NDPiCommandServer_Client extends EventEmitter {
         });
 
         this.ws_conn_system.forEach(client => {
+            try { client.close(); }
+            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e); }
+            finally { this.ws_conn_system.delete(client); }
+        });
+
+        this.ws_conn_sources.forEach(client => {
             try { client.close(); }
             catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Error Closing Display WebSocket Client Connection', e); }
             finally { this.ws_conn_system.delete(client); }
@@ -333,9 +340,12 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     /**
-     * This replaces two functions: updateDisplay() and broadcastToDisplay()
+     * 
+     * @param {object} message - Message object to send to Overlay Display
+     * @param {string} [message.type] - Read by the overlay display as the message type.
+     * @param {any} [message.data] - Data to send. Type predefinded by Display WebSocket on basis of message.type.
      */
-    sendUpdateToDisplay() {
+    sendUpdateToDisplay(message) {
         let message = {
             type: 'settings-update',
             data: Array.from(this.settings.fileMap),

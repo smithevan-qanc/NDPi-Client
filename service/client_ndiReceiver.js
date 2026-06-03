@@ -99,7 +99,7 @@ class NDI_Receiver_v4 extends EventEmitter {
         });
 
         this.receiver.on('close', (code, signal) => {
-            this.receiver = null;
+            this.emit('killed', this.ndiActiveSource);
 
             this.ndiActiveSource = null;
             this.settings.put('ndpi_status_ndi_source_active', '');
@@ -115,6 +115,8 @@ class NDI_Receiver_v4 extends EventEmitter {
 
             this.ndiResolution = null;
             this.settings.put('ndpi_status_ndi_source_resolution', '');
+
+            this.receiver = null;
         });
     }
 
@@ -127,7 +129,6 @@ class NDI_Receiver_v4 extends EventEmitter {
             setTimeout(() => {
                 func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
                 func.focusNdi();
-                this.server.upd
             }, delay);
         }
 

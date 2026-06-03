@@ -36,8 +36,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: opacity 800ms ease;
         }
-        #overlay-svg {
+        #overlay {
             opacity: 0;
             width: auto;
             height: 50vh;
@@ -50,7 +51,7 @@
             top: 0;
             margin: 1vh;
             width: 8vh;
-            transition: opacity 300ms ease;
+            transition: opacity 500ms ease;
         }
         #attempting-ndi-connection-svg {
             position: absolute;
@@ -58,7 +59,7 @@
             top: 0;
             margin: 1vh;
             width: 6vh;
-            transition: opacity 300ms ease;
+            transition: opacity 500ms ease;
         }
         .status-indicator {
             position: absolute;
@@ -122,16 +123,16 @@
     <!-- SYSTEM DETAILS -->
     <div id="sys-details">
         <div>
-            <span id="devName" style="font-weight: 600; font-size: 110%"></span>
+            <span id="device_name" style="font-weight: 600; font-size: 110%"></span>
             <br>
-            <span id="devId" style="text-transform: uppercase; font-size:90%; letter-spacing: 0.07vh;"></span>
+            <span id="device_id" style="text-transform: uppercase; font-size:90%; letter-spacing: 0.07vh;"></span>
         </div>
-        <div>IP:<span id="devIp" style="font-weight: 600"></span></div>
-        <div>SERVER:<span id="servIp" style="font-weight: 600"></span></div>
+        <div>IP:<span id="device_ip" style="font-weight: 600"></span></div>
+        <div>SERVER:<span id="ndpi_command_server_host" style="font-weight: 600"></span></div>
 
         <div style="font-size: 90%; display: flex;">
-            <span id="programName"></span>
-            <div>&nbsp;|&nbsp;v<span id="programVer"></span></div>
+            <span id="device_type"></span>
+            <div>&nbsp;|&nbsp;v<span id="ndpi_version"></span></div>
         </div>
     </div>
     <!-- WAITING FOR SERVER CONNECTION -->
@@ -158,10 +159,11 @@
     <!-- OVERLAY CONTAINER -->
     <div id="display-container">
         <div id="overlay-container">
-            <img id="overlay-svg" src="" alt="NDPi Monitor">
+            <img id="overlay" src="" alt="NDPi Monitor">
         </div>
     </div>
 
+    <script src="/socket.js"></script>
     <script src="/index.js"></script>
 </body>
 
