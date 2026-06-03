@@ -648,11 +648,15 @@ class FileSystemMonitor extends EventEmitter {
             await this.updateLocalIp();
             console.log(`Checking IP Address In: ${this.#ipPollInterval / 1000}s`);
         }
-        catch {}
+        catch (err)
+        { console.error("error?? pollIp", err); }
         finally
         {
             if (this.ipPollEnable)
-            { this.#ipPoll = setTimeout(this.pollIp, this.#ipPollInterval); }
+            {
+                this.#ipPoll = null;
+                this.#ipPoll = setTimeout(this.pollIp, this.#ipPollInterval);
+            }
         }
 
         // try { clearTimeout(this.#ipPoll); }
@@ -671,11 +675,15 @@ class FileSystemMonitor extends EventEmitter {
             await this.checkForUpdate();
             console.log(`Checking GIT for Update In: ${this.#updatePollInterval / 1000}s`);
         }
-        catch {}
+        catch (err)
+        { console.error("error?? pollUpdate", err); }
         finally
         {
             if (this.updatePollEnable)
-            { this.#updatePoll = setTimeout(this.pollUpdate, this.#updatePollInterval); }
+            {
+                this.#updatePoll = null;
+                this.#updatePoll = setTimeout(this.pollUpdate, this.#updatePollInterval);
+            }
         }
     }
 
