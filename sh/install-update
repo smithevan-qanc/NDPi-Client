@@ -9,6 +9,8 @@ set -e
 
 customInstallInstructions() {
     # Write Custom Update Script Here
+    export DISPLAY=':0'
+    openbox --restart
     sleep 0.1
 }
 
