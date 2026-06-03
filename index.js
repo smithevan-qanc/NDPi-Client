@@ -331,7 +331,10 @@ class NDPi {
         if (source == 'none')
         {
             if (this.ndiReceiver.size >= 1)
-            { this.ndiReceiver.forEach((receiver, key) => { receiver.close(); }); }
+            {
+                await func.fadeVolume(0, `${path.basename(__filename)} startNdiReceiver()`)
+                this.ndiReceiver.forEach((receiver, key) => { receiver.close(); });
+            }
             return;
         }
 
