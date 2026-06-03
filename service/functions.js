@@ -262,7 +262,7 @@ const { exec, spawn } = require('node:child_process');
                 case 'reboot-device':
                     try
                     {
-                        const f = await fetch('http://localhost:3080/api/v1/__internal/reboot', {
+                        let f = await fetch('http://localhost:3080/api/v1/__internal/reboot', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(command)
@@ -524,7 +524,7 @@ const { exec, spawn } = require('node:child_process');
             try
             {
                 console.log('Attempting to wake display. CEC');
-                const f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
+                let f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: crypto.randomUUID, data: 'on 0' })
@@ -534,12 +534,12 @@ const { exec, spawn } = require('node:child_process');
                 await wait(1500);
 
                 console.log('Attempting to wake display. CEC');
-                const f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
+                let f2 = await fetch('http://localhost:3080/api/v1/__internal/cec', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: crypto.randomUUID, data: 'as' })
                 });
-                if (!f.ok) { throw new Error() }
+                if (!f2.ok) { throw new Error() }
             }
             catch
             {
