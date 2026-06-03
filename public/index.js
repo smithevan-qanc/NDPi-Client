@@ -19,11 +19,11 @@ function updateDetails(msg) {
     displayDetails();
 }
 
-const server = new NDPi_WebSocket('ws/display');
-
 const overlayEl = document.getElementById('overlay');
 const detailsEl = document.getElementById('sys-details');
 const startingEl = document.getElementById('attempting-ndi-connection-svg');
+
+const server = new NDPi_WebSocket('ws/display');
 
 server._ws.onopen = () => {
     console.log('Connected to device server');
@@ -133,6 +133,22 @@ server._ws.onmessage = (message) => {
         }
     }
     catch {}
+}
+
+server._ws.onclose = async () => {
+    const url = new URLPattern(window.location.href);
+    const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/rpc`;
+    try
+    {
+        const res = await fetch(urlString, {
+            signal: AbortSignal.timeout(9007199254740992),
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'ping' })
+        });
+    }
+    catch {}
+    finally { window.location.reload(); }
 }
 
 let displayMode = 'blank';

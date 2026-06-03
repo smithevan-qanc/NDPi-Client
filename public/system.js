@@ -1,10 +1,8 @@
 // use NDPi_WebSocket from './socket.js'
-const server = new NDPi_WebSocket('ws/system');
-const sources = new NDPi_WebSocket('ws/sources');
-
 
 // Available sources array.
 let availableSources = [];
+
 const uploaderEl = document.getElementById('overlay_upload');
 const uploaderPreviewEl = document.getElementById('overlay_preview');
 let overlayUploadCommand = {
@@ -19,12 +17,7 @@ let overlayUploadCommand = {
     }
 };
 
-(async () => {
-    await refreshSources();
-    addEvents();
-})();
-
-
+const server = new NDPi_WebSocket('ws/system');
 server._ws.onmessage = (message) => {
     try
     {
@@ -77,7 +70,28 @@ server._ws.onmessage = (message) => {
     catch (e)
     { console.error('Invalid message:', e); }
 };
+server._ws.onclose = async () => {
+    const url = new URLPattern(window.location.href);
+    const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/rpc`;
+    try
+    {
+        const res = await fetch(urlString, {
+            signal: AbortSignal.timeout(9007199254740992),
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'ping' })
+        });
+    }
+    catch {}
+    finally { window.location.reload(); }
+}
 
+(async () => {
+    await refreshSources();
+    addEvents();
+})();
+
+const sources = new NDPi_WebSocket('ws/sources');
 sources._ws.onmessage = (message) => {
     try
     {
@@ -237,43 +251,6 @@ async function handleFiles() {
     reader.readAsDataURL(file);
 }
 
-async function sendCommand(command = {}, viaWebSocket = true) {
-    if (!command.type) return null;
-    
-    if (viaWebSocket && server?._ws && server?._ws.readyState === WebSocket.OPEN) 
-    {
-        try
-        {
-            server._ws.send(JSON.stringify(command));
-            return;
-        }
-        catch (err)
-        { console.error(err); }
-    }
-    
-    // const searchParams = new URLSearchParams(command).toString();
-    // const url = new URLPattern(window.location.href);
-    // const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/rpc?${searchParams}`;
-
-    const url = new URLPattern(window.location.href);
-    const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/rpc`;
-
-    let data = null;
-    try
-    {
-        const res = await fetch(urlString, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(command)
-        });
-        if (!res.ok) throw new Error(await res.json());
-        data = await res.json();
-    }
-    catch (e) 
-    { console.error(e); }
-    return data;
-}
-
 async function refreshSources() {
     const response = await sendCommand({ type: 'get-sources' }, false);
     console.log(response);
@@ -311,4 +288,41 @@ function renderSources() {
 
     if (currentSourceEl)
     { sourceSelectorEl.value = currentSourceEl.value || 'none'; }
+}
+
+async function sendCommand(command = {}, viaWebSocket = true) {
+    if (!command.type) return null;
+    
+    if (viaWebSocket && server?._ws && server?._ws.readyState === WebSocket.OPEN) 
+    {
+        try
+        {
+            server._ws.send(JSON.stringify(command));
+            return;
+        }
+        catch (err)
+        { console.error(err); }
+    }
+    
+    // const searchParams = new URLSearchParams(command).toString();
+    // const url = new URLPattern(window.location.href);
+    // const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/rpc?${searchParams}`;
+
+    const url = new URLPattern(window.location.href);
+    const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/rpc`;
+
+    let data = null;
+    try
+    {
+        const res = await fetch(urlString, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(command)
+        });
+        if (!res.ok) throw new Error(await res.json());
+        data = await res.json();
+    }
+    catch (e) 
+    { console.error(e); }
+    return data;
 }

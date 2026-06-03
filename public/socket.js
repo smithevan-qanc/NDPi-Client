@@ -24,12 +24,6 @@ class NDPi_WebSocket extends EventTarget {
         this.connect();
     }
 
-    disconnect() {
-        if (this._ws && this._ws.readyState === WebSocket.OPEN)
-        try { this._ws.close(); } catch {}
-        this._ws = null;
-    }
-
     connect() {
         // if (this._ws && this._ws.readyState === WebSocket.OPEN)
         try { this._ws.close(); }
@@ -56,9 +50,15 @@ class NDPi_WebSocket extends EventTarget {
 
         this._ws.onclose = () => {
             console.info('NDPi Websocket Disconnected');
-            this.reconnect();
-            this._ws = null;
+            // this.reconnect();
+            // this._ws = null;
         }
+    }
+
+    disconnect() {
+        if (this._ws && this._ws.readyState === WebSocket.OPEN)
+        try { this._ws.close(); } catch {}
+        this._ws = null;
     }
 
     reconnect() {
