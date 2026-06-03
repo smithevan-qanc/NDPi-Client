@@ -177,8 +177,10 @@ class NDI_Receiver_v4 extends EventEmitter {
     async close(shutdown = false) {
         this.enabled = false;
         
-        func.fadeVolume(0, `${path.basename(__filename)} close()`);
-        await func.focusChromium();
+        await Promise.all([
+            func.fadeVolume(0, `${path.basename(__filename)} close()`),
+            func.focusChromium()
+        ]);
 
         if (this.receiver)
         {
