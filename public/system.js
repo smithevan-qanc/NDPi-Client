@@ -171,6 +171,7 @@ function addEvents() {
         const res = await sendCommand(overlayUploadCommand);
         if (!res?.success)
         { console.error('Failed to upload overlay.', res) }
+        uploaderEl.value = '';
     });
     document.getElementById('device_reboot').addEventListener('click', async function(e) {
         e.preventDefault();
@@ -234,7 +235,6 @@ async function handleFiles() {
         { document.getElementById('save_overlay').disabled = false; }
     };
     reader.readAsDataURL(file);
-    uploaderEl.value = '';
 }
 
 async function sendCommand(command = {}, viaWebSocket = true) {
