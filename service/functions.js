@@ -416,7 +416,44 @@ const { exec, spawn } = require('node:child_process');
             let focusSuccess = false;
             let focusError = null;
 
-            console.log('trying minimize chromium.');
+            console.log('trying to focus gstreamer.');
+
+            await new Promise((resolve) => {
+                exec(`xdotool search --class 'gstreamer'`, (error, stdout, stderr) => {
+                    if (error)
+                    {
+                        console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr.toString() || 'No Instances of Chromium when trying to focus.');
+                        resolve();
+                    }
+                    else
+                    {
+                        const output = stdoutToArray(stdout);
+                        for (const line of output)
+                        {
+                            if (!focusSuccess)
+                            {
+                                exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+                                    if (error)
+                                    { focusError = stderr.toString().trim() || `None of the GStreamer instances are focusable. ${output.join(', ')}`; }
+                                    else
+                                    { focusSuccess = true; }
+                                });
+                            }
+                        }
+                        resolve();
+                    }
+                });
+            });
+
+            console.log('DONE trying to focus gstreamer.');
+
+            if (focusError)
+            {
+                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError);
+                return;
+            }
+
+            console.log('trying to minimize chromium.');
 
             await new Promise((resolve) => {
                 exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
@@ -445,7 +482,7 @@ const { exec, spawn } = require('node:child_process');
                 });
             });
 
-            console.log('DONE trying minimize chromium.');
+            console.log('DONE trying to minimize chromium.');
 
             setTimeout(() => {
                 console.log('trying to kill picom.');
@@ -455,10 +492,8 @@ const { exec, spawn } = require('node:child_process');
                     else
                     { console.log('Picom has been killed.'); }
                 });
-            }, 2000);
+            }, 1000);
 
-            if (focusError)
-            { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError); }
         }
 
         async function launchPicom() {
