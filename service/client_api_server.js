@@ -205,21 +205,6 @@ class NDPiCommandServer_Client extends EventEmitter {
 
                     case 'ndi':
                         let source = String(data || 'none');
-
-                        // if (String(data || 'none').toLowerCase() === 'none')
-                        // {
-                        //     source = 'none';
-                        //     setTimeout(() => {
-                        //         const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
-                        //         // this.updateDisplay({ type: `show-${displayMode}` });
-                        //     }, 2000);
-                        // }
-                        // else
-                        // {
-                        //     source = String(data);
-                        //     // this.updateDisplay({ type: `ndi-init` });
-                        // }
-
                         this.settings.put('ndpi_status_ndi_source_target', source);
 
                         res.status(200);

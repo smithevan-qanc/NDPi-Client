@@ -518,6 +518,28 @@ const { exec, spawn } = require('node:child_process');
             return;
         }
 
+        async function activateDisplay() {
+            try
+            {
+                const f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: crypto.randomUUID, data: 'on 0' })
+                });
+                if (!f.ok) { throw new Error() }
+                
+                await wait(1500);
+
+                const f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: crypto.randomUUID, data: 'as' })
+                });
+                if (!f.ok) { throw new Error() }
+            }
+            catch { await setDisplayResolution(); }
+        }
+
         /** STDOUT TO ARRAY */
         function stdoutToArray(stdout) {
             let a = [];
@@ -528,9 +550,32 @@ const { exec, spawn } = require('node:child_process');
             return a;
         }
 
+        /**
+         * **Asynchronous inline blocking tool.**
+         * 
+         * Call this funciton using 'await' for the process to block.
+         * 
+         * ---
+         * 
+         * ### NDPi Function
+         * 
+         * @param {number} time > **time**: Wait time in *milliseconds*.
+         */
+        async function wait(time) {
+            return new Promise((resolve) => { setTimeout(() => { resolve(); }, time || 0) });
+        }
+
         /** SET DISPLAY RESOLUTION */
         /**
-         * This function set's the HDMI output resolution to the currently set values contained in 'output_display_port', 'output_display_resolution_preference', and 'output_display_framerate_preference'.
+         * This function set's the HDMI output resolution
+         * - Using these setting values:
+         *   - 'output_display_port'
+         *   - 'output_display_resolution_preference'
+         *   - 'output_display_framerate_preference'.
+         * ---
+         * 
+         * ### NDPi Function
+         * 
          */
         async function setDisplayResolution() {
             let config = {
@@ -538,11 +583,21 @@ const { exec, spawn } = require('node:child_process');
                 resolution: null,
                 framerate: null,
             };
-            try { config.displayPort = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_port'), 'utf8').trim() } catch {}
-            try { config.resolution = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_resolution_preference'), 'utf8').trim() } catch {}
-            try { config.framerate = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_framerate_preference'), 'utf8').trim() } catch {}
 
-            await new Promise((resolve) => {
+            try
+            { config.displayPort = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_port'), 'utf8').trim() }
+            catch {}
+            try
+            { config.resolution = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_resolution_preference'), 'utf8').trim() }
+            catch {}
+            try
+            { config.framerate = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_framerate_preference'), 'utf8').trim() }
+            catch {}
+
+            if (config.displayPort == '')
+            { return; }
+
+            return await new Promise((resolve) => {
                 exec(`xrandr \
                     --output ${config.displayPort} \
                     ${config.resolution ? `--mode ${config.resolution}` : '--auto'} \
@@ -567,7 +622,6 @@ const { exec, spawn } = require('node:child_process');
                     }
                 });
             });
-            return;
         }
 
         async function waitForNetwork({ host = '8.8.8.8', port = 53, retryMs = 1000 } = {}) {
