@@ -351,11 +351,12 @@ class NDPiCommandServer_Client extends EventEmitter {
             data: Array.from(this.settings.fileMap),
             ...message,
         };
-        
-        this.ws_conn_display.forEach(client => {
-            try { client.send(JSON.stringify(msg)); }
-            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', msg, '\n', e); }
-        });
+        setTimeout(() => {
+            this.ws_conn_display.forEach(client => {
+                try { client.send(JSON.stringify(msg)); }
+                catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', msg, '\n', e); }
+            });
+        }, 100);
     }
 
     setCecController(CecController) {

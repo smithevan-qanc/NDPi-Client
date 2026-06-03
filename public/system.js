@@ -31,6 +31,12 @@ server._ws.onmessage = (message) => {
         const msg = JSON.parse(message.data);
         for (const [id, object] of msg)
         {
+            if (id = 'media_overlay_image' && object.value.startsWith('{'))
+            {
+                document.getElementById('media_overlay_image').src = JSON.parse(object.value).src;
+                return;
+            }
+
             const settingInnerHTML = `
                 <div class="div-label">${String(id.split('_').join(' '))}</div>
                 <input type="text" id="${id}" value="${String(object.value).replaceAll('"', "'")}" ${object.allowEditExternal ? '' : 'disabled'}>

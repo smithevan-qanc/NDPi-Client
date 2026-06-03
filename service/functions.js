@@ -378,7 +378,6 @@ const { exec, spawn } = require('node:child_process');
             console.log('trying to focus chromium.');
 
             await new Promise((resolve) => {
-
                 exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
                     if (error)
                     {
@@ -394,13 +393,9 @@ const { exec, spawn } = require('node:child_process');
                             {
                                 exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
                                     if (error)
-                                    {
-                                        focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`;
-                                    }
+                                    { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
                                     else
-                                    {
-                                        focusSuccess = true;
-                                    }
+                                    { focusSuccess = true; }
                                 });
                             }
                         }
@@ -421,10 +416,10 @@ const { exec, spawn } = require('node:child_process');
             let focusSuccess = false;
             let focusError = null;
 
-            console.log('trying to focus gstreamer.');
+            console.log('trying minimize chromium.');
 
             await new Promise((resolve) => {
-                exec(`xdotool search --class 'gstreamer'`, (error, stdout, stderr) => {
+                exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
                     if (error)
                     {
                         console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr.toString() || 'No Instances of Chromium when trying to focus.');
@@ -437,15 +432,11 @@ const { exec, spawn } = require('node:child_process');
                         {
                             if (!focusSuccess)
                             {
-                                exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+                                exec(`xdotool windowminimize ${line}`, (error, stdout, stderr) => {
                                     if (error)
-                                    {
-                                        focusError = stderr.toString().trim() || `None of the GStreamer instances are focusable. ${output.join(', ')}`;
-                                    }
+                                    { focusError = stderr.toString().trim() || `None of the Chromium instances are actionable windows. ${output.join(', ')}`; }
                                     else
-                                    {
-                                        focusSuccess = true;
-                                    }
+                                    { focusSuccess = true; }
                                 });
                             }
                         }
@@ -454,7 +445,7 @@ const { exec, spawn } = require('node:child_process');
                 });
             });
 
-            console.log('DONE trying to focus gstreamer.');
+            console.log('DONE trying minimize chromium.');
 
             setTimeout(() => {
                 console.log('trying to kill picom.');
