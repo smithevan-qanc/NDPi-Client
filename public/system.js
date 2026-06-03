@@ -30,7 +30,7 @@ server._ws.onmessage = (message) => {
     {
         const msg = JSON.parse(message.data);
         const overlayPreviewEl = document.getElementById('media_overlay_image');
-        
+
         for (const [id, object] of msg)
         {
             if (id === 'media_overlay_image')
@@ -216,8 +216,8 @@ async function handleFiles() {
     { return; }
 
     const img = document.createElement("img");
-    img.file = file;
-    uploaderPreviewEl.appendChild(img);
+    uploaderPreviewEl.file = file;
+    // uploaderPreviewEl.appendChild(img);
 
     overlayUploadCommand.data.name = file.name || '';
     overlayUploadCommand.data.type = file.type || '';
@@ -228,7 +228,7 @@ async function handleFiles() {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-        img.src = e.target.result;
+        uploaderPreviewEl.src = e.target.result;
         overlayUploadCommand.data.src = e.target.result;
         if (overlayUploadCommand.data.src)
         { document.getElementById('save_overlay').disabled = false; }
