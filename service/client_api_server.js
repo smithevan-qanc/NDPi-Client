@@ -346,10 +346,10 @@ class NDPiCommandServer_Client extends EventEmitter {
      * @param {any} [message.data] - Data to send. Type predefinded by Display WebSocket on basis of message.type.
      */
     sendUpdateToDisplay(message) {
-        let message = {
-            type: 'settings-update',
-            data: Array.from(this.settings.fileMap),
-        };
+        // let msg = {
+        //     type: 'settings-update',
+        //     data: Array.from(this.settings.fileMap),
+        // };
         
         this.ws_conn_display.forEach(client => {
             try { client.send(JSON.stringify(message)); }
