@@ -118,9 +118,9 @@ server._ws.onmessage = (message) => {
                     }
                     try
                     {
-                        const imageObj = JSON.parse(output);
-                        if (imageObj.src)
-                        { overlayEl.src = imageObj.src; }
+                        const imageObj = JSON.parse(output).src || '/assets/Display_Overlay.svg';
+                        if (imageObj)
+                        { overlayEl.src = imageObj; }
                         else
                         { throw new Error('/assets/Display_Overlay.svg') }
                     }
