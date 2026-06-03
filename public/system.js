@@ -27,8 +27,10 @@ server._ws.onmessage = (message) => {
 
         for (const [id, object] of msg)
         {
+            let isMultiline = false;
             if (id === 'media_overlay_image')
             {
+                isMultiline = true;
                 try
                 {
                     const parse = JSON.parse(object.value).src || null;
@@ -44,54 +46,59 @@ server._ws.onmessage = (message) => {
                     overlayPreviewEl.style.boxShadow = 'none';
                     overlayPreviewEl.src = '';
                 }
-                finally { return; }
             }
 
             if (id === 'ndpi_status_ndi_source_target')
-            { document.getElementById('source_selection').value = object.value || 'none'; }
+            {
+                document.getElementById('source_selection').value = object.value || 'none';
+            }
+            
+            if (!document.getElementById(`__${id}`))
+            {
+                const newSetting = document.createElement('div');
+                newSetting.id = `__${id}`;
+                newSetting.innerHTML = `<div id="label__${id}" class="div-label">${String(id.split('_').join(' '))}</div>`
+                document.getElementById('settings').appendChild(newSetting);
+            }
 
-            let settingEl = document.getElementById(`__${id}`);
-            const settingDoesNotExist = !settingEl;
+            const settingEl = document.getElementById(`__${id}`);
+            let settingInnerHTML = document.getElementById(`label__${id}`).outerHTML;
 
             if (object.options)
             {
-                if (settingDoesNotExist)
-                {
-                    settingEl = document.createElement('select');
-                    // settingEl.id = `__${id}`;
-                }
-                
-                settingEl.innerHTML = '';
-                
+                settingInnerHTML += `<select id="${id}" value="${object.value}">`;
+
                 for (const [ key, value ] of object.options)
                 {
                     const opt = document.createElement('option');
                     opt.value = value;
                     opt.textContent = key;
-                    settingEl.appendChild(opt);
+                    settingInnerHTML += opt.outerHTML;
                 }
+
+                settingInnerHTML += `</select>`
             }
             else
             {
-                let settingInnerHTML = ``;
-                settingInnerHTML += `<div class="div-label">${String(id.split('_').join(' '))}</div>`;
-                settingInnerHTML += `<input type="text" id="${id}" value="${String(object.value).replaceAll('"', "'")}" ${object.allowEditExternal ? '' : 'disabled'}>`;
-
-                if (settingDoesNotExist)
+                if (isMultiline)
                 {
-                    settingEl = document.createElement('div');
-                    // settingEl.id = `__${id}`;
-                    // settingEl.innerHTML = settingInnerHTML;
+                    settingInnerHTML += `<textarea `;
+                    settingInnerHTML += `rows="3" `;
+                    settingInnerHTML += `style="resize: vertical; max-height: 300px; min-height: 3rem;" `;
+                    settingInnerHTML += `id="${id}" `;
+                    settingInnerHTML += `value="${String(object.value).replaceAll('"', "'")}" `;
+                    settingInnerHTML += `${object.allowEditExternal ? '' : 'disabled'}></textarea>`;
                 }
-                // else
-                // { settingEl.innerHTML = settingInnerHTML; }
-                settingEl.innerHTML = settingInnerHTML;
+                else
+                {
+                    settingInnerHTML += `<input `;
+                    settingInnerHTML += `type="text" `;
+                    settingInnerHTML += `id="${id}" `;
+                    settingInnerHTML += `value="${String(object.value).replaceAll('"', "'")}" `;
+                    settingInnerHTML += `${object.allowEditExternal ? '' : 'disabled'}></input>`;
+                }
             }
-            if (settingDoesNotExist)
-            {
-                settingEl.id = `__${id}`;
-                document.getElementById('settings').appendChild(settingEl);
-            }
+            settingEl.innerHTML = settingInnerHTML;
         }
     }
     catch (e)

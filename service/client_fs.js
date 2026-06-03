@@ -217,6 +217,10 @@ class FileSystemMonitor extends EventEmitter {
                 key: "ndpi_status_no_source_display_mode",
                 value: `overlay`,
                 group: ``,
+                options: [
+                    ['Overlay Image', 'overlay'],
+                    ['Blank Screen',  'blank'  ],
+                ],
                 allowEditInternal: true,
                 allowEditExternal: true,
             },
@@ -238,11 +242,11 @@ class FileSystemMonitor extends EventEmitter {
                 key: "ndi_receiver_bandwidth",
                 value: `0`,
                 options: [
-                    ['Metadata Only', '-10'],
-                    ['Audio Only',    '10'],
-                    ['Lowest',        '0'],
-                    ['Highest',       '100'],
-                    ['Max',           '0x7fffffff']
+                    ['Metadata Only', '-10'       ],
+                    ['Audio Only',    '10'        ],
+                    ['Lowest',        '0'         ],
+                    ['Highest',       '100'       ],
+                    ['Max',           '0x7fffffff'],
                 ],
                 group: ``,
                 allowEditInternal: true,
@@ -252,13 +256,13 @@ class FileSystemMonitor extends EventEmitter {
                 key: "ndi_receiver_color_format",
                 value: `100`,
                 options: [
-                    ['BGRx_BGRa', '0'],
-                    ['UYVY_BGRa', '1'],
-                    ['RGBx_RGBa', '2'],
-                    ['UYVY_RGBa', '3'],
-                    ['Fastest',   '100'],
-                    ['Best',      '101'],
-                    ['Max',       '0x7fffffff']
+                    ['BGRx_BGRa', '0'         ],
+                    ['UYVY_BGRa', '1'         ],
+                    ['RGBx_RGBa', '2'         ],
+                    ['UYVY_RGBa', '3'         ],
+                    ['Fastest',   '100'       ],
+                    ['Best',      '101'       ],
+                    ['Max',       '0x7fffffff'],
                 ],
                 group: ``,
                 allowEditInternal: true,
@@ -469,7 +473,7 @@ class FileSystemMonitor extends EventEmitter {
 
     async __flushQueue() {
         let updated = false;
-        
+
         while (this.queue.length > 0)
         {
             const { name } = this.queue.shift();
