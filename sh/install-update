@@ -53,12 +53,9 @@ install() {
     debug "[Current Dir] $(pwd)"
     
     customInstallInstructions
-    
-    # echo "Restarting NDPi Client" && sudo systemctl restart ndpi
-    # echo "INSTALLATION COMPLETE"
 
     echo -ne "\nRestarting NDPi Client"
-    sudo systemctl restart ndpi
+    # sudo systemctl restart ndpi
     echo -ne "\rINSTALLATION COMPLETE  \n"
 
     # sudo reboot
