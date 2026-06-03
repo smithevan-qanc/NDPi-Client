@@ -121,8 +121,10 @@ server._ws.onmessage = (message) => {
                         const imageObj = JSON.parse(output);
                         if (imageObj.src)
                         { overlayEl.src = imageObj.src; }
+                        else
+                        { throw new Error('/assets/Display_Overlay.svg') }
                     }
-                    catch {}
+                    catch (e) { overlayEl.src = e; }
                     break;
                     return;
 
