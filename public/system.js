@@ -18,6 +18,7 @@ let overlayUploadCommand = {
 };
 
 const server = new NDPi_WebSocket('ws/system');
+
 server._ws.onmessage = (message) => {
     try
     {
@@ -70,6 +71,7 @@ server._ws.onmessage = (message) => {
     catch (e)
     { console.error('Invalid message:', e); }
 };
+
 server._ws.onclose = () => {
     pingServer();
 }
