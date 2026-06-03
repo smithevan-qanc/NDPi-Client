@@ -364,11 +364,10 @@ const { exec, spawn } = require('node:child_process');
          * @param {string} source - Description of where the function was called. For debugging.
          * @returns
          */
-        function fadeVolume(level, source = 'Default') {
+        async function fadeVolume(level, source = 'Default') {
             if (!level.toString()) return;
-
             const commandLine = `${path.join(__dirname, '..', 'sh', 'fade-volume')} ${level} "${source}"` ;
-            exec(commandLine);
+            return new Promise((resolve) => { exec(commandLine).once('exit', resolve); });
         }
 
         async function focusChromium() {
