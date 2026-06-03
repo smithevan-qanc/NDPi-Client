@@ -35,13 +35,16 @@ class NDPi_WebSocket extends EventTarget {
         this._ws.onopen = () => {
             console.info('NDPi Websocket Connected');
 
-            try { clearTimeout(this.timerPageReload); }
-            catch {}
-            finally { this.timerPageReload = null; }
+            if (this.timerReconnect)
+            { window.navigation.reload(); }
 
-            try { clearTimeout(this.timerReconnect); }
-            catch {}
-            finally { this.timerReconnect = null; }
+            // try { clearTimeout(this.timerPageReload); }
+            // catch {}
+            // finally { this.timerPageReload = null; }
+
+            // try { clearTimeout(this.timerReconnect); }
+            // catch {}
+            // finally { this.timerReconnect = null; }
         };
 
         this._ws.onerror = (error) => {
@@ -50,8 +53,8 @@ class NDPi_WebSocket extends EventTarget {
 
         this._ws.onclose = () => {
             console.info('NDPi Websocket Disconnected');
-            // this.reconnect();
-            // this._ws = null;
+            this.reconnect();
+            this._ws = null;
         }
     }
 
@@ -70,11 +73,11 @@ class NDPi_WebSocket extends EventTarget {
             this.connect();
         }, this.reconnectDelay);
 
-        if (this.timerPageReload) { return; }
+        // if (this.timerPageReload) { return; }
 
-        this.timerPageReload = setTimeout(() => {
-            window.navigation.reload();
-        }, this.reloadPageDelay);
+        // this.timerPageReload = setTimeout(() => {
+        //     window.navigation.reload();
+        // }, this.reloadPageDelay);
     }
 }
 
