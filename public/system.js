@@ -239,7 +239,7 @@ async function handleFiles() {
 
 async function refreshSources() {
     const response = await sendCommand({ type: 'get-sources' }, false);
-    console.log(response);
+    // console.log(response);
     if (response?.success)
     { availableSources = response.data.sources || []; }
     renderSources();
