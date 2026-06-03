@@ -64,6 +64,7 @@ server._ws.onmessage = (message) => {
                     else
                     { document.getElementById('waiting-for-server-svg').style.opacity = 0; }
                     document.getElementById(id).textContent = output || '⎯';
+                    document.getElementById(`div__${id}`).hidden = !output;
                     break;
                     return;
 
