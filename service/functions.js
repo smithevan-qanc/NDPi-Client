@@ -433,7 +433,7 @@ const { exec, spawn } = require('node:child_process');
                         {
                             if (!focusSuccess)
                             {
-                                exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+                                exec(`xdotool windowraise ${line}`, (error, stdout, stderr) => {
                                     if (error)
                                     { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
                                     else
