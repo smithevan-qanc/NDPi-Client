@@ -80,7 +80,6 @@ class ClientServerWebSocket extends EventEmitter {
         
         this.socket.on('close', () => {
             console.info(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] NDPi Server Disconnected`);
-            this.server.sendUpdateToDisplay({ type: 'server-hub-connected', data: false });
             this.scheduleReconnect();
         });
     }

@@ -75,7 +75,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             
             this.ws_conn_display.add(ws);
             
-            setTimeout(() => { this.sendUpdateToDisplay(); }, 1000);
+            setTimeout(() => { this.sendUpdateToDisplay(); }, 500);
 
             ws.on('error', (error) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Display WebSocket Server`, error); });
             
@@ -346,14 +346,15 @@ class NDPiCommandServer_Client extends EventEmitter {
      * @param {any} [message.data] - Data to send. Type predefinded by Display WebSocket on basis of message.type.
      */
     sendUpdateToDisplay(message) {
-        // let msg = {
-        //     type: 'settings-update',
-        //     data: Array.from(this.settings.fileMap),
-        // };
+        let msg = {
+            type: 'settings-update',
+            data: Array.from(this.settings.fileMap),
+            ...message,
+        };
         
         this.ws_conn_display.forEach(client => {
-            try { client.send(JSON.stringify(message)); }
-            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', message, '\n', e); }
+            try { client.send(JSON.stringify(msg)); }
+            catch (e) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', msg, '\n', e); }
         });
     }
 
