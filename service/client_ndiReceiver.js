@@ -89,12 +89,12 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         this.receiver.stderr.on('data', (data) => {
             func.stdoutToArray(data.toString().trim()).forEach((line) => {
-                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] -`, line);
+                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] -`, line);
             });
         });
 
         this.receiver.on('error', (error) => {
-            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ RECEIVER ERROR ] -`, error);
+            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ RECEIVER ERROR ] -`, error);
             this.emit('error');
         });
 

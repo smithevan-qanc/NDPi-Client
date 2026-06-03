@@ -11,7 +11,6 @@ class FileSystemMonitor extends EventEmitter {
     #pgmVersion;
     #pgmVersionDate;
     #ipPoll;
-    #ipPollInterval;
     #updatePoll;
     #updatePollInterval;
     constructor(version = '1.0.0', versionDate = '1970-01-01') {
@@ -24,7 +23,7 @@ class FileSystemMonitor extends EventEmitter {
         this.defaultDeviceName = 'NDPi Client';
 
         this.#ipPoll = null;
-        this.#ipPollInterval = 1000;
+        this.ipPollInterval = 1000;
         this.ipPollEnable = true;
 
         this.#updatePoll = null;
@@ -446,7 +445,7 @@ class FileSystemMonitor extends EventEmitter {
                 }
             }
             catch (err)
-            { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err) }
+            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err) }
             
             if (this.sendToLCD.includes(setting.key))
             { fs.writeFileSync(path.join(__dirname, '..', 'python', 'script', setting.key), setting.value, 'utf8'); }
@@ -473,7 +472,7 @@ class FileSystemMonitor extends EventEmitter {
         });
         
         this.watcher.on('error', (error) => {
-            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error);
+            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error);
         });
 
         this.watcher.on('close', () => {
@@ -539,7 +538,7 @@ class FileSystemMonitor extends EventEmitter {
         if (!fileName || !this.fileMap.has(fileName))
         { return; }
         try { fs.writeFileSync(path.join(this.dataDir, fileName), data.trim(), 'utf8') }
-        catch (error) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving to FileSystem`); }
+        catch (error) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving to FileSystem`); }
     }
 
     startDrmMonitor() {
@@ -564,7 +563,7 @@ class FileSystemMonitor extends EventEmitter {
         });
 
         this.drmMonitor.on('error', (error) => {
-            console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] 'udevadm' DRM monitor disabled`, error.toString());
+            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] 'udevadm' DRM monitor disabled`, error.toString());
             this.drmMonitor = null;
         });
 
@@ -645,8 +644,8 @@ class FileSystemMonitor extends EventEmitter {
         console.log('Checking IP Address');
         try
         {
-            await check();
-            console.log(`Checking IP Address In: ${this.#ipPollInterval / 1000}s`);
+            await check(this);
+            console.log(`Checking IP Address In: ${this.ipPollInterval / 1000}s`);
         }
         catch (err)
         { console.error("error?? pollIp", err); }
@@ -655,11 +654,11 @@ class FileSystemMonitor extends EventEmitter {
             if (this.ipPollEnable)
             {
                 this.#ipPoll = null;
-                this.#ipPoll = setTimeout(this.pollIp, this.#ipPollInterval);
+                this.#ipPoll = setTimeout(this.pollIp, this.ipPollInterval);
             }
         }
 
-        async function check() {
+        async function check(module) {
             let fileName = 'device_ip';
             let valueUpdate = null;
 
@@ -667,7 +666,7 @@ class FileSystemMonitor extends EventEmitter {
                 exec('ip -j address', (error, stdout, stderr) => {
                     if (error)
                     {
-                        console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, stderr.toString());
+                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, stderr.toString());
                         resolve();
                     }
                     else
@@ -694,7 +693,7 @@ class FileSystemMonitor extends EventEmitter {
                             }
                         }
                         catch (error)
-                        { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, error); }
+                        { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, error); }
                         finally
                         { resolve(); }
                     }
@@ -703,17 +702,17 @@ class FileSystemMonitor extends EventEmitter {
 
             if (valueUpdate)
             {
-                const storedValue = this.fileMap.get(fileName).value;
+                const storedValue = module.fileMap.get(fileName).value;
                 if (valueUpdate !== storedValue)
                 {
-                    this.put(fileName, valueUpdate);
-                    this.#ipPollInterval = 10000;
+                    module.put(fileName, valueUpdate);
+                    module.ipPollInterval = 10000;
                 }
             }
             else
             {
-                this.put(fileName, '');
-                this.#ipPollInterval = 1000;
+                module.put(fileName, '');
+                module.ipPollInterval = 1000;
             }
             return;
         }
@@ -724,14 +723,14 @@ class FileSystemMonitor extends EventEmitter {
 
         // this.#ipPoll = setTimeout(() => {
         //     this.updateLocalIp()
-        // }, this.#ipPollInterval);
+        // }, this.ipPollInterval);
     }
 
     async pollUpdate() {
         console.log('Checking GIT for Update');
         try
         {
-            await check();
+            await check(this);
             console.log(`Checking GIT for Update In: ${this.#updatePollInterval / 1000}s`);
         }
         catch (err)
@@ -745,12 +744,12 @@ class FileSystemMonitor extends EventEmitter {
             }
         }
 
-        async function check() {
+        async function check(module) {
             return new Promise((resolve) => {
                 exec(path.join(__dirname, '..', 'sh', 'check-for-update'), (error, stdout) => {
                     if (error)
                     {
-                        console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error when checking for update. {{ ./sh/check-for-update }}`);
+                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error when checking for update. {{ ./sh/check-for-update }}`);
                         resolve();
                     }
                     else
@@ -760,11 +759,11 @@ class FileSystemMonitor extends EventEmitter {
                         {
                             const update = JSON.parse(output);
                             if (update.update_available)
-                            { this.put('ndpi_version_update_available', String(update.update_available)); }
+                            { module.put('ndpi_version_update_available', String(update.update_available)); }
                             if (update.newest_version?.ndpi)
-                            { this.put('ndpi_version_update_version', String(update.newest_version.ndpi)); }
+                            { module.put('ndpi_version_update_version', String(update.newest_version.ndpi)); }
                         }
-                        catch (err) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error parsing update.`, err); }
+                        catch (err) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error parsing update.`, err); }
                         finally
                         {
                             resolve();
@@ -788,7 +787,7 @@ class FileSystemMonitor extends EventEmitter {
             exec('ip -j address', (error, stdout, stderr) => {
                 if (error)
                 {
-                    console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, stderr.toString());
+                    console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, stderr.toString());
                     resolve();
                 }
                 else
@@ -815,7 +814,7 @@ class FileSystemMonitor extends EventEmitter {
                         }
                     }
                     catch (error)
-                    { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, error); }
+                    { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ] Error Reading IP Address.`, error); }
                     finally
                     { resolve(); }
                 }
@@ -828,13 +827,13 @@ class FileSystemMonitor extends EventEmitter {
             if (valueUpdate !== storedValue)
             {
                 this.put(fileName, valueUpdate);
-                this.#ipPollInterval = 10000;
+                this.ipPollInterval = 10000;
             }
         }
         else
         {
             this.put(fileName, '');
-            this.#ipPollInterval = 1000;
+            this.ipPollInterval = 1000;
         }
         return;
     }
@@ -844,7 +843,7 @@ class FileSystemMonitor extends EventEmitter {
             exec(path.join(__dirname, '..', 'sh', 'check-for-update'), (error, stdout) => {
                 if (error)
                 {
-                    console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error when checking for update. {{ ./sh/check-for-update }}`);
+                    console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error when checking for update. {{ ./sh/check-for-update }}`);
                     resolve();
                 }
                 else
@@ -858,7 +857,7 @@ class FileSystemMonitor extends EventEmitter {
                         if (update.newest_version?.ndpi)
                         { this.put('ndpi_version_update_version', String(update.newest_version.ndpi)); }
                     }
-                    catch (err) { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error parsing update.`, err); }
+                    catch (err) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error parsing update.`, err); }
                     finally
                     {
                         resolve();
@@ -876,7 +875,7 @@ class FileSystemMonitor extends EventEmitter {
         await new Promise((resolve) => {
             exec('cat /sys/class/drm/card*HDMI*/status', (error, stdout, stderr) => {
                 if (error)
-                { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ updateOutputDisplayFiles() ][ ERROR ]`, stderr.toString().trim()); }
+                { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ updateOutputDisplayFiles() ][ ERROR ]`, stderr.toString().trim()); }
                 else
                 {
                     const output = func.stdoutToArray(stdout);
@@ -906,7 +905,7 @@ class FileSystemMonitor extends EventEmitter {
             const commandPath = path.join(__dirname, '..', 'sh', 'current-resolution');
             exec(commandPath, (error, stdout, stderr) => {
                 if (error)
-                { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ updateOutputDisplayFiles() ][ ERROR ] ${stderr.toString().trim()}`); }
+                { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ updateOutputDisplayFiles() ][ ERROR ] ${stderr.toString().trim()}`); }
                 else
                 {
                     let resolutionOptions = [];

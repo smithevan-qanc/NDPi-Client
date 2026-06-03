@@ -367,7 +367,7 @@ const { exec, spawn } = require('node:child_process');
                 exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
                     if (error)
                     {
-                        console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, stderr.toString() || 'No Instances of Chromium when trying to focus.');
+                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, stderr.toString() || 'No Instances of Chromium when trying to focus.');
                         resolve();
                     }
                     else
@@ -393,7 +393,7 @@ const { exec, spawn } = require('node:child_process');
             console.log('DONE trying to focus chromium.');
 
             if (focusError)
-            { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError); }
+            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError); }
             else
             { await launchPicom(); }
         }
@@ -410,7 +410,7 @@ const { exec, spawn } = require('node:child_process');
                 exec(`xdotool search --class 'gstreamer'`, (error, stdout, stderr) => {
                     if (error)
                     {
-                        console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr.toString() || 'No Instances of Chromium when trying to focus.');
+                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr.toString() || 'No Instances of Chromium when trying to focus.');
                         resolve();
                     }
                     else
@@ -437,7 +437,7 @@ const { exec, spawn } = require('node:child_process');
 
             if (focusError)
             {
-                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError);
+                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError);
                 return;
             }
 
@@ -449,7 +449,7 @@ const { exec, spawn } = require('node:child_process');
                 exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
                     if (error)
                     {
-                        console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr.toString() || 'No Instances of Chromium when trying to focus.');
+                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr.toString() || 'No Instances of Chromium when trying to focus.');
                         resolve();
                     }
                     else
@@ -532,7 +532,7 @@ const { exec, spawn } = require('node:child_process');
             {
                 console.log('CEC could not wake display. Trying RandR.');
                 await setDisplayResolution().catch(() => {
-                    console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ activateDisplay() ][ setDisplayResolution() ]`, reason);
+                    console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ activateDisplay() ][ setDisplayResolution() ]`, reason);
                 });
             }
         }
@@ -615,7 +615,7 @@ const { exec, spawn } = require('node:child_process');
                 }, (error, stderr) => {
                     if (error)
                     {
-                        console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Resolution Set:`, config, stderr);
+                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Resolution Set:`, config, stderr);
                         reject(`XRandR Failed to set resolution. Reason: ${stderr.toString()}`);
                         return;
                     }
@@ -626,7 +626,7 @@ const { exec, spawn } = require('node:child_process');
                         }, (error, stdout, stderr) => {
                             if (error)
                             {
-                                console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`);
+                                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`);
                                 reject(`Openbox Failed to restart after setting resolution. Reason: ${stderr.toString()}`);
                                 return;
                             }

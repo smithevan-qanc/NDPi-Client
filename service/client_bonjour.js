@@ -102,7 +102,7 @@ class NDPiBonjourService {
 
         this.service = bonjour.publish(options);
 
-        this.service.on('error', (err) => { console.error(`⚠️ [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, err.message); });
+        this.service.on('error', (err) => { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, err.message); });
     }
 
     /**
