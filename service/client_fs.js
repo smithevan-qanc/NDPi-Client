@@ -641,15 +641,15 @@ class FileSystemMonitor extends EventEmitter {
 
 
     async pollIp() {
-        console.log('Checking IP Address');
+        // console.log('Checking IP Address');
 
         try { await this.updateLocalIp(); }
-        catch (err) { console.error("error?? pollIp", err); }
+        catch {}
         finally
         {
             if (this.ipPollEnable)
             {
-                console.log(`Checking IP Address In: ${this.ipPollInterval / 1000}s`);
+                // console.log(`Checking IP Address In: ${this.ipPollInterval / 1000}s`);
                 this.#ipPoll = null;
                 this.#updatePoll = setTimeout(() => {
                     this.pollIp();
@@ -666,15 +666,15 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     async pollUpdate() {
-        console.log('Checking GIT for Update');
+        // console.log('Checking GIT for Update');
 
         try { await this.checkForUpdate(); }
-        catch (err) { console.error("error?? pollUpdate", err); }
+        catch {}
         finally
         {
             if (this.updatePollEnable)
             {
-                console.log(`Checking GIT for Update In: ${this.#updatePollInterval / 1000}s`);
+                // console.log(`Checking GIT for Update In: ${this.#updatePollInterval / 1000}s`);
                 this.#updatePoll = null;
                 this.#updatePoll = setTimeout(() => {
                     this.pollUpdate();
