@@ -47,6 +47,7 @@ class NDI_Receiver_v4 extends EventEmitter {
         this.ndiFramerate = null;
         this.ndiResolution = null;
         this.ndiStatus = 'idle';
+        this.windowId = null;
 
         this.enabled = true;
         this.closing = false;

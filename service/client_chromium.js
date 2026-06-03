@@ -9,6 +9,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         this.service = null;
         this.settings = fsData;
         this.server = api;
+        this.windowId = null;
         this.launch();
     }
 
@@ -60,7 +61,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         this.service.on('exit', () => {
             this.emit('close');
         });
-        
+
         process.nextTick(() => { this.emit('ready'); });
     }
 

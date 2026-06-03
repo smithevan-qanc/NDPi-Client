@@ -35,6 +35,7 @@
     <application class="GStreamer">
       <layer>normal</layer>
       <focus>no</focus>
+      <iconic>no</iconic>
       <maximized>true</maximized>
       <fullscreen>yes</fullscreen>
     </application>
@@ -43,6 +44,7 @@
     <application class="Chromium">
       <fullscreen>yes</fullscreen>
       <layer>normal</layer>
+      <iconic>no</iconic>
       <focus>no</focus>
       <maximized>true</maximized>
     </application>
