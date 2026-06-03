@@ -30,6 +30,7 @@ server._ws.onmessage = (message) => {
     {
         const msg = JSON.parse(message.data);
         const overlayPreviewEl = document.getElementById('media_overlay_image');
+        
         for (const [id, object] of msg)
         {
             if (id === 'media_overlay_image')

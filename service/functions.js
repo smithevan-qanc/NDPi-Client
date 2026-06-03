@@ -469,15 +469,12 @@ const { exec, spawn } = require('node:child_process');
                         const output = stdoutToArray(stdout);
                         for (const line of output)
                         {
-                            if (!focusSuccess)
-                            {
-                                exec(`xdotool windowminimize ${line}`, (error, stdout, stderr) => {
-                                    if (error)
-                                    { focusError = stderr.toString().trim() || `None of the Chromium instances are actionable windows. ${output.join(', ')}`; }
-                                    else
-                                    { focusSuccess = true; }
-                                });
-                            }
+                            exec(`xdotool windowminimize ${line}`, (error, stdout, stderr) => {
+                                if (error)
+                                { focusError = stderr.toString().trim() || `None of the Chromium instances are actionable windows. ${output.join(', ')}`; }
+                                else
+                                { focusSuccess = true; }
+                            });
                         }
                         resolve();
                     }

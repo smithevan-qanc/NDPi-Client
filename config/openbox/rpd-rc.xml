@@ -35,14 +35,14 @@
     <application class="GStreamer">
       <layer>above</layer>
       <fullscreen>yes</fullscreen>
-      <focus>no</focus>
+      <focus>yes</focus>
       <iconic>no</iconic>
       <maximized>true</maximized>
     </application>
 
     <!--  Display Browser  -->
     <application class="Chromium">
-      <layer>normal</layer>
+      <layer>below</layer>
       <fullscreen>yes</fullscreen>
       <iconic>no</iconic>
       <focus>no</focus>
