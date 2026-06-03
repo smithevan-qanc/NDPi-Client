@@ -38,10 +38,11 @@ server._ws.onmessage = (message) => {
                 try
                 {
                     const parse = JSON.parse(object.value).src || null;
-                    if (parse)
+                    if (parse && parse !== overlayPreviewEl.src)
                     {
                         overlayPreviewEl.src = parse;
                         overlayPreviewEl.style.boxShadow = '0px 0px 5px -1px rgba(250, 250, 250, 0.6)';
+                        uploaderEl.value = '';
                     }
                 }
                 catch
@@ -217,7 +218,6 @@ async function handleFiles() {
 
     const img = document.getElementById('media_overlay_image');
     img.file = file;
-    // uploaderPreviewEl.appendChild(img);
 
     overlayUploadCommand.data.name = file.name || '';
     overlayUploadCommand.data.type = file.type || '';
@@ -234,6 +234,7 @@ async function handleFiles() {
         { document.getElementById('save_overlay').disabled = false; }
     };
     reader.readAsDataURL(file);
+    uploaderEl.value = '';
 }
 
 async function sendCommand(command = {}, viaWebSocket = true) {
