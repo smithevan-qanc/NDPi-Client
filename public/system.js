@@ -73,23 +73,22 @@ server._ws.onmessage = (message) => {
 };
 
 server._ws.onclose = () => {
-    pingServer();
-}
-
-async function pingServer() {
-    const url = new URLPattern(window.location.href);
-    const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/rpc`;
-    try
-    {
-        const res = await fetch(urlString, {
-            signal: AbortSignal.timeout(9007199254740992),
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'ping' })
-        });
-        window.location.reload();
+    const pingServer = async () => {
+        const url = new URLPattern(window.location.href);
+        const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/rpc`;
+        try
+        {
+            const res = await fetch(urlString, {
+                signal: AbortSignal.timeout(9007199254740992),
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'ping' })
+            });
+            window.location.reload();
+        }
+        catch { setTimeout(() => { pingServer(); }, 2000); }
     }
-    catch { setTimeout(() => { pingServer(); }, 2000); }
+    pingServer();
 }
 
 (async () => {
