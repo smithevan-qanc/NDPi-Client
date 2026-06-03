@@ -31,7 +31,7 @@ server._ws.onmessage = (message) => {
         const msg = JSON.parse(message.data);
         for (const [id, object] of msg)
         {
-            if (id = 'media_overlay_image' && String(object.value).includes('src'))
+            if (id === 'media_overlay_image' && String(object.value).includes('src'))
             {
                 document.getElementById('media_overlay_image').src = JSON.parse(object.value).src;
                 return;
