@@ -354,6 +354,7 @@ class NDPi {
         const receiver = new NDI_Receiver_v4(this.settings, this.server_api);
 
         this.ndiReceiver.add(source, receiver);
+        console.log(Array.from(this.ndiReceiver));
 
         for (const rec of openNdiReceivers)
         { await this.ndiReceiver.get(rec).close(); }
