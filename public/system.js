@@ -70,7 +70,11 @@ server._ws.onmessage = (message) => {
     catch (e)
     { console.error('Invalid message:', e); }
 };
-server._ws.onclose = async () => {
+server._ws.onclose = () => {
+    pingServer();
+}
+
+async function pingServer() {
     const url = new URLPattern(window.location.href);
     const urlString = `${url.protocol}://${url.hostname}:${url.port}/api/v1/rpc`;
     try
@@ -81,9 +85,9 @@ server._ws.onclose = async () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type: 'ping' })
         });
+        window.location.reload();
     }
-    catch {}
-    finally { window.location.reload(); }
+    catch { setTimeout(() => { pingServer(); }, 2000); }
 }
 
 (async () => {
