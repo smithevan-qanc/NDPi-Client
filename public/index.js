@@ -121,12 +121,12 @@ server._ws.onmessage = (message) => {
                     {
                         const imageObj = JSON.parse(output);
                         if (imageObj.src)
-                        { overlayEl.src = imageObj; }
+                        { overlayEl.src = imageObj.src; }
                     }
                     catch {}
                     break;
                     return;
-                    
+
                 default:
                     break;
                     return;
