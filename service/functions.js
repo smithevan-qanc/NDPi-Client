@@ -11,6 +11,11 @@ const { exec, spawn } = require('node:child_process');
  * @property {string}  message - A human-readable status message.
  * @property {Object|Array|null} data - The payload returned from the operation, if any.
  */
+/**
+ * @typedef  {Object}  ExecResponse
+ * @property {boolean} success - Indicates if the operation completed without errors.
+ * @property {any} data - The payload returned from the operation, if any.
+ */
 
 
 /** ---- Export Functions ---- */
@@ -310,6 +315,56 @@ const { exec, spawn } = require('node:child_process');
 
     /** COMPLETED */
 
+    
+        /**
+         * Async CLI exec() function
+         * 
+         * ---
+         * ### NDPi Function
+         * @param {string} command >**command**: CLI command to execute
+         * @param {string|null} cwd >**cwd**: Modify the current working directory of the shell. *Default Directory*: **home / *user* / ndpi / sh** 
+         * @param {Object|null} env >**env**: Additional environment variables to pass into the shell.
+         * @returns {ExecResponse} 
+         * ```
+         * {
+         *   success: boolean,
+         *   data: any[]
+         * }
+         * ```
+         */
+        async function exe(command, cwd, env = {}) {
+            let response = {
+                success: false,
+                data: null
+            };
+
+            let options = {
+                env: {
+                    ...process.env,
+                    ...env
+                }
+            }
+            if (cwd) { options.cwd = cwd; }
+
+            await new Promise((resolve, reject) => {
+                exec(command, options, (error, stdout, stderr) => {
+                    if (error)
+                    {
+                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ exec(${command}) ][ ERROR ]`, stderr.toString().trim());
+                        reject(stderr);
+                    }
+                    else
+                    {
+                        response.success = true;
+                        response.data = stdoutToArray(stdout)
+                        resolve();
+                    }
+                });
+            });
+
+            return response;
+        }
+
         /** GET LOCAL IP */
         async function getLocalIp(testForNetwork = false) {
             if (testForNetwork)
@@ -375,6 +430,109 @@ const { exec, spawn } = require('node:child_process');
             if (!level.toString()) return;
             const commandLine = `${path.join(__dirname, '..', 'sh', 'fade-volume')} ${level} "${source}"` ;
             return new Promise((resolve) => { exec(commandLine).once('exit', resolve); });
+        }
+
+        // NDI Window Actions
+
+        async function minimizeWindow_NDI() {
+            let response = false;
+            const cmd1 = await exe(`xdotool search --class 'gstreamer'`);
+
+            if (!cmd1.success)
+            { return response; }
+
+            if (Array.isArray(cmd1.data))
+            {
+                cmd1.data.forEach((windowId) => {
+                    const cmd2 = exe(`xdotool windowminimize ${windowId}`);
+                    if (cmd2.success) { response = true; }
+                });
+            }
+            return response;
+        }
+        async function raiseWindow_NDI() {
+            let response = false;
+            const cmd1 = await exe(`xdotool search --class 'gstreamer'`);
+
+            if (!cmd1.success)
+            { return response; }
+
+            if (Array.isArray(cmd1.data))
+            {
+                cmd1.data.forEach((windowId) => {
+                    const cmd2 = exe(`xdotool windowraise ${windowId}`);
+                    if (cmd2.success) { response = true; }
+                });
+            }
+            return response;
+        }
+        async function activateWindow_NDI() {
+            let response = false;
+            const cmd1 = await exe(`xdotool search --class 'gstreamer'`);
+
+            if (!cmd1.success)
+            { return response; }
+
+            if (Array.isArray(cmd1.data))
+            {
+                cmd1.data.forEach((windowId) => {
+                    const cmd2 = exe(`xdotool windowactivate ${windowId}`);
+                    if (cmd2.success) { response = true; }
+                });
+            }
+            return response;
+        }
+
+
+        // Chromium Window Actions
+
+        async function minimizeWindow_Chromium() {
+            let response = false;
+            const cmd1 = await exe(`xdotool search --class 'chromium'`);
+
+            if (!cmd1.success)
+            { return response; }
+
+            if (Array.isArray(cmd1.data))
+            {
+                cmd1.data.forEach((windowId) => {
+                    const cmd2 = exe(`xdotool windowminimize ${windowId}`);
+                    if (cmd2.success) { response = true; }
+                });
+            }
+            return response;
+        }
+        async function raiseWindow_Chromium() {
+            let response = false;
+            const cmd1 = await exe(`xdotool search --class 'chromium'`);
+
+            if (!cmd1.success)
+            { return response; }
+
+            if (Array.isArray(cmd1.data))
+            {
+                cmd1.data.forEach((windowId) => {
+                    const cmd2 = exe(`xdotool windowraise ${windowId}`);
+                    if (cmd2.success) { response = true; }
+                });
+            }
+            return response;
+        }
+        async function activateWindow_Chromium() {
+            let response = false;
+            const cmd1 = await exe(`xdotool search --class 'chromium'`);
+
+            if (!cmd1.success)
+            { return response; }
+
+            if (Array.isArray(cmd1.data))
+            {
+                cmd1.data.forEach((windowId) => {
+                    const cmd2 = exe(`xdotool windowactivate ${windowId}`);
+                    if (cmd2.success) { response = true; }
+                });
+            }
+            return response;
         }
 
         async function focusChromium() {
@@ -444,33 +602,66 @@ const { exec, spawn } = require('node:child_process');
             });
 
             await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
+
+            const q = await exe(`xdotool search --class 'chromium'`);
+
+            if (!q.success)
+            {
+                console.error(
+                    `⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`,
+                    stderr.toString() || 'No Instances of Chromium when trying to activate.'
+                );
+            }
             
-            await new Promise((resolve) => {
-                exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
-                    if (error)
-                    {
-                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, stderr.toString() || 'No Instances of Chromium when trying to activate.');
-                        resolve();
-                    }
-                    else
-                    {
-                        const output = stdoutToArray(stdout);
-                        for (const line of output)
-                        {
-                            if (!focusSuccess)
-                            {
-                                exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
-                                    if (error)
-                                    { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
-                                    else
-                                    { focusSuccess = true; }
-                                });
-                            }
-                        }
-                        resolve();
-                    }
-                });
-            });
+            // await new Promise((resolve) => {
+            //     exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
+            //         if (error)
+            //         {
+            //             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, stderr.toString() || 'No Instances of Chromium when trying to activate.');
+            //             resolve();
+            //         }
+            //         else
+            //         {
+            //             const output = stdoutToArray(stdout);
+            //             for (const line of output)
+            //             {
+            //                 if (!focusSuccess)
+            //                 {
+            //                     exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+            //                         if (error)
+            //                         { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
+            //                         else
+            //                         { focusSuccess = true; }
+            //                     });
+            //                 }
+            //             }
+            //             resolve();
+            //         }
+            //     });
+            // });
+            
+            /**
+             * 
+             * 
+             * 
+             * 
+             * I think this needs to activate 
+             * chromium after the g streamer
+             * instance hase been closed
+             * 
+             * It wont activate chromium 
+             * but when I run the 
+             * 'xdotool windowactivate'
+             * command in the terminal ....
+             * it works....
+             * 
+             * so
+             * 
+             * yeah 
+             * 
+             * 
+             * 
+             */
 
             console.log('DONE trying to focus chromium.');
 
@@ -489,70 +680,75 @@ const { exec, spawn } = require('node:child_process');
 
             console.log('trying to activate gstreamer.');
 
-            await new Promise((resolve) => {
-                exec(`xdotool search --class 'gstreamer'`, (error, stdout, stderr) => {
-                    if (error)
-                    {
-                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr.toString() || 'No Instances of GStreamer when trying to activate.');
-                        resolve();
-                    }
-                    else
-                    {
-                        const output = stdoutToArray(stdout);
-                        for (const line of output)
-                        {
-                            if (!focusSuccess)
-                            {
-                                exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
-                                    if (error)
-                                    { focusError = stderr.toString().trim() || `None of the GStreamer instances are focusable. ${output.join(', ')}`; }
-                                    else
-                                    { focusSuccess = true; }
-                                });
-                            }
-                        }
-                        resolve();
-                    }
-                });
-            });
+            const step1 = await activateWindow_NDI();
+            // await new Promise((resolve) => {
+            //     exec(`xdotool search --class 'gstreamer'`, (error, stdout, stderr) => {
+            //         if (error)
+            //         {
+            //             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr.toString() || 'No Instances of GStreamer when trying to activate.');
+            //             resolve();
+            //         }
+            //         else
+            //         {
+            //             const output = stdoutToArray(stdout);
+            //             for (const line of output)
+            //             {
+            //                 if (!focusSuccess)
+            //                 {
+            //                     exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
+            //                         if (error)
+            //                         { focusError = stderr.toString().trim() || `None of the GStreamer instances are focusable. ${output.join(', ')}`; }
+            //                         else
+            //                         { focusSuccess = true; }
+            //                     });
+            //                 }
+            //             }
+            //             resolve();
+            //         }
+            //     });
+            // });
 
             console.log('DONE trying to activate gstreamer.');
 
-            if (focusError)
+            if (!step1.success)
             {
-                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, focusError);
+                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() >> Step 1: Activate GStreamer ]`);
                 return;
             }
 
-            await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
+            await wait(1000);
 
             console.log('trying to minimize chromium.');
 
-            await new Promise((resolve) => {
-                exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
-                    if (error)
-                    {
-                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr.toString() || 'No Instances of Chromium when trying to minimize.');
-                        resolve();
-                    }
-                    else
-                    {
-                        const output = stdoutToArray(stdout);
-                        for (const line of output)
-                        {
-                            exec(`xdotool windowminimize ${line}`, (error, stdout, stderr) => {
-                                if (error)
-                                { focusError = stderr.toString().trim() || `None of the Chromium instances are actionable windows. ${output.join(', ')}`; }
-                                else
-                                { focusSuccess = true; }
-                            });
-                        }
-                        resolve();
-                    }
-                });
-            });
+            const step2 = await minimizeWindow_Chromium();
+            // await new Promise((resolve) => {
+            //     exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
+            //         if (error)
+            //         {
+            //             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() ]`, stderr.toString() || 'No Instances of Chromium when trying to minimize.');
+            //             resolve();
+            //         }
+            //         else
+            //         {
+            //             const output = stdoutToArray(stdout);
+            //             for (const line of output)
+            //             {
+            //                 exec(`xdotool windowminimize ${line}`, (error, stdout, stderr) => {
+            //                     if (error)
+            //                     { focusError = stderr.toString().trim() || `None of the Chromium instances are actionable windows. ${output.join(', ')}`; }
+            //                     else
+            //                     { focusSuccess = true; }
+            //                 });
+            //             }
+            //             resolve();
+            //         }
+            //     });
+            // });
 
             console.log('DONE trying to minimize chromium.');
+
+            if (!step2.success)
+            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() >> Step 2: Minimize Chromium ]`); }
 
             setTimeout(() => {
                 console.log('trying to kill picom.');
@@ -838,11 +1034,22 @@ module.exports = {
     setDisplayResolution,
     checkCecCompliance,
     waitForNetwork,
+    
     focusChromium,
     focusNdi,
     setNdi,
+
     fadeVolume,
     launchPicom,
+
     updateSetting,
     updateInstall,
+
+    minimizeWindow_Chromium,
+    raiseWindow_Chromium,
+    activateWindow_Chromium,
+    
+    minimizeWindow_NDI,
+    raiseWindow_NDI,
+    activateWindow_NDI,
 };

@@ -88,9 +88,12 @@ class NDI_Receiver_v4 extends EventEmitter {
         });
 
         this.receiver.stderr.on('data', (data) => {
-            func.stdoutToArray(data.toString().trim()).forEach((line) => {
-                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] -`, line);
-            });
+            if (!this.receiver.signalCode)
+            {
+                func.stdoutToArray(data.toString().trim()).forEach((line) => {
+                    console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] -`, line);
+                });
+            }
         });
 
         this.receiver.on('error', (error) => {
@@ -164,12 +167,25 @@ class NDI_Receiver_v4 extends EventEmitter {
      */
     async softClose() {
         await Promise.all([
-            func.fadeVolume(0, `${path.basename(__filename)} close()`),
-            func.focusChromium()
+            func.fadeVolume(0, `${path.basename(__filename)} softClose()`),
+            func.minimizeWindow_NDI()
         ]);
+
+        if (this.receiver)
+        {
+            await new Promise((resolve) => {
+                this.receiver.once('exit', () => { resolve(); });
+                this.receiver.kill('SIGTERM');
+            });
+        }
         
-        try { this.receiver.kill('SIGTERM'); }
-        catch {}
+        await func.raiseWindow_Chromium();
+
+        await func.activateWindow_Chromium();
+
+        setTimeout(() => {
+            func.launchPicom();
+        }, 1000);
     }
     
     /**
@@ -181,12 +197,12 @@ class NDI_Receiver_v4 extends EventEmitter {
         
         await Promise.all([
             func.fadeVolume(0, `${path.basename(__filename)} close()`),
-            func.focusChromium()
+            func.minimizeWindow_NDI()
         ]);
 
         if (this.receiver)
         {
-            return new Promise((resolve) => {
+            await new Promise((resolve) => {
                 if (this.receiver?.exitCode !== null || this.receiver?.killed) {
                     resolve();
                     return;
@@ -212,8 +228,14 @@ class NDI_Receiver_v4 extends EventEmitter {
 
             });
         }
-        else
-        { return; }
+
+        await func.raiseWindow_Chromium();
+
+        await func.activateWindow_Chromium();
+
+        setTimeout(() => {
+            func.launchPicom();
+        }, 1000);
     }
 
     logInfo(data) {
