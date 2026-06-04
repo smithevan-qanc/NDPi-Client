@@ -731,7 +731,7 @@ const { exec, spawn } = require('node:child_process');
             console.log('DONE trying to activate gstreamer.');
 
             if (!step1.success)
-            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() >> Step 1: Activate GStreamer ]`, step1.); }
+            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() >> Step 1: Activate GStreamer ]`); }
 
             await wait(1000);
 
