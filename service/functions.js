@@ -482,21 +482,18 @@ const { exec, spawn } = require('node:child_process');
             let response = false;
             const cmd1 = await exe(`xdotool search --class 'gstreamer'`);
 
-            if (!cmd1.success)
-            { return response; }
-
             if (Array.isArray(cmd1.data))
             {
                 for (const windowId of cmd1.data)
                 {
-                    try {
-                        const cmd2 = await exe(`xdotool windowactivate ${windowId}`);
-                        if (cmd2.success) { response = true; }
-                        console.log(cmd2)
-                    } catch {}
+                    const cmd2 = await exe(`xdotool windowactivate ${windowId}`);
+                    if (cmd2.success)
+                    { response = true; }
                 }
+                return response;
             }
-            return response;
+            else
+            { return response; }
         }
 
 
