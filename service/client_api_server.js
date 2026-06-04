@@ -112,7 +112,10 @@ class NDPiCommandServer_Client extends EventEmitter {
                 this.ws_conn_sources.delete(ws);
 
                 if (this.ws_conn_sources.size === 0)
-                { this.discoveryExec.kill('SIGTERM'); }
+                { 
+                    try { this.discoveryExec.kill('SIGTERM'); }
+                    catch {}
+                }
             });
         });
 

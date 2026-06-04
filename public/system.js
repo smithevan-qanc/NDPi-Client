@@ -68,14 +68,14 @@ server._ws.onmessage = (message) => {
                     updateButtons.check.disabled = true;
                     updateButtons.check.hidden = true;
                     updateButtons.install.disabled = false;
-                    updateButtons.check.hidden = false;
+                    updateButtons.install.hidden = false;
                 }
                 else
                 {
                     updateButtons.check.disabled = false;
                     updateButtons.check.hidden = false;
                     updateButtons.install.disabled = true;
-                    updateButtons.check.hidden = true;
+                    updateButtons.install.hidden = true;
                 }
             }
             
