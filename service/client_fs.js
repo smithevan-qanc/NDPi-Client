@@ -27,7 +27,7 @@ class FileSystemMonitor extends EventEmitter {
         this.ipPollEnable = true;
 
         this.#updatePoll = null;
-        this.#updatePollInterval = 10000;
+        this.#updatePollInterval = 60000;
         this.updatePollEnable = true;
 
         this.dataDir = process.env.DATA_NDPI_PATH;
@@ -666,15 +666,15 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     async pollUpdate() {
-        // console.log('Checking GIT for Update');
+        console.log('Checking GIT for Update');
 
-        try { await this.checkForUpdate(); }
+        try { await func.checkForUpdate(); }
         catch {}
         finally
         {
             if (this.updatePollEnable)
             {
-                // console.log(`Checking GIT for Update In: ${this.#updatePollInterval / 1000}s`);
+                console.log(`Checking GIT for Update In: ${this.#updatePollInterval / 1000}s`);
                 this.#updatePoll = null;
                 this.#updatePoll = setTimeout(() => {
                     this.pollUpdate();
@@ -746,35 +746,35 @@ class FileSystemMonitor extends EventEmitter {
         return;
     }
 
-    async checkForUpdate() {
-        return new Promise((resolve) => {
-            exec(path.join(__dirname, '..', 'sh', 'check-for-update'), (error, stdout) => {
-                if (error)
-                {
-                    console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error when checking for update. {{ ./sh/check-for-update }}`);
-                    resolve();
-                }
-                else
-                {
-                    const output = String(stdout.toString());
-                    try
-                    {
-                        const update = JSON.parse(output);
-                        if (update.update_available)
-                        { this.put('ndpi_version_update_available', String(update.update_available)); }
-                        if (update.newest_version?.ndpi)
-                        { this.put('ndpi_version_update_version', String(update.newest_version.ndpi)); }
-                    }
-                    catch (err) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error parsing update.`, err); }
-                    finally
-                    {
-                        resolve();
-                        return;
-                    }
-                }
-            });
-        });
-    }
+    // async checkForUpdate() {
+    //     return new Promise((resolve) => {
+    //         exec(path.join(__dirname, '..', 'sh', 'check-for-update'), (error, stdout) => {
+    //             if (error)
+    //             {
+    //                 console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error when checking for update. {{ ./sh/check-for-update }}`);
+    //                 resolve();
+    //             }
+    //             else
+    //             {
+    //                 const output = String(stdout.toString());
+    //                 try
+    //                 {
+    //                     const update = JSON.parse(output);
+    //                     if (update.update_available)
+    //                     { this.put('ndpi_version_update_available', String(update.update_available)); }
+    //                     if (update.newest_version?.ndpi)
+    //                     { this.put('ndpi_version_update_version', String(update.newest_version.ndpi)); }
+    //                 }
+    //                 catch (err) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error parsing update.`, err); }
+    //                 finally
+    //                 {
+    //                     resolve();
+    //                     return;
+    //                 }
+    //             }
+    //         });
+    //     });
+    // }
 
     async updateOutputDisplayFiles() {
         let HDMI_1;

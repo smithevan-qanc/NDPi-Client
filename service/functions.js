@@ -294,6 +294,12 @@ const { exec, spawn } = require('node:child_process');
                     return response;
                     break;
 
+                case 'check-for-update':
+                    await checkForUpdate();
+                    response.success = true;
+                    return response;
+                    break;
+
                 case 'install-update':
                     const installUpdate = updateInstall();
                     response.success = installUpdate.success;
@@ -990,6 +996,36 @@ const { exec, spawn } = require('node:child_process');
             { response.message = `Invalid setting: ${name}`; }
             return response;
         }
+
+        async function checkForUpdate() {
+            return new Promise((resolve) => {
+                exec(path.join(__dirname, '..', 'sh', 'check-for-update'), (error, stdout) => {
+                    if (error)
+                    {
+                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error when checking for update. {{ ./sh/check-for-update }}`);
+                        resolve();
+                    }
+                    else
+                    {
+                        const output = String(stdout.toString());
+                        try
+                        {
+                            const update = JSON.parse(output);
+                            if (update.update_available)
+                            { fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndpi_version_update_available'), String(update.update_available), 'utf8'); }
+                            if (update.newest_version?.ndpi)
+                            { fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndpi_version_update_version'), String(update.newest_version.ndpi), 'utf8'); }
+                        }
+                        catch (err) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error parsing update.`, err); }
+                        finally
+                        {
+                            resolve();
+                            return;
+                        }
+                    }
+                });
+            });
+        }
         
         /**
          * **Installs Update from GIT**
@@ -1034,7 +1070,8 @@ module.exports = {
     setDisplayResolution,
     checkCecCompliance,
     waitForNetwork,
-    
+    checkForUpdate,
+
     focusChromium,
     focusNdi,
     setNdi,

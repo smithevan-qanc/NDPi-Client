@@ -55,10 +55,28 @@ server._ws.onmessage = (message) => {
 
             if (id === 'ndpi_version_update_available')
             {
+                const updateButtons = {
+                    check: document.getElementById('check_device_update'),
+                    install: document.getElementById('device_update'),
+                };
+
+                if (!updateButtons.check || !updateButtons.install)
+                { return; }
+
                 if (object.value === 'true')
-                { document.getElementById('device_update').disabled = false; }
+                {
+                    updateButtons.check.disabled = true;
+                    updateButtons.check.hidden = true;
+                    updateButtons.install.disabled = false;
+                    updateButtons.check.hidden = false;
+                }
                 else
-                { document.getElementById('device_update').disabled = true; }
+                {
+                    updateButtons.check.disabled = false;
+                    updateButtons.check.hidden = false;
+                    updateButtons.install.disabled = true;
+                    updateButtons.check.hidden = true;
+                }
             }
             
             if (!document.getElementById(`__${id}`))
@@ -137,7 +155,6 @@ function addEvents() {
         e.preventDefault();
         sendCommand({
             type: 'send-cec',
-            // data: 'standby%200',
             data: encodeURI('standby 0'),
         });
     });
@@ -217,7 +234,7 @@ function addEvents() {
     document.getElementById('device_reboot').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        this.textContent = 'REBOOTING...'
+        this.textContent = 'REBOOTING...';
         await sendCommand({
             type: 'reboot-device'
         });
@@ -225,20 +242,30 @@ function addEvents() {
     document.getElementById('device_shutdown').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        this.textContent = 'SHUTTING DOWN...'
+        this.textContent = 'SHUTTING DOWN...';
         await sendCommand({
             type: 'shutdown-device'
         });
     });
+    document.getElementById('check_device_update').addEventListener('click', async function(e) {
+        e.preventDefault();
+        this.disabled = true;
+        this.textContent = 'Checking For Update...';
+        await sendCommand({
+            type: 'check-for-update'
+        });
+        this.textContent = 'Check For Update';
+        this.disabled = false;
+    });
     document.getElementById('device_update').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        this.textContent = 'UPDATING...'
+        this.textContent = 'UPDATING...';
         await sendCommand({
             type: 'install-update'
         });
+        this.disabled = false;
     });
-    
 }
 
 function resetOverlayUpload() {
