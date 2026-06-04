@@ -380,8 +380,27 @@ class NDPiCommandServer_Client extends EventEmitter {
             // catch (e) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Corrupted Data Received from ${programName}`); }
         });
 
+        if (this.ws_conn_sources.size === 0)
+        { 
+            try { this.discoveryExec.kill('SIGTERM'); }
+            catch {}
+        }
+
         this.discoveryExec.on('exit', () => {
-            this.discoveryExec = null;
+            this._restartDiscovery();
+        });
+    }
+
+    _restartDiscovery() {
+        process.nextTick(() => {
+            if (this.ws_conn_sources.size >= 1)
+            {
+                console.error('Source Discovery Exited Prematurely. Relaunching');
+                this.discoveryExec = null;
+                this.startDiscovery();
+            }
+            else
+            { this.discoveryExec = null; }
         });
     }
 }
