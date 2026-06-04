@@ -133,24 +133,24 @@ sources._ws.onmessage = (message) => {
 };
 
 function addEvents() {
-    document.getElementById('tv_power_off').addEventListener('click', async (e) => {
+    document.getElementById('tv_power_off').addEventListener('click', (e) => {
         e.preventDefault();
-        await sendCommand({
+        sendCommand({
             type: 'send-cec',
             // data: 'standby%200',
             data: encodeURI('standby 0'),
         });
     });
-    document.getElementById('tv_power_on').addEventListener('click', async (e) => {
+    document.getElementById('tv_power_on').addEventListener('click', (e) => {
         e.preventDefault();
-        await sendCommand({
+        sendCommand({
             type: 'send-cec',
             data: encodeURI('on 0'),
         });
     });
-    document.getElementById('tv_volume_down').addEventListener('click', async (e) => {
+    document.getElementById('tv_volume_down').addEventListener('click', (e) => {
         e.preventDefault();
-        await sendCommand({
+        sendCommand({
             type: 'send-cec',
             data: encodeURI('voldown'),
         });
@@ -195,12 +195,12 @@ function addEvents() {
         });
         this.disabled = false;
     });
-    document.getElementById('refresh_sources').addEventListener('click', async function(e) {
-        e.preventDefault();
-        this.disabled = true;
-        await refreshSources();
-        this.disabled = false;
-    });
+    // document.getElementById('refresh_sources').addEventListener('click', async function(e) {
+    //     e.preventDefault();
+    //     this.disabled = true;
+    //     await refreshSources();
+    //     this.disabled = false;
+    // });
     uploaderEl.addEventListener('change', handleFiles);
     document.getElementById('reset_overlay_upload').addEventListener('click', (e) => {
         e.preventDefault();
@@ -233,7 +233,7 @@ function addEvents() {
     document.getElementById('device_update').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        this.textContent = 'Installing Update...'
+        this.textContent = 'UPDATING...'
         await sendCommand({
             type: 'install-update'
         });
