@@ -149,7 +149,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
 
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
-            showNDI(500);
+            showNDI(1000);
         }
 
         if (stdout.includes('Reconnected to:'))
