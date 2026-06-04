@@ -449,10 +449,11 @@ const { exec, spawn } = require('node:child_process');
 
             if (Array.isArray(cmd1.data))
             {
-                cmd1.data.forEach((windowId) => {
-                    const cmd2 = exe(`xdotool windowminimize ${windowId}`);
+                for (const windowId of cmd1.data)
+                {
+                    const cmd2 = await exe(`xdotool windowminimize ${windowId}`);
                     if (cmd2.success) { response = true; }
-                });
+                }
             }
             return response;
         }
@@ -465,10 +466,11 @@ const { exec, spawn } = require('node:child_process');
 
             if (Array.isArray(cmd1.data))
             {
-                cmd1.data.forEach((windowId) => {
-                    const cmd2 = exe(`xdotool windowraise ${windowId}`);
+                for (const windowId of cmd1.data)
+                {
+                    const cmd2 = await exe(`xdotool windowraise ${windowId}`);
                     if (cmd2.success) { response = true; }
-                });
+                }
             }
             return response;
         }
@@ -481,10 +483,11 @@ const { exec, spawn } = require('node:child_process');
 
             if (Array.isArray(cmd1.data))
             {
-                cmd1.data.forEach((windowId) => {
-                    const cmd2 = exe(`xdotool windowactivate ${windowId}`);
+                for (const windowId of cmd1.data)
+                {
+                    const cmd2 = await exe(`xdotool windowactivate ${windowId}`);
                     if (cmd2.success) { response = true; }
-                });
+                }
             }
             return response;
         }
@@ -501,10 +504,11 @@ const { exec, spawn } = require('node:child_process');
 
             if (Array.isArray(cmd1.data))
             {
-                cmd1.data.forEach((windowId) => {
-                    const cmd2 = exe(`xdotool windowminimize ${windowId}`);
+                for (const windowId of cmd1.data)
+                {
+                    const cmd2 = await exe(`xdotool windowminimize ${windowId}`);
                     if (cmd2.success) { response = true; }
-                });
+                }
             }
             return response;
         }
@@ -517,10 +521,11 @@ const { exec, spawn } = require('node:child_process');
 
             if (Array.isArray(cmd1.data))
             {
-                cmd1.data.forEach((windowId) => {
-                    const cmd2 = exe(`xdotool windowraise ${windowId}`);
+                for (const windowId of cmd1.data)
+                {
+                    const cmd2 = await exe(`xdotool windowraise ${windowId}`);
                     if (cmd2.success) { response = true; }
-                });
+                }
             }
             return response;
         }
@@ -533,14 +538,16 @@ const { exec, spawn } = require('node:child_process');
 
             if (Array.isArray(cmd1.data))
             {
-                cmd1.data.forEach((windowId) => {
-                    const cmd2 = exe(`xdotool windowactivate ${windowId}`);
+                for (const windowId of cmd1.data)
+                {
+                    const cmd2 = await exe(`xdotool windowactivate ${windowId}`);
                     if (cmd2.success) { response = true; }
-                });
+                }
             }
             return response;
         }
 
+        
         async function focusChromium() {
             let focusSuccess = false;
             let focusError = null;

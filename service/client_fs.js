@@ -666,7 +666,7 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     async pollUpdate() {
-        console.log('Checking GIT for Update');
+        // console.log('Checking GIT for Update');
 
         try { await func.checkForUpdate(); }
         catch {}
@@ -674,7 +674,7 @@ class FileSystemMonitor extends EventEmitter {
         {
             if (this.updatePollEnable)
             {
-                console.log(`Checking GIT for Update In: ${this.#updatePollInterval / 1000}s`);
+                // console.log(`Checking GIT for Update In: ${this.#updatePollInterval / 1000}s`);
                 this.#updatePoll = null;
                 this.#updatePoll = setTimeout(() => {
                     this.pollUpdate();
