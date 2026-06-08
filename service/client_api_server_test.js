@@ -345,6 +345,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         const discoveryPath = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
         const programName = './ndpi_discover';
         
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ] Starting NDI Source Discovery.`);
         this.discoveryExec = spawn(programName, {
             cwd: discoveryPath
         });
@@ -372,21 +373,19 @@ class NDPiCommandServer_Client extends EventEmitter {
         }
 
         this.discoveryExec.on('exit', () => {
-            this._restartDiscovery();
+            process.nextTick(() => { this._restartDiscovery(); });
         });
     }
 
     _restartDiscovery() {
-        process.nextTick(() => {
-            if (this.ws_conn_sources.size >= 1)
-            {
-                console.error('Source Discovery Exited Prematurely. Relaunching');
-                this.discoveryExec = null;
-                this.startDiscovery();
-            }
-            else
-            { this.discoveryExec = null; }
-        });
+        if (this.ws_conn_sources.size >= 1)
+        {
+            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Source Discovery Exited Prematurely. Relaunching`);
+            this.discoveryExec = null;
+            this.startDiscovery();
+        }
+        else
+        { this.discoveryExec = null; }
     }
 
     async close() {

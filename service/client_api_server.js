@@ -468,7 +468,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         process.nextTick(() => {
             if (this.ws_conn_sources.size >= 1)
             {
-                console.error('Source Discovery Exited Prematurely. Relaunching');
+                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Source Discovery Exited Prematurely. Relaunching`);
                 this.discoveryExec = null;
                 this.startDiscovery();
             }

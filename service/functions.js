@@ -188,16 +188,17 @@ const { exec, spawn } = require('node:child_process');
                             else
                             {
                                 response.data.sources = [];
-                                console.log(stdout)
-                                const stdoutArray = stdoutToArray(stdout);
-
-                                for (const line of stdoutArray)
+                                if (stdout)
                                 {
-                                    const splitLine = line.split('^');
-                                    response.data.sources.push({
-                                        name: splitLine[1],
-                                        url: splitLine[0],
-                                    });
+                                    const stdoutArray = stdoutToArray(stdout);
+                                    for (const line of stdoutArray)
+                                    {
+                                        const splitLine = line.split('^');
+                                        response.data.sources.push({
+                                            name: splitLine[1],
+                                            url: splitLine[0],
+                                        });
+                                    }
                                 }
                                 response.success = true;
                                 resolve();
