@@ -46,6 +46,7 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     start() {
+        console.log('Starting API *** 1: start()');
         this.App = express();
         this.App.use(express.json());
         this.App.use(
@@ -71,6 +72,7 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     __ws_Display() {
+        console.log('Starting API *** 2: __ws_Display()');
         this.ws_serv_display = new WebSocket.Server({ noServer: true });
         this.ws_conn_display = new Set();
 
@@ -108,6 +110,7 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     __ws_System() {
+        console.log('Starting API *** 3: __ws_System()');
         this.ws_serv_system = new WebSocket.Server({ noServer: true });
         this.ws_conn_system = new Set();
 
@@ -151,6 +154,7 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     __ws_Sources() {
+        console.log('Starting API *** 4: __ws_Sources()');
         this.ws_serv_sources = new WebSocket.Server({ noServer: true });
         this.ws_conn_sources = new Set();
 
@@ -192,6 +196,7 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     __Routers() {
+        console.log('Starting API *** 5: __Routers()');
         this.Routes = express.Router();
         this.App.use(this.Routes);
         this.startServer();
@@ -309,6 +314,7 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     startServer() {
+        console.log('Starting API *** 6: startServer()');
         this.Server = http.createServer(this.App);
 
         this.Server.listen(this.port, '0.0.0.0', () => {
@@ -429,72 +435,8 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     /**
-     * This function is depricated. Use 'module.sendUpdateToDisplay()'
-     * @param {object} message - This function is depricated. Use 'module.sendUpdateToDisplay()'
-     * @param {boolean} sendAll - This function is depricated. Use 'module.sendUpdateToDisplay()'
-     * @param {object} options - This function is depricated. Use 'module.sendUpdateToDisplay()'
-     * @returns 
-     */
-    broadcastToDisplay(message = {}, sendAll = false, options = {}) {
-
-        const displayMode = this.settings.get('ndpi_status_no_source_display_mode');
-        let updateData = {};
-        
-        if (message.type)
-        { updateData.type = message.type; }
-        else
-        { updateData.type = `show-${displayMode}`; }
-
-        if (this.settings.get('ndpi_status_ndi') === 'streaming')
-        { updateData.type = 'show-ndi'; }
-
-        if (sendAll)
-        {
-            updateData.serverIp = this.settings.get('ndpi_command_server_host');
-            updateData.thisDevice = {};
-            updateData.thisDevice.id = this.settings.get('device_id');
-            updateData.thisDevice.address = this.settings.get('device_ip');
-            updateData.thisDevice.name = this.settings.get('device_name');
-            updateData.service = {};
-            updateData.service.name = this.settings.get('device_type');
-            updateData.service.version = this.settings.get('ndpi_version');
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Sending update to GUI');
-        }
-
-        if (options.ws) 
-        {
-            if (options.ws.readyState === WebSocket.OPEN) 
-            {
-                options.ws.send(JSON.stringify(updateData));
-                return;
-            }
-        }
-        else
-        {
-            this.ws_conn_display.forEach(client => {
-                if (client.readyState === WebSocket.OPEN)
-                { client.send(JSON.stringify(updateData)); }
-            });
-        }
-    }
-
-    /**
-     * This function is depricated. Use 'module.sendUpdateToDisplay()'
-     * @param {object} message - This function is depricated. Use 'module.sendUpdateToDisplay()'
-     * @returns 
-     */
-    updateDisplay(message = {}) {
-        if (!message.type)
-        { return; }
-        this.ws_conn_display.forEach(client => {
-            try { client.send(JSON.stringify(message)); }
-            catch (e) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', message, '\n', e); }
-        });
-    }
-
-    /**
      * 
-     * @param {object} message - Message object to send to Overlay Display
+     * @param {Object} message - Message object to send to Overlay Display
      * @param {string} [message.type] - Read by the overlay display as the message type.
      * @param {any} [message.data] - Data to send. Type predefinded by Display WebSocket on basis of message.type.
      */

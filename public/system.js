@@ -330,7 +330,7 @@ function renderSources() {
 
     const noSourceOpt = document.createElement('option');
     noSourceOpt.value = 'none';
-    noSourceOpt.textContent = 'Clear Source';
+    noSourceOpt.textContent = 'No Source';
     sourceSelectorEl.appendChild(noSourceOpt);
 
     if (availableSources.length >= 1)
