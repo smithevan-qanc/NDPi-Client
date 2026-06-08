@@ -46,7 +46,6 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     start() {
-        console.log('Starting API *** 1: start()');
         this.App = express();
         this.App.use(express.json());
         this.App.use(
@@ -66,13 +65,12 @@ class NDPiCommandServer_Client extends EventEmitter {
         );
 
         this.__ws_Display();
-        this.__ws_Sources();
         this.__ws_System();
+        this.__ws_Sources();
         this.__Routers();
     }
 
     __ws_Display() {
-        console.log('Starting API *** 2: __ws_Display()');
         this.ws_serv_display = new WebSocket.Server({ noServer: true });
         this.ws_conn_display = new Set();
 
@@ -110,7 +108,6 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     __ws_System() {
-        console.log('Starting API *** 3: __ws_System()');
         this.ws_serv_system = new WebSocket.Server({ noServer: true });
         this.ws_conn_system = new Set();
 
@@ -154,7 +151,6 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     __ws_Sources() {
-        console.log('Starting API *** 4: __ws_Sources()');
         this.ws_serv_sources = new WebSocket.Server({ noServer: true });
         this.ws_conn_sources = new Set();
 
@@ -196,7 +192,6 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     __Routers() {
-        console.log('Starting API *** 5: __Routers()');
         this.Routes = express.Router();
         this.App.use(this.Routes);
         this.startServer();
@@ -314,7 +309,6 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     startServer() {
-        console.log('Starting API *** 6: startServer()');
         this.Server = http.createServer(this.App);
 
         this.Server.listen(this.port, '0.0.0.0', () => {
@@ -349,7 +343,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         { return; }
 
         const discoveryPath = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
-        const programName = './ndpi_discover';
+        const programName = './ndpi_discover 3';
         
         console.info(`[ ${path.basename(__filename).split('.')[0]} ] Starting NDI Source Discovery.`);
         this.discoveryExec = spawn(programName, {
