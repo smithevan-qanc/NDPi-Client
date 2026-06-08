@@ -308,14 +308,6 @@ const { exec, spawn } = require('node:child_process');
                     return response;
                     break;
 
-                // OTHER
-                case 'reject':
-                    await new Promise((resolve, reject) => {
-                        reject('test rejection');
-                    });
-                    return response;
-                    break;
-                    
                 // Default Fallback
                 default:
                     console.log('[ functions ] Unhandled Command Received', command.type);
@@ -360,12 +352,12 @@ const { exec, spawn } = require('node:child_process');
             }
             if (cwd) { options.cwd = cwd; }
 
-            await new Promise((resolve, reject) => {
+            await new Promise((resolve) => {
                 exec(command, options, (error, stdout, stderr) => {
                     if (error)
                     {
                         console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ exec(${command}) ][ ERROR ]`, stderr.toString().trim());
-                        reject(stderr);
+                        resolve();
                     }
                     else
                     {
@@ -842,7 +834,8 @@ const { exec, spawn } = require('node:child_process');
             return await new Promise((resolve, reject) => {
                 if (config.displayPort == '')
                 {
-                    reject('No Display Port Configured');
+                    // reject('No Display Port Configured');
+                    resolve()
                     return;
                 }
                 exec(`xrandr \
@@ -855,7 +848,8 @@ const { exec, spawn } = require('node:child_process');
                     if (error)
                     {
                         console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Resolution Set:`, config, stderr);
-                        reject(`XRandR Failed to set resolution. Reason: ${stderr.toString()}`);
+                        resolve();
+                        // reject(`XRandR Failed to set resolution. Reason: ${stderr.toString()}`);
                         return;
                     }
                     else
@@ -866,7 +860,8 @@ const { exec, spawn } = require('node:child_process');
                             if (error)
                             {
                                 console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`);
-                                reject(`Openbox Failed to restart after setting resolution. Reason: ${stderr.toString()}`);
+                                // reject(`Openbox Failed to restart after setting resolution. Reason: ${stderr.toString()}`);
+                                resolve();
                                 return;
                             }
                             resolve('');

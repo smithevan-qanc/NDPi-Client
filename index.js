@@ -235,7 +235,7 @@ class NDPi {
 
     /** START API */
     startApi() {
-        const NDPiCommandServer_Client = require('./service/client_api_server.js');
+        const NDPiCommandServer_Client = require('./service/client_api_server_test.js');
         this.server_api = new NDPiCommandServer_Client(this.settings);
 
         this.server_api.on('online', () => {
