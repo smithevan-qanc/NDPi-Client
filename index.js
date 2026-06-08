@@ -343,7 +343,8 @@ class NDPi {
         // const receiver = new NDI_Receiver_v4(this.settings, this.server_api);
 
         this.ndiReceiver.set(source, new NDI_Receiver_v4(this.settings, this.server_api).once('killed', (activeSource) => {
-            this.removeFromSet(activeSource.toString());
+            if (activeSource)
+            { this.removeFromSet(activeSource.toString()); }
         }));
 
         setTimeout(() => {

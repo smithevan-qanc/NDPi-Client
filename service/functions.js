@@ -308,6 +308,14 @@ const { exec, spawn } = require('node:child_process');
                     return response;
                     break;
 
+                // OTHER
+                case 'reject':
+                    await new Promise((resolve, reject) => {
+                        reject('test rejection');
+                    });
+                    return response;
+                    break;
+                    
                 // Default Fallback
                 default:
                     console.log('[ functions ] Unhandled Command Received', command.type);
