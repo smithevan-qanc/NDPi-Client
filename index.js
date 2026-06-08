@@ -304,8 +304,7 @@ class NDPi {
         this.controller_cec = new CecController(this.settings);
 
         this.controller_cec.on('ready', () => {
-            try { this.server_api.setCecController(this.controller_cec); }
-            catch {}
+            this.server_api.controller_cec = this.controller_cec;
             this.controller_cec.send('on 0');
             setTimeout(() => {
                 this.controller_cec.send('as');

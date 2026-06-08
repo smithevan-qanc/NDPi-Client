@@ -81,22 +81,22 @@ const { exec, spawn } = require('node:child_process');
                 }
             });
         }
+        processCommand
     
         /** 
          * (NDPi Function) - Process API Command.
-         * @param {object} message - Message object from API. Required: 'type'
-         * @param {string} [message.id] 
-         * @param {string} [message.type]
-         * @param {any} [message.data]
+         * @param {Object}  message - Message object from API. Required: 'type'
+         * @param {string}  [message.id] 
+         * @param {string}  [message.type]
+         * @param {any}     [message.data]
          * 
          * @returns {object} 
          */
         async function processCommand(message = {}) {
-            // ... Reference For Building
             let command = {
-                id:     message?.id || '',     // UUID of command for tracking
+                id:     message?.id || '',  // UUID of command for tracking
                 type:   message?.type,
-                data:   message?.data,  // data can be of any type
+                data:   message?.data,      // data can be of any type
             };
 
             let response = {
