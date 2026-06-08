@@ -188,6 +188,7 @@ const { exec, spawn } = require('node:child_process');
                             else
                             {
                                 response.data.sources = [];
+                                console.log(stdout)
                                 const stdoutArray = stdoutToArray(stdout);
 
                                 for (const line of stdoutArray)
@@ -773,7 +774,9 @@ const { exec, spawn } = require('node:child_process');
          * **Convert line returns to an Array**
          * 
          * ---
+         * 
          * ### NDPi Function
+         * 
          * @param {string} stdout >**stdout**: Output from `node:child_process`
          * @returns {Array}
          */
