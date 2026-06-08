@@ -343,7 +343,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         { return; }
 
         const discoveryPath = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
-        const programName = './ndpi_discover 3';
+        const programName = './ndpi_discover';
         
         console.info(`[ ${path.basename(__filename).split('.')[0]} ] Starting NDI Source Discovery.`);
         this.discoveryExec = spawn(programName, {
