@@ -92,7 +92,7 @@ server._ws.onmessage = (message) => {
 
             if (object.options)
             {
-                settingInnerHTML += `<select id="${id}" value="${object.value}">`;
+                settingInnerHTML += `<select id="${id}">`;
                 const currentValue = object.value;
                 for (const [ key, value ] of object.options)
                 {
