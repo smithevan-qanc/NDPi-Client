@@ -11,11 +11,21 @@ const { exec, spawn } = require('node:child_process');
  * @property {string}  message - A human-readable status message.
  * @property {Object|Array|null} data - The payload returned from the operation, if any.
  */
+
 /**
- * @typedef  {Object}  ExecResponse
- * @property {boolean} success - Indicates if the operation completed without errors.
- * @property {any} data - The payload returned from the operation, if any.
+ * @typedef  {Object}   ExecResponse
+ * @property {boolean}  success - Indicates if the operation completed without errors.
+ * @property {any}      data - The payload returned from the operation, if any.
  */
+
+/**
+ * @typedef  {Object}       CommandResponse
+ * @property {string}       id - Tracking UUID.
+ * @property {boolean}      success - Indicates if the operation completed without errors.
+ * @property {number}       ts - Epoch timestamp generated at the beginning of the function.
+ * @property {Object|any}   data - The payload returned from the operation, if any.
+ */
+
 
 
 /** ---- Export Functions ---- */
@@ -81,16 +91,29 @@ const { exec, spawn } = require('node:child_process');
                 }
             });
         }
-        processCommand
-    
+
         /** 
-         * (NDPi Function) - Process API Command.
+         * **Process API Command**
+         * 
+         * ---
+         * 
+         * ### NDPi Function
+         * 
          * @param {Object}  message - Message object from API. Required: 'type'
          * @param {string}  [message.id] 
          * @param {string}  [message.type]
          * @param {any}     [message.data]
          * 
-         * @returns {object} 
+         * @returns {CommandResponse}
+         * 
+         * ```json
+         * {
+         *    "id":      "<Tracking UUID>",
+         *    "success": "<Boolean>",
+         *    "ts":      "<Epoch TS>",
+         *    "data":    "<Object>"
+         * }
+         * ```
          */
         async function processCommand(message = {}) {
             let command = {
@@ -328,7 +351,9 @@ const { exec, spawn } = require('node:child_process');
          * Async CLI exec() function
          * 
          * ---
+         * 
          * ### NDPi Function
+         * 
          * @param {string} command >**command**: CLI command to execute
          * @param {string|null} cwd >**cwd**: Modify the current working directory of the shell. *Default Directory*: **home / *user* / ndpi / sh** 
          * @param {Object|null} env >**env**: Additional environment variables to pass into the shell.
@@ -401,7 +426,10 @@ const { exec, spawn } = require('node:child_process');
          * @param {string} [command.data] - The name of the NDI source to connect to.
          * @param {object} res - This function will overwrite an existing response object for API. Optional.
          * 
-         * @returns 
+         * ---
+         * 
+         * ### NDPi Function
+         * 
          */
         async function setNdi(command, res = {}) {
             let response = { ...res };
@@ -432,7 +460,11 @@ const { exec, spawn } = require('node:child_process');
          * Fade the volume from it's current level.
          * @param {number} level - Level to fade the volume to. Starting from it's current setpoint. [Range: 0 - 255]
          * @param {string} source - Description of where the function was called. For debugging.
-         * @returns
+         * 
+         * ---
+         * 
+         * ### NDPi Function
+         * 
          */
         async function fadeVolume(level, source = 'Default') {
             if (!level.toString()) return;
@@ -685,8 +717,6 @@ const { exec, spawn } = require('node:child_process');
         }
 
         async function focusNdi() {
-            let focusSuccess = false;
-            let focusError = null;
 
             activateDisplay();
 
@@ -740,31 +770,58 @@ const { exec, spawn } = require('node:child_process');
             return;
         }
 
+        async function killPicom() {
+            let picomRunning = false;
+
+            await new Promise((resolve) => {
+                exec('pgrep picom', (error, stdout, stderr) => {
+                    if (!error) { picomRunning = true; }
+                    resolve();
+                });
+            });
+
+            if (picomRunning)
+            { return await exe('killall picom'); }
+            else 
+            { return; }
+        }
+
         async function activateDisplay() {
             try
-            {
-                console.log('Attempting to wake display. CEC');
-                let f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: crypto.randomUUID, data: 'on 0' })
-                });
-                if (!f.ok) { throw new Error() }
-                
-                await wait(1500);
+            {//output_display_cec_this_source_active
+                const cecEnabled = Boolean(fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'), 'utf8'));
+                const cecPower = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_status_power'), 'utf8') == 'On';
 
-                console.log('Attempting to activate device. CEC');
-                let f2 = await fetch('http://localhost:3080/api/v1/__internal/cec', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: crypto.randomUUID, data: 'as' })
-                });
-                if (!f2.ok) { throw new Error() }
+                if (cecEnabled && !cecPower)
+                {
+                    console.log('Attempting to wake display. CEC');
+                    let f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: crypto.randomUUID, data: 'on 0' })
+                    });
+                    if (!f.ok) { throw new Error() }
+                    
+                    await wait(1500);
+                }
+
+                const cecActiveSource = Boolean(fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_this_source_active'), 'utf8'));
+
+                if (!cecActiveSource)
+                {
+                    console.log('Attempting to activate device. CEC');
+                    let f2 = await fetch('http://localhost:3080/api/v1/__internal/cec', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: crypto.randomUUID, data: 'as' })
+                    });
+                    if (!f2.ok) { throw new Error() }
+                }
             }
             catch
             {
                 console.log('CEC could not wake display. Trying RandR.');
-                await setDisplayResolution().catch(() => {
+                await setDisplayResolution().catch((reason) => {
                     console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ activateDisplay() ][ setDisplayResolution() ]`, reason);
                 });
             }
@@ -792,9 +849,7 @@ const { exec, spawn } = require('node:child_process');
 
         /**
          * @async 
-         * **Inline blocking tool.**
-         * 
-         * Call this funciton using 'await' for the process to block.
+         * **Inline blocking tool**
          * 
          * ---
          * 
@@ -806,6 +861,7 @@ const { exec, spawn } = require('node:child_process');
             return new Promise((resolve) => { setTimeout(() => { resolve(); }, time || 0) });
         }
 
+        setDisplayResolution()
         /** SET DISPLAY RESOLUTION */
         /**
          * This function set's the HDMI output resolution
@@ -813,6 +869,11 @@ const { exec, spawn } = require('node:child_process');
          *   - 'output_display_port'
          *   - 'output_display_resolution_preference'
          *   - 'output_display_framerate_preference'.
+         * 
+         * **⚠️ Use try / catch**
+         * 
+         * _This function will reject on failure with reason_
+         * 
          * ---
          * 
          * ### NDPi Function
@@ -1023,16 +1084,18 @@ module.exports = {
     setDisplayResolution,
     checkCecCompliance,
     waitForNetwork,
-    checkForUpdate,
+    wait,
 
+    setNdi,
+    fadeVolume,
     focusChromium,
     focusNdi,
-    setNdi,
 
-    fadeVolume,
     launchPicom,
+    killPicom,
 
     updateSetting,
+    checkForUpdate,
     updateInstall,
 
     minimizeWindow_Chromium,
@@ -1042,4 +1105,6 @@ module.exports = {
     minimizeWindow_NDI,
     raiseWindow_NDI,
     activateWindow_NDI,
+
+    activateDisplay,
 };

@@ -127,7 +127,7 @@ server._ws.onmessage = (message) => {
                 }
             }
             settingEl.innerHTML = settingInnerHTML;
-            
+
             if (isSelection && object.value)
             { document.getElementById(id).value = object.value; }
 
@@ -140,8 +140,8 @@ server._ws.onmessage = (message) => {
                         value: this.value
                     }
                 }, false);
-                if (res.data.message)
-                { alert(`${res.data.message}`); }
+                // if (res.data.message)
+                // { alert(`${res.data.message}`); }
             });
         }
     }

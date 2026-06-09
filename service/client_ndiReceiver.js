@@ -14,6 +14,7 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         this.settings = fsData;
         this.server = api;
+        this.displayActivated = false;
 
         this.receiverDirectory = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
 
@@ -40,6 +41,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             // 100 = highest       -> Receive metadata, audio, video at full resolution.
             // 0x7fffffff = max
         
+
         fsData.on('ndi_receiver_color_format', async (data) => {
             await this.softClose();
             this.ndiColorFormat = String(data || '').trim() || '100';
@@ -137,16 +139,9 @@ class NDI_Receiver_v4 extends EventEmitter {
 
     /**
      * Handle data from 'receiver.stdout.on('data')'
-     * @param {string} stdout - CONVERT TO STRING FIRST [ data.toString().trim() ]
+     * @param {string} stdout ⚠️ CONVERT TO STRING FIRST〈 data.toString().trim() 〉
      */
     _handleReceiverData(stdout) {
-        const showNDI = (delay = 1000) => {
-            func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
-            setTimeout(() => {
-                func.focusNdi();
-            }, delay);
-        }
-
         this.logInfo(stdout);
 
         if (stdout.includes('NDI Receiver started:'))
@@ -161,7 +156,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
 
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
-            showNDI(1000);
+            this.showGStreamer(1000);
         }
 
         if (stdout.includes('Reconnected to:'))
@@ -171,6 +166,32 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.secondsInactive = 0;
         }
 
+    }
+
+    async showGStreamer(delay = 1000) {
+        func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
+
+        await func.wait(delay);
+
+        if (!this.displayActivated)
+        {
+            this.displayActivated = true;
+            func.activateDisplay();
+        }
+
+        const step1 = await activateWindow_NDI();
+        if (!step1)
+        { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() >> Step 1: Activate GStreamer ]`); return; }
+        
+        await func.wait(1000); // not affected by the delay argv.
+
+        const step2 = await minimizeWindow_Chromium();
+        if (!step2)
+        { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() >> Step 2: Minimize Chromium ]`); }
+
+        setTimeout(() => {
+            func.killPicom();
+        }, 1000); // not affected by the delay argv.
     }
 
     /**

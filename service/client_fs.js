@@ -282,7 +282,7 @@ class FileSystemMonitor extends EventEmitter {
                     ['UYVY_RGBa', '3'         ],
                     ['Fastest',   '100'       ],
                     ['Best',      '101'       ],
-                    ['Max',       '0x7fffffff'],
+                    // ['Max',       '0x7fffffff'],
                 ],
                 group: ``,
                 allowEditInternal: true,
