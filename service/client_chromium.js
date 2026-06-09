@@ -10,6 +10,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         this.settings = fsData;
         this.server = api;
         this.windowId = null;
+        this.ready = false;
         this.launch();
     }
 
@@ -53,6 +54,12 @@ class ChromiumOverlayDisplay extends EventEmitter {
                 XAUTHORITY: `${process.env.HOME}/.Xauthority`,
             }
         });
+
+        this.service.on('spawn', () => {
+            setTimeout(() => {
+                this.emit('ready');
+            }, 500);
+        });
         
         this.service.on('error', (err) => {
             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ]`, '[ SERVICE ERROR ]', err);
@@ -61,8 +68,6 @@ class ChromiumOverlayDisplay extends EventEmitter {
         this.service.on('exit', () => {
             this.emit('close');
         });
-
-        process.nextTick(() => { this.emit('ready'); });
     }
 
     async close() {

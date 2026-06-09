@@ -332,9 +332,7 @@ class NDPi {
         if (source == 'none')
         {
             if (this.ndiReceiver.size >= 1)
-            {
-                this.ndiReceiver.forEach((receiver, key) => { receiver.close(); });
-            }
+            { this.ndiReceiver.forEach((receiver, key) => { receiver.close(); }); }
             return;
         }
 
@@ -344,17 +342,22 @@ class NDPi {
         const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
         // const receiver = new NDI_Receiver_v4(this.settings, this.server_api);
 
+        this.ndiReceiver.forEach((receiver, key) => {
+            if (key !== source)
+            { receiver.close(); }
+        });
+
         this.ndiReceiver.set(source, new NDI_Receiver_v4(this.settings, this.server_api).once('killed', (activeSource) => {
             if (activeSource)
             { this.removeFromSet(activeSource.toString()); }
         }));
 
-        setTimeout(() => {
-            this.ndiReceiver.forEach((receiver, key) => {
-                if (key !== source)
-                { receiver.close(); }
-            });
-        }, 2000);
+        // setTimeout(() => {
+        //     this.ndiReceiver.forEach((receiver, key) => {
+        //         if (key !== source)
+        //         { receiver.close(); }
+        //     });
+        // }, 2000);
 
         
 
