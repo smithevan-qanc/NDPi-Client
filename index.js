@@ -215,13 +215,13 @@ class NDPi {
                 this.startLcdDisplay();
             }, 15000);
         });
-        this.lcdDisplay.stdout.once('data', () => {
-            console.log('lcd DATA');
-            console.log(this.lcdDisplay);
-            this.lcdDisplayRestartTimer = setTimeout(() => {
-                this.startLcdDisplay();
-            }, 15000);
-        });
+        // this.lcdDisplay.stdout.once('data', () => {
+        //     console.log('lcd DATA');
+        //     console.log(this.lcdDisplay);
+        //     this.lcdDisplayRestartTimer = setTimeout(() => {
+        //         this.startLcdDisplay();
+        //     }, 15000);
+        // });
 
         this.lcdDisplay.stderr.on('data', (data) => {
             console.error(`⚠️  [ update_lcd ][ ERROR ]`, data);
