@@ -27,6 +27,12 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
 
+
+        fsData.on('ndi_receiver_bandwidth', async (data) => {
+            await this.softClose();
+            this.ndiBandwidth = String(data || '').trim() || '0';
+            this.connect();
+        });
         this.ndiBandwidth = this.settings.get('ndi_receiver_bandwidth') || '0';
             // -10 = metadata_only -> Receive metadata.
             //  10 = audio_only    -> Receive metadata, audio.
@@ -34,6 +40,11 @@ class NDI_Receiver_v4 extends EventEmitter {
             // 100 = highest       -> Receive metadata, audio, video at full resolution.
             // 0x7fffffff = max
         
+        fsData.on('ndi_receiver_color_format', async (data) => {
+            await this.softClose();
+            this.ndiColorFormat = String(data || '').trim() || '100';
+            this.connect();
+        });
         this.ndiColorFormat = this.settings.get('ndi_receiver_color_format') || '100';
             //   0 = BGRX_BGRA
             //   1 = UYVY_BGRA
@@ -42,6 +53,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             // 100 = fastest  
             // 101 = best     
 
+        
         this.ndiActiveSource = null;
         this.ndiConnectedAt = null;
         this.ndiFramerate = null;
@@ -162,6 +174,7 @@ class NDI_Receiver_v4 extends EventEmitter {
     }
 
     /**
+     * @async
      * Kill the NDI Receiver without resetting the target source.
      * To reactivate the source, call 'thisModule.connect();'
      */
@@ -189,6 +202,7 @@ class NDI_Receiver_v4 extends EventEmitter {
     }
     
     /**
+     * @async
      * Kill the NDI Receiver and close out of the module.
      */
     async close() {

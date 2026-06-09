@@ -128,21 +128,18 @@ server._ws.onmessage = (message) => {
             }
             settingEl.innerHTML = settingInnerHTML;
             if (isSelection && object.value)
-            {//set-setting
+            {
                 document.getElementById(id).value = object.value;
                 document.getElementById(id).addEventListener('change', function(e) {
                     e.preventDefault();
-                    console.log({
+                    const res = await sendCommand({
+                        type: 'set-setting',
+                        data: {
                             name: id,
                             value: this.value
-                        });
-                    // sendCommand({
-                    //     type: 'set-setting',
-                    //     data: {
-                    //         name: id,
-                    //         value: this.value
-                    //     }
-                    // });
+                        }
+                    }, false);
+                    alert(`${res.message}`);
                 });
             }
         }
@@ -382,7 +379,6 @@ function renderSources() {
  */
 async function sendCommand(command = {}, viaWebSocket = true) {
     if (!command.type) return null;
-    
     if (viaWebSocket && server?._ws && server?._ws.readyState === WebSocket.OPEN) 
     {
         try
