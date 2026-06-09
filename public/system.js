@@ -97,6 +97,8 @@ server._ws.onmessage = (message) => {
                 for (const [ key, value ] of object.options)
                 {
                     const opt = document.createElement('option');
+                    if (value === object.value)
+                    { opt.selected = true; }
                     opt.value = value;
                     opt.textContent = key;
                     settingInnerHTML += opt.outerHTML;
