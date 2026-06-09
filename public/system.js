@@ -98,7 +98,7 @@ server._ws.onmessage = (message) => {
                 {
                     const opt = document.createElement('option');
                     if (value == currentValue)
-                    { opt.selected = true; }
+                    { console.log('option is selected', key, value); opt.selected = true; }
                     opt.value = value;
                     opt.textContent = key;
                     settingInnerHTML += opt.outerHTML;
