@@ -85,11 +85,6 @@ class NDPi {
             this.startNdiReceiver(output);
         });
 
-        // //  No Source Display Mode
-        // this.settings.on('ndpi_status_no_source_display_mode', (data) => {
-        //     console.log('')
-        // });
-
         //  NDPi Hub Server IP
         this.settings.on('ndpi_command_server_host', (data) => {
             const output = String(data || '').trim() || null;
@@ -168,11 +163,6 @@ class NDPi {
             const output = String(data || '').trim() || null;
 
             if (output) { await func.setDisplayResolution(); }
-
-            // if (!output && this.ndiReceiver.size >= 1)
-            // { this.ndiReceiver.forEach(rec => rec.softClose()); }
-            // else
-            // { this.ndiReceiver.forEach(rec => rec.connect()); }
         });
 
         //  HDMI Resolution
@@ -184,9 +174,6 @@ class NDPi {
         this.settings.on('output_display_framerate_preference', () => {
             func.setDisplayResolution();
         });
-
-        //  DRM Update
-        // this.settings.on('drm', () => { setResolutionResetNDI(); });
     }
 
     /**
