@@ -81,8 +81,10 @@ server._ws.onmessage = (message) => {
                 case 'ndpi_status_ndi':
                     if (output == 'idle' || output == 'stalled')
                     {
-                        detailsEl.style.opacity = 1;
-                        overlayEl.style.opacity = 1;
+                        setTimeout(() => {
+                            overlayEl.style.opacity = 1;
+                            detailsEl.style.opacity = 1;
+                        }, 800);
                     }
                     else
                     {

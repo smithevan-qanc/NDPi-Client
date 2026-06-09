@@ -246,14 +246,15 @@ class NDI_Receiver_v4 extends EventEmitter {
      */
     async showChromium_PostTerm(picom = false) {
         await func.raiseWindow_Chromium().catch();
+        if (picom) { await func.launchPicom(); }
         await func.wait(500);
         await func.activateWindow_Chromium().catch();
-        if (picom)
-        {
-            setTimeout(() => {
-                func.launchPicom();
-            }, 1000);
-        }
+        // if (picom)
+        // {
+        //     setTimeout(() => {
+        //         func.launchPicom();
+        //     }, 1000);
+        // }
         return;
     }
 
