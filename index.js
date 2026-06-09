@@ -25,8 +25,10 @@ class NDPi {
         this.service_bonjour = null;
         this.service_chromium = null;
         this.controller_cec = null;
-        this.lcdDisplay = null;
         this.ndiReceiver = new Map();
+
+        this.lcdDisplayRestartTimer = null;
+        this.lcdDisplay = null;
 
         this.wsConnection_ndpiServer = null;
         this.ndpiServerStatusUpdate = null; // Interval Timer
@@ -190,14 +192,26 @@ class NDPi {
     /**
      * LAUNCH LCD DISPLAY RENDERER
      */
-    startLcdDisplay() {
-        try { this.lcdDisplay.kill(); }
-        catch {}
-        finally { this.lcdDisplay = null; }
+    async startLcdDisplay() {
+        if (this.lcdDisplay)
+        {
+            await new Promise((resolve) => {
+                this.lcdDisplay.once('end', resolve);
+                console.log(this.lcdDisplay);
+                this.lcdDisplay.kill();
+            });
+            this.lcdDisplay = null;
+        }
 
         this.lcdDisplay = spawn('python3', ['update_lcd.py'], {
             cwd: this.settings.lcdDisplayScriptPath,
             env: { ...process.env }
+        }).stdout.once('data', () => {
+            console.log('lcd DATA');
+            console.log(this.lcdDisplay);
+            this.lcdDisplayRestartTimer = setTimeout(() => {
+                this.startLcdDisplay();
+            }, 15000);
         });
 
         this.lcdDisplay.stderr.on('data', (data) => {
@@ -212,7 +226,7 @@ class NDPi {
             if (!this.shutdown)
             {
                 lcdDisplayClose('exit', code, signal.toString());
-                this.startLcdDisplay();
+                // process.nextTick(() => { this.startLcdDisplay(); });
             }
         });
 
@@ -220,7 +234,7 @@ class NDPi {
             if (!this.shutdown)
             {
                 lcdDisplayClose('disconnect');
-                this.startLcdDisplay();
+                // process.nextTick(() => { this.startLcdDisplay(); });
             }
         });
 
@@ -228,13 +242,16 @@ class NDPi {
             if (!this.shutdown)
             {
                 lcdDisplayClose('close', code, signal.toString());
-                this.startLcdDisplay();
+                // process.nextTick(() => { this.startLcdDisplay(); });
             }
         });
 
-        function lcdDisplayClose(source = '', code = 0 | null, signal = '') {
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ update_lcd ] Closed: [ Code: ${code || 'N/A'} ], [ Signal: ${signal || 'N/A'} ]`);
+        function lcdDisplayClose(source = '', code = 0 | null, signal = '', event = '') {
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ update_lcd ] Closed: [ Code: ${code || 'N/A'} ], [ Signal: ${signal || 'N/A'} ], [ Event: ${event || 'N/A'}]`);
         }
+    }
+    _closeLcdDisplay () {
+        this.lcdDisplay.kill();
     }
 
     /**
@@ -373,6 +390,10 @@ class NDPi {
         { this.ndiReceiver.delete(sourceName); }
     }
 
+    async closeReceivers() {
+        for (const receiver of this.ndiReceiver)
+        { await receiver.close(); }
+    }
     async softCloseReceivers() {
         for (const receiver of this.ndiReceiver)
         { await receiver.softClose(); }

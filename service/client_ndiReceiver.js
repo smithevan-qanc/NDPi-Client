@@ -90,6 +90,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_connected_time', '');
             this.settings.put('ndpi_status_ndi_source_framerate', '');
             this.settings.put('ndpi_status_ndi_source_resolution', '');
+            await func.exe(`killall ${this.receiverName}`);
             process.nextTick(() => { this.emit('close'); });
             return;
         }

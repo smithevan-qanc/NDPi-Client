@@ -805,7 +805,7 @@ const { exec, spawn } = require('node:child_process');
                     await wait(1500);
                 }
 
-                const cecActiveSource = Boolean(fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_this_source_active'), 'utf8'));
+                const cecActiveSource = Boolean(fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_this_source_active'), 'utf8') || 'false');
 
                 if (!cecActiveSource)
                 {
@@ -861,7 +861,6 @@ const { exec, spawn } = require('node:child_process');
             return new Promise((resolve) => { setTimeout(() => { resolve(); }, time || 0) });
         }
 
-        setDisplayResolution()
         /** SET DISPLAY RESOLUTION */
         /**
          * This function set's the HDMI output resolution
@@ -1039,6 +1038,26 @@ const { exec, spawn } = require('node:child_process');
                     }
                 });
             });
+        }
+checkVersion()
+        /**
+         *  **This function checks for the latest version by version number.**
+         * 
+         * 
+         * | _`env.NODE_ENV`_       | _Action_                              |
+         * | ---                    | ---                                   |
+         * | ⎯⎯⎯⎯⎯⎯⎯⎯ | ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ |
+         * | `production`           | → Compares `Stable Version` number    |
+         * | `development`          | → Compares `Version` number           |
+         * 
+         * ---
+         * 
+         * @returns {boolean}
+         * - `true` If Version numbers are _**different**_.
+         * - `false` If Version numbers are _**matching**_.
+         */
+        async function checkVersion() {
+
         }
         
         /**
