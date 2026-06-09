@@ -127,22 +127,22 @@ server._ws.onmessage = (message) => {
                 }
             }
             settingEl.innerHTML = settingInnerHTML;
+            
             if (isSelection && object.value)
-            {
-                document.getElementById(id).value = object.value;
-                document.getElementById(id).addEventListener('change', async function(e) {
-                    e.preventDefault();
-                    const res = await sendCommand({
-                        type: 'set-setting',
-                        data: {
-                            name: id,
-                            value: this.value
-                        }
-                    }, false);
-                    console.log(res);
-                    alert(`${res.message}`);
-                });
-            }
+            { document.getElementById(id).value = object.value; }
+
+            document.getElementById(id).addEventListener('change', async function(e) {
+                e.preventDefault();
+                const res = await sendCommand({
+                    type: 'set-setting',
+                    data: {
+                        name: id,
+                        value: this.value
+                    }
+                }, false);
+                if (res.data.message)
+                { alert(`${res.data.message}`); }
+            });
         }
     }
     catch (e)
