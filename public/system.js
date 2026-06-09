@@ -28,6 +28,7 @@ server._ws.onmessage = (message) => {
         for (const [id, object] of msg)
         {
             let isMultiline = false;
+            let isSelection = false;
             if (id === 'media_overlay_image')
             {
                 isMultiline = true;
@@ -93,18 +94,17 @@ server._ws.onmessage = (message) => {
             if (object.options)
             {
                 settingInnerHTML += `<select id="${id}">`;
-                const currentValue = object.value;
+
                 for (const [ key, value ] of object.options)
                 {
                     const opt = document.createElement('option');
-                    if (value == currentValue)
-                    { console.log('option is selected', key, value); opt.selected = true; }
+                    opt.id = `${id}__${value}`;
                     opt.value = value;
                     opt.textContent = key;
                     settingInnerHTML += opt.outerHTML;
                 }
-
-                settingInnerHTML += `</select>`
+                settingInnerHTML += `</select>`;
+                isSelection = true;
             }
             else
             {
@@ -127,6 +127,8 @@ server._ws.onmessage = (message) => {
                 }
             }
             settingEl.innerHTML = settingInnerHTML;
+            if (isSelection && object.value)
+            { document.getElementById(id).value = object.value; }
         }
     }
     catch (e)
