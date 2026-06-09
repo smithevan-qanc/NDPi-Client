@@ -124,7 +124,9 @@ try:
 
 except KeyboardInterrupt:
     print("\nStopping...")
-    disp.clear()
+    imageClear = Image.new("RGB", (disp.height, disp.width), "BLACK")
+    disp.ShowImage(imageClear)
+    time.sleep(0.1)
     disp.module_exit()
 except Exception as e:
     print(e)

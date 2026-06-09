@@ -422,24 +422,14 @@ const index = new NDPi();
 async function shutdownDevice() {
     await quitNDPi('SIGTERM', false);
     setTimeout(() => {
-        exec('shutdown now', {
-            env: {
-                ...process.env,
-                XAUTHORITY: `${process.env.HOME}/.Xauthority`,
-            }
-        });
+        exec('sudo shutdown now');
     }, 1000);
 }
 
 async function rebootDevice() {
     await quitNDPi('SIGTERM', false);
     setTimeout(() => {
-        exec('reboot', {
-            env: {
-                ...process.env,
-                XAUTHORITY: `${process.env.HOME}/.Xauthority`,
-            }
-        });
+        exec('sudo reboot');
     }, 1000);
 }
 
