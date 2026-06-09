@@ -205,10 +205,10 @@ class NDPi {
         });
 
         this.lcdDisplay.on('spawn', () => {
-            this.lcdDisplayRestartTimer = null;
             this.lcdDisplayRestartTimer = setTimeout(() => {
+                this.lcdDisplayRestartTimer = null;
                 this.startLcdDisplay();
-            }, 15000);
+            }, (60 * 60) * 1000);
         });
 
         this.lcdDisplay.stderr.on('data', (data) => {
@@ -223,6 +223,7 @@ class NDPi {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ update_lcd ] Closed`);
         });
     }
+
     async _closeLcdDisplay () {
         return new Promise((resolve) => {
             this.lcdDisplay.once('exit', () => {
@@ -362,9 +363,8 @@ class NDPi {
             new (require('./service/client_ndiReceiver.js'))(
                 this.settings,
                 this.server_api
-            ).once('killed', (activeSource) => {
-                if (activeSource)
-                { this._removeFromSet(activeSource.toString()); }
+            ).once('close', () => {
+                this._removeFromSet(source);
             })
         );
     }

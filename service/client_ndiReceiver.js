@@ -33,6 +33,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             await this.softClose();
             this.ndiBandwidth = String(data || '').trim() || '0';
             this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
+            await func.wait(1000);
             this.connect();
         });
         this.ndiBandwidth = this.settings.get('ndi_receiver_bandwidth') || '0';
@@ -130,7 +131,7 @@ class NDI_Receiver_v4 extends EventEmitter {
         });
 
         this.receiver.on('close', (code, signal) => {
-            this.emit('killed', this.ndiActiveSource);
+            // this.emit('killed', this.ndiActiveSource);
 
             this.ndiActiveSource = null;
             this.settings.put('ndpi_status_ndi_source_active', '');
@@ -273,6 +274,7 @@ class NDI_Receiver_v4 extends EventEmitter {
                 this.receiver.once('exit', () => { resolve(); });
                 this.receiver.kill('SIGTERM');
             });
+            this.receiver = null;
         }
         
         await this.showChromium_PostTerm(false);
