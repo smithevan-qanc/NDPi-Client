@@ -179,7 +179,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             if (this.secondsInactive >= 60)
             { this.showGStreamer(); }
 
-            this.secondsInactive = 0; this.showChromium_PreTerm()
+            this.secondsInactive = 0;
         }
     }
 
