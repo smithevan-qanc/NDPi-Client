@@ -606,25 +606,28 @@ class FileSystemMonitor extends EventEmitter {
             });
         }
 
-        if (this.drmMonitor)
-        {
-            await new Promise((resolve) => {
-                this.drmMonitor.once('exit', () => {
-                    this.drmMonitor = null;
-                    resolve();
-                });
-                this.drmMonitor.kill('SIGINT');
-            });
-        }
-
         if (this.debounceTimerDrmEvents)
         {
             clearTimeout(this.debounceTimerDrmEvents);
             this.debounceTimerDrmEvents = null;
         }
 
-        console.info( `[  CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
-        return;
+        return new Promise((resolve) => {
+            if (this.drmMonitor)
+            {
+                this.drmMonitor.once('exit', () => {
+                    this.drmMonitor = null;
+                    console.info( `[  CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                    resolve();
+                });
+                this.drmMonitor.kill('SIGINT');
+            }
+            else
+            {
+                console.info( `[  CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                resolve();
+            }
+        });
     }
 
 

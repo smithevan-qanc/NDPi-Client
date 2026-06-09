@@ -445,12 +445,17 @@ class NDPiCommandServer_Client extends EventEmitter {
             //     resolve();
             // });
 
+            console.log('Trying to closeAllConnections.');
             try { this.Server.closeAllConnections(); }
             catch {}
 
+            console.log('Trying to close server.')
             try { this.Server.close(); }
             catch {}
-            finally { resolve(); }
+            finally { 
+                console.log('Server Closed.')
+                resolve();
+            }
         });
     }
 
