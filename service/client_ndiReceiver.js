@@ -83,6 +83,8 @@ class NDI_Receiver_v4 extends EventEmitter {
     }
 
     connect() {
+        if (this.ndiSource.toLowerCase() !== 'none')
+
         this.receiver = spawn(`./${this.receiverName}`, [
             '--source', this.ndiSource,
             '--bandwidth', this.ndiBandwidth,
@@ -241,7 +243,6 @@ class NDI_Receiver_v4 extends EventEmitter {
 
                 this.receiver.once('exit', (code, signal) => {
                     console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited' );
-                    this.emit('close');
                     resolve();
                     return;
                 });
@@ -259,6 +260,8 @@ class NDI_Receiver_v4 extends EventEmitter {
 
             });
         }
+
+        this.emit('close');
 
         await func.raiseWindow_Chromium();
 
