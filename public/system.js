@@ -128,7 +128,23 @@ server._ws.onmessage = (message) => {
             }
             settingEl.innerHTML = settingInnerHTML;
             if (isSelection && object.value)
-            { document.getElementById(id).value = object.value; }
+            {//set-setting
+                document.getElementById(id).value = object.value;
+                document.getElementById(id).addEventListener('change', function(e) {
+                    e.preventDefault();
+                    console.log({
+                            name: id,
+                            value: this.value
+                        });
+                    // sendCommand({
+                    //     type: 'set-setting',
+                    //     data: {
+                    //         name: id,
+                    //         value: this.value
+                    //     }
+                    // });
+                });
+            }
         }
     }
     catch (e)
@@ -356,6 +372,14 @@ function renderSources() {
     { sourceSelectorEl.value = currentSourceEl.value || 'none'; }
 }
 
+/**
+ * 
+ * @param {Object} command >**command**: Command processed by handleCommand function.
+ * @param {string} command.type >**type**: Command type
+ * @param {any|null} command.data >**data**: Any data type releative to command type.
+ * @param {boolean} viaWebSocket >**viaWebSocket**: Try to send the command through the open WebSocket. If the WebSocket is not open, it will revert to the standard API.
+ * @returns 
+ */
 async function sendCommand(command = {}, viaWebSocket = true) {
     if (!command.type) return null;
     
@@ -385,7 +409,10 @@ async function sendCommand(command = {}, viaWebSocket = true) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(command)
         });
-        if (!res.ok) throw new Error(await res.json());
+        if (!res.ok) {
+            const errRes = await res.json()
+            throw new Error(errRes);
+        }
         data = await res.json();
     }
     catch (e) 

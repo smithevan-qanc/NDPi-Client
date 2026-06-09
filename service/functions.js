@@ -290,7 +290,7 @@ const { exec, spawn } = require('node:child_process');
                     break;
                 
                 case 'set-setting':
-                    const setSetting = updateSetting(command.data?.name || null, command.data?.value);
+                    const setSetting = await updateSetting(command.data?.name || null, command.data?.value);
                     response.success = setSetting.success  //.success;
                     response.data.message = setSetting.message;
                     return response;
