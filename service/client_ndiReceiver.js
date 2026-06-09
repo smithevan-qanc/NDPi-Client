@@ -190,9 +190,8 @@ class NDI_Receiver_v4 extends EventEmitter {
     
     /**
      * Kill the NDI Receiver and close out of the module.
-     * @param {boolean} shutdown - Set as true when exiting the entire NDPi Process.
      */
-    async close(shutdown = false) {
+    async close() {
         this.enabled = false;
         
         await Promise.all([

@@ -289,6 +289,8 @@ class NDPi {
     
     async _afterChromiumStart() {
         func.fadeVolume(0, `${path.basename(__filename)} startChromium() service_chromium.on(ready)`);
+        await func.raiseWindow_Chromium();
+        await func.activateWindow_Chromium();
 
         if (String(this.targetSource).toLowerCase() !== 'none')
         {
@@ -453,7 +455,7 @@ async function rebootDevice() {
 
 async function quitNDPi(signal, exit = true) {
 
-    await new Promise(async (resolve) => {
+    // await new Promise(async (resolve) => {
         const sig = signal ? `[ ${signal} ]` : '';
 
         console.log(`[ index ]${sig} Shutting down application...`);
@@ -474,8 +476,15 @@ async function quitNDPi(signal, exit = true) {
         //     }
         // }
 
-        try { index.lcdDisplay.kill('SIGINT'); }
-        catch {}
+        if (index.lcdDisplay)
+        {
+            await new Promise((resolve) => {
+                index.lcdDisplay.once('exit', () => { resolve(); });
+                index.lcdDisplay.kill('SIGINT');
+            });
+        }
+        // try { index.lcdDisplay.kill('SIGINT'); }
+        // catch {}
 
         try { await index.controller_cec.close(); }
         catch {}
@@ -491,11 +500,11 @@ async function quitNDPi(signal, exit = true) {
 
         try { index.settings.close(); }
         catch {}
-        finally { resolve(); }
+        // finally { resolve(); }
 
         // try { index.service_chromium.close(); }
         // catch {}
-    });
+    // });
 
     if (exit)
     { process.exit(0); }
