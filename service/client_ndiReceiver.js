@@ -82,7 +82,7 @@ class NDI_Receiver_v4 extends EventEmitter {
         }
     }
 
-    connect() {
+    async connect() {
         if (this.ndiSource.toLowerCase() === 'none')
         {
             this.settings.put('ndpi_status_ndi', 'idle');

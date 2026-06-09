@@ -195,12 +195,8 @@ class NDPi {
     async startLcdDisplay() {
         if (this.lcdDisplay)
         {
-            await new Promise((resolve) => {
-                this.lcdDisplay.once('end', resolve);
-                console.log(this.lcdDisplay);
-                this.lcdDisplay.kill();
-            });
-            this.lcdDisplay = null;
+            await this._closeLcdDisplay();
+            await func.wait(500);
         }
 
         this.lcdDisplay = spawn('python', ['update_lcd.py'], {
@@ -209,58 +205,37 @@ class NDPi {
         });
 
         this.lcdDisplay.on('spawn', () => {
-            console.log('lcd SPAWN');
-            console.log(this.lcdDisplay);
+            this.lcdDisplayRestartTimer = null;
             this.lcdDisplayRestartTimer = setTimeout(() => {
                 this.startLcdDisplay();
             }, 15000);
         });
-        // this.lcdDisplay.stdout.once('data', () => {
-        //     console.log('lcd DATA');
-        //     console.log(this.lcdDisplay);
-        //     this.lcdDisplayRestartTimer = setTimeout(() => {
-        //         this.startLcdDisplay();
-        //     }, 15000);
-        // });
 
         this.lcdDisplay.stderr.on('data', (data) => {
-            console.error(`⚠️  [ update_lcd ][ ERROR ]`, data);
+            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ update_lcd ][ ERROR ]`, data.toString());
         });
 
         this.lcdDisplay.on('error', (err) => {
-            console.error(`⚠️  [ update_lcd ][ ERROR ] ${err.toString()}`);
+            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ update_lcd ][ ERROR ]`, err);
         });
 
         this.lcdDisplay.on('exit', (code, signal) => {
-            if (!this.shutdown)
-            {
-                lcdDisplayClose('exit', code, signal.toString());
-                // process.nextTick(() => { this.startLcdDisplay(); });
-            }
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ update_lcd ] Closed`);
         });
-
-        this.lcdDisplay.on('disconnect', () => {
-            if (!this.shutdown)
-            {
-                lcdDisplayClose('disconnect');
-                // process.nextTick(() => { this.startLcdDisplay(); });
-            }
-        });
-
-        this.lcdDisplay.on('close', (code, signal) => {
-            if (!this.shutdown)
-            {
-                lcdDisplayClose('close', code, signal.toString());
-                // process.nextTick(() => { this.startLcdDisplay(); });
-            }
-        });
-
-        function lcdDisplayClose(source = '', code = 0 | null, signal = '', event = '') {
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ update_lcd ] Closed: [ Code: ${code || 'N/A'} ], [ Signal: ${signal || 'N/A'} ], [ Event: ${event || 'N/A'}]`);
-        }
     }
-    _closeLcdDisplay () {
-        this.lcdDisplay.kill();
+    async _closeLcdDisplay () {
+        return new Promise((resolve) => {
+            this.lcdDisplay.once('exit', () => {
+                this.lcdDisplay = null;
+                resolve();
+            });
+
+            if (this.lcdDisplay)
+            { this.lcdDisplay.kill(); }
+            else
+            { resolve(); }
+            
+        });
     }
 
     /**
@@ -475,44 +450,37 @@ async function rebootDevice() {
 }
 
 async function quitNDPi(signal, exit = true) {
+    const sig = signal ? `[ ${signal} ]` : '';
 
-    // await new Promise(async (resolve) => {
-        const sig = signal ? `[ ${signal} ]` : '';
-        console.info(`[ index ]${sig} Shutting down application...`);
-        index.shutdown = true;
+    console.info(`[ index ]${sig} Shutting down application...`);
 
-        try { clearInterval(index.ndpiServerStatusUpdate); }
-        catch {}
-        finally { index.ndpiServerStatusUpdate = null; }
+    index.shutdown = true;
 
-        if (index.ndiReceiver.size >= 1)
-        {
-            try { await index.softCloseReceivers(); }
-            catch {}
-        }
+    if (index.ndiReceiver.size >= 1)
+    { try { await index.softCloseReceivers(); } catch {} }
 
-        if (index.lcdDisplay)
-        {
-            await new Promise((resolve) => {
-                index.lcdDisplay.once('exit', () => { resolve(); });
-                index.lcdDisplay.kill('SIGINT');
-            });
-        }
+    try { clearInterval(index.ndpiServerStatusUpdate); } catch {}
+    finally { index.ndpiServerStatusUpdate = null; }
 
-        try { await index.controller_cec.close(); }
-        catch {}
+    try { clearTimeout(index.lcdDisplayRestartTimer); } catch {}
+    finally { index.lcdDisplayRestartTimer = null; }
 
-        try { await index.service_bonjour.close(); }
-        catch {}
+    await index._closeLcdDisplay();
 
-        try { index.wsConnection_ndpiServer.close(); }
-        catch {}
+    try { await index.controller_cec.close(); }
+    catch {}
 
-        try { await index.server_api.close(); }
-        catch {}
+    try { await index.service_bonjour.close(); }
+    catch {}
 
-        try { await index.settings.close(); }
-        catch {}
+    try { index.wsConnection_ndpiServer.close(); }
+    catch {}
+
+    try { await index.server_api.close(); }
+    catch {}
+
+    try { await index.settings.close(); }
+    catch {}
 
     if (exit)
     { process.exit(0); }
