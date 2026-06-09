@@ -398,8 +398,10 @@ class NDI_Receiver_v4 extends EventEmitter {
                 break;
             case 60:
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                await func.launchPicom();
+                await func.wait(1000);
                 await this.showChromium_PreTerm();
-                await this.showChromium_PostTerm(true);
+                await this.showChromium_PostTerm(false);
                 return;
                 break;
             default:
