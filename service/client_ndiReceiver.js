@@ -179,13 +179,13 @@ class NDI_Receiver_v4 extends EventEmitter {
             func.activateDisplay();
         }
 
-        const step1 = await activateWindow_NDI();
+        const step1 = await func.activateWindow_NDI();
         if (!step1)
         { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() >> Step 1: Activate GStreamer ]`); return; }
         
         await func.wait(1000); // not affected by the delay argv.
 
-        const step2 = await minimizeWindow_Chromium();
+        const step2 = await func.minimizeWindow_Chromium();
         if (!step2)
         { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() >> Step 2: Minimize Chromium ]`); }
 
