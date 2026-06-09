@@ -27,6 +27,8 @@ class NDPiCommandServer_Client extends EventEmitter {
             });
         });
 
+        this.closing = false;
+
         this.discoveryExec = null;
         this.restartDiscoveryTimer = null;
         
@@ -167,7 +169,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
             setTimeout((resolve) => {
                 this.startDiscovery();
-            }, 500);
+            }, 20);
 
             ws.onerror = (error) => {
                 console.error(
@@ -183,11 +185,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                     `[ ${path.basename(__filename).split('.')[0]} ]`,
                     'NDI Source WebSocket connection REMOVED.'
                 );
-                if (this.ws_conn_sources.size === 0)
-                { 
-                    try { this.discoveryExec.kill('SIGTERM'); }
-                    catch {}
-                }
+                this._tryCloseDiscovery();
             };
         });
     }
@@ -347,6 +345,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         const programName = './ndpi_discover';
         
         console.info(`[ ${path.basename(__filename).split('.')[0]} ] Starting NDI Source Discovery.`);
+
         this.discoveryExec = spawn(programName, {
             cwd: discoveryPath
         });
@@ -364,33 +363,47 @@ class NDPiCommandServer_Client extends EventEmitter {
                 }
             }
             catch {}
-            // catch (e) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Corrupted Data Received from ${programName}`); }
         });
 
-        if (this.ws_conn_sources.size === 0)
-        { 
-            try { this.discoveryExec.kill('SIGTERM'); }
-            catch {}
-        }
-
         this.discoveryExec.on('exit', () => {
-            this.restartDiscoveryTimer = setTimeout(() => { this._restartDiscovery(); }, 2000);
+            this._scheduleRestartDiscovery();
         });
     }
 
-    _restartDiscovery() {
-        this.restartDiscoveryTimer = null;
+    _scheduleRestartDiscovery() {
+        if (this.closing)
+        { return; }
+
         if (this.ws_conn_sources.size >= 1)
         {
             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Source Discovery Exited Prematurely. Relaunching`);
-            this.discoveryExec = null;
-            this.startDiscovery();
+
+            this.restartDiscoveryTimer = setTimeout(() => {
+                this.discoveryExec = null;
+                this.restartDiscoveryTimer = null;
+                this.startDiscovery();
+            }, 2000);
         }
         else
         { this.discoveryExec = null; }
     }
 
+    async _tryCloseDiscovery() {
+        if (this.ws_conn_sources.size === 0 && this.discoveryExec)
+        {
+            await new Promise((resolve) => {
+                this.discoveryExec.once('exit', () => {
+                    this.discoveryExec = null;
+                    resolve();
+                });
+                this.discoveryExec.kill('SIGTERM');
+            });
+        }
+    }
+
     async close() {
+        this.closing = true;
+
         console.info(
             `[ ${path.basename(__filename).split('.')[0]} ]`,
             'Closing Module',
@@ -416,15 +429,15 @@ class NDPiCommandServer_Client extends EventEmitter {
             finally { this.ws_conn_sources.delete(client); }
         }
 
+        try { clearTimeout(this.restartDiscoveryTimer) } catch {}
+        finally { this.restartDiscoveryTimer = null; }
+
         if (this.discoveryExec)
         {
             await new Promise((resolve) => {
-                this.discoveryExec.once('exit', () => {
-                    resolve();
-                });
+                this.discoveryExec.once('exit', () => { resolve(); });
                 this.discoveryExec.kill('SIGTERM');
             });
-            try { clearTimeout(this.restartDiscoveryTimer) } catch {}
         }
 
         return new Promise((resolve) => {
