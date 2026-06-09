@@ -28,6 +28,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         });
 
         this.discoveryExec = null;
+        this.restartDiscoveryTimer = null;
         
         this.ws_serv_display = null;
         this.ws_conn_display = null;
@@ -373,11 +374,12 @@ class NDPiCommandServer_Client extends EventEmitter {
         }
 
         this.discoveryExec.on('exit', () => {
-            process.nextTick(() => { this._restartDiscovery(); });
+            this.restartDiscoveryTimer = setTimeout(() => { this._restartDiscovery(); }, 2000);
         });
     }
 
     _restartDiscovery() {
+        this.restartDiscoveryTimer = null;
         if (this.ws_conn_sources.size >= 1)
         {
             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Source Discovery Exited Prematurely. Relaunching`);
@@ -414,6 +416,17 @@ class NDPiCommandServer_Client extends EventEmitter {
             finally { this.ws_conn_sources.delete(client); }
         }
 
+        if (this.discoveryExec)
+        {
+            await new Promise((resolve) => {
+                this.discoveryExec.once('exit', () => {
+                    resolve();
+                });
+                this.discoveryExec.kill('SIGTERM');
+            });
+            try { clearTimeout(this.restartDiscoveryTimer) } catch {}
+        }
+
         return new Promise((resolve) => {
             this.Server.once('close', () => {
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited');
@@ -430,9 +443,9 @@ class NDPiCommandServer_Client extends EventEmitter {
 
     /**
      * 
-     * @param {Object} message - Message object to send to Overlay Display
+     * @param {Object}  message - Message object to send to Overlay Display
      * @param {string} [message.type] - Read by the overlay display as the message type.
-     * @param {any} [message.data] - Data to send. Type predefinded by Display WebSocket on basis of message.type.
+     * @param {any}    [message.data] - Data to send. Type predefinded by Display WebSocket on basis of message.type.
      */
     sendUpdateToDisplay(message) {
         let msg = {

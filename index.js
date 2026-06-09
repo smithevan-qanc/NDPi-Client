@@ -442,9 +442,7 @@ async function quitNDPi(signal, exit = true) {
 
     // await new Promise(async (resolve) => {
         const sig = signal ? `[ ${signal} ]` : '';
-
         console.info(`[ index ]${sig} Shutting down application...`);
-
         index.shutdown = true;
 
         try { clearInterval(index.ndpiServerStatusUpdate); }
@@ -474,10 +472,10 @@ async function quitNDPi(signal, exit = true) {
         try { index.wsConnection_ndpiServer.close(); }
         catch {}
 
-        try { index.server_api.close(); }
+        try { await index.server_api.close(); }
         catch {}
 
-        try { index.settings.close(); }
+        try { await index.settings.close(); }
         catch {}
 
     if (exit)
