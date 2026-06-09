@@ -130,7 +130,7 @@ server._ws.onmessage = (message) => {
             if (isSelection && object.value)
             {
                 document.getElementById(id).value = object.value;
-                document.getElementById(id).addEventListener('change', function(e) {
+                document.getElementById(id).addEventListener('change', async function(e) {
                     e.preventDefault();
                     const res = await sendCommand({
                         type: 'set-setting',
