@@ -206,7 +206,9 @@ class NDPi {
         this.lcdDisplay = spawn('python3', ['update_lcd.py'], {
             cwd: this.settings.lcdDisplayScriptPath,
             env: { ...process.env }
-        }).stdout.once('data', () => {
+        });
+        
+        this.lcdDisplay.stdout.once('data', () => {
             console.log('lcd DATA');
             console.log(this.lcdDisplay);
             this.lcdDisplayRestartTimer = setTimeout(() => {
