@@ -27,7 +27,7 @@ class FileSystemMonitor extends EventEmitter {
         this.ipPollEnable = true;
 
         this.#updatePoll = null;
-        this.#updatePollInterval = 60000;
+        this.#updatePollInterval = (10 * 60) * 1000;
         this.updatePollEnable = true;
 
         this.dataDir = process.env.DATA_NDPI_PATH;
@@ -41,7 +41,6 @@ class FileSystemMonitor extends EventEmitter {
 
         this.serverCommunicationWebSocket = null;
 
-        this.drmEnable = true;
         this.drmMonitor = null;
         this.debounceTimerDrmEvents = null;
 
@@ -542,16 +541,11 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     startDrmMonitor() {
-        this.drmEnable = false;
-
         try
         { exec('killall udevadm'); }
         catch {}
         finally
-        {
-            this.drmMonitor = null;
-            this.drmEnable = true;
-        }
+        { this.drmMonitor = null;}
 
         console.info(`[ ${path.basename(__filename).split('.')[0]} ] Starting DRM Event Monitor`);
 
@@ -568,10 +562,8 @@ class FileSystemMonitor extends EventEmitter {
         });
 
         this.drmMonitor.on('close', () => {
-            if (this.drmEnable)
-            { setTimeout(() => { this.startDrmMonitor(); }, 1000); }
-            else
-            { try { clearTimeout(this.debounceTimerDrmEvents) } catch {} }
+            console.info(`[ CLOSED ][ ${path.basename(__filename).split('.')[0]} ] DRM Monitor`)
+            try { clearTimeout(this.debounceTimerDrmEvents) } catch {}
         });
     }
 
@@ -590,18 +582,15 @@ class FileSystemMonitor extends EventEmitter {
 
     async close() {
         this.watcherEnable = false;
-        this.drmEnable = false;
         this.ipPollEnable = false;
         this.updatePollEnable = false;
 
         console.info( `[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
 
-        try { clearTimeout(this.#ipPoll); }
-        catch {}
+        try { clearTimeout(this.#ipPoll); } catch {}
         finally { this.#ipPoll = null; }
 
-        try { clearTimeout(this.#updatePoll); }
-        catch {}
+        try { clearTimeout(this.#updatePoll); } catch {}
         finally { this.#updatePoll = null; }
 
         if (this.watcher)
