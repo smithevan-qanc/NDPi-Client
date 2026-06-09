@@ -439,17 +439,18 @@ class NDPiCommandServer_Client extends EventEmitter {
         // }
 
         return new Promise((resolve) => {
-            this.Server.once('close', () => {
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited');
-                this.Server = null;
-                resolve();
-            });
+            // this.Server.once('', () => {
+            //     console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited');
+            //     this.Server = null;
+            //     resolve();
+            // });
 
             try { this.Server.closeAllConnections(); }
             catch {}
 
             try { this.Server.close(); }
             catch {}
+            finally { resolve(); }
         });
     }
 
