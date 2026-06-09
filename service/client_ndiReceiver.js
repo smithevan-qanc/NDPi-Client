@@ -223,9 +223,10 @@ class NDI_Receiver_v4 extends EventEmitter {
      */
     async showChromium_PreTerm() {
         await Promise.all([
-            func.fadeVolume(0, `${path.basename(__filename)} softClose()`),
-            func.minimizeWindow_NDI()
+            func.fadeVolume(0, `${path.basename(__filename)} softClose()`).catch(),
+            func.minimizeWindow_NDI().catch()
         ]);
+        return;
     }
 
     /**
@@ -244,14 +245,16 @@ class NDI_Receiver_v4 extends EventEmitter {
      * @param {boolean} picom >**picom**: Launch Picom? (Default: false)
      */
     async showChromium_PostTerm(picom = false) {
-        await func.raiseWindow_Chromium();
-        await func.activateWindow_Chromium();
+        await func.raiseWindow_Chromium().catch();
+        await func.wait(500);
+        await func.activateWindow_Chromium().catch();
         if (picom)
         {
             setTimeout(() => {
                 func.launchPicom();
             }, 1000);
         }
+        return;
     }
 
     /**
