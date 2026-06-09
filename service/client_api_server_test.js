@@ -167,9 +167,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                 'NDI Source WebSocket connection ADDED.'
             );
 
-            setTimeout((resolve) => {
-                this.startDiscovery();
-            }, 20);
+            process.nextTick(() => { this.startDiscovery();} );
 
             ws.onerror = (error) => {
                 console.error(
@@ -377,11 +375,10 @@ class NDPiCommandServer_Client extends EventEmitter {
         if (this.ws_conn_sources.size >= 1)
         {
             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Source Discovery Exited Prematurely. Relaunching`);
-
             this.restartDiscoveryTimer = setTimeout(() => {
                 this.discoveryExec = null;
                 this.restartDiscoveryTimer = null;
-                this.startDiscovery();
+                process.nextTick(() => { this.startDiscovery();} );
             }, 2000);
         }
         else
@@ -432,13 +429,14 @@ class NDPiCommandServer_Client extends EventEmitter {
         try { clearTimeout(this.restartDiscoveryTimer) } catch {}
         finally { this.restartDiscoveryTimer = null; }
 
-        if (this.discoveryExec)
-        {
-            await new Promise((resolve) => {
-                this.discoveryExec.once('exit', () => { resolve(); });
-                this.discoveryExec.kill('SIGTERM');
-            });
-        }
+        await this._tryCloseDiscovery();
+        // if (this.discoveryExec)
+        // {
+        //     await new Promise((resolve) => {
+        //         this.discoveryExec.once('exit', () => { resolve(); });
+        //         this.discoveryExec.kill('SIGTERM');
+        //     });
+        // }
 
         return new Promise((resolve) => {
             this.Server.once('close', () => {
