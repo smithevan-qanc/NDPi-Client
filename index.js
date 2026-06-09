@@ -367,6 +367,11 @@ class NDPi {
         { this.ndiReceiver.delete(sourceName); }
     }
 
+    async softCloseReceivers() {
+        for (const receiver of this.ndiReceiver)
+        { await receiver.softClose(); }
+    }
+
     /**
      * OPEN COMMUNICATION WITH NDPI HUB SERVER
      */
@@ -445,6 +450,14 @@ async function quitNDPi(signal, exit = true) {
         try { clearInterval(index.ndpiServerStatusUpdate); }
         catch {}
         finally { index.ndpiServerStatusUpdate = null; }
+
+        await func.fadeVolume(0, `${path.basename(__filename)} quitNDPi()`);
+
+        if (index.ndiReceiver.size >= 1)
+        {
+            try { await index.softCloseReceivers(); }
+            catch {}
+        }
 
         if (index.lcdDisplay)
         {

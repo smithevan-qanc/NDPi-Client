@@ -10,23 +10,23 @@ printLog() {
     echo "[ $(date '+%Y-%m-%d %H:%M:%S.%3N') ][ $FUNC_CALLED_FROM ] $*" | tee -a "${HOME}/volFadeLog.txt" > /dev/null
 }
 
-printLog '-----------------'
-printLog Start
+# printLog '-----------------'
+# printLog Start
 
 if [[ -z "$target" ]]; then
-    printLog "No target level provided."
+    # printLog "No target level provided."
     echo "Please provide a target volume setpoint."
     echo ""
     echo "Usage: $0 <LVL>"
     echo "           LVL Range: 0-255"
-    printLog "Exiting."
+    # printLog "Exiting."
     exit 1
 fi
 
 
-printLog "Fading Volume"
-printLog " ↳ From: $current"
-printLog "   ↳ To: $target"
+# printLog "Fading Volume"
+# printLog " ↳ From: $current"
+# printLog "   ↳ To: $target"
 
 if [ "$current" -lt "$target" ]; then
     while [ "$current" -lt "$target" ]; do
@@ -45,6 +45,6 @@ else
 fi
 
 
-printLog "Exiting."
+# printLog "Exiting."
 
 exit 0
