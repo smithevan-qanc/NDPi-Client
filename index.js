@@ -451,8 +451,6 @@ async function quitNDPi(signal, exit = true) {
         catch {}
         finally { index.ndpiServerStatusUpdate = null; }
 
-        await func.fadeVolume(0, `${path.basename(__filename)} quitNDPi()`);
-
         if (index.ndiReceiver.size >= 1)
         {
             try { await index.softCloseReceivers(); }
