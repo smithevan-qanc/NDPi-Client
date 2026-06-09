@@ -139,6 +139,7 @@ server._ws.onmessage = (message) => {
                             value: this.value
                         }
                     }, false);
+                    console.log(res);
                     alert(`${res.message}`);
                 });
             }
