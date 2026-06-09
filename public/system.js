@@ -93,11 +93,11 @@ server._ws.onmessage = (message) => {
             if (object.options)
             {
                 settingInnerHTML += `<select id="${id}" value="${object.value}">`;
-
+                const currentValue = object.value;
                 for (const [ key, value ] of object.options)
                 {
                     const opt = document.createElement('option');
-                    if (value === object.value)
+                    if (value == currentValue)
                     { opt.selected = true; }
                     opt.value = value;
                     opt.textContent = key;
