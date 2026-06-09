@@ -50,7 +50,7 @@ class NDPi {
                 data
                     .toString()
                     .split(/\r?\n/)
-                    .forEach((line) => { console.log(line) });
+                    .forEach((line) => { console.info(line) });
             });
             startup.on('exit', () => {
                 console.info(process.env);
@@ -61,7 +61,9 @@ class NDPi {
         execStartup();
     }
 
-    /** START FILE SYSTEM WATCHER */
+    /**
+     * START FILE SYSTEM WATCHER
+     */
     startFsData() {
         const FileSystemMonitor = require('./service/client_fs.js');
         this.settings = new FileSystemMonitor(NDPi_VERSION, NDPi_VERSION_DATE);
@@ -81,10 +83,10 @@ class NDPi {
             this.startNdiReceiver(output);
         });
 
-        //  No Source Display Mode
-        this.settings.on('ndpi_status_no_source_display_mode', (data) => {
-            console.log('')
-        });
+        // //  No Source Display Mode
+        // this.settings.on('ndpi_status_no_source_display_mode', (data) => {
+        //     console.log('')
+        // });
 
         //  NDPi Hub Server IP
         this.settings.on('ndpi_command_server_host', (data) => {
@@ -185,7 +187,9 @@ class NDPi {
         // this.settings.on('drm', () => { setResolutionResetNDI(); });
     }
 
-    /** LAUNCH LCD DISPLAY RENDERER */
+    /**
+     * LAUNCH LCD DISPLAY RENDERER
+     */
     startLcdDisplay() {
         try { this.lcdDisplay.kill(); }
         catch {}
@@ -233,7 +237,9 @@ class NDPi {
         }
     }
 
-    /** START API */
+    /**
+     * START API
+     */
     startApi() {
         const NDPiCommandServer_Client = require('./service/client_api_server_test.js');
         this.server_api = new NDPiCommandServer_Client(this.settings);
@@ -259,13 +265,17 @@ class NDPi {
         });
     }
 
-    /** START BONJOUR MDNS BROADCAST */
+    /**
+     * START BONJOUR MDNS BROADCAST
+     */
     startMdns() {
         const NDPiBonjourService = require('./service/client_bonjour.js');
         this.service_bonjour = new NDPiBonjourService(this.settings);
     }
 
-    /** LAUNCH LOCAL CHROMIUM DISPLAY */
+    /**
+     * LAUNCH LOCAL CHROMIUM DISPLAY
+     */
     async startChromium() {
         if (fs.existsSync('/usr/bin/chromium'))
         {
@@ -276,7 +286,6 @@ class NDPi {
             this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
 
             this.service_chromium.on('ready', () => {
-                console.log('chromium ready signal received');
                 setTimeout(() => { this._afterChromiumStart(); }, 1000);
             });
         }
@@ -300,7 +309,9 @@ class NDPi {
         }
     }
 
-    /** OPEN CEC CONTROLER */
+    /**
+     * OPEN CEC CONTROLER
+     */
     openCecController() {
         const CecController = require('./service/client_cec.js');
         this.controller_cec = new CecController(this.settings);
@@ -324,11 +335,10 @@ class NDPi {
         });
     }
 
-    /** LAUNCH NDI RECEIVER */
+    /**
+     * LAUNCH NDI RECEIVER
+     */
     async startNdiReceiver(source = 'none') {
-
-        // await func.launchPicom();
-        
         if (source == 'none')
         {
             if (this.ndiReceiver.size >= 1)
@@ -340,7 +350,6 @@ class NDPi {
         { this.targetSource = source; }
 
         const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
-        // const receiver = new NDI_Receiver_v4(this.settings, this.server_api);
 
         this.ndiReceiver.forEach((receiver, key) => {
             if (key !== source)
@@ -349,59 +358,18 @@ class NDPi {
 
         this.ndiReceiver.set(source, new NDI_Receiver_v4(this.settings, this.server_api).once('killed', (activeSource) => {
             if (activeSource)
-            { this.removeFromSet(activeSource.toString()); }
+            { this._removeFromSet(activeSource.toString()); }
         }));
-
-        // setTimeout(() => {
-        //     this.ndiReceiver.forEach((receiver, key) => {
-        //         if (key !== source)
-        //         { receiver.close(); }
-        //     });
-        // }, 2000);
-
-        
-
-        // for (const rec of openNdiReceivers)
-        // { await this.ndiReceiver.get(rec).close(); }
-
-        // receiver.once('close', () => {
-        //     console.log('closing receivers');
-        //     this.ndiReceiver.delete(source);
-        // });
-
-        // this.ndiReceiver.on('connected', () => {
-        //     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
-        //     this.server_api.updateDisplay({ type: `show-ndi` });
-        // });
-
-        // this.ndiReceiver.on('close', () => {
-        //     console.log('close signal received in "index"', 'Module Enabled', this.ndiReceiver.enabled);
-        //     if (this.ndiReceiver.enabled)
-        //     { this.__restartNdiReceiver(); }
-        //     this.ndiReceiver = null;
-        // });
     }
 
-    removeFromSet(sourceName = '') {
+    _removeFromSet(sourceName = '') {
         if (this.ndiReceiver.has(sourceName))
-        {
-            console.log(`Removing ${sourceName} from this.ndiReceiver.set`);
-            this.ndiReceiver.delete(sourceName);
-        }
+        { this.ndiReceiver.delete(sourceName); }
     }
 
-    /** RELAUNCH NDI RECEIVER */
-    __restartNdiReceiver(delay = 1000) {
-        if (!this.timerRestartNdi)
-        {
-            this.timerRestartNdi = setTimeout(() => {
-                this.startNdiReceiver();
-                this.timerRestartNdi = null;
-            }, delay);
-        }
-    }
-
-    /** OPEN COMMUNICATION WITH NDPI HUB SERVER */
+    /**
+     * OPEN COMMUNICATION WITH NDPI HUB SERVER
+     */
     connectToNDPiServer() {
         const ClientServerWebSocket = require('./service/clientServer_websocket.js');
         this.wsConnection_ndpiServer = new ClientServerWebSocket(this.settings, this.server_api);
@@ -413,6 +381,7 @@ class NDPi {
     }
 
     /** HELPER FUNCTIONS */
+
     sendStatusToNDPiServer() {
         const status = {
             type: 'client-status',
@@ -442,18 +411,36 @@ class NDPi {
     }
 }
 
-// ************************************************** START PROCESS *************
+// ******************************************************
+// *                                                    *
+// *                START NDPi PROCESS                  *
+// *                                                    *
+// ******************************************************
 let quitAttempts = 0;
 const index = new NDPi();
 
 async function shutdownDevice() {
     await quitNDPi('SIGTERM', false);
-    setTimeout(() => { exec('sudo shutdown now'); }, 1000);
+    setTimeout(() => {
+        exec('shutdown now', {
+            env: {
+                ...process.env,
+                XAUTHORITY: `${process.env.HOME}/.Xauthority`,
+            }
+        });
+    }, 1000);
 }
 
 async function rebootDevice() {
     await quitNDPi('SIGTERM', false);
-    setTimeout(() => { exec('sudo reboot'); }, 1000);
+    setTimeout(() => {
+        exec('reboot', {
+            env: {
+                ...process.env,
+                XAUTHORITY: `${process.env.HOME}/.Xauthority`,
+            }
+        });
+    }, 1000);
 }
 
 async function quitNDPi(signal, exit = true) {
@@ -461,23 +448,13 @@ async function quitNDPi(signal, exit = true) {
     // await new Promise(async (resolve) => {
         const sig = signal ? `[ ${signal} ]` : '';
 
-        console.log(`[ index ]${sig} Shutting down application...`);
+        console.info(`[ index ]${sig} Shutting down application...`);
 
         index.shutdown = true;
 
         try { clearInterval(index.ndpiServerStatusUpdate); }
         catch {}
         finally { index.ndpiServerStatusUpdate = null; }
-
-
-        // index.startNdiReceiver('none');
-        // if (index.ndiReceiver.size >= 1) 
-        // {
-        //     for (const rec of index.ndiReceiver)
-        //     {
-        //         await index.ndiReceiver.get(rec).close();
-        //     }
-        // }
 
         if (index.lcdDisplay)
         {
@@ -486,8 +463,6 @@ async function quitNDPi(signal, exit = true) {
                 index.lcdDisplay.kill('SIGINT');
             });
         }
-        // try { index.lcdDisplay.kill('SIGINT'); }
-        // catch {}
 
         try { await index.controller_cec.close(); }
         catch {}
@@ -503,44 +478,36 @@ async function quitNDPi(signal, exit = true) {
 
         try { index.settings.close(); }
         catch {}
-        // finally { resolve(); }
-
-        // try { index.service_chromium.close(); }
-        // catch {}
-    // });
 
     if (exit)
     { process.exit(0); }
 }
 
 process.on('uncaughtException', (err) => {
-    console.log(' ');
-    console.log('🔴');
-    console.log('🔴🔴');
-    console.log('🔴🔴🔴');
-    console.log('Uncaught Exception');
-    console.log('------------------');
-    console.log(err);
-    console.log('------------------');
-    console.log('🔴🔴🔴');
-    console.log('🔴🔴');
-    console.log('🔴');
-    console.log(' ');
+    console.error(' ');
+    console.error('🔴🔴🔴');
+    console.error('Uncaught Exception');
+    console.error('------------------');
+    console.error(err);
+    console.error('------------------');
+    console.error('🔴🔴🔴');
+    console.error(' ');
 });
 
 process.on('unhandledRejection', (reason) => {
-    console.log(' ');
-    console.log('🔴');
-    console.log('🔴🔴');
-    console.log('🔴🔴🔴');
-    console.log('Unhandled REJECTION');
-    console.log('-------------------');
-    console.log(reason);
-    console.log('-------------------');
-    console.log('🔴🔴🔴');
-    console.log('🔴🔴');
-    console.log('🔴');
-    console.log(' ');
+    console.error(' ');
+    console.error('🔴');
+    console.error('🔴🔴');
+    console.error('🔴🔴🔴');
+    console.error('Unhandled REJECTION');
+    console.error('-------------------');
+    console.error(reason);
+    console.error('-------------------');
+    console.error('  Restarting NDPi  ');
+    console.error('🔴🔴🔴');
+    console.error('🔴🔴');
+    console.error('🔴');
+    console.error(' ');
     if (quitAttempts < 10)
     {
         quitAttempts++;
@@ -554,6 +521,6 @@ process.on('SIGTERM', () => quitNDPi('SIGTERM'));
 process.on('SIGINT',  () => quitNDPi('SIGINT'));
 
 process.on('exit', (code) => {
-    console.log(`[ EXIT CODE: ${code} ]`);
-    console.log('══════════════════════════════════════════  N D P i - M O N I T O R  ═══');
+    console.info(`[ EXIT CODE: ${code} ]`);
+    console.info('══════════════════════════════════════════  N D P i - M O N I T O R  ═══');
 });
