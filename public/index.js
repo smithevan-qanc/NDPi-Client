@@ -82,9 +82,7 @@ server._ws.onmessage = (message) => {
                     if (output == 'idle' || output == 'stalled')
                     {
                         detailsEl.style.opacity = 1;
-                        setTimeout(() => {
-                            overlayEl.style.opacity = 1;
-                        }, 500);
+                        overlayEl.style.opacity = 1;
                     }
                     else
                     {

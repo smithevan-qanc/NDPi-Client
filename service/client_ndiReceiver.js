@@ -83,7 +83,16 @@ class NDI_Receiver_v4 extends EventEmitter {
     }
 
     connect() {
-        if (this.ndiSource.toLowerCase() !== 'none')
+        if (this.ndiSource.toLowerCase() === 'none')
+        {
+            this.settings.put('ndpi_status_ndi', 'idle');
+            this.settings.put('ndpi_status_ndi_source_active', '');
+            this.settings.put('ndpi_status_ndi_source_connected_time', '');
+            this.settings.put('ndpi_status_ndi_source_framerate', '');
+            this.settings.put('ndpi_status_ndi_source_resolution', '');
+            process.nextTick(() => { this.emit('close'); });
+            return;
+        }
 
         this.receiver = spawn(`./${this.receiverName}`, [
             '--source', this.ndiSource,
