@@ -168,7 +168,6 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
             this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
 
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_ndiReceiver ] Receiver Started`);
             this.showGStreamer(1000);
         }
 
@@ -176,9 +175,12 @@ class NDI_Receiver_v4 extends EventEmitter {
         {
             this.ndiStatus = 'streaming';
             this.settings.put('ndpi_status_ndi', this.ndiStatus);
-            this.secondsInactive = 0;
-        }
 
+            if (this.secondsInactive >= 60)
+            { this.showGStreamer(); }
+
+            this.secondsInactive = 0; this.showChromium_PreTerm()
+        }
     }
 
     async showGStreamer(delay = 1000) {
@@ -208,15 +210,57 @@ class NDI_Receiver_v4 extends EventEmitter {
     }
 
     /**
+     * ---
+     * 
+     * **_Step 1 of 2_** ⎯ Call this function before terminating the NDI® Receiver
+     * 
+     * **1.1** ⎯ Fade Volume to _0_
+     * 
+     * **1.2** ⎯ Minimize GStreamer
+     * 
+     * **@async**
+     * 
+     */
+    async showChromium_PreTerm() {
+        await Promise.all([
+            func.fadeVolume(0, `${path.basename(__filename)} softClose()`),
+            func.minimizeWindow_NDI()
+        ]);
+    }
+
+    /**
+     * ---
+     * 
+     * **_Step 2 of 2_** ⎯ Call this function after terminating the NDI® Receiver
+     * 
+     * **2.1** ⎯ Raise Window **Chromium**
+     * 
+     * **2.2** ⎯ Activate Window **Chromium**
+     * 
+     * **2.3** ⎯ Launch Picom (Default: false)
+     * 
+     * **@async**
+     * 
+     * @param {boolean} picom >**picom**: Launch Picom? (Default: false)
+     */
+    async showChromium_PostTerm(picom = false) {
+        await func.raiseWindow_Chromium();
+        await func.activateWindow_Chromium();
+        if (picom)
+        {
+            setTimeout(() => {
+                func.launchPicom();
+            }, 1000);
+        }
+    }
+
+    /**
      * @async
      * Kill the NDI Receiver without resetting the target source.
      * To reactivate the source, call 'thisModule.connect();'
      */
     async softClose() {
-        await Promise.all([
-            func.fadeVolume(0, `${path.basename(__filename)} softClose()`),
-            func.minimizeWindow_NDI()
-        ]);
+        await this.showChromium_PreTerm();
 
         if (this.receiver)
         {
@@ -226,8 +270,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             });
         }
         
-        await func.raiseWindow_Chromium();
-        await func.activateWindow_Chromium();
+        await this.showChromium_PostTerm(false);
     }
     
     /**
@@ -237,10 +280,7 @@ class NDI_Receiver_v4 extends EventEmitter {
     async close() {
         this.enabled = false;
         
-        await Promise.all([
-            func.fadeVolume(0, `${path.basename(__filename)} close()`),
-            func.minimizeWindow_NDI()
-        ]);
+        await this.showChromium_PreTerm()
 
         if (this.receiver)
         {
@@ -270,15 +310,8 @@ class NDI_Receiver_v4 extends EventEmitter {
             });
         }
 
+        await this.showChromium_PostTerm(true);
         this.emit('close');
-
-        await func.raiseWindow_Chromium();
-
-        await func.activateWindow_Chromium();
-
-        setTimeout(() => {
-            func.launchPicom();
-        }, 1000);
     }
 
     logInfo(data) {
@@ -332,7 +365,7 @@ class NDI_Receiver_v4 extends EventEmitter {
         });
     }
 
-    processInactiveStream() {
+    async processInactiveStream() {
         switch(this.secondsInactive)
         {
             case 2:
@@ -362,6 +395,8 @@ class NDI_Receiver_v4 extends EventEmitter {
                 break;
             case 60:
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
+                await this.showChromium_PreTerm();
+                await this.showChromium_PostTerm(true);
                 return;
                 break;
             default:
