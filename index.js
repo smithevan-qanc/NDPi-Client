@@ -153,8 +153,8 @@ class NDPi {
             if (this.service_chromium) { await this.service_chromium.close(); }
             if (this.server_api) { this.server_api.close(); }
 
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ] Updated API/Display Server PORT.`);
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ] Restarting API/Display Server.`);
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ] Updated API Server PORT.`);
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ] Restarting API Server.`);
 
             setTimeout(() => {
                 this.startApi();
@@ -349,17 +349,23 @@ class NDPi {
         if (source !== this.targetSource)
         { this.targetSource = source; }
 
-        const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
+        // const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
 
         this.ndiReceiver.forEach((receiver, key) => {
             if (key !== source)
             { receiver.close(); }
         });
 
-        this.ndiReceiver.set(source, new NDI_Receiver_v4(this.settings, this.server_api).once('killed', (activeSource) => {
-            if (activeSource)
-            { this._removeFromSet(activeSource.toString()); }
-        }));
+        this.ndiReceiver.set(
+            source,
+            new (require('./service/client_ndiReceiver.js'))(
+                this.settings,
+                this.server_api
+            ).once('killed', (activeSource) => {
+                if (activeSource)
+                { this._removeFromSet(activeSource.toString()); }
+            })
+        );
     }
 
     _removeFromSet(sourceName = '') {
