@@ -6,8 +6,8 @@ if [ "$LOGNAME" != "root" ]; then
     exit 1
 fi
 
-_OUTPUT_NAME="ndi_receiver_v5"
-_SOURCE_CODE="ndi_receiver_v5.cpp"
+_OUTPUT_NAME="ndi_receiver_v4"
+_SOURCE_CODE="ndi_receiver_v4.cpp"
 _HOME="/home/ndpi-client"
 
 cd $_HOME/ndpi/ndi_receiver_v3__NDI6
@@ -16,7 +16,7 @@ rm -f $_OUTPUT_NAME
 
 if ! g++ \
     -o $_OUTPUT_NAME $_SOURCE_CODE \
-    $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0 webkit2gtk-4.1) \
+    $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0) \
     -I"include" \
     -ldl \
     -std=c++11 \

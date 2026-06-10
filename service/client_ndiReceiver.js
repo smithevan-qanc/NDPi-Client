@@ -58,6 +58,13 @@ class NDI_Receiver_v4 extends EventEmitter {
             // 100 = fastest  
             // 101 = best     
 
+        fsData.on('ndi_receiver_scale_method', async (data) => {
+            await this.softClose();
+            this.ndiScaleMethod = String(data || '').trim() || 'bilinear';
+            this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
+            this.connect();
+        });
+        this.ndiScaleMethod = this.settings.get('ndi_receiver_scale_method') || 'bilinear';
         
         this.ndiActiveSource = null;
         this.ndiConnectedAt = null;
@@ -97,9 +104,10 @@ class NDI_Receiver_v4 extends EventEmitter {
         }
 
         this.receiver = spawn(`./${this.receiverName}`, [
-            '--source', this.ndiSource,
-            '--bandwidth', this.ndiBandwidth,
+            '--source',       this.ndiSource,
+            '--bandwidth',    this.ndiBandwidth,
             '--color-format', this.ndiColorFormat,
+            '--scale-method', this.ndiScaleMethod,
             //'--framesync'
         ], {
             cwd: this.receiverDirectory,
@@ -270,9 +278,10 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         if (this.receiver)
         {
-            await new Promise((resolve) => {
+            await new Promise(async (resolve) => {
                 this.receiver.once('exit', () => { resolve(); });
-                this.receiver.kill('SIGTERM');
+                // this.receiver.kill('SIGTERM');
+                await func.exe(`killall ${this.receiverName}`);
             });
             this.receiver = null;
         }
