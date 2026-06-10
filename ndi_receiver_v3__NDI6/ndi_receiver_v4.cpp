@@ -260,28 +260,6 @@ private:
         //std::cout << "Display_Resolution " << display_width << "x" << display_height << " (Fallback)" << std::endl;
     }
     
-    // Calculate scaled dimensions that maintain aspect ratio while fitting in display bounds
-    void calculateScaledDimensions(int source_w, int source_h, int& out_w, int& out_h) {
-        if (source_w <= 0 || source_h <= 0) {
-            out_w = display_width;
-            out_h = display_height;
-            return;
-        }
-        
-        double source_aspect = (double)source_w / (double)source_h;
-        double display_aspect = (double)display_width / (double)display_height;
-        
-        if (source_aspect < display_aspect) {
-            // Source is wider (more landscape) - fit to display width
-            out_w = display_width;
-            out_h = (int)((double)display_width / source_aspect);
-        } else {
-            // Source is taller (more portrait) or same aspect - fit to display height
-            out_h = display_height;
-            out_w = (int)((double)display_height * source_aspect);
-        }
-    }
-    
 public:
     NDIReceiver(
         NDIlib_recv_bandwidth_e bandwidth = NDIlib_recv_bandwidth_max,
@@ -461,14 +439,9 @@ public:
         
         double fps = (double)framerate_n / (double)framerate_d;
         
-        // Calculate scaled dimensions that maintain aspect ratio
-        int scaled_width, scaled_height;
-        calculateScaledDimensions(width, height, scaled_width, scaled_height);
-        
         // Log the format change
         std::cout << "Display_Resolution^"    << display_width << "x" << display_height << std::endl;
         std::cout << "NDI_Source_Resolution^" << width << "x" << height << std::endl;
-        std::cout << "Scaled_Output_Resolution^" << scaled_width << "x" << scaled_height << std::endl;
         std::cout << "NDI_Source_Framerate^"  << fps << std::endl;
         std::flush(std::cout);
         
@@ -492,11 +465,11 @@ public:
         // - queue max-size-buffers=1: minimal buffering
         // - leaky=downstream: drop frames if backed up rather than buffering
         // - sync=false: don't wait for clock sync
-        // - videoscale maintains aspect ratio
+        //"caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
         char pipeline_str[1024];
         snprintf(pipeline_str, sizeof(pipeline_str),
             "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
-            "caps=video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/%d ! "
+            "caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
             "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
             "videoconvert ! "
             "videoscale method=%s add-borders=false ! "
@@ -507,7 +480,7 @@ public:
             "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
             width, height, framerate_n, framerate_d,
             scale_method.c_str(),
-            scaled_width, scaled_height);
+            display_width, display_height);
             
         GError *error = nullptr;
         pipeline = gst_parse_launch(pipeline_str, &error);
@@ -560,15 +533,10 @@ public:
         actual_comp_is_hevc = is_hevc;
 
         double fps = (double)framerate_n / (double)framerate_d;
-        
-        // Calculate scaled dimensions that maintain aspect ratio
-        int scaled_width, scaled_height;
-        calculateScaledDimensions(width, height, scaled_width, scaled_height);
 
         // Log the format change
         std::cout << "Display_Resolution^"      << display_width << "x" << display_height << std::endl;
         std::cout << "NDI_Source_Resolution^"   << width << "x" << height << std::endl;
-        std::cout << "Scaled_Output_Resolution^" << scaled_width << "x" << scaled_height << std::endl;
         std::cout << "NDI_Source_Framerate^"    << fps << std::endl;
         std::cout << "NDI_Source_Compression^"  << (is_hevc ? "H.265/HEVC" : "H.264") << std::endl;
         std::flush(std::cout);
@@ -599,7 +567,7 @@ public:
             video_caps,
             parse_elem, decode_elem,
             scale_method.c_str(),
-            scaled_width, scaled_height);
+            display_width, display_height);
 
         GError *error = nullptr;
         comp_pipeline = gst_parse_launch(pipeline_str, &error);
