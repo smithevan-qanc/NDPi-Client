@@ -271,7 +271,7 @@ private:
         double source_aspect = (double)source_w / (double)source_h;
         double display_aspect = (double)display_width / (double)display_height;
         
-        if (source_aspect > display_aspect) {
+        if (source_aspect < display_aspect) {
             // Source is wider (more landscape) - fit to display width
             out_w = display_width;
             out_h = (int)((double)display_width / source_aspect);
