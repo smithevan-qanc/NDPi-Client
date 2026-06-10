@@ -961,7 +961,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string version = "NDPi Receiver [GStreamer] (4.0.3)";
+    std::string version = "NDPi Receiver [GStreamer] (4.0.4)";
     std::string source_name = "";
     NDIlib_recv_bandwidth_e bandwidth = NDIlib_recv_bandwidth_max;
     NDIlib_recv_color_format_e color_format = NDIlib_recv_color_format_fastest;
