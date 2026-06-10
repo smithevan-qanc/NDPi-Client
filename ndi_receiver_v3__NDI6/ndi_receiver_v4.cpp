@@ -496,7 +496,7 @@ public:
         char pipeline_str[1024];
         snprintf(pipeline_str, sizeof(pipeline_str),
             "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
-            "caps=video/x-raw,format=NV12,width=%d,height=%d,framerate=%d/%d ! "
+            "caps=video/x-raw,format=YUY2,width=%d,height=%d,framerate=%d/%d ! "
             "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
             "videoconvert ! "
             "videoscale method=%s add-borders=false ! "
