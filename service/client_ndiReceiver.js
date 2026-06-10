@@ -365,6 +365,9 @@ class NDI_Receiver_v4 extends EventEmitter {
                             this.processInactiveStream();
                         }
                         break;
+                    case 'Scaled_Output_Resolution':
+                        log(`${KeyValues[0]} = ${KeyValues[1]}`);
+                        break;
                     case 'WebKit_Overlay':
                         log(`${KeyValues[0]} = ${KeyValues[1]}`);
                         break;
