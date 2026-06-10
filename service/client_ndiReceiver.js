@@ -30,11 +30,17 @@ class NDI_Receiver_v4 extends EventEmitter {
 
 
         fsData.on('ndi_receiver_bandwidth', async (data) => {
-            await this.softClose();
+            if (this.receiver)
+            { await func.exe(`killall -s SIGKILL ${this.receiverName}`); }
+
             this.ndiBandwidth = String(data || '').trim() || '0';
             this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
-            await func.wait(1000);
-            this.connect();
+
+            if (this.receiver)
+            {
+                await func.wait(1000);
+                this.connect();
+            }
         });
         this.ndiBandwidth = this.settings.get('ndi_receiver_bandwidth') || '0';
             // -10 = metadata_only -> Receive metadata.
@@ -45,10 +51,17 @@ class NDI_Receiver_v4 extends EventEmitter {
         
 
         fsData.on('ndi_receiver_color_format', async (data) => {
-            await this.softClose();
+            if (this.receiver)
+            { await func.exe(`killall -s SIGKILL ${this.receiverName}`); }
+
             this.ndiColorFormat = String(data || '').trim() || '100';
             this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
-            this.connect();
+
+            if (this.receiver)
+            {
+                await func.wait(1000);
+                this.connect();
+            }
         });
         this.ndiColorFormat = this.settings.get('ndi_receiver_color_format') || '100';
             //   0 = BGRX_BGRA
@@ -59,10 +72,17 @@ class NDI_Receiver_v4 extends EventEmitter {
             // 101 = best     
 
         fsData.on('ndi_receiver_scale_method', async (data) => {
-            await this.softClose();
+            if (this.receiver)
+            { await func.exe(`killall -s SIGKILL ${this.receiverName}`); }
+
             this.ndiScaleMethod = String(data || '').trim() || 'bilinear';
             this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
-            this.connect();
+
+            if (this.receiver)
+            {
+                await func.wait(1000);
+                this.connect();
+            }
         });
         this.ndiScaleMethod = this.settings.get('ndi_receiver_scale_method') || 'bilinear';
         
@@ -98,7 +118,6 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_connected_time', '');
             this.settings.put('ndpi_status_ndi_source_framerate', '');
             this.settings.put('ndpi_status_ndi_source_resolution', '');
-            await func.exe(`killall ${this.receiverName}`);
             process.nextTick(() => { this.emit('close'); });
             return;
         }
@@ -156,7 +175,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_resolution', '');
 
             this.receiver = null;
-            
+
             if (signal == 'SIGKILL')
             { this.emit('killed'); }
         });
