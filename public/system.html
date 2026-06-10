@@ -234,8 +234,7 @@
 
 <body>
     <div class="main">
-        <div class="card">
-            <h2>NDI Source</h2>
+        <div class="card"> <h2>NDI Source</h2>
             <div class="flex-column">
                 <select id="source_selection">
                     <option value="none">No Source</option>
@@ -244,8 +243,7 @@
             </div>
             <div class="flex-column" id="Source"></div>
         </div>
-        <div class="card">
-            <h2>Connected TV Controls</h2>
+        <div class="card"> <h2>TV Control (CEC)</h2>
             <div class="flex-row">
                 <div class="flex-column">
                     <button id="tv_power_on">
@@ -292,11 +290,10 @@
             </div>
             <div class="flex-column" id="CEC"></div>
         </div>
-        <div class="card">
-            <h2>Receiver Settings</h2>
+        <div class="card"> <h2>Receiver Settings</h2>
             <div class="flex-column" id="Receiver"></div>
         </div>
-        <div class="card">
+        <div class="card"> <h2>Device Settings</h2>
             <div class="flex-column" id="Device"></div>
             <div class="flex-column">
                 <div class="flex-row">
@@ -307,12 +304,10 @@
                 <button class="red" id="device_shutdown">SHUTDOWN Device</button>
             </div>
         </div>
-        <div class="card">
-            <h2>Display Resolution Settings</h2>
+        <div class="card"> <h2>Display Resolution Settings</h2>
             <div class="flex-column" id="Display_Resolution"></div>
         </div>
-        <div class="card">
-            <h2>Overlay Image</h2>
+        <div class="card"> <h2>Overlay Image</h2>
             <div class="flex-row">
                 <input id="overlay_upload" type="file" accept=".jpg, .png, .svg" title="Upload Image"/>
                 <button id="save_overlay" disabled>Set Overlay</button>
@@ -323,14 +318,10 @@
                     <img id="media_overlay_image">
                 </div>
             </div>
-        </div>
-        <div class="card">
-            <h2>Backend Settings</h2>
-            <div class="flex-column" id="Backend"></div>
-        </div>
-        <div class="card">
-            <h2>Other Settings</h2>
             <div class="flex-column" id="settings"></div>
+        </div>
+        <div class="card"> <h2>Backend Settings</h2>
+            <div class="flex-column" id="Backend"></div>
         </div>
     </div>
 </body>
