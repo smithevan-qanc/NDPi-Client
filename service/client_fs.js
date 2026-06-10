@@ -276,9 +276,9 @@ class FileSystemMonitor extends EventEmitter {
                 key: "ndi_receiver_scale_method",
                 value: `bilinear`,
                 options: [
-                    [ 'Nearest',  'nearest'  ],
-                    [ 'Linear',   'linear'   ],
-                    [ 'Cubic',    'cubic'    ],
+                    // [ 'Nearest',  'nearest'  ],
+                    // [ 'Linear',   'linear'   ],
+                    // [ 'Cubic',    'cubic'    ],
                     [ 'Lanczos',  'lanczos'  ],
                     [ 'Bilinear', 'bilinear' ],
                 ],

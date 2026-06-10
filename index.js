@@ -378,11 +378,12 @@ class NDPi {
     async startNdiReceiver(source = 'none') {
         if (source !== this.targetSource)
         { this.targetSource = source; }
-
+        
+        await this._closeNdiReceiver();
+        
         if (source == 'none')
         {
-            await this._closeNdiReceiver();
-            return
+            return;
             // if (this.ndiReceiver.size >= 1)
             // { this.ndiReceiver.forEach((receiver, key) => { receiver.close(); }); }
             // return;
@@ -416,12 +417,7 @@ class NDPi {
 
     async _closeNdiReceiver() {
         if (this.ndiReceiver)
-        {
-            await this.ndiReceiver.close();
-            return;
-        }
-        else
-        { return; }
+        { await this.ndiReceiver.close(); }
         // for (const receiver of this.ndiReceiver)
         // { await receiver.close(); }
     }

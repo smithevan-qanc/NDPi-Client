@@ -472,6 +472,20 @@ public:
         std::cout << "NDI_Source_Framerate^"  << fps << std::endl;
         std::flush(std::cout);
         
+        // avdec_h265 -  libav HEVC (High Efficiency Video Coding) decoder
+        // video/x-h265
+
+        // "h265parse ! avdec_h265 ! videoconvert ! "
+        // "h264parse ! avdec_h264 ! videoconvert ! "
+            // const char* parse_elem = is_hevc ? "h265parse" : "h264parse";
+            // const char* decode_elem = is_hevc ? "avdec_h265" : "avdec_h264";
+
+        // "caps=video/x-h265,stream-format=byte-stream,alignment=au ! "
+        // "caps=video/x-h264,stream-format=byte-stream,alignment=au ! "
+            // const char* video_caps  = is_hevc
+            //     ? "video/x-h265,stream-format=byte-stream,alignment=au"
+            //     : "video/x-h264,stream-format=byte-stream,alignment=au";
+
         // Create GStreamer pipeline with autovideosink - OPTIMIZED FOR LOW LATENCY
         // - queue max-size-buffers=1: minimal buffering
         // - leaky=downstream: drop frames if backed up rather than buffering
