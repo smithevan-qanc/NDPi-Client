@@ -640,7 +640,7 @@ class FileSystemMonitor extends EventEmitter {
             if (this.ipPollEnable)
             {
                 this.#ipPoll = null;
-                this.#updatePoll = setTimeout(() => {
+                this.#ipPoll = setTimeout(() => {
                     this.pollIp();
                 }, this.ipPollInterval);
             }
