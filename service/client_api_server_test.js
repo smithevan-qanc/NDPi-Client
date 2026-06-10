@@ -426,7 +426,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         //     catch {}
         //     finally { this.ws_conn_system.delete(client); }
         // }
-        this.ws_conn_system.close((err) => {
+        this.ws_serv_system.close((err) => {
             if (err)
             { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] System GUI WebSocket`, err); }
             else
@@ -439,7 +439,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         //     catch {}
         //     finally { this.ws_conn_sources.delete(client); }
         // }
-        this.ws_conn_sources.close((err) => {
+        this.ws_serv_sources.close((err) => {
             if (err)
             { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] NDI Source WebSocket`, err); }
             else
