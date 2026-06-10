@@ -496,7 +496,7 @@ public:
         char pipeline_str[1024];
         snprintf(pipeline_str, sizeof(pipeline_str),
             "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
-            "caps=video/x-h265,stream-format=byte-stream,alignment=au ! "
+            "caps=video/x-h265,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
             "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
             "h265parse ! avdec_h265 ! videoconvert ! "
             "videoscale method=%s add-borders=false ! "
@@ -505,7 +505,7 @@ public:
             "appsrc name=audio_src format=time is-live=true block=false do-timestamp=true "
             "caps=audio/x-raw,format=S16LE,channels=2,rate=48000,layout=interleaved ! "
             "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
-            // width, height, framerate_n, framerate_d,
+            width, height, framerate_n, framerate_d,
             scale_method.c_str(),
             scaled_width, scaled_height);
             
