@@ -1039,7 +1039,7 @@ const { exec, spawn } = require('node:child_process');
                 });
             });
         }
-checkVersion()
+        
         /**
          *  **This function checks for the latest version by version number.**
          * 
@@ -1104,6 +1104,7 @@ module.exports = {
     checkCecCompliance,
     waitForNetwork,
     wait,
+    exe,
 
     setNdi,
     fadeVolume,
