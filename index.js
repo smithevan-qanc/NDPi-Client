@@ -536,11 +536,13 @@ async function quitNDPi(signal, exit = true) {
     await index._killNdiReceiver();
 
     console.log('*** 🛑 SHUTDOWN ⎯ 2');
-    try { clearInterval(index.ndpiServerStatusUpdate); } catch {}
+    try { clearInterval(index.ndpiServerStatusUpdate); }
+    catch {}
     finally { index.ndpiServerStatusUpdate = null; }
 
     console.log('*** 🛑 SHUTDOWN ⎯ 3');
-    try { clearTimeout(index.lcdDisplayRestartTimer); } catch {}
+    try { clearTimeout(index.lcdDisplayRestartTimer); }
+    catch {}
     finally { index.lcdDisplayRestartTimer = null; }
 
     console.log('*** 🛑 SHUTDOWN ⎯ 4');
@@ -566,7 +568,9 @@ async function quitNDPi(signal, exit = true) {
     console.log('*** 🛑 SHUTDOWN ⎯ 9');
     // try { await index.settings.close(); }
     // catch {}
-    await index._closeFsData();
+    index._closeFsData();
+
+    await func.wait(1000);
 
     console.log('Memory:', process.availableMemory());
     console.log(process.getActiveResourcesInfo());
@@ -609,8 +613,13 @@ process.on('unhandledRejection', (reason) => {
     { process.exit(1); }
 });
 
-process.on('SIGTERM', () => quitNDPi('SIGTERM'));
-process.on('SIGINT',  () => quitNDPi('SIGINT'));
+process.on('SIGTERM', async () => {
+    await quitNDPi('SIGTERM');
+});
+
+process.on('SIGINT', async () => {
+    await quitNDPi('SIGINT');
+});
 
 process.on('exit', (code) => {
     console.info(`[ EXIT CODE: ${code} ]`);

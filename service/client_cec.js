@@ -43,7 +43,6 @@ class CecController extends EventEmitter {
         
         this.proc.on('exit', (code, signal) => {
             this.isReady = false;
-            this.proc = null;
 
             if (this.enabled)
             { this._scheduleRestart() }
@@ -59,13 +58,15 @@ class CecController extends EventEmitter {
                 }
             }
 
+            this.proc = null;
+
             console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited', `[ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
             
         });
-        this.proc.on('error', () => {
-            this.isReady = false;
-            this._scheduleRestart();
-        });
+        // this.proc.on('error', () => {
+        //     this.isReady = false;
+        //     this._scheduleRestart();
+        // });
 
         if (this.timeoutTimer)
         { return; }
