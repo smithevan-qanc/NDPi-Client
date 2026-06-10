@@ -307,7 +307,9 @@
         <div class="card"> <h2>Display Resolution Settings</h2>
             <div class="flex-column" id="Display_Resolution"></div>
         </div>
-        <div class="card"> <h2>Overlay Image</h2>
+        <div class="card"> <h2 hidden>Overlay Image</h2>
+            <div class="flex-column" id="settings"></div>
+            <h2>Overlay Image</h2>
             <div class="flex-row">
                 <input id="overlay_upload" type="file" accept=".jpg, .png, .svg" title="Upload Image"/>
                 <button id="save_overlay" disabled>Set Overlay</button>
@@ -318,7 +320,6 @@
                     <img id="media_overlay_image">
                 </div>
             </div>
-            <div class="flex-column" id="settings"></div>
         </div>
         <div class="card"> <h2>Backend Settings</h2>
             <div class="flex-column" id="Backend"></div>
