@@ -254,6 +254,11 @@ class NDPi {
         });
     }
 
+    async _closeApi() {
+        if (this.server_api)
+        { await this.server_api.close(); }
+    }
+
     /**
      * START BONJOUR MDNS BROADCAST
      */
@@ -471,8 +476,7 @@ async function quitNDPi(signal, exit = true) {
     catch {}
 
     console.log('*** 🛑 SHUTDOWN ⎯ 8');
-    try { await index.server_api.close(); }
-    catch {}
+    await index._closeApi();
 
     console.log('*** 🛑 SHUTDOWN ⎯ 9');
     try { await index.settings.close(); }
