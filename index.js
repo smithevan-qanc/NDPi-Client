@@ -399,6 +399,10 @@ class NDPi {
 
         this.ndiReceiver = new (require('./service/client_ndiReceiver.js'))(this.settings, this.server_api);
 
+        this.ndiReceiver.on('close', () => {
+            this.ndiReceiver = null;
+        });
+
         // this.ndiReceiver.set(
         //     source,
         //     new (require('./service/client_ndiReceiver.js'))(
@@ -420,6 +424,33 @@ class NDPi {
         { await this.ndiReceiver.close(); }
         // for (const receiver of this.ndiReceiver)
         // { await receiver.close(); }
+    }
+
+    async _killNdiReceiver() {
+        return new Promise((resolve) => {
+            if (this.ndiReceiver)
+            {
+                let autoResolve = setTimeout(() => {
+                    resolve();
+                }, 5000);
+
+                this.ndiReceiver.once('killed', () => {
+                    this.ndiReceiver = null;
+                    clearTimeout(autoResolve);
+                    resolve();
+                });
+
+                if (this.ndiReceiver.receiver)
+                { this.ndiReceiver.receiver.kill('SIGKILL'); }
+                else
+                {
+                    clearTimeout(autoResolve);
+                    resolve();
+                }
+            }
+            else
+            { resolve(); }
+        });
     }
     // async softCloseReceivers() {
     //     for (const receiver of this.ndiReceiver)
@@ -502,7 +533,7 @@ async function quitNDPi(signal, exit = true) {
     console.log('*** 🛑 SHUTDOWN ⎯ 1');
     // if (index.ndiReceiver.size >= 1)
     // { try { await index.softCloseReceivers(); } catch {} }
-    await index._closeNdiReceiver();
+    await index._killNdiReceiver();
 
     console.log('*** 🛑 SHUTDOWN ⎯ 2');
     try { clearInterval(index.ndpiServerStatusUpdate); } catch {}

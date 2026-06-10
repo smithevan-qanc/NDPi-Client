@@ -139,7 +139,6 @@ class NDI_Receiver_v4 extends EventEmitter {
         });
 
         this.receiver.on('close', (code, signal) => {
-            // this.emit('killed', this.ndiActiveSource);
 
             this.ndiActiveSource = null;
             this.settings.put('ndpi_status_ndi_source_active', '');
@@ -157,6 +156,9 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_resolution', '');
 
             this.receiver = null;
+            
+            if (signal == 'SIGKILL')
+            { this.emit('killed'); }
         });
     }
 

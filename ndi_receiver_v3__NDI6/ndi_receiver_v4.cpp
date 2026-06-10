@@ -496,9 +496,9 @@ public:
         char pipeline_str[1024];
         snprintf(pipeline_str, sizeof(pipeline_str),
             "appsrc name=ndi_src format=time is-live=true block=false do-timestamp=true max-latency=0 "
-            "caps=video/x-h265,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
+            "caps=video/x-raw,format=NV12,width=%d,height=%d,framerate=%d/%d ! "
             "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
-            "h265parse ! avdec_h265 ! videoconvert ! "
+            "videoconvert ! "
             "videoscale method=%s add-borders=false ! "
             "video/x-raw,width=%d,height=%d ! "
             "autovideosink sync=false "
