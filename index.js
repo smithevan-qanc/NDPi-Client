@@ -482,6 +482,9 @@ async function quitNDPi(signal, exit = true) {
     try { await index.settings.close(); }
     catch {}
 
+    console.log('Memory:', process.availableMemory());
+    console.log(process.getActiveResourcesInfo());
+
     if (exit)
     { process.exit(0); }
 }
