@@ -93,21 +93,28 @@ class CecController extends EventEmitter {
     }
 
     /**
+     * @async
      * Kill the CEC Adapter and close out of the module.
-     * @param {boolean} shutdown - Set as true when exiting the entire NDPi Process.
      */
-    async close(shutdown = false) {
+    async close() {
         this.enabled = false;
         this.isReady = false;
 
-        console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module');
+        return new Promise((resolve) => {
+            if (this.proc)
+            {
+                this.proc.once('exit', () => {
+                    this.proc = null;
+                    console.info(`[  CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                    resolve();
+                });
 
-        console.log('CEC sigint');
-        this.proc.kill('SIGINT');
-        console.log('CEC sigint Complete');
-
-        await new Promise((resolve) => { setTimeout(() => { resolve(); }, shutdown ? 50 : 500); });
-        return;
+                console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
+                this.proc.kill('SIGINT');
+            }
+            else
+            { resolve(); }
+        });
     }
 
     _scheduleRestart() {

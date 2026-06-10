@@ -176,6 +176,14 @@ class NDPi {
         });
     }
 
+    async _closeFsData() {
+        if (this.settings)
+        {
+            await this.settings.close();
+            this.settings = null;
+        }
+    }
+
     /**
      * LAUNCH LCD DISPLAY RENDERER
      */
@@ -256,7 +264,10 @@ class NDPi {
 
     async _closeApi() {
         if (this.server_api)
-        { await this.server_api.close(); }
+        { 
+            await this.server_api.close();
+            this.server_api = null;
+        }
     }
 
     /**
@@ -265,6 +276,14 @@ class NDPi {
     startMdns() {
         const NDPiBonjourService = require('./service/client_bonjour.js');
         this.service_bonjour = new NDPiBonjourService(this.settings);
+    }
+
+    async _closeMdns() {
+        if (this.service_bonjour)
+        {
+            await this.service_bonjour.close(true);
+            this.service_bonjour = null;
+        }
     }
 
     /**
@@ -303,30 +322,53 @@ class NDPi {
         }
     }
 
+    async _closeChromium() {
+        if (this.service_chromium)
+        {
+            await this.service_chromium.close();
+            this.service_chromium = null;
+        }
+    }
+
     /**
      * OPEN CEC CONTROLER
      */
     openCecController() {
-        const CecController = require('./service/client_cec.js');
-        this.controller_cec = new CecController(this.settings);
+        // const CecController = require('./service/client_cec.js');
+        // this.controller_cec = new CecController(this.settings);
+        this.controller_cec = new (require('./service/client_cec.js'))(this.settings);
 
         this.controller_cec.on('ready', () => {
             this.server_api.controller_cec = this.controller_cec;
+
             this.controller_cec.send('on 0');
+            
             setTimeout(() => {
                 this.controller_cec.send('as');
             }, 2000);
         });
 
-        this.controller_cec.on('event', (data) => { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_cec ]`, data); });
+        this.controller_cec.on('event', (data) => {
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_cec ]`, data);
+        });
         
-        this.controller_cec.on('error_log', (data) => { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ client_cec ][ ERROR ]`, data); });
+        this.controller_cec.on('error_log', (data) => {
+            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ client_cec ][ ERROR ]`, data);
+        });
 
         this.controller_cec.on('timeout', (data) => {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_cec ] ${String(data || 'CEC Unavailable')}`);
             this.controller_cec.close();
             this.controller_cec = null;
         });
+    }
+
+    async _closeCecController() {
+        if (this.controller_cec)
+        {
+            await this.controller_cec.close();
+            this.controller_cec = null;
+        }
     }
 
     /**
@@ -464,12 +506,14 @@ async function quitNDPi(signal, exit = true) {
     await index._closeLcdDisplay();
 
     console.log('*** 🛑 SHUTDOWN ⎯ 5');
-    try { await index.controller_cec.close(); }
-    catch {}
+    // try { await index.controller_cec.close(); }
+    // catch {}
+    await index._closeCecController();
 
     console.log('*** 🛑 SHUTDOWN ⎯ 6');
-    try { await index.service_bonjour.close(); }
-    catch {}
+    // try { await index.service_bonjour.close(); }
+    // catch {}
+    await index._closeMdns();
 
     console.log('*** 🛑 SHUTDOWN ⎯ 7');
     try { index.wsConnection_ndpiServer.close(); }
@@ -479,8 +523,9 @@ async function quitNDPi(signal, exit = true) {
     await index._closeApi();
 
     console.log('*** 🛑 SHUTDOWN ⎯ 9');
-    try { await index.settings.close(); }
-    catch {}
+    // try { await index.settings.close(); }
+    // catch {}
+    await index._closeFsData();
 
     console.log('Memory:', process.availableMemory());
     console.log(process.getActiveResourcesInfo());
