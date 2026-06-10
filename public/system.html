@@ -242,19 +242,7 @@
                 </select>
                 <!-- <button style="min-width: 0;" id="refresh_sources">Refresh</button> -->
             </div>
-        </div>
-        <div class="card">
-            <h2>Overlay Image</h2>
-            <div class="flex-row">
-                <input id="overlay_upload" type="file" accept=".jpg, .png, .svg" title="Upload Image"/>
-                <button id="save_overlay" disabled>Set Overlay</button>
-                <button class="red" id="reset_overlay_upload">Reset</button>
-            </div>
-            <div class="flex-row">
-                <div id="overlay_preview">
-                    <img id="media_overlay_image">
-                </div>
-            </div>
+            <div class="flex-column" id="Source"></div>
         </div>
         <div class="card">
             <h2>Connected TV Controls</h2>
@@ -316,16 +304,25 @@
             </div>
         </div>
         <div class="card">
-            <h2>Source Settings</h2>
-            <div class="flex-column" id="Source"></div>
-        </div>
-        <div class="card">
             <h2>Receiver Settings</h2>
             <div class="flex-column" id="Receiver"></div>
         </div>
         <div class="card">
             <h2>Display Resolution Settings</h2>
             <div class="flex-column" id="Display_Resolution"></div>
+        </div>
+        <div class="card">
+            <h2>Overlay Image</h2>
+            <div class="flex-row">
+                <input id="overlay_upload" type="file" accept=".jpg, .png, .svg" title="Upload Image"/>
+                <button id="save_overlay" disabled>Set Overlay</button>
+                <button class="red" id="reset_overlay_upload">Reset</button>
+            </div>
+            <div class="flex-row">
+                <div id="overlay_preview">
+                    <img id="media_overlay_image">
+                </div>
+            </div>
         </div>
         <div class="card">
             <h2>Backend Settings</h2>
