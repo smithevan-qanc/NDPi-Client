@@ -179,6 +179,7 @@ private:
     bool is_running = false;
     bool first_frame_logged = false;
     bool is_stalled = false;
+    std::string scale_method = "bilinear";
 
     int source_width = 0;
     int source_height = 0;
@@ -263,8 +264,9 @@ public:
     NDIReceiver(
         NDIlib_recv_bandwidth_e bandwidth = NDIlib_recv_bandwidth_max,
         NDIlib_recv_color_format_e color_format = NDIlib_recv_color_format_fastest,
-        bool enable_framesync = false
-    ) : bandwidth_setting(bandwidth), color_format_setting(color_format), use_framesync(enable_framesync) {
+        bool enable_framesync = false,
+        const std::string& scale_method_arg = "bilinear"
+    ) : bandwidth_setting(bandwidth), color_format_setting(color_format), use_framesync(enable_framesync), scale_method(scale_method_arg) {
     //NDIReceiver() {
         // Initialize GStreamer
         gst_init(nullptr, nullptr);
@@ -454,13 +456,14 @@ public:
             "caps=video/x-raw,format=UYVY,width=%d,height=%d,framerate=%d/%d ! "
             "queue max-size-buffers=1 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
             "videoconvert ! "
-            "videoscale method=bilinear add-borders=false ! "
+            "videoscale method=%s add-borders=false ! "
             "video/x-raw,width=%d,height=%d ! "
             "autovideosink sync=false "
             "appsrc name=audio_src format=time is-live=true block=false do-timestamp=true "
             "caps=audio/x-raw,format=S16LE,channels=2,rate=48000,layout=interleaved ! "
             "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
             width, height, framerate_n, framerate_d,
+            scale_method.c_str(),
             display_width, display_height);
             
         GError *error = nullptr;
@@ -539,7 +542,7 @@ public:
             "caps=%s ! "
             "queue max-size-buffers=4 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
             "%s ! %s ! videoconvert ! "
-            "videoscale method=bilinear add-borders=false ! "
+            "videoscale method=%s add-borders=false ! "
             "video/x-raw,width=%d,height=%d ! "
             "autovideosink sync=false "
             "appsrc name=audio_src format=time is-live=true do-timestamp=true "
@@ -547,6 +550,7 @@ public:
             "queue ! audioconvert ! audioresample ! autoaudiosink sync=false",
             video_caps,
             parse_elem, decode_elem,
+            scale_method.c_str(),
             display_width, display_height);
 
         GError *error = nullptr;
@@ -925,11 +929,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string version = "NDPi Receiver [GStreamer] (4.0.2)";
+    std::string version = "NDPi Receiver [GStreamer] (4.0.3)";
     std::string source_name = "";
     NDIlib_recv_bandwidth_e bandwidth = NDIlib_recv_bandwidth_max;
     NDIlib_recv_color_format_e color_format = NDIlib_recv_color_format_fastest;
     bool use_framesync = false;
+    std::string scale_method = "bilinear";
 
 
     for (int i = 1; i < argc; ++i) {
@@ -949,6 +954,10 @@ int main(int argc, char* argv[]) {
             }
         } else if (arg == "-f" || arg == "--framesync") {
             use_framesync = true;
+        } else if (arg == "-S" || arg == "--scale-method") {
+            if (i + 1 < argc) {
+                scale_method = argv[++i];
+            }
         } else if (arg == "-v" || arg == "--version") {
             std::cout << version << std::endl;
             std::cout << g_ndi.version() << std::endl;
@@ -957,25 +966,33 @@ int main(int argc, char* argv[]) {
         else if (arg == "-h" || arg == "--help") {
             std::cout << "\nUsage: " << argv[0] << "[OPTIONS]\n";
             std::cout << "[OPTIONS]:\n";
-            std::cout << "    [-s|--source [<name>]] ---------------------- NDI source name to open.               " << "\n";
-            std::cout << "    [-b|--bandwidth [<CHOICE>]] ----------------- Bandwidth ENUM  (Default: '0x7fffffff')" << "\n";
-            std::cout << "                                                  [CHOICES]                              " << "\n";
-            std::cout << "                                                  '-10'        -> metadata_only          " << "\n";
-            std::cout << "                                                  '10'         -> audio_only             " << "\n";
-            std::cout << "                                                  '0'          -> lowest                 " << "\n";
-            std::cout << "                                                  '100'        -> highest                " << "\n";
-            std::cout << "                                                  '0x7fffffff' -> max                    " << "\n";
+            std::cout << "    [-s|--source [<SOURCE NAME>]] --------------- NDI source name to open.               " << "\n";
+            std::cout << "    [-b|--bandwidth [<OPTION>]] ----------------- Bandwidth ENUM  (Default: '0x7fffffff')" << "\n";
+            std::cout << "                                                  [OPTIONS]:                             " << "\n";
+            std::cout << "                                                      '-10'        -> metadata_only      " << "\n";
+            std::cout << "                                                      '10'         -> audio_only         " << "\n";
+            std::cout << "                                                      '0'          -> lowest             " << "\n";
+            std::cout << "                                                      '100'        -> highest            " << "\n";
+            std::cout << "                                                      '0x7fffffff' -> max                " << "\n";
             std::cout << "                                                                                         " << "\n";
-            std::cout << "    [-c|--color-format [<CHOICE>]] -------------- Color Format ENUM  (Default: '100')    " << "\n";
-            std::cout << "                                                  [CHOICES]                              " << "\n";
-            std::cout << "                                                  '0'   -> BGRX_BGRA                     " << "\n";
-            std::cout << "                                                  '1'   -> UYVY_BGRA                     " << "\n";
-            std::cout << "                                                  '2'   -> RGBX_RGBA                     " << "\n";
-            std::cout << "                                                  '3'   -> UYVY_RGBA                     " << "\n";
-            std::cout << "                                                  '100' -> fastest                       " << "\n";
-            std::cout << "                                                  '101' -> best                          " << "\n";
+            std::cout << "    [-c|--color-format [<OPTION>]] -------------- Color Format ENUM  (Default: '100')    " << "\n";
+            std::cout << "                                                  [OPTIONS]:                             " << "\n";
+            std::cout << "                                                      '0'   -> BGRX_BGRA                 " << "\n";
+            std::cout << "                                                      '1'   -> UYVY_BGRA                 " << "\n";
+            std::cout << "                                                      '2'   -> RGBX_RGBA                 " << "\n";
+            std::cout << "                                                      '3'   -> UYVY_RGBA                 " << "\n";
+            std::cout << "                                                      '100' -> fastest                   " << "\n";
+            std::cout << "                                                      '101' -> best                      " << "\n";
             std::cout << "                                                                                         " << "\n";
             std::cout << "    [-f|--framesync] ---------------------------- Enable frame-synchronized receiver.    " << "\n";
+            std::cout << "    [-S|--scale-method [<OPTION>]] -------------- GStreamer videoscale method.           " << "\n";
+            std::cout << "                                                         (Default: 'bilinear')           " << "\n";
+            std::cout << "                                                  [OPTIONS]:                             " << "\n";
+            std::cout << "                                                      nearest                            " << "\n";
+            std::cout << "                                                      linear                             " << "\n";
+            std::cout << "                                                      cubic                              " << "\n";
+            std::cout << "                                                      lanczos                            " << "\n";
+            std::cout << "                                                      bilinear                           " << "\n";
             std::cout << "    [-v|--version] ------------------------------ NDPi Receiver Version.                 " << "\n";
             std::cout << "    [-h|--help] --------------------------------- This help menu.                        " << std::endl;
 
@@ -998,7 +1015,7 @@ int main(int argc, char* argv[]) {
     // }
     
     try {
-        g_receiver = new NDIReceiver(bandwidth, color_format, use_framesync);
+        g_receiver = new NDIReceiver(bandwidth, color_format, use_framesync, scale_method);
         
         //if (argc > 1) {
         if (!source_name.empty()) {
