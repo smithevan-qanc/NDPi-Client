@@ -78,7 +78,7 @@ server._ws.onmessage = (message) => {
                     break;
                     return;
 
-                case 'ndpi_status_ndi':
+                case 'ndpi_status_ndi_status':
                     if (output == 'idle' || output == 'stalled')
                     {
                         setTimeout(() => {

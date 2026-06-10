@@ -82,9 +82,24 @@ server._ws.onmessage = (message) => {
             
             if (!document.getElementById(`__${id}`))
             {
+                let fieldName = '';
+                if (String(id).includes('ndpi_status_'))
+                { fieldName = String(id.split('ndpi_status_')[1]).split('_').join(' '); }
+                else if (String(id).includes('ndi_receiver_'))
+                { fieldName = String(id.split('ndi_receiver_')[1]).split('_').join(' '); }
+                else if (String(id).includes('output_display_'))
+                { fieldName = String(id.split('output_display_')[1]).split('_').join(' '); }
+                else if (String(id).includes('ndpi_'))
+                { fieldName = String(id.split('ndpi_')[1]).split('_').join(' '); }
+                else if (String(id).includes('device_'))
+                { fieldName = String(id.split('device_')[1]).split('_').join(' '); }
+                else
+                { fieldName = String(id.split('_').join(' ')); }
+
                 const newSetting = document.createElement('div');
                 newSetting.id = `__${id}`;
-                newSetting.innerHTML = `<div id="label__${id}" class="div-label">${String(id.split('_').join(' '))}</div>`
+
+                newSetting.innerHTML = `<div id="label__${id}" class="div-label">${fieldName}</div>`
                 document.getElementById(object.group ? object.group : 'settings').appendChild(newSetting);
             }
 

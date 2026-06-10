@@ -489,7 +489,7 @@ class NDPi {
         status.ndiInfo.displayResolution = this.settings.get('output_display_resolution_current');
         status.ndiInfo.displayName = this.settings.get('output_display_framerate_current');
         status.ndiInfo.connectedAt = this.settings.get('ndpi_status_ndi_source_connected_time');
-        status.status = this.settings.get('ndpi_status_ndi');
+        status.status = this.settings.get('ndpi_status_ndi_status');
         status.systemStats = {
             cpu: 0,
             memory: { used: 0, total: 0, percent: 0 },

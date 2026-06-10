@@ -359,7 +359,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         else
         { updateData.type = `show-${displayMode}`; }
 
-        if (this.settings.get('ndpi_status_ndi') === 'streaming')
+        if (this.settings.get('ndpi_status_ndi_status') === 'streaming')
         { updateData.type = 'show-ndi'; }
 
         if (sendAll)

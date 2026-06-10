@@ -50,7 +50,7 @@ class FileSystemMonitor extends EventEmitter {
             'device_id',
             'device_ip',
             'ndpi_version',
-            'ndpi_status_ndi',
+            'ndpi_status_ndi_status',
             'ndpi_status_ndi_source_target',
         ];
 
@@ -191,7 +191,7 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditExternal: false,
             },
             {
-                key: "ndpi_status_ndi", 
+                key: "ndpi_status_ndi_status", 
                 value: `idle`,
                 group: `Source`,
                 allowEditInternal: true,
@@ -420,7 +420,7 @@ class FileSystemMonitor extends EventEmitter {
             'ndi_receiver_exec',
             'local_port_number_bonjour',
             'local_port_number_api',
-            'ndpi_status_ndi',
+            'ndpi_status_ndi_status',
             'ndpi_status_ndi_source_active',
             'ndpi_status_ndi_source_connected_time',
             'ndpi_status_ndi_source_resolution',

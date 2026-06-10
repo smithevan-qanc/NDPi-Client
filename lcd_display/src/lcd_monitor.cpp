@@ -59,7 +59,7 @@ extern "C" {
 typedef struct {
     char device_name[MAX_STRING_LEN];
     char device_ip[MAX_STRING_LEN];
-    char ndpi_status_ndi[MAX_STRING_LEN];
+    char ndpi_status_ndi_status[MAX_STRING_LEN];
     char ndpi_status_ndi_source_resolution[MAX_STRING_LEN];
     char output_display_resolution_current[MAX_STRING_LEN];
     uint32_t last_update_ms;
@@ -167,9 +167,9 @@ static int parse_json_message(const char *message)
         }
     }
     
-    if (extract_json_string(message, "ndpi_status_ndi", temp, sizeof(temp))) {
-        if (strcmp(g_display_data.ndpi_status_ndi, temp) != 0) {
-            strncpy(g_display_data.ndpi_status_ndi, temp, sizeof(g_display_data.ndpi_status_ndi) - 1);
+    if (extract_json_string(message, "ndpi_status_ndi_status", temp, sizeof(temp))) {
+        if (strcmp(g_display_data.ndpi_status_ndi_status, temp) != 0) {
+            strncpy(g_display_data.ndpi_status_ndi_status, temp, sizeof(g_display_data.ndpi_status_ndi_status) - 1);
             updated = 1;
         }
     }
@@ -258,7 +258,7 @@ static void render_display(void)
     /* ---- SECTION 1: NDI Status (max 20 chars Font8) ---- */
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, "NDI Status:", &Font8, COLOR_HEADER, COLOR_BG);
     y_pos += 10;
-    truncate_string(truncated, g_display_data.ndpi_status_ndi, 20);
+    truncate_string(truncated, g_display_data.ndpi_status_ndi_status, 20);
     uint16_t ndi_color = get_ndi_status_color(truncated);
     Paint_DrawString_EN(MARGIN_LEFT, y_pos, truncated, &Font8, ndi_color, COLOR_BG);
     y_pos += 15;
@@ -395,7 +395,7 @@ int main(int argc, char *argv[])
     /* Initialize display data with defaults */
     strncpy(g_display_data.device_name, "NDPi Client", sizeof(g_display_data.device_name) - 1);
     strncpy(g_display_data.device_ip, "waiting...", sizeof(g_display_data.device_ip) - 1);
-    strncpy(g_display_data.ndpi_status_ndi, "idle", sizeof(g_display_data.ndpi_status_ndi) - 1);
+    strncpy(g_display_data.ndpi_status_ndi_status, "idle", sizeof(g_display_data.ndpi_status_ndi_status) - 1);
     g_display_data.last_update_ms = get_time_ms();
     
     /* Initial render */

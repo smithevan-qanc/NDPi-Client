@@ -101,7 +101,7 @@ class NDI_Receiver_v4 extends EventEmitter {
         { this.connect(); }
         else
         {
-            this.settings.put('ndpi_status_ndi', 'idle');
+            this.settings.put('ndpi_status_ndi_status', 'idle');
             this.settings.put('ndpi_status_ndi_source_active', '');
             this.settings.put('ndpi_status_ndi_source_connected_time', '');
             this.settings.put('ndpi_status_ndi_source_framerate', '');
@@ -113,7 +113,7 @@ class NDI_Receiver_v4 extends EventEmitter {
     async connect() {
         if (this.ndiSource.toLowerCase() === 'none')
         {
-            this.settings.put('ndpi_status_ndi', 'idle');
+            this.settings.put('ndpi_status_ndi_status', 'idle');
             this.settings.put('ndpi_status_ndi_source_active', '');
             this.settings.put('ndpi_status_ndi_source_connected_time', '');
             this.settings.put('ndpi_status_ndi_source_framerate', '');
@@ -163,7 +163,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_active', '');
 
             this.ndiStatus = 'idle';
-            this.settings.put('ndpi_status_ndi', this.ndiStatus);
+            this.settings.put('ndpi_status_ndi_status', this.ndiStatus);
 
             this.ndiConnectedAt = null;
             this.settings.put('ndpi_status_ndi_source_connected_time', '');
@@ -195,7 +195,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.ndiActiveSource = this.ndiSource;
             this.ndiStatus = 'streaming';
 
-            this.settings.put('ndpi_status_ndi', this.ndiStatus);
+            this.settings.put('ndpi_status_ndi_status', this.ndiStatus);
             this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
             this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
 
@@ -205,7 +205,7 @@ class NDI_Receiver_v4 extends EventEmitter {
         if (stdout.includes('Reconnected to:'))
         {
             this.ndiStatus = 'streaming';
-            this.settings.put('ndpi_status_ndi', this.ndiStatus);
+            this.settings.put('ndpi_status_ndi_status', this.ndiStatus);
 
             if (this.secondsInactive >= 60)
             { this.showGStreamer(); }
@@ -410,7 +410,7 @@ class NDI_Receiver_v4 extends EventEmitter {
         {
             case 2:
                 //this.ndiStatus = 'stalled';
-                this.settings.put('ndpi_status_ndi', 'stalled');
+                this.settings.put('ndpi_status_ndi_status', 'stalled');
                 return;
                 break;
             case 10:

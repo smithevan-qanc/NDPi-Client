@@ -62,7 +62,7 @@ try:
 
         device_ip = read_file('device_ip')
         ndpi_version = read_file('ndpi_version')
-        ndpi_status_ndi = read_file('ndpi_status_ndi').upper()
+        ndpi_status_ndi_status = read_file('ndpi_status_ndi_status').upper()
 
         target_source = read_file('ndpi_status_ndi_source_target').upper()
         target_src = target_source.split('(')
@@ -91,8 +91,8 @@ try:
         draw.text((10, 60), "NDI\nStatus", fill="GRAY", font=Consolas_Bold_20)
 
         # NDI Current State ----------------------------------------------------------
-        ndi_status_x = get_right_x(ndpi_status_ndi, 25)
-        draw.text((ndi_status_x, 60), ndpi_status_ndi, fill="GREEN", font=Consolas_25)
+        ndi_status_x = get_right_x(ndpi_status_ndi_status, 25)
+        draw.text((ndi_status_x, 60), ndpi_status_ndi_status, fill="GREEN", font=Consolas_25)
 
         # NDI Target Source ----------------------------------------------------------
         src_x_1 = get_centered_x(src_line_1, 25)
