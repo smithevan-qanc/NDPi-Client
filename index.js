@@ -443,29 +443,38 @@ async function quitNDPi(signal, exit = true) {
 
     index.shutdown = true;
 
+    console.log('*** 🛑 SHUTDOWN ⎯ 1');
     if (index.ndiReceiver.size >= 1)
     { try { await index.softCloseReceivers(); } catch {} }
 
+    console.log('*** 🛑 SHUTDOWN ⎯ 2');
     try { clearInterval(index.ndpiServerStatusUpdate); } catch {}
     finally { index.ndpiServerStatusUpdate = null; }
 
+    console.log('*** 🛑 SHUTDOWN ⎯ 3');
     try { clearTimeout(index.lcdDisplayRestartTimer); } catch {}
     finally { index.lcdDisplayRestartTimer = null; }
 
+    console.log('*** 🛑 SHUTDOWN ⎯ 4');
     await index._closeLcdDisplay();
 
+    console.log('*** 🛑 SHUTDOWN ⎯ 5');
     try { await index.controller_cec.close(); }
     catch {}
 
+    console.log('*** 🛑 SHUTDOWN ⎯ 6');
     try { await index.service_bonjour.close(); }
     catch {}
 
+    console.log('*** 🛑 SHUTDOWN ⎯ 7');
     try { index.wsConnection_ndpiServer.close(); }
     catch {}
 
+    console.log('*** 🛑 SHUTDOWN ⎯ 8');
     try { await index.server_api.close(); }
     catch {}
 
+    console.log('*** 🛑 SHUTDOWN ⎯ 9');
     try { await index.settings.close(); }
     catch {}
 
