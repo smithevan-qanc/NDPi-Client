@@ -202,7 +202,7 @@ class FileSystemMonitor extends EventEmitter {
                 value: ``,
                 group: `Source`,
                 allowEditInternal: true,
-                allowEditExternal: true,
+                allowEditExternal: false,
             },
             {
                 key: "ndpi_status_ndi_source_active",
