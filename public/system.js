@@ -29,7 +29,11 @@ server._ws.onmessage = (message) => {
         {
             let isMultiline = false;
             let isSelection = false;
-            if (id === 'media_overlay_image')
+            if (id === 'ndpi_command_log')
+            {
+                isMultiline = true;
+            }
+            else if (id === 'media_overlay_image')
             {
                 isMultiline = true;
                 try
@@ -48,13 +52,11 @@ server._ws.onmessage = (message) => {
                     overlayPreviewEl.src = '';
                 }
             }
-
-            if (id === 'ndpi_status_ndi_source_target')
+            else if (id === 'ndpi_status_ndi_source_target')
             {
                 document.getElementById('source_selection').value = object.value || 'none';
             }
-
-            if (id === 'ndpi_version_update_available')
+            else if (id === 'ndpi_version_update_available')
             {
                 const updateButtons = {
                     check: document.getElementById('check_device_update'),
