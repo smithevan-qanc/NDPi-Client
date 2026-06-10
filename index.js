@@ -213,16 +213,16 @@ class NDPi {
 
     async _closeLcdDisplay () {
         return new Promise((resolve) => {
-            this.lcdDisplay.once('exit', () => {
-                this.lcdDisplay = null;
-                resolve();
-            });
-
             if (this.lcdDisplay)
-            { this.lcdDisplay.kill(); }
+            {
+                this.lcdDisplay.once('exit', () => {
+                    this.lcdDisplay = null;
+                    resolve();
+                });
+                this.lcdDisplay.kill();
+            }
             else
             { resolve(); }
-            
         });
     }
 
