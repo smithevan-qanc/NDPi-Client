@@ -85,7 +85,7 @@ server._ws.onmessage = (message) => {
                 const newSetting = document.createElement('div');
                 newSetting.id = `__${id}`;
                 newSetting.innerHTML = `<div id="label__${id}" class="div-label">${String(id.split('_').join(' '))}</div>`
-                document.getElementById('settings').appendChild(newSetting);
+                document.getElementById(object.group ? object.group : 'settings').appendChild(newSetting);
             }
 
             const settingEl = document.getElementById(`__${id}`);

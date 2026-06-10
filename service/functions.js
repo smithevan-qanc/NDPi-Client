@@ -1,7 +1,7 @@
 const { setTimeout } = require('timers');
-const os = require('os');
 const net = require('net');
-const fs = require('fs');
+const fs = require('node:fs/promises');
+const os = require('node:os');
 const path = require('path');
 const { exec, spawn } = require('node:child_process');
 
