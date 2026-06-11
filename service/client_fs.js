@@ -244,6 +244,13 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditExternal: true,
             },
             {
+                key: "ndpi_status_mdns_service",
+                value: `down`,
+                group: ``,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
                 key: "ndi_receiver_bandwidth",
                 value: `0`,
                 options: [
@@ -575,7 +582,7 @@ class FileSystemMonitor extends EventEmitter {
         });
 
         this.drmMonitor.on('close', () => {
-            console.info(`[ CLOSED ][ ${path.basename(__filename).split('.')[0]} ] DRM Monitor`)
+            console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] DRM Monitor`)
             try { clearTimeout(this.debounceTimerDrmEvents) } catch {}
         });
     }
@@ -630,14 +637,14 @@ class FileSystemMonitor extends EventEmitter {
             {
                 this.drmMonitor.once('exit', () => {
                     this.drmMonitor = null;
-                    console.info( `[  CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                    console.info( `[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
                     resolve();
                 });
                 this.drmMonitor.kill('SIGINT');
             }
             else
             {
-                console.info( `[  CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                console.info( `[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
                 resolve();
             }
         });

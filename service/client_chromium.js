@@ -94,7 +94,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
             });
         });
 
-        console.info(`[  CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+        console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
         return;
     }
 }

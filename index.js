@@ -239,7 +239,7 @@ class NDPi {
      * START API
      */
     startApi() {
-        const NDPiCommandServer_Client = require('./service/client_api_server_test.js');
+        const NDPiCommandServer_Client = require('./service/client_api_server.js');
         this.server_api = new NDPiCommandServer_Client(this.settings);
 
         this.server_api.on('online', () => {
@@ -282,7 +282,7 @@ class NDPi {
     async _closeMdns() {
         if (this.service_bonjour)
         {
-            await this.service_bonjour.close(true);
+            await this.service_bonjour.close();
             this.service_bonjour = null;
         }
     }
@@ -382,48 +382,18 @@ class NDPi {
         await this._closeNdiReceiver();
         
         if (source == 'none')
-        {
-            return;
-            // if (this.ndiReceiver.size >= 1)
-            // { this.ndiReceiver.forEach((receiver, key) => { receiver.close(); }); }
-            // return;
-        }
-
-
-        // const NDI_Receiver_v4 = require('./service/client_ndiReceiver.js');
-
-        // this.ndiReceiver.forEach((receiver, key) => {
-        //     if (key !== source)
-        //     { receiver.close(); }
-        // });
+        { return; }
 
         this.ndiReceiver = new (require('./service/client_ndiReceiver.js'))(this.settings, this.server_api);
 
         this.ndiReceiver.on('close', () => {
             this.ndiReceiver = null;
         });
-
-        // this.ndiReceiver.set(
-        //     source,
-        //     new (require('./service/client_ndiReceiver.js'))(
-        //         this.settings,
-        //         this.server_api
-        //     ).once('close', () => {
-        //         this._removeFromSet(source);
-        //     })
-        // );
     }
-
-    // _removeFromSet(sourceName = '') {
-    //     if (this.ndiReceiver.has(sourceName))
-    //     { this.ndiReceiver.delete(sourceName); }
-    // }
 
     async _closeNdiReceiver() {
         if (this.ndiReceiver)
         { await this.ndiReceiver.close(); }
-        // for (const receiver of this.ndiReceiver)
-        // { await receiver.close(); }
     }
 
     async _killNdiReceiver() {
@@ -452,10 +422,6 @@ class NDPi {
             { resolve(); }
         });
     }
-    // async softCloseReceivers() {
-    //     for (const receiver of this.ndiReceiver)
-    //     { await receiver.softClose(); }
-    // }
 
     /**
      * OPEN COMMUNICATION WITH NDPI HUB SERVER
@@ -510,73 +476,55 @@ let quitAttempts = 0;
 const index = new NDPi();
 
 async function shutdownDevice() {
-    await quitNDPi('SIGTERM', false);
-    setTimeout(() => {
-        exec('sudo shutdown now');
-    }, 1000);
+    await quitNDPi('SIGTERM');
+    await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
+    exec('sudo shutdown now');
 }
 
 async function rebootDevice() {
-    await quitNDPi('SIGTERM', false);
-    setTimeout(() => {
-        exec('sudo reboot');
-    }, 1000);
+    await quitNDPi('SIGTERM');
+    await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
+    exec('sudo reboot');
 }
 
-async function quitNDPi(signal, exit = true) {
+async function quitNDPi(signal) {
     const sig = signal ? `[ ${signal} ]` : '';
-
-    console.info(`[ index ]${sig} Shutting down application...`);
-
+    console.info(`[ ${path.basename(__filename).split('.')[0]} ]${sig} Exiting NDPi`);
+    
     index.shutdown = true;
 
-    console.log('*** 🛑 SHUTDOWN ⎯ 1');
-    // if (index.ndiReceiver.size >= 1)
-    // { try { await index.softCloseReceivers(); } catch {} }
+    console.log('*** SHUTDOWN ⎯ 1');
     await index._killNdiReceiver();
 
-    console.log('*** 🛑 SHUTDOWN ⎯ 2');
+    console.log('*** SHUTDOWN ⎯ 2');
     try { clearInterval(index.ndpiServerStatusUpdate); }
     catch {}
     finally { index.ndpiServerStatusUpdate = null; }
 
-    console.log('*** 🛑 SHUTDOWN ⎯ 3');
+    console.log('*** SHUTDOWN ⎯ 3');
     try { clearTimeout(index.lcdDisplayRestartTimer); }
     catch {}
     finally { index.lcdDisplayRestartTimer = null; }
 
-    console.log('*** 🛑 SHUTDOWN ⎯ 4');
+    console.log('*** SHUTDOWN ⎯ 4');
     await index._closeLcdDisplay();
 
-    console.log('*** 🛑 SHUTDOWN ⎯ 5');
-    // try { await index.controller_cec.close(); }
-    // catch {}
+    console.log('*** SHUTDOWN ⎯ 5');
     await index._closeCecController();
 
-    console.log('*** 🛑 SHUTDOWN ⎯ 6');
-    // try { await index.service_bonjour.close(); }
-    // catch {}
+    console.log('*** SHUTDOWN ⎯ 6');
     await index._closeMdns();
 
-    console.log('*** 🛑 SHUTDOWN ⎯ 7');
+    console.log('*** SHUTDOWN ⎯ 7');
     try { index.wsConnection_ndpiServer.close(); }
     catch {}
+    finally {}
 
-    console.log('*** 🛑 SHUTDOWN ⎯ 8');
+    console.log('*** SHUTDOWN ⎯ 8');
     await index._closeApi();
 
-    console.log('*** 🛑 SHUTDOWN ⎯ 9');
-    // try { await index.settings.close(); }
-    // catch {}
+    console.log('*** SHUTDOWN ⎯ 9');
     index._closeFsData();
-
-    await func.wait(1000);
-
-    console.log('Memory:', process.availableMemory());
-    console.log(process.getActiveResourcesInfo());
-
-    if (exit)
-    { process.exit(0); }
 }
 
 process.on('uncaughtException', (err) => {
@@ -615,10 +563,12 @@ process.on('unhandledRejection', (reason) => {
 
 process.on('SIGTERM', async () => {
     await quitNDPi('SIGTERM');
+    process.exit(0);
 });
 
 process.on('SIGINT', async () => {
     await quitNDPi('SIGINT');
+    process.exit(0);
 });
 
 process.on('exit', (code) => {

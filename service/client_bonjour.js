@@ -3,7 +3,6 @@ const path = require('path');
 
 class NDPiBonjourService {
     constructor(fsData) {
-
         this.service = null;
         this.settings = fsData;
 
@@ -50,6 +49,11 @@ class NDPiBonjourService {
         });
 
         this._tryPublish();
+
+        this.republishInterval = null;
+        this.republishInterval = setInterval(() => {
+            this._tryPublish();
+        }, (1 * 60) * 1000);
     }
 
     _isReady() {
@@ -87,50 +91,72 @@ class NDPiBonjourService {
 
         if (this.service) {
             await new Promise((resolve) => {
-                this.service.stop();
-                this.service = null;
-                setTimeout(() => { resolve(); }, 1500);
+                this.service.stop(() => {
+                    this.service = null;
+                    resolve();
+                });
             });
         }
-
         this.publish();
     }
 
     publish() {
+        if (!this._isReady())
+        {
+            this.settings.put('ndpi_status_bonjour_service', 'down');
+            return;
+        }
+
         const options = this._buildOptions();
-        console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Publishing Service');
 
         this.service = bonjour.publish(options);
+        this.service.start();
 
-        this.service.on('error', (err) => { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, err.message); });
+        this.service.on('up', () => {
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Service Up');
+            this.settings.put('ndpi_status_mdns_service', 'up');
+        });
+        
+        this.service.on('error', (err) => {
+            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, err);
+        });
     }
 
     /**
      * Kill the Bonjour client and close out of the module.
-     * @param {boolean} shutdown - Set as true when exiting the entire NDPi Process.
      */
-    async close(shutdown = false) {
-        console.info(
-            `[ ${path.basename(__filename).split('.')[0]} ]`,
-            'Closing Module'
-        );
+    async close() {
+        console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
+
+        try { clearInterval(this.republishInterval) }
+        catch {}
+        finally { this.republishInterval = null; }
 
         await new Promise((resolve) => {
             if (this.service)
             {
-                this.service.stop();
-                this.service = null;
-                setTimeout(() => { resolve(); }, shutdown ? 50 : 1000);
+                this.service.stop(() => {
+                    this.service = null;
+                    this.settings.put('ndpi_status_mdns_service', 'down');
+                    console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                    resolve();
+                });
             }
             else
-            { resolve(); }
+            {
+                try
+                {
+                    bonjour.unpublishAll(() => {
+                        this.settings.put('ndpi_status_mdns_service', 'down');
+                        console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                        resolve();
+                    });
+                }
+                catch { resolve(); }
+            }
         });
-
-        console.info(
-            `[ ${path.basename(__filename).split('.')[0]} ]`,
-            'Module Exited'
-        );
-        return;
+        bonjour.destroy();
+        return new Promise((resolve) => { resolve(); });
     }
 }
 

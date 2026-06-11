@@ -98,7 +98,7 @@ class CecController extends EventEmitter {
             {
                 this.proc.once('exit', () => {
                     this.proc = null;
-                    console.info(`[  CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                    console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
                     resolve();
                 });
 
