@@ -73,56 +73,44 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.__Routers();
     }
 
+    /**
+     *      Overlay Display - WebSocket Connection Handler
+     */
     __ws_Display() {
         this.ws_serv_display = new WebSocket.Server({ noServer: true });
         this.ws_conn_display = new Set();
 
-        /**
-         *      Overlay Display - WebSocket Connection Handler
-         */
         this.ws_serv_display.on('connection', (ws) =>{
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Overlay Display WebSocket connection ADDED.');
+
             this.ws_conn_display.add(ws);
 
-            console.info(
-                `[ ${path.basename(__filename).split('.')[0]} ]`,
-                'Overlay Display WebSocket connection ADDED.'
-            );
-
-            setTimeout((resolve) => {
+            setTimeout(() => {
                 this.sendUpdateToDisplay();
-            }, 500);
+            }, 200);
 
             ws.onerror = (error) => {
-                console.error(
-                    `⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`,
-                    `Overlay Display WebSocket Server`,
-                    error
-                );
+                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `Overlay Display WebSocket Server`, error);
             };
 
             ws.onclose = () => {
                 this.ws_conn_display.delete(ws);
-                console.info(
-                    `[ ${path.basename(__filename).split('.')[0]} ]`,
-                    'Overlay Display WebSocket connection REMOVED.'
-                );
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Overlay Display WebSocket connection REMOVED.');
             };
         });
     }
 
+    /**
+     *      System GUI - WebSocket Connection Handler
+     */
     __ws_System() {
         this.ws_serv_system = new WebSocket.Server({ noServer: true });
         this.ws_conn_system = new Set();
 
-        /**
-         *      System GUI - WebSocket Connection Handler
-         */
         this.ws_serv_system.on('connection', (ws) =>{
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'System GUI WebSocket connection ADDED.');
+
             this.ws_conn_system.add(ws);
-            console.info(
-                `[ ${path.basename(__filename).split('.')[0]} ]`,
-                'System GUI WebSocket connection ADDED.'
-            );
 
             ws.send(
                 JSON.stringify(Array.from(this.settings.fileMap))
@@ -136,54 +124,40 @@ class NDPiCommandServer_Client extends EventEmitter {
             };
 
             ws.onerror = (error) => {
-                console.error(
-                    `⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`,
-                    `System GUI WebSocket Server`,
-                    error
-                );
+                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `System GUI WebSocket Server`, error);
             };
 
             ws.onclose = () => {
                 this.ws_conn_system.delete(ws);
-                console.info(
-                    `[ ${path.basename(__filename).split('.')[0]} ]`,
-                    'System GUI WebSocket connection REMOVED.'
-                );
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'System GUI WebSocket connection REMOVED.');
             };
         });
     }
 
+    /**
+     *      NDI Source - WebSocket Connection Handler
+     */
     __ws_Sources() {
         this.ws_serv_sources = new WebSocket.Server({ noServer: true });
         this.ws_conn_sources = new Set();
 
-        /**
-         *      NDI Source - WebSocket Connection Handler
-         */
         this.ws_serv_sources.on('connection', (ws) =>{
-            this.ws_conn_sources.add(ws);
-            console.info(
-                `[ ${path.basename(__filename).split('.')[0]} ]`,
-                'NDI Source WebSocket connection ADDED.'
-            );
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'NDI Source WebSocket connection ADDED.');
 
-            process.nextTick(() => { this.startDiscovery();} );
+            this.ws_conn_sources.add(ws);
+
+            process.nextTick(() => {
+                this.startDiscovery();
+            });
 
             ws.onerror = (error) => {
-                console.error(
-                    `⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`,
-                    `NDI Source WebSocket Server`,
-                    error
-                );
+                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `NDI Source WebSocket Server`, error);
             };
             
             ws.onclose = async () => {
                 this.ws_conn_sources.delete(ws);
-                console.info(
-                    `[ ${path.basename(__filename).split('.')[0]} ]`,
-                    'NDI Source WebSocket connection REMOVED.'
-                );
-                await this._tryCloseDiscovery();
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'NDI Source WebSocket connection REMOVED.');
+                // await this._tryCloseDiscovery();
             };
         });
     }
@@ -364,7 +338,6 @@ class NDPiCommandServer_Client extends EventEmitter {
         });
 
         this.discoveryExec.on('exit', () => {
-            console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] Source Discovery`);
             this.discoveryExec = null;
             this._scheduleRestartDiscovery();
         });
@@ -375,25 +348,32 @@ class NDPiCommandServer_Client extends EventEmitter {
         { return; }
 
         this.restartDiscoveryTimer = setTimeout(() => {
-            this.startDiscovery();
             this.restartDiscoveryTimer = null;
+            if (!this.closing)
+            { this.startDiscovery(); }
         }, 2000);
     }
 
     async _tryCloseDiscovery() {
-        if (this.discoveryExec)
-        {
-            await new Promise((resolve) => {
+        return new Promise((resolve) => {
+            if (this.discoveryExec)
+            {
                 this.discoveryExec.once('exit', () => { resolve(); });
                 this.discoveryExec.kill('SIGTERM');
-            });
-        }
+            }
+            else
+            { resolve(); }
+        });
     }
 
     async close() {
         this.closing = true;
 
         console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
+
+        try { clearTimeout(this.restartDiscoveryTimer) }
+        catch {}
+        finally { this.restartDiscoveryTimer = null; }
 
         this.ws_serv_display.close((err) => {
             if (err)
@@ -415,10 +395,6 @@ class NDPiCommandServer_Client extends EventEmitter {
             else
             { console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] NDI Source WebSocket`); }
         });
-
-        try { clearTimeout(this.restartDiscoveryTimer) }
-        catch {}
-        finally { this.restartDiscoveryTimer = null; }
 
         await this._tryCloseDiscovery();
 
