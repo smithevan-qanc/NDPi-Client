@@ -45,28 +45,20 @@ class CecController extends EventEmitter {
             this.isReady = false;
 
             if (this.enabled)
-            { this._scheduleRestart() }
-            else
+            { this._scheduleRestart(); }
+
+            try { clearTimeout(this.timeoutTimer); }
+            catch {}
+            finally
             {
-                try { clearTimeout(this.timeoutTimer); }
-                catch {}
-                finally
-                {
-                    this.timeoutTimer = null;
-                    this.queue = [];
-                    this.debounceMap.clear();
-                }
+                this.timeoutTimer = null;
+                this.queue = [];
+                this.debounceMap.clear();
             }
 
             this.proc = null;
-
             console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited', `[ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
-            
         });
-        // this.proc.on('error', () => {
-        //     this.isReady = false;
-        //     this._scheduleRestart();
-        // });
 
         if (this.timeoutTimer)
         { return; }
@@ -111,7 +103,7 @@ class CecController extends EventEmitter {
                 });
 
                 console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
-                this.proc.kill('SIGINT');
+                this.proc.kill('SIGKILL');
             }
             else
             { resolve(); }
@@ -119,11 +111,13 @@ class CecController extends EventEmitter {
     }
 
     _scheduleRestart() {
+        if (!this.enabled)
+        { return; }
         this.restartTimer = setTimeout(() => {
             this.restartDelay = Math.min(this.restartDelay * 2, this.maxDelay);
             this.restartTimer = null;
             if (this.enabled)
-                { this.start() }
+            { this.start() }
         }, this.restartDelay);
     }
 
@@ -132,7 +126,6 @@ class CecController extends EventEmitter {
         const thisLine = String(data).split(/\r?\n/);
 
         thisLine.forEach(async (line) => {
-            
             if (this.debug) { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ DEBUG ] ${line}`); }
 
             if (line.includes('waiting for input'))
@@ -146,10 +139,8 @@ class CecController extends EventEmitter {
                     this.restartDelay = 1000;
                     this.isReady = true;
                 }
-
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ] CEC Ready`);
                 this.emit('ready');
-
                 this._flushQueue();
             }
 
