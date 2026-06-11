@@ -28,11 +28,11 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
 
-        fsData.on('device_volume', (data) => {
+        fsData.on('device_volume', async (data) => {
             if (this.receiver && typeof data === 'number')
             {
                 this.volumeSetPoint = Number(data || '255');
-                func.fadeVolume(this.volumeSetPoint, 'Auto-Adjust NDI Receiver');
+                await func.fadeVolume(this.volumeSetPoint, 'Auto-Adjust NDI Receiver');
             }
         });
         this.volumeSetPoint = Number(this.settings.get('device_volume') || '255');
