@@ -150,15 +150,14 @@ server._ws.onmessage = (message) => {
 
             document.getElementById(id).addEventListener('change', async function(e) {
                 e.preventDefault();
+                this.disabled = true;
                 const res = await sendCommand({
                     type: 'set-setting',
                     data: {
                         name: id,
                         value: this.value
                     }
-                }, false);
-                // if (res.data.message)
-                // { alert(`${res.data.message}`); }
+                }, false).catch().finally(() => { this.disabled = false; });
             });
         }
     }
@@ -186,19 +185,27 @@ sources._ws.onmessage = (message) => {
 };
 
 function addEvents() {
-    document.getElementById('tv_power_off').addEventListener('click', (e) => {
+    document.getElementById('tv_power_off').addEventListener('click', async function(e) {
         e.preventDefault();
-        sendCommand({
+        this.disabled = true;
+        const ogHTML = this.innerHTML;
+        this.innerHTML = 'Powering Off';
+        await sendCommand({
             type: 'send-cec',
             data: encodeURI('standby 0'),
         });
+        this.innerHTML = ogHTML;
     });
-    document.getElementById('tv_power_on').addEventListener('click', (e) => {
+    document.getElementById('tv_power_on').addEventListener('click', async function(e) {
         e.preventDefault();
-        sendCommand({
+        this.disabled = true;
+        const ogHTML = this.innerHTML;
+        this.innerHTML = 'Powering On';
+        await sendCommand({
             type: 'send-cec',
             data: encodeURI('on 0'),
         });
+        this.innerHTML = ogHTML;
     });
     document.getElementById('tv_volume_down').addEventListener('click', (e) => {
         e.preventDefault();
@@ -207,26 +214,30 @@ function addEvents() {
             data: encodeURI('voldown'),
         });
     });
-    document.getElementById('tv_volume_up').addEventListener('click', async (e) => {
+    document.getElementById('tv_volume_up').addEventListener('click', (e) => {
         e.preventDefault();
-        await sendCommand({
+        sendCommand({
             type: 'send-cec',
             data: encodeURI('volup'),
         });
     });
-    document.getElementById('tv_as').addEventListener('click', async (e) => {
+    document.getElementById('tv_as').addEventListener('click', async function(e) {
         e.preventDefault();
+        this.disabled = true;
         await sendCommand({
             type: 'send-cec',
             data: encodeURI('as'),
-        });
+        }, false);
+        this.disabled = false;
     });
-    document.getElementById('tv_is').addEventListener('click', async (e) => {
+    document.getElementById('tv_is').addEventListener('click', async function(e) {
         e.preventDefault();
+        this.disabled = true;
         await sendCommand({
             type: 'send-cec',
             data: encodeURI('is'),
-        });
+        }, false);
+        this.disabled = false;
     });
     document.getElementById('send_bytes').addEventListener('change', async function(e) {
         e.preventDefault();
@@ -234,7 +245,7 @@ function addEvents() {
         await sendCommand({
             type: 'send-cec',
             data: encodeURI(`${this.value}`),
-        });
+        }, false);
         this.value = '';
         this.disabled = false;
     });
@@ -244,15 +255,9 @@ function addEvents() {
         await sendCommand({
             type: 'set-source',
             data: this.value,
-        });
+        }, false);
         this.disabled = false;
     });
-    // document.getElementById('refresh_sources').addEventListener('click', async function(e) {
-    //     e.preventDefault();
-    //     this.disabled = true;
-    //     await refreshSources();
-    //     this.disabled = false;
-    // });
     uploaderEl.addEventListener('change', handleFiles);
     document.getElementById('reset_overlay_upload').addEventListener('click', (e) => {
         e.preventDefault();
@@ -261,7 +266,7 @@ function addEvents() {
     document.getElementById('save_overlay').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        const res = await sendCommand(overlayUploadCommand);
+        const res = await sendCommand(overlayUploadCommand, false);
         if (!res?.success)
         { console.error('Failed to upload overlay.', res) }
         uploaderEl.value = '';
@@ -272,7 +277,7 @@ function addEvents() {
         this.textContent = 'REBOOTING...';
         await sendCommand({
             type: 'reboot-device'
-        });
+        }, false);
     });
     document.getElementById('device_shutdown').addEventListener('click', async function(e) {
         e.preventDefault();
@@ -280,7 +285,7 @@ function addEvents() {
         this.textContent = 'SHUTTING DOWN...';
         await sendCommand({
             type: 'shutdown-device'
-        });
+        }, false);
     });
     document.getElementById('check_device_update').addEventListener('click', async function(e) {
         e.preventDefault();
@@ -288,7 +293,7 @@ function addEvents() {
         this.textContent = 'Checking For Update...';
         await sendCommand({
             type: 'check-for-update'
-        });
+        }, false);
         this.textContent = 'Check For Update';
         this.disabled = false;
     });
@@ -298,7 +303,7 @@ function addEvents() {
         this.textContent = 'UPDATING...';
         await sendCommand({
             type: 'install-update'
-        });
+        }, false);
         this.disabled = false;
     });
 }
