@@ -335,8 +335,6 @@ class NDPi {
      * OPEN CEC CONTROLER
      */
     openCecController() {
-        // const CecController = require('./service/client_cec.js');
-        // this.controller_cec = new CecController(this.settings);
         this.controller_cec = new (require('./service/client_cec.js'))(this.settings);
 
         this.controller_cec.on('ready', () => {

@@ -28,6 +28,14 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         this.ndiSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
 
+        fsData.on('device_volume', (data) => {
+            if (this.receiver && typeof data === 'number')
+            {
+                this.volumeSetPoint = Number(data || '255');
+                func.fadeVolume(this.volumeSetPoint, 'Auto-Adjust NDI Receiver');
+            }
+        });
+        this.volumeSetPoint = Number(this.settings.get('device_volume') || '255');
 
         fsData.on('ndi_receiver_bandwidth', async (data) => {
             if (this.receiver)
@@ -215,7 +223,7 @@ class NDI_Receiver_v4 extends EventEmitter {
     }
 
     async showGStreamer(delay = 1000) {
-        func.fadeVolume(255, `${path.basename(__filename)} connect(); stdout.on(data)`);
+        func.fadeVolume(this.volumeSetPoint, `${path.basename(__filename)} connect(); stdout.on(data)`);
 
         await func.wait(delay);
 
@@ -328,14 +336,14 @@ class NDI_Receiver_v4 extends EventEmitter {
                 }
 
                 this.receiver.once('exit', (code, signal) => {
-                    console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited' );
+                    console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
                     resolve();
                     return;
                 });
 
                 try 
                 {
-                    console.info( `[ ${path.basename(__filename).split('.')[0]} ]`, 'Closing Module' );
+                    console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
                     this.receiver.kill('SIGTERM');
                 }
                 catch
