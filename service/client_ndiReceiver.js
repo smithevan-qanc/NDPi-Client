@@ -32,7 +32,6 @@ class NDI_Receiver_v4 extends EventEmitter {
             if (this.receiver)
             {
                 this.volumeSetPoint = Number(data || '255');
-                console.log('fading volume');
                 await func.fadeVolume(this.volumeSetPoint, 'Auto-Adjust NDI Receiver');
             }
         });

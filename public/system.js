@@ -188,24 +188,24 @@ function addEvents() {
     document.getElementById('tv_power_off').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        const ogHTML = this.innerHTML;
-        this.innerHTML = 'Powering Off';
+        const ogTC = this.textContent;
+        this.textContent = 'Powering Off';
         await sendCommand({
             type: 'send-cec',
             data: encodeURI('standby 0'),
-        });
-        this.innerHTML = ogHTML;
+        }, false);
+        this.textContent = ogTC;
     });
     document.getElementById('tv_power_on').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        const ogHTML = this.innerHTML;
-        this.innerHTML = 'Powering On';
+        const ogTC = this.textContent;
+        this.textContent = 'Powering On';
         await sendCommand({
             type: 'send-cec',
             data: encodeURI('on 0'),
-        });
-        this.innerHTML = ogHTML;
+        }, false);
+        this.textContent = ogTC;
     });
     document.getElementById('tv_volume_down').addEventListener('click', (e) => {
         e.preventDefault();
