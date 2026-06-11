@@ -247,12 +247,10 @@ function addEvents() {
     });
     document.getElementById('source_selection').addEventListener('change', async function(e) {
         e.preventDefault();
-        this.disabled = true;
         await sendCommand({
             type: 'set-source',
             data: this.value,
-        }, false);
-        this.disabled = false;
+        });
     });
     uploaderEl.addEventListener('change', handleFiles);
     document.getElementById('reset_overlay_upload').addEventListener('click', (e) => {
