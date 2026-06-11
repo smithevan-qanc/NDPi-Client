@@ -251,16 +251,6 @@ const { exec, spawn } = require('node:child_process');
                     return response;
                     break;
                 
-                case 'focus-chromium':
-                    await focusChromium();
-                    return response;
-                    break;
-                
-                case 'focus-ndi':
-                    await focusNdi();
-                    return response;
-                    break;
-                
                 // Device
                 case 'shutdown-device':
                     try
@@ -578,174 +568,6 @@ const { exec, spawn } = require('node:child_process');
             return response;
         }
 
-
-        async function focusChromium() {
-            let focusSuccess = false;
-            let focusError = null;
-
-            console.log('trying to minimize gstreamer.');
-
-            await new Promise((resolve) => {
-                exec(`xdotool search --class 'gstreamer'`, (error, stdout, stderr) => {
-                    if (error)
-                    {
-                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, stderr.toString() || 'No Instances of GStreamer when trying to minimize.');
-                        resolve();
-                    }
-                    else
-                    {
-                        const output = stdoutToArray(stdout);
-                        for (const line of output)
-                        {
-                            exec(`xdotool windowminimize ${line}`, (error, stdout, stderr) => {
-                                if (error)
-                                { focusError = stderr.toString().trim() || `None of the GStreamer instances are actionable windows. ${output.join(', ')}`; }
-                                else
-                                { focusSuccess = true; }
-                            });
-                        }
-                        resolve();
-                    }
-                });
-            });
-
-            console.log('DONE trying to minimize gstreamer.');
-
-            if (focusError)
-            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError); }
-            else
-            { await launchPicom(); }
-
-            console.log('trying to focus chromium.');
-
-            await new Promise((resolve) => {
-                exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
-                    if (error)
-                    {
-                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, stderr.toString() || 'No Instances of Chromium when trying to activate.');
-                        resolve();
-                    }
-                    else
-                    {
-                        const output = stdoutToArray(stdout);
-                        for (const line of output)
-                        {
-                            if (!focusSuccess)
-                            {
-                                exec(`xdotool windowraise ${line}`, (error, stdout, stderr) => {
-                                    if (error)
-                                    { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
-                                    else
-                                    { focusSuccess = true; }
-                                });
-                            }
-                        }
-                        resolve();
-                    }
-                });
-            });
-
-            await new Promise((resolve) => { setTimeout(() => { resolve(); }, 1000); });
-
-            const q = await exe(`xdotool search --class 'chromium'`);
-
-            if (!q.success)
-            {
-                console.error(
-                    `⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`,
-                    stderr.toString() || 'No Instances of Chromium when trying to activate.'
-                );
-            }
-            
-            // await new Promise((resolve) => {
-            //     exec(`xdotool search --class 'chromium'`, (error, stdout, stderr) => {
-            //         if (error)
-            //         {
-            //             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, stderr.toString() || 'No Instances of Chromium when trying to activate.');
-            //             resolve();
-            //         }
-            //         else
-            //         {
-            //             const output = stdoutToArray(stdout);
-            //             for (const line of output)
-            //             {
-            //                 if (!focusSuccess)
-            //                 {
-            //                     exec(`xdotool windowactivate ${line}`, (error, stdout, stderr) => {
-            //                         if (error)
-            //                         { focusError = stderr.toString().trim() || `None of the Chromium instances are focusable. ${output.join(', ')}`; }
-            //                         else
-            //                         { focusSuccess = true; }
-            //                     });
-            //                 }
-            //             }
-            //             resolve();
-            //         }
-            //     });
-            // });
-            
-            /**
-             * 
-             * 
-             * 
-             * 
-             * I think this needs to activate 
-             * chromium after the g streamer
-             * instance hase been closed
-             * 
-             * It wont activate chromium 
-             * but when I run the 
-             * 'xdotool windowactivate'
-             * command in the terminal ....
-             * it works....
-             * 
-             * so
-             * 
-             * yeah 
-             * 
-             * 
-             * 
-             */
-
-            console.log('DONE trying to focus chromium.');
-
-            if (focusError)
-            {
-                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusChromium() ]`, focusError);
-                return;
-            }
-        }
-
-        async function focusNdi() {
-
-            activateDisplay();
-
-            console.log('trying to activate gstreamer.');
-            const step1 = await activateWindow_NDI();
-            console.log('DONE trying to activate gstreamer.');
-
-            if (!step1) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() >> Step 1: Activate GStreamer ]`); return; }
-
-            await wait(1000);
-
-            console.log('trying to minimize chromium.');
-            const step2 = await minimizeWindow_Chromium();
-            console.log('DONE trying to minimize chromium.');
-
-            if (!step2) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ focusNdi() >> Step 2: Minimize Chromium ]`); }
-
-            setTimeout(() => {
-                console.log('trying to kill picom.');
-                exec('killall picom', (error, stdout, stderr) => {
-                    if (error)
-                    { console.log('Picom was not running.'); }
-                    else
-                    { console.log('Picom has been killed.'); }
-                });
-            }, 1000);
-
-        }
-
         async function launchPicom() {
             let picomNotRunning = false;
             await new Promise((resolve) => {
@@ -788,39 +610,41 @@ const { exec, spawn } = require('node:child_process');
 
         async function activateDisplay() {
             try
-            {//output_display_cec_this_source_active
-                const cecEnabled = Boolean(fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'), 'utf8'));
-                const cecPower = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_status_power'), 'utf8') == 'On';
+            {
+                // const cecEnabled = Boolean(fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'), 'utf8'));
+                // const cecPower = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_status_power'), 'utf8') == 'On';
 
-                if (cecEnabled && !cecPower)
-                {
-                    console.log('Attempting to wake display. CEC');
-                    let f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: crypto.randomUUID, data: 'on 0' })
-                    });
-                    if (!f.ok) { throw new Error() }
-                    
-                    await wait(1500);
-                }
+                // if (cecEnabled && !cecPower)
+                // {
+                //     console.log('Attempting to wake display. CEC');
+                //     const f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
+                //         method: 'POST',
+                //         headers: { 'Content-Type': 'application/json' },
+                //         body: JSON.stringify({ id: crypto.randomUUID, data: 'on 0' })
+                //     });
+                //     await wait(1500);
+                // }
 
                 const cecActiveSource = Boolean(fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_this_source_active'), 'utf8') || 'false');
 
                 if (!cecActiveSource)
                 {
-                    console.log('Attempting to activate device. CEC');
-                    let f2 = await fetch('http://localhost:3080/api/v1/__internal/cec', {
+                    console.log(`[ ${path.basename(__filename).split('.')[0]} ][ activateDisplay() ][ CEC ] Attempting to activate display.`);
+
+                    const f2 = await fetch('http://localhost:3080/api/v1/__internal/cec', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ id: crypto.randomUUID, data: 'as' })
                     });
-                    if (!f2.ok) { throw new Error() }
+                    if (!f2.ok) { throw new Error(); }
+
+                    const data = await f2.json();
+                    if (!data.success) { throw new Error(); }
                 }
             }
             catch
             {
-                console.log('CEC could not wake display. Trying RandR.');
+                console.log(`[ ${path.basename(__filename).split('.')[0]} ][ activateDisplay() ] could not activate display. Trying RandR.`);
                 await setDisplayResolution().catch((reason) => {
                     console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ activateDisplay() ][ setDisplayResolution() ]`, reason);
                 });
@@ -1108,8 +932,6 @@ module.exports = {
 
     setNdi,
     fadeVolume,
-    focusChromium,
-    focusNdi,
 
     launchPicom,
     killPicom,
