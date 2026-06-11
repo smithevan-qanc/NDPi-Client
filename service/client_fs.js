@@ -58,7 +58,7 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     async init() {
-        console.info(`[ ${path.basename(__filename).split('.')[0]} ][  INITIATE ] NDPi Data Management Module - v${this.#pgmVersion} - ${this.#pgmVersionDate}`);
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ][ -INITIATE ] NDPi Data Management Module - v${this.#pgmVersion} - ${this.#pgmVersionDate}`);
 
         // Create directory if it doesn't exist.
         if (!fs.existsSync(this.dataDir))

@@ -30,7 +30,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.closing = false;
 
         this.discoveryExec = null;
-        this.restartDiscoveryTimer = null;
+        this.availableSources = null;
         
         this.ws_serv_display = null;
         this.ws_conn_display = null;
@@ -146,9 +146,11 @@ class NDPiCommandServer_Client extends EventEmitter {
 
             this.ws_conn_sources.add(ws);
 
-            process.nextTick(() => {
-                this.startDiscovery();
-            });
+            if (this.availableSources)
+            { ws.send(JSON.stringify(this.availableSources)); }
+
+            if (!this.discoveryExec)
+            { this.startDiscovery(); }
 
             ws.onerror = (error) => {
                 console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `NDI Source WebSocket Server`, error);
@@ -157,7 +159,6 @@ class NDPiCommandServer_Client extends EventEmitter {
             ws.onclose = async () => {
                 this.ws_conn_sources.delete(ws);
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'NDI Source WebSocket connection REMOVED.');
-                // await this._tryCloseDiscovery();
             };
         });
     }
@@ -310,14 +311,13 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     startDiscovery() {
-        if (this.discoveryExec)
-        { return; }
-
         const discoveryPath = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
         const programName = './ndpi_discover';
         
         console.info(`[ ${path.basename(__filename).split('.')[0]} ] Starting NDI Source Discovery.`);
 
+        this.discoveryExec = null;
+        
         this.discoveryExec = spawn(programName, {
             cwd: discoveryPath
         });
@@ -326,11 +326,11 @@ class NDPiCommandServer_Client extends EventEmitter {
             const output = data.toString() || '[]';
             try
             {
-                const sources = JSON.parse(output);
-                if (Array.isArray(sources))
+                this.availableSources = JSON.parse(output);
+                if (Array.isArray(this.availableSources))
                 {
                     this.ws_conn_sources.forEach((ws) => {
-                        ws.send(JSON.stringify(sources));
+                        ws.send(JSON.stringify(this.availableSources));
                     });
                 }
             }
@@ -339,19 +339,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         this.discoveryExec.on('exit', () => {
             this.discoveryExec = null;
-            this._scheduleRestartDiscovery();
         });
-    }
-
-    _scheduleRestartDiscovery() {
-        if (this.closing)
-        { return; }
-
-        this.restartDiscoveryTimer = setTimeout(() => {
-            this.restartDiscoveryTimer = null;
-            if (!this.closing)
-            { this.startDiscovery(); }
-        }, 2000);
     }
 
     async _tryCloseDiscovery() {
@@ -370,10 +358,6 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.closing = true;
 
         console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
-
-        try { clearTimeout(this.restartDiscoveryTimer) }
-        catch {}
-        finally { this.restartDiscoveryTimer = null; }
 
         this.ws_serv_display.close((err) => {
             if (err)

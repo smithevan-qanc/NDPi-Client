@@ -353,7 +353,7 @@ class NDI_Receiver_v4 extends EventEmitter {
 
     logInfo(data) {
         const log = (line = '') => {
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI ] ⎯→ ${line}`);
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ NDI® ] → ${line}`);
         }
         data.split(/\r?\n/).forEach((stdout) => {
             const str = String(stdout || '');

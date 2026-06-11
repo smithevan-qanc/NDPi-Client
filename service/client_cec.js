@@ -43,9 +43,13 @@ class CecController extends EventEmitter {
         
         this.proc.on('exit', (code, signal) => {
             this.isReady = false;
+            this.proc = null;
 
             if (this.enabled)
-            { this._scheduleRestart(); }
+            {
+                this._scheduleRestart();
+                return;
+            }
 
             try { clearTimeout(this.timeoutTimer); }
             catch {}
@@ -55,9 +59,6 @@ class CecController extends EventEmitter {
                 this.queue = [];
                 this.debounceMap.clear();
             }
-
-            this.proc = null;
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Module Exited', `[ Code: ${code || 'n/a'} ], [ Signal: ${signal || 'n/a'} ]`);
         });
 
         if (this.timeoutTimer)
@@ -90,7 +91,6 @@ class CecController extends EventEmitter {
      * Kill the CEC Adapter and close out of the module.
      */
     async close() {
-        this.enabled = false;
         this.isReady = false;
 
         return new Promise((resolve) => {
@@ -98,11 +98,14 @@ class CecController extends EventEmitter {
             {
                 this.proc.once('exit', () => {
                     this.proc = null;
+                    try { clearTimeout(this.restartTimer); }
+                    catch {}
                     console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
                     resolve();
                 });
 
                 console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
+                this.enabled = false;
                 this.proc.kill('SIGKILL');
             }
             else
@@ -111,14 +114,15 @@ class CecController extends EventEmitter {
     }
 
     _scheduleRestart() {
-        if (!this.enabled)
-        { return; }
-        this.restartTimer = setTimeout(() => {
-            this.restartDelay = Math.min(this.restartDelay * 2, this.maxDelay);
-            this.restartTimer = null;
-            if (this.enabled)
-            { this.start() }
-        }, this.restartDelay);
+        if (this.enabled)
+        {
+            this.restartTimer = setTimeout(() => {
+                this.restartDelay = Math.min(this.restartDelay * 2, this.maxDelay);
+                this.restartTimer = null;
+                if (this.enabled)
+                { this.start(); }
+            }, this.restartDelay);
+        }
     }
 
     _handleStdout(data) {
