@@ -188,24 +188,20 @@ function addEvents() {
     document.getElementById('tv_power_off').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        const ogTC = this.textContent;
-        this.textContent = 'Powering Off';
         await sendCommand({
             type: 'send-cec',
             data: encodeURI('standby 0'),
         }, false);
-        this.textContent = ogTC;
+        this.disabled = false;
     });
     document.getElementById('tv_power_on').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        const ogTC = this.textContent;
-        this.textContent = 'Powering On';
         await sendCommand({
             type: 'send-cec',
             data: encodeURI('on 0'),
         }, false);
-        this.textContent = ogTC;
+        this.disabled = false;
     });
     document.getElementById('tv_volume_down').addEventListener('click', (e) => {
         e.preventDefault();
@@ -268,43 +264,49 @@ function addEvents() {
         this.disabled = true;
         const res = await sendCommand(overlayUploadCommand, false);
         if (!res?.success)
-        { console.error('Failed to upload overlay.', res) }
+        { console.error('Failed to upload overlay.', res); }
         uploaderEl.value = '';
     });
     document.getElementById('device_reboot').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
+        const ogTC = this.textContent;
         this.textContent = 'REBOOTING...';
         await sendCommand({
             type: 'reboot-device'
         }, false);
+        this.textContent = ogTC;
     });
     document.getElementById('device_shutdown').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
+        const ogTC = this.textContent;
         this.textContent = 'SHUTTING DOWN...';
         await sendCommand({
             type: 'shutdown-device'
         }, false);
+        this.textContent = ogTC;
     });
     document.getElementById('check_device_update').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
+        const ogTC = this.textContent;
         this.textContent = 'Checking For Update...';
         await sendCommand({
             type: 'check-for-update'
         }, false);
-        this.textContent = 'Check For Update';
+        this.textContent = ogTC;
         this.disabled = false;
     });
     document.getElementById('device_update').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
+        const ogTC = this.textContent;
         this.textContent = 'UPDATING...';
         await sendCommand({
             type: 'install-update'
         }, false);
-        this.disabled = false;
+        this.textContent = ogTC;
     });
 }
 
