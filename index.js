@@ -181,7 +181,9 @@ class NDPi {
     async _closeFsData() {
         if (this.settings)
         {
+            console.log('*** SHUTDOWN ⎯ 9 (1 of 2) [ Start [_closeFsData] ]');
             await this.settings.close();
+            console.log('*** SHUTDOWN ⎯ 9 (2 of 2) [ End [_closeFsData] ]');
             this.settings = null;
         }
     }
@@ -222,17 +224,22 @@ class NDPi {
     }
 
     async _closeLcdDisplay () {
+        console.log('*** SHUTDOWN ⎯ 4 (1 of 2) [ Start [_closeLcdDisplay] ]');
         return new Promise((resolve) => {
             if (this.lcdDisplay)
             {
                 this.lcdDisplay.once('close', () => {
                     this.lcdDisplay = null;
+                    console.log('*** SHUTDOWN ⎯ 4 (2 of 2) [ End [_closeLcdDisplay]: A ]');
                     resolve();
                 });
                 this.lcdDisplay.kill('SIGKILL');
             }
             else
-            { resolve(); }
+            {
+                console.log('*** SHUTDOWN ⎯ 4 (2 of 2) [ End [_closeLcdDisplay]: B ]');
+                resolve();
+            }
         });
     }
 
@@ -266,8 +273,10 @@ class NDPi {
 
     async _closeApi() {
         if (this.server_api)
-        { 
+        {
+            console.log('*** SHUTDOWN ⎯ 8 (1 of 2) [ Start [_closeApi] ]');
             await this.server_api.close();
+            console.log('*** SHUTDOWN ⎯ 8 (2 of 2) [ End [_closeApi] ]');
             this.server_api = null;
         }
     }
@@ -283,7 +292,9 @@ class NDPi {
     async _closeMdns() {
         if (this.service_bonjour)
         {
+            console.log('*** SHUTDOWN ⎯ 6 (1 of 2) [ Start [_closeMdns] ]');
             await this.service_bonjour.close();
+            console.log('*** SHUTDOWN ⎯ 6 (2 of 2) [ End [_closeMdns] ]');
             this.service_bonjour = null;
         }
     }
@@ -364,7 +375,9 @@ class NDPi {
     async _closeCecController() {
         if (this.controller_cec)
         {
+            console.log('*** SHUTDOWN ⎯ 5 (1 of 2) [ Start [_closeCecController] ]');
             await this.controller_cec.close();
+            console.log('*** SHUTDOWN ⎯ 5 (2 of 2) [ End [_closeCecController] ]');
             this.controller_cec = null;
         }
     }
@@ -394,6 +407,7 @@ class NDPi {
     }
 
     async _killNdiReceiver() {
+        console.log('*** SHUTDOWN ⎯ 1 (1 of 2) [ Start [_killNdiReceiver] ]');
         return new Promise((resolve) => {
             if (this.ndiReceiver)
             {
@@ -412,11 +426,15 @@ class NDPi {
                 else
                 {
                     clearTimeout(autoResolve);
+                    console.log('*** SHUTDOWN ⎯ 1 (2 of 2) [ End [_killNdiReceiver]: A ]');
                     resolve();
                 }
             }
             else
-            { resolve(); }
+            {
+                console.log('*** SHUTDOWN ⎯ 1 (2 of 2) [ End [_killNdiReceiver]: B ]');
+                resolve();
+            }
         });
     }
 
@@ -494,14 +512,30 @@ async function quitNDPi(signal) {
     await index._killNdiReceiver();
 
     console.log('*** SHUTDOWN ⎯ 2');
-    try { clearInterval(index.ndpiServerStatusUpdate); }
+    try {
+        console.log('*** SHUTDOWN ⎯ 2 (1 of 4) [ Start [ndpiServerStatusUpdate]: clearInterval ]');
+        clearInterval(index.ndpiServerStatusUpdate);
+        console.log('*** SHUTDOWN ⎯ 2 (2 of 4) [ End [ndpiServerStatusUpdate]: clearInterval ]');
+    }
     catch {}
-    finally { index.ndpiServerStatusUpdate = null; }
+    finally {
+        console.log('*** SHUTDOWN ⎯ 2 (3 of 4) [ Start [ndpiServerStatusUpdate]: NULL ]');
+        index.ndpiServerStatusUpdate = null;
+        console.log('*** SHUTDOWN ⎯ 2 (4 of 4) [ End [ndpiServerStatusUpdate]: NULL ]');
+    }
 
     console.log('*** SHUTDOWN ⎯ 3');
-    try { clearTimeout(index.lcdDisplayRestartTimer); }
+    try {
+        console.log('*** SHUTDOWN ⎯ 3 (1 of 4) [ Start [lcdDisplayRestartTimer]: clearInterval ]');
+        clearTimeout(index.lcdDisplayRestartTimer);
+        console.log('*** SHUTDOWN ⎯ 3 (2 of 4) [ End [lcdDisplayRestartTimer]: clearInterval ]');
+    }
     catch {}
-    finally { index.lcdDisplayRestartTimer = null; }
+    finally {
+        console.log('*** SHUTDOWN ⎯ 3 (3 of 4) [ Start [lcdDisplayRestartTimer]: NULL ]');
+        index.lcdDisplayRestartTimer = null;
+        console.log('*** SHUTDOWN ⎯ 3 (4 of 4) [ End [lcdDisplayRestartTimer]: NULL ]');
+    }
 
     console.log('*** SHUTDOWN ⎯ 4');
     await index._closeLcdDisplay();
