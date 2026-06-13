@@ -265,7 +265,7 @@ function addEvents() {
         e.preventDefault();
         this.disabled = true;
 
-        const confirm = prompt(`This action will power cycle the device.\nAre you sure?`, 'Reboot Device');
+        const confirm = window.confirm(`### This action will power cycle the device.\n- Would you like to proceed?`);
         if (confirm)
         {
             const ogTC = this.textContent;
@@ -280,8 +280,8 @@ function addEvents() {
     document.getElementById('device_shutdown').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-
-        const confirm = prompt(`This action will power down the device.\nAre you sure?`,'Shutdown Device');
+       
+        const confirm = window.confirm(`### This action will power down the device.\n- Would you like to proceed?`);
         if (confirm)
         {
             const ogTC = this.textContent;
