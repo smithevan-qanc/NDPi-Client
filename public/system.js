@@ -265,7 +265,7 @@ function addEvents() {
         e.preventDefault();
         this.disabled = true;
 
-        const confirm = window.confirm(`### This action will power cycle the device.\n- Would you like to proceed?`);
+        const confirm = window.confirm(`This action will POWER CYCLE the device.`);
         if (confirm)
         {
             const ogTC = this.textContent;
@@ -281,7 +281,7 @@ function addEvents() {
         e.preventDefault();
         this.disabled = true;
        
-        const confirm = window.confirm(`### This action will power down the device.\n- Would you like to proceed?`);
+        const confirm = window.confirm(`This action will POWER OFF the device.`);
         if (confirm)
         {
             const ogTC = this.textContent;
