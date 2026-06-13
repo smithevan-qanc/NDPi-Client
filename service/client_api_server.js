@@ -360,6 +360,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
 
+        await new Promise((resolve) => {});
         this.ws_serv_display.close((err) => {
             if (err)
             { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] Overlay Display WebSocket`, err); }
@@ -367,6 +368,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             { console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] Overlay Display WebSocket`); }
         });
 
+        await new Promise((resolve) => {});
         this.ws_serv_system.close((err) => {
             if (err)
             { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] System GUI WebSocket`, err); }
@@ -374,6 +376,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             { console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] System GUI WebSocket`); }
         });
 
+        await new Promise((resolve) => {});
         this.ws_serv_sources.close((err) => {
             if (err)
             { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] NDI Source WebSocket`, err); }
