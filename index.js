@@ -508,7 +508,7 @@ async function quitNDPi(signal) {
     
     index.shutdown = true;
 
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
         const timeout = setTimeout(() => {
             console.error('GRACEFUL SHUTDOWN TIMEOUT EXPIRED. FORCING EXIT');
             resolve();
