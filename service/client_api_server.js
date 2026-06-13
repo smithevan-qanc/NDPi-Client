@@ -337,18 +337,17 @@ class NDPiCommandServer_Client extends EventEmitter {
             }
             catch {}
         });
-
-        this.discoveryExec.on('exit', () => {
-            this.discoveryExec = null;
-        });
     }
 
     async _tryCloseDiscovery() {
         return new Promise((resolve) => {
-            if (this.discoveryExec)
+            if (!this.discoveryExec.killed)
             {
-                this.discoveryExec.once('exit', () => { resolve(); });
+                this.discoveryExec.once('close', () => { resolve(); });
                 this.discoveryExec.kill('SIGTERM');
+                setTimeout(() => {
+                    if (!this.discoveryExec.killed) { resolve(); }
+                }, 2000);
             }
             else
             { resolve(); }

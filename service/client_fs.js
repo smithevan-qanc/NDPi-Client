@@ -820,7 +820,7 @@ class FileSystemMonitor extends EventEmitter {
 
     startDrmMonitor() {
         try
-        { exec('killall udevadm'); }
+        { exec('killall -s SIGKILL udevadm'); }
         catch {}
         finally
         { this.drmMonitor = null;}
@@ -839,7 +839,7 @@ class FileSystemMonitor extends EventEmitter {
             this.drmMonitor = null;
         });
 
-        this.drmMonitor.once('exit', () => {
+        this.drmMonitor.once('close', () => {
             console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] DRM Monitor`)
             try { clearTimeout(this.debounceTimerDrmEvents) } catch {}
         });
@@ -883,12 +883,13 @@ class FileSystemMonitor extends EventEmitter {
         return new Promise((resolve) => {
             if (this.drmMonitor)
             {
-                this.drmMonitor.once('exit', () => {
+                this.drmMonitor.once('close', () => {
                     this.drmMonitor = null;
                     console.info( `[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
                     resolve();
                 });
-                this.drmMonitor.kill('SIGINT');
+                // this.drmMonitor.kill('SIGKILL');
+                exec('killall -s SIGKILL udevadm');
             }
             else
             {
