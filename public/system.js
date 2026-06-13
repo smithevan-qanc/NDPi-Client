@@ -296,17 +296,12 @@ function addEvents() {
     document.getElementById('check_device_update').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-
-        const confirm = prompt(`This action will power cycle the device.\nAre you sure?`, 'Reboot Device');
-        if (confirm)
-        {
-            const ogTC = this.textContent;
-            this.textContent = 'Checking For Update...';
-            await sendCommand({
-                type: 'check-for-update'
-            }, false);
-            this.textContent = ogTC;
-        }
+        const ogTC = this.textContent;
+        this.textContent = 'Checking For Update...';
+        await sendCommand({
+            type: 'check-for-update'
+        }, false);
+        this.textContent = ogTC;
         this.disabled = false;
     });
     document.getElementById('device_update').addEventListener('click', async function(e) {
