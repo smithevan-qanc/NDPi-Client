@@ -183,7 +183,7 @@ class NDPi {
         {
             console.log('*** SHUTDOWN ⎯ 9 (1 of 2) [ Start [_closeFsData] ]');
             await this.settings.close();
-            console.log('*** SHUTDOWN ⎯ 9 (2 of 2) [ End [_closeFsData] ]');
+            console.log('*** SHUTDOWN ⎯ 9 (2 of 2) [ End   [_closeFsData] ]');
             this.settings = null;
         }
     }
@@ -230,14 +230,14 @@ class NDPi {
             {
                 this.lcdDisplay.once('close', () => {
                     this.lcdDisplay = null;
-                    console.log('*** SHUTDOWN ⎯ 4 (2 of 2) [ End [_closeLcdDisplay]: A ]');
+                    console.log('*** SHUTDOWN ⎯ 4 (2 of 2) [ End   [_closeLcdDisplay]: A ]');
                     resolve();
                 });
                 this.lcdDisplay.kill('SIGKILL');
             }
             else
             {
-                console.log('*** SHUTDOWN ⎯ 4 (2 of 2) [ End [_closeLcdDisplay]: B ]');
+                console.log('*** SHUTDOWN ⎯ 4 (2 of 2) [ End   [_closeLcdDisplay]: B ]');
                 resolve();
             }
         });
@@ -276,7 +276,7 @@ class NDPi {
         {
             console.log('*** SHUTDOWN ⎯ 8 (1 of 2) [ Start [_closeApi] ]');
             await this.server_api.close();
-            console.log('*** SHUTDOWN ⎯ 8 (2 of 2) [ End [_closeApi] ]');
+            console.log('*** SHUTDOWN ⎯ 8 (2 of 2) [ End   [_closeApi] ]');
             this.server_api = null;
         }
     }
@@ -294,7 +294,7 @@ class NDPi {
         {
             console.log('*** SHUTDOWN ⎯ 6 (1 of 2) [ Start [_closeMdns] ]');
             await this.service_bonjour.close();
-            console.log('*** SHUTDOWN ⎯ 6 (2 of 2) [ End [_closeMdns] ]');
+            console.log('*** SHUTDOWN ⎯ 6 (2 of 2) [ End   [_closeMdns] ]');
             this.service_bonjour = null;
         }
     }
@@ -377,7 +377,7 @@ class NDPi {
         {
             console.log('*** SHUTDOWN ⎯ 5 (1 of 2) [ Start [_closeCecController] ]');
             await this.controller_cec.close();
-            console.log('*** SHUTDOWN ⎯ 5 (2 of 2) [ End [_closeCecController] ]');
+            console.log('*** SHUTDOWN ⎯ 5 (2 of 2) [ End   [_closeCecController] ]');
             this.controller_cec = null;
         }
     }
@@ -426,13 +426,13 @@ class NDPi {
                 else
                 {
                     clearTimeout(autoResolve);
-                    console.log('*** SHUTDOWN ⎯ 1 (2 of 2) [ End [_killNdiReceiver]: A ]');
+                    console.log('*** SHUTDOWN ⎯ 1 (2 of 2) [ End   [_killNdiReceiver]: A ]');
                     resolve();
                 }
             }
             else
             {
-                console.log('*** SHUTDOWN ⎯ 1 (2 of 2) [ End [_killNdiReceiver]: B ]');
+                console.log('*** SHUTDOWN ⎯ 1 (2 of 2) [ End   [_killNdiReceiver]: B ]');
                 resolve();
             }
         });
@@ -508,64 +508,63 @@ async function quitNDPi(signal) {
     
     index.shutdown = true;
 
-    console.log('*** SHUTDOWN ⎯ 1');
-     index._killNdiReceiver();
-    // await index._killNdiReceiver();
-
-    console.log('*** SHUTDOWN ⎯ 2');
-    try {
-        console.log('*** SHUTDOWN ⎯ 2 (1 of 4) [ Start [ndpiServerStatusUpdate]: clearInterval ]');
-        clearInterval(index.ndpiServerStatusUpdate);
-        console.log('*** SHUTDOWN ⎯ 2 (2 of 4) [ End [ndpiServerStatusUpdate]: clearInterval ]');
-    }
-    catch {}
-    finally {
-        console.log('*** SHUTDOWN ⎯ 2 (3 of 4) [ Start [ndpiServerStatusUpdate]: NULL ]');
-        index.ndpiServerStatusUpdate = null;
-        console.log('*** SHUTDOWN ⎯ 2 (4 of 4) [ End [ndpiServerStatusUpdate]: NULL ]');
-    }
-
-    console.log('*** SHUTDOWN ⎯ 3');
-    try {
-        console.log('*** SHUTDOWN ⎯ 3 (1 of 4) [ Start [lcdDisplayRestartTimer]: clearInterval ]');
-        clearTimeout(index.lcdDisplayRestartTimer);
-        console.log('*** SHUTDOWN ⎯ 3 (2 of 4) [ End [lcdDisplayRestartTimer]: clearInterval ]');
-    }
-    catch {}
-    finally {
-        console.log('*** SHUTDOWN ⎯ 3 (3 of 4) [ Start [lcdDisplayRestartTimer]: NULL ]');
-        index.lcdDisplayRestartTimer = null;
-        console.log('*** SHUTDOWN ⎯ 3 (4 of 4) [ End [lcdDisplayRestartTimer]: NULL ]');
-    }
-
-    console.log('*** SHUTDOWN ⎯ 4');
-     index._closeLcdDisplay();
-    // await index._closeLcdDisplay();
-
-    console.log('*** SHUTDOWN ⎯ 5');
-     index._closeCecController();
-    // await index._closeCecController();
-
-    console.log('*** SHUTDOWN ⎯ 6');
-     index._closeMdns();
-    // await index._closeMdns();
-
-    console.log('*** SHUTDOWN ⎯ 7');
-    try { index.wsConnection_ndpiServer.close(); }
-    catch {}
-    finally {}
-
-    console.log('*** SHUTDOWN ⎯ 8');
-     index._closeApi();
-    // await index._closeApi();
-
-    console.log('*** SHUTDOWN ⎯ 9');
-     index._closeFsData();
-    // await index._closeFsData();
-
     return new Promise((resolve) => {
-        console.log('Continuing in 10 sec...');
-        setTimeout(() => { resolve(); }, 10000);
+        const timeout = setTimeout(() => {
+            console.error('GRACEFUL SHUTDOWN TIMEOUT EXPIRED. FORCING EXIT');
+            resolve();
+        }, 10000);
+
+        console.log('*** SHUTDOWN ⎯ 1');
+        await index._killNdiReceiver().catch();
+
+        console.log('*** SHUTDOWN ⎯ 2');
+        try {
+            console.log('*** SHUTDOWN ⎯ 2 (1 of 4) [ Start [ndpiServerStatusUpdate]: clearInterval ]');
+            clearInterval(index.ndpiServerStatusUpdate);
+            console.log('*** SHUTDOWN ⎯ 2 (2 of 4) [ End   [ndpiServerStatusUpdate]: clearInterval ]');
+        }
+        catch {}
+        finally {
+            console.log('*** SHUTDOWN ⎯ 2 (3 of 4) [ Start [ndpiServerStatusUpdate]: NULL ]');
+            index.ndpiServerStatusUpdate = null;
+            console.log('*** SHUTDOWN ⎯ 2 (4 of 4) [ End   [ndpiServerStatusUpdate]: NULL ]');
+        }
+
+        console.log('*** SHUTDOWN ⎯ 3');
+        try {
+            console.log('*** SHUTDOWN ⎯ 3 (1 of 4) [ Start [lcdDisplayRestartTimer]: clearInterval ]');
+            clearTimeout(index.lcdDisplayRestartTimer);
+            console.log('*** SHUTDOWN ⎯ 3 (2 of 4) [ End   [lcdDisplayRestartTimer]: clearInterval ]');
+        }
+        catch {}
+        finally {
+            console.log('*** SHUTDOWN ⎯ 3 (3 of 4) [ Start [lcdDisplayRestartTimer]: NULL ]');
+            index.lcdDisplayRestartTimer = null;
+            console.log('*** SHUTDOWN ⎯ 3 (4 of 4) [ End   [lcdDisplayRestartTimer]: NULL ]');
+        }
+
+        console.log('*** SHUTDOWN ⎯ 4');
+        await index._closeLcdDisplay().catch();
+
+        console.log('*** SHUTDOWN ⎯ 5');
+        await index._closeCecController().catch();
+
+        console.log('*** SHUTDOWN ⎯ 6');
+        await index._closeMdns().catch();
+
+        console.log('*** SHUTDOWN ⎯ 7');
+        try { index.wsConnection_ndpiServer.close(); }
+        catch {}
+        finally {}
+
+        console.log('*** SHUTDOWN ⎯ 8');
+        await index._closeApi().catch();
+
+        console.log('*** SHUTDOWN ⎯ 9');
+        await index._closeFsData();
+
+        clearTimeout(timeout);
+        resolve();
     });
 }
 
@@ -594,14 +593,15 @@ process.on('unhandledRejection', async (reason) => {
     console.error('🔴🔴');
     console.error('🔴');
     console.error(' ');
-    if (quitAttempts < 10)
-    {
-        quitAttempts++;
-        await quitNDPi('unhandledRejection');
-        exit(0);
-    }
-    else
-    { exit(1); }
+    exit(1);
+    // if (quitAttempts < 10)
+    // {
+    //     quitAttempts++;
+    //     await quitNDPi('unhandledRejection');
+    //     exit(0);
+    // }
+    // else
+    // { exit(1); }
 });
 
 process.on('SIGTERM', async () => {
