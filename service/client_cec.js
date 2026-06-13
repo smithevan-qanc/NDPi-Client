@@ -93,9 +93,9 @@ class CecController extends EventEmitter {
         this.enabled = false;
 
         return new Promise((resolve) => {
-            if (this.proc)
-            {
-                this.proc.once('exit', () => {
+            // if (this.proc)
+            // {
+                this.proc.once('close', () => {
                     try { clearTimeout(this.restartTimer); }
                     catch {}
                     console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
@@ -103,10 +103,11 @@ class CecController extends EventEmitter {
                 });
 
                 console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
-                this.proc.kill('SIGKILL');
-            }
-            else
-            { resolve(); }
+                this.proc.stdin.write('q');
+                // this.proc.kill('SIGKILL');
+            // }
+            // else
+            // { resolve(); }
         });
     }
 
