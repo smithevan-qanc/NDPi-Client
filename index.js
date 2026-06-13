@@ -509,7 +509,8 @@ async function quitNDPi(signal) {
     index.shutdown = true;
 
     console.log('*** SHUTDOWN ⎯ 1');
-    await index._killNdiReceiver();
+     index._killNdiReceiver();
+    // await index._killNdiReceiver();
 
     console.log('*** SHUTDOWN ⎯ 2');
     try {
@@ -538,13 +539,16 @@ async function quitNDPi(signal) {
     }
 
     console.log('*** SHUTDOWN ⎯ 4');
-    await index._closeLcdDisplay();
+     index._closeLcdDisplay();
+    // await index._closeLcdDisplay();
 
     console.log('*** SHUTDOWN ⎯ 5');
-    await index._closeCecController();
+     index._closeCecController();
+    // await index._closeCecController();
 
     console.log('*** SHUTDOWN ⎯ 6');
-    await index._closeMdns();
+     index._closeMdns();
+    // await index._closeMdns();
 
     console.log('*** SHUTDOWN ⎯ 7');
     try { index.wsConnection_ndpiServer.close(); }
@@ -552,10 +556,17 @@ async function quitNDPi(signal) {
     finally {}
 
     console.log('*** SHUTDOWN ⎯ 8');
-    await index._closeApi();
+     index._closeApi();
+    // await index._closeApi();
 
     console.log('*** SHUTDOWN ⎯ 9');
-    await index._closeFsData();
+     index._closeFsData();
+    // await index._closeFsData();
+
+    return new Promise((resolve) => {
+        console.log('Continuing in 10 sec...');
+        setTimeout(() => { resolve(); }, 10000);
+    });
 }
 
 process.on('uncaughtException', (err) => {
