@@ -68,15 +68,11 @@ server._ws.onmessage = (message) => {
 
                 if (object.value === 'true')
                 {
-                    updateButtons.check.disabled = true;
-                    updateButtons.check.hidden = true;
                     updateButtons.install.disabled = false;
                     updateButtons.install.hidden = false;
                 }
                 else
                 {
-                    updateButtons.check.disabled = false;
-                    updateButtons.check.hidden = false;
                     updateButtons.install.disabled = true;
                     updateButtons.install.hidden = true;
                 }
