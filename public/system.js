@@ -268,32 +268,49 @@ function addEvents() {
     document.getElementById('device_reboot').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        const ogTC = this.textContent;
-        this.textContent = 'REBOOTING...';
-        await sendCommand({
-            type: 'reboot-device'
-        }, false);
-        this.textContent = ogTC;
+
+        const confirm = prompt(`This action will power cycle the device.\nAre you sure?`, 'Reboot Device');
+        if (confirm)
+        {
+            const ogTC = this.textContent;
+            this.textContent = 'REBOOTING...';
+            await sendCommand({
+                type: 'reboot-device'
+            }, false);
+        }
+        else
+        { this.disabled = false; }
     });
     document.getElementById('device_shutdown').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        const ogTC = this.textContent;
-        this.textContent = 'SHUTTING DOWN...';
-        await sendCommand({
-            type: 'shutdown-device'
-        }, false);
-        this.textContent = ogTC;
+
+        const confirm = prompt(`This action will power down the device.\nAre you sure?`,'Shutdown Device');
+        if (confirm)
+        {
+            const ogTC = this.textContent;
+            this.textContent = 'SHUTTING DOWN...';
+            await sendCommand({
+                type: 'shutdown-device'
+            }, false);
+        }
+        else
+        { this.disabled = false; }
     });
     document.getElementById('check_device_update').addEventListener('click', async function(e) {
         e.preventDefault();
         this.disabled = true;
-        const ogTC = this.textContent;
-        this.textContent = 'Checking For Update...';
-        await sendCommand({
-            type: 'check-for-update'
-        }, false);
-        this.textContent = ogTC;
+
+        const confirm = prompt(`This action will power cycle the device.\nAre you sure?`, 'Reboot Device');
+        if (confirm)
+        {
+            const ogTC = this.textContent;
+            this.textContent = 'Checking For Update...';
+            await sendCommand({
+                type: 'check-for-update'
+            }, false);
+            this.textContent = ogTC;
+        }
         this.disabled = false;
     });
     document.getElementById('device_update').addEventListener('click', async function(e) {
