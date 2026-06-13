@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const func = require('./service/functions.js');
 const { exec, spawn } = require('node:child_process');
+const { exit } = require('node:process');
 
 const VERSION_DIR = path.join(__dirname, 'version');
 const NDPi_VERSION = (
@@ -224,11 +225,11 @@ class NDPi {
         return new Promise((resolve) => {
             if (this.lcdDisplay)
             {
-                this.lcdDisplay.once('exit', () => {
+                this.lcdDisplay.once('close', () => {
                     this.lcdDisplay = null;
                     resolve();
                 });
-                this.lcdDisplay.kill();
+                this.lcdDisplay.kill('SIGKILL');
             }
             else
             { resolve(); }
@@ -536,7 +537,7 @@ process.on('uncaughtException', (err) => {
     console.error(' ');
 });
 
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', async (reason) => {
     console.error(' ');
     console.error('🔴');
     console.error('🔴🔴');
@@ -553,20 +554,21 @@ process.on('unhandledRejection', (reason) => {
     if (quitAttempts < 10)
     {
         quitAttempts++;
-        quitNDPi('unhandledRejection');
+        await quitNDPi('unhandledRejection');
+        exit(0);
     }
     else
-    { process.exit(1); }
+    { exit(1); }
 });
 
 process.on('SIGTERM', async () => {
     await quitNDPi('SIGTERM');
-    process.exit(0);
+    exit(0);
 });
 
 process.on('SIGINT', async () => {
     await quitNDPi('SIGINT');
-    process.exit(0);
+    exit(0);
 });
 
 process.on('exit', (code) => {

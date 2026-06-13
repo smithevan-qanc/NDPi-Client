@@ -112,8 +112,11 @@ class NDPiBonjourService {
         this.service = bonjour.publish(options);
         this.service.start();
 
-        this.service.on('up', () => {
+        this.service.once('up', () => {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Service Up');
+        });
+
+        this.service.on('up', () => {
             this.settings.put('ndpi_status_mdns_service', 'up');
         });
         

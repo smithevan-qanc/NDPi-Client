@@ -8,7 +8,7 @@ const { exec, spawn } = require('node:child_process');
 const { setTimeout } = require('node:timers');
 
 class FileSystemMonitor extends EventEmitter {
-    #pgmVersion;
+#pgmVersion;
     #pgmVersionDate;
     #ipPoll;
     #updatePoll;

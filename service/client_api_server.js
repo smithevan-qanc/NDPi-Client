@@ -3,6 +3,7 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
+const crypto = require('node:crypto');
 const func = require('./functions');
 const { randomUUID } = require('crypto');
 const { spawn } = require('node:child_process');
@@ -192,7 +193,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
             const commandRes = await func.processCommand({
                 ...req.query,
-                id: randomUUID(),
+                id: crypto.randomUUID(),
             });
 
             if (commandRes && commandRes.success)
@@ -205,7 +206,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
             const commandRes = await func.processCommand({
                 ...req.body,
-                id: randomUUID(),
+                id: crypto.randomUUID(),
             });
 
             if (commandRes && commandRes.success)

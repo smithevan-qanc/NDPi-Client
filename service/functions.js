@@ -91,6 +91,7 @@ const { exec, spawn } = require('node:child_process');
                 }
             });
         }
+        processCommand()
 
         /** 
          * **Process API Command**
