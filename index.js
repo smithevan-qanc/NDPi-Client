@@ -18,7 +18,6 @@ const NDPi_VERSION_DATE = (
 
 class NDPi {
     constructor() {
-
         this.isInitialized = false;
 
         this.settings = null;
@@ -26,7 +25,6 @@ class NDPi {
         this.service_bonjour = null;
         this.service_chromium = null;
         this.controller_cec = null;
-        // this.ndiReceiver = new Map();
         this.ndiReceiver = null;
 
         this.lcdDisplayRestartTimer = null;
@@ -47,7 +45,7 @@ class NDPi {
     }
 
     /** INITIATE */
-    async initiate() {
+    initiate() {
         const execStartup = async () => {
             const startup = exec(`./sh/startup`);
             startup.stdout.on('data', (data) => {
@@ -56,12 +54,11 @@ class NDPi {
                     .split(/\r?\n/)
                     .forEach((line) => { console.info(line) });
             });
-            startup.on('exit', () => {
+            startup.once('exit', () => {
                 console.info(process.env);
                 this.startFsData();
             });
         };
-        
         execStartup();
     }
 
@@ -70,7 +67,7 @@ class NDPi {
      */
     startFsData() {
         const FileSystemMonitor = require('./service/client_fs.js');
-        this.settings = new FileSystemMonitor(NDPi_VERSION, NDPi_VERSION_DATE);
+        this.settings = new (require('./service/client_fs.js'))(NDPi_VERSION, NDPi_VERSION_DATE);
 
         //  FS System Ready
         this.settings.on('ready', () => {
@@ -218,7 +215,7 @@ class NDPi {
             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ update_lcd ][ ERROR ]`, err);
         });
 
-        this.lcdDisplay.on('exit', (code, signal) => {
+        this.lcdDisplay.once('close', (code, signal) => {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ update_lcd ] Closed`);
         });
     }
@@ -248,7 +245,7 @@ class NDPi {
      */
     startApi() {
         const NDPiCommandServer_Client = require('./service/client_api_server.js');
-        this.server_api = new NDPiCommandServer_Client(this.settings);
+        this.server_api = new (require('./service/client_api_server.js'))(this.settings);
 
         this.server_api.on('online', () => {
             if (!this.isInitialized)
@@ -286,7 +283,7 @@ class NDPi {
      */
     startMdns() {
         const NDPiBonjourService = require('./service/client_bonjour.js');
-        this.service_bonjour = new NDPiBonjourService(this.settings);
+        this.service_bonjour = new (require('./service/client_bonjour.js'))(this.settings);
     }
 
     async _closeMdns() {
@@ -308,8 +305,8 @@ class NDPi {
             if (this.service_chromium)
             { await this.service_chromium.close(); }
 
-            const ChromiumOverlayDisplay = require('./service/client_chromium.js');
-            this.service_chromium = new ChromiumOverlayDisplay(this.settings, this.server_api);
+            // const ChromiumOverlayDisplay = require('./service/client_chromium.js');
+            this.service_chromium = new (require('./service/client_chromium.js'))(this.settings, this.server_api);
 
             this.service_chromium.on('ready', () => {
                 setTimeout(() => { this._afterChromiumStart(); }, 1000);
@@ -365,9 +362,9 @@ class NDPi {
             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ client_cec ][ ERROR ]`, data);
         });
 
-        this.controller_cec.once('timeout', (data) => {
+        this.controller_cec.once('close', (data) => {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_cec ] ${String(data || 'CEC Unavailable')}`);
-            this.controller_cec.close();
+            // this.controller_cec.close();
             this.controller_cec = null;
         });
     }

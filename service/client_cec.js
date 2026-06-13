@@ -43,10 +43,9 @@ class CecController extends EventEmitter {
         
         this.proc.once('exit', (code, signal) => {
             this.isReady = false;
-            this.proc = null;
-
             if (this.enabled)
             {
+                this.proc = null;
                 this._scheduleRestart();
                 try { clearTimeout(this.timeoutTimer); }
                 catch {}
