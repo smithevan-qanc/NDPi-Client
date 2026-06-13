@@ -523,7 +523,7 @@ async function quitNDPi(signal) {
     await index._closeApi();
 
     console.log('*** SHUTDOWN ⎯ 9');
-    index._closeFsData();
+    await index._closeFsData();
 }
 
 process.on('uncaughtException', (err) => {
