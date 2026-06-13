@@ -45,8 +45,6 @@ class ChromiumOverlayDisplay extends EventEmitter {
             `http://localhost:${connectionPort}/`
         ];
 
-        console.log('launching chromium');
-
         this.service = spawn(command, args, {
             env: {
                 ...process.env,

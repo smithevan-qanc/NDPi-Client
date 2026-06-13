@@ -580,7 +580,7 @@ const { exec, spawn } = require('node:child_process');
 
             if (picomNotRunning)
             {
-                console.log('launching PICOM');
+                // console.log('launching PICOM');
                 await new Promise((resolve) => {
                     exec(`picom -b --config "${process.env.HOME}/.config/picom/picom.conf"`, (error, stdout, stderr) => {
                         if (error)
@@ -588,7 +588,7 @@ const { exec, spawn } = require('node:child_process');
                         resolve();
                     });
                 });
-                console.log('PICOM launch');
+                // console.log('PICOM launch');
             }
             return;
         }
