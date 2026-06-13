@@ -883,13 +883,16 @@ class FileSystemMonitor extends EventEmitter {
         return new Promise((resolve) => {
             if (this.drmMonitor)
             {
-                this.drmMonitor.once('close', () => {
-                    this.drmMonitor = null;
-                    console.info( `[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                // this.drmMonitor.once('close', () => {
+                //     this.drmMonitor = null;
+                //     console.info( `[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                //     resolve();
+                // });
+                // this.drmMonitor.kill('SIGKILL');
+                exec('killall -s SIGKILL udevadm', () => {
                     resolve();
                 });
-                // this.drmMonitor.kill('SIGKILL');
-                exec('killall -s SIGKILL udevadm');
+
             }
             else
             {
