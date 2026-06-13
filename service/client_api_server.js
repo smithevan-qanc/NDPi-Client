@@ -366,42 +366,42 @@ class NDPiCommandServer_Client extends EventEmitter {
                 {
                     this.ws_serv_display.close((err) => {
                         if (err)
-                        { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] Overlay Display WebSocket`, err); }
+                            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] Overlay Display WebSocket`, err); }
                         else
-                        { console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] Overlay Display WebSocket`); }
+                            { console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] Overlay Display WebSocket`); }
                         resolve();
                     });
                 }
                 else
-                { resolve(); }
+                    { resolve(); }
             }),
             new Promise((resolve) => {
                 if (this.ws_conn_system.size !== 0)
                 {
                     this.ws_serv_system.close((err) => {
                         if (err)
-                        { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] System GUI WebSocket`, err); }
+                            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] System GUI WebSocket`, err); }
                         else
-                        { console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] System GUI WebSocket`); }
+                            { console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] System GUI WebSocket`); }
                         resolve();
                     });
                 }
                 else
-                { resolve(); }
+                    { resolve(); }
             }),
             new Promise((resolve) => {
                 if (this.ws_conn_sources.size !== 0)
                 {
                     this.ws_serv_sources.close((err) => {
                         if (err)
-                        { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] NDI Source WebSocket`, err); }
+                            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] NDI Source WebSocket`, err); }
                         else
-                        { console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] NDI Source WebSocket`); }
+                            { console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] NDI Source WebSocket`); }
                         resolve();
                     });
                 }
                 else
-                { resolve(); }
+                    { resolve(); }
             }),
         ]);
         
