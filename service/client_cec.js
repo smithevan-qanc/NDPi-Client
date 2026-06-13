@@ -41,23 +41,21 @@ class CecController extends EventEmitter {
         this.proc.stdout.on('data', (data) => this._handleStdout(data));
         this.proc.stderr.on('data', (data) => this._handleStderr(data));
         
-        this.proc.on('exit', (code, signal) => {
+        this.proc.once('exit', (code, signal) => {
             this.isReady = false;
             this.proc = null;
 
             if (this.enabled)
             {
                 this._scheduleRestart();
-                return;
-            }
-
-            try { clearTimeout(this.timeoutTimer); }
-            catch {}
-            finally
-            {
-                this.timeoutTimer = null;
-                this.queue = [];
-                this.debounceMap.clear();
+                try { clearTimeout(this.timeoutTimer); }
+                catch {}
+                finally
+                {
+                    this.timeoutTimer = null;
+                    this.queue = [];
+                    this.debounceMap.clear();
+                }
             }
         });
 
@@ -92,12 +90,12 @@ class CecController extends EventEmitter {
      */
     async close() {
         this.isReady = false;
+        this.enabled = false;
 
         return new Promise((resolve) => {
             if (this.proc)
             {
                 this.proc.once('exit', () => {
-                    this.proc = null;
                     try { clearTimeout(this.restartTimer); }
                     catch {}
                     console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
@@ -105,7 +103,6 @@ class CecController extends EventEmitter {
                 });
 
                 console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
-                this.enabled = false;
                 this.proc.kill('SIGKILL');
             }
             else

@@ -165,7 +165,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.emit('error');
         });
 
-        this.receiver.on('close', (code, signal) => {
+        this.receiver.once('exit', (code, signal) => {
 
             this.ndiActiveSource = null;
             this.settings.put('ndpi_status_ndi_source_active', '');
@@ -309,7 +309,6 @@ class NDI_Receiver_v4 extends EventEmitter {
         {
             await new Promise(async (resolve) => {
                 this.receiver.once('exit', () => { resolve(); });
-                // this.receiver.kill('SIGTERM');
                 await func.exe(`killall ${this.receiverName}`);
             });
             this.receiver = null;

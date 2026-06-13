@@ -749,19 +749,9 @@ class FileSystemMonitor extends EventEmitter {
 
     startWatcher() {
         this.watcher = fs.watch(this.dataDir);
-
         this.watcher.on('change', (eventType, filename) => {
             if (this.fileMap.has(filename))
             { this._fsEvent(filename); }
-        });
-        
-        this.watcher.on('error', (error) => {
-            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error);
-        });
-
-        this.watcher.on('close', () => {
-            if (this.watcherEnable)
-            { setTimeout(() => { this.startWatcher(); }, 1000); }
         });
     }
     
@@ -821,8 +811,11 @@ class FileSystemMonitor extends EventEmitter {
     put(fileName, data = '') {
         if (!fileName || !this.fileMap.has(fileName))
         { return; }
-        try { fs.writeFileSync(path.join(this.dataDir, fileName), data.trim(), 'utf8') }
-        catch (error) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving to FileSystem`); }
+        
+        try
+        { fs.writeFileSync(path.join(this.dataDir, fileName), data.trim(), 'utf8'); }
+        catch (error)
+        { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving to FileSystem`); }
     }
 
     startDrmMonitor() {
@@ -846,7 +839,7 @@ class FileSystemMonitor extends EventEmitter {
             this.drmMonitor = null;
         });
 
-        this.drmMonitor.on('close', () => {
+        this.drmMonitor.once('exit', () => {
             console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] DRM Monitor`)
             try { clearTimeout(this.debounceTimerDrmEvents) } catch {}
         });
@@ -879,17 +872,7 @@ class FileSystemMonitor extends EventEmitter {
         finally { this.#updatePoll = null; }
 
         if (this.watcher)
-        {
-
-            await new Promise((resolve) => {
-                this.watcher.once('close', async () => {
-                    await this.__flushQueue();
-                    resolve();
-                });
-
-                this.watcher.close();
-            });
-        }
+        {  this.watcher.close(); }
 
         if (this.debounceTimerDrmEvents)
         {
@@ -916,6 +899,10 @@ class FileSystemMonitor extends EventEmitter {
     }
 
 
+
+    /**
+     *  Helper Functions
+     */
 
     async pollIp() {
         try { await this.updateLocalIp(); }
@@ -946,10 +933,6 @@ class FileSystemMonitor extends EventEmitter {
             }
         }
     }
-
-    /**
-     *  Helper Functions
-     */
 
     async updateLocalIp() {
         let fileName = 'device_ip';

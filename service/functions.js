@@ -43,7 +43,7 @@ const { exec, spawn } = require('node:child_process');
                         if (line) { responseCecCompliance.push(line); }
                     });
                 });
-                proc.on('close', () => { resolve(); });
+                proc.once('exit', () => { resolve(); });
             });
 
             // console.log(JSON.stringify(responseCecCompliance, null, 2));

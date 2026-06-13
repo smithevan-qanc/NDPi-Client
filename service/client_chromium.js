@@ -55,7 +55,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
             }
         });
 
-        this.service.on('spawn', () => {
+        this.service.once('spawn', () => {
             setTimeout(() => {
                 this.emit('ready');
             }, 500);
@@ -65,8 +65,9 @@ class ChromiumOverlayDisplay extends EventEmitter {
             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ]`, '[ SERVICE ERROR ]', err);
         });
 
-        this.service.on('exit', () => {
+        this.service.once('exit', () => {
             this.emit('close');
+            this.service = null;
         });
     }
 

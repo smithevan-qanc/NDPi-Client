@@ -341,8 +341,6 @@ class NDPi {
         this.controller_cec.on('ready', () => {
             this.server_api.controller_cec = this.controller_cec;
 
-            this.controller_cec.send('on 0');
-            
             setTimeout(() => {
                 this.controller_cec.send('as');
             }, 2000);
@@ -356,7 +354,7 @@ class NDPi {
             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ client_cec ][ ERROR ]`, data);
         });
 
-        this.controller_cec.on('timeout', (data) => {
+        this.controller_cec.once('timeout', (data) => {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_cec ] ${String(data || 'CEC Unavailable')}`);
             this.controller_cec.close();
             this.controller_cec = null;
