@@ -45,8 +45,8 @@ Roboto_25 = ImageFont.truetype(os.path.join(font_dir, "RobotoCondensed-Regular.t
 
 
 try:
-    # def font_roboto(style, size):
-    #     return ImageFont.truetype(os.path.join(font_dir, f"RobotoCondensed-{style}"), size)
+    def font_roboto(style, size):
+        return ImageFont.truetype(os.path.join(font_dir, f"RobotoCondensed-{style}.ttf"), size)
     # Initialize display ONCE at startup
     disp = LCD_1inch69.LCD_1inch69()
     disp.Init()
@@ -88,8 +88,8 @@ try:
         image1 = Image.new("RGB", (disp.height, disp.width), "BLACK")
         draw = ImageDraw.Draw(image1)
         
-        # Device Name ---------------------------------------------------------------- font_roboto("Black", 25)
-        draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=Roboto_25)
+        # Device Name ----------------------------------------------------------------
+        draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=font_roboto("Black", 25))
 
         # Gray Line ------------------------------------------------------------------
         draw.line([(0, 52), (280, 52)], fill = "GRAY", width = 1)
