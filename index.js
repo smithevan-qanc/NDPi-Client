@@ -175,7 +175,7 @@ class NDPi {
     }
 
     async _closeFsData() {
-        return new Promise((resolve) => {
+        return new Promise(async (resolve) => {
             if (this.settings)
             {
                 await this.settings.close();
