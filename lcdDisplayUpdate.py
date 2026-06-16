@@ -86,7 +86,7 @@ try:
         draw = ImageDraw.Draw(image1)
         
         # Device Name ----------------------------------------------------------------
-        draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=font_roboto('Black', 25))
+        draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=font_roboto("Black", 25))
 
         # Gray Line ------------------------------------------------------------------
         draw.line([(0, 52), (280, 52)], fill = "GRAY", width = 1)
