@@ -5,7 +5,7 @@ import sys
 import time
 import logging
 from datetime import datetime
-sys.path.append("..")
+# sys.path.append("..")
 from python.lib import LCD_1inch69
 from PIL import Image, ImageDraw, ImageFont
 
