@@ -85,7 +85,7 @@ try:
             src_line_2 = ""
 
         # Draw on display ------------------------------------------------------------
-        image1 = Image.new("RGB", (disp.height, disp.width), "BLACK")
+        image1 = Image.new("RGB", (disp.width, disp.height), "BLACK")
         draw = ImageDraw.Draw(image1)
         
         # Device Name ----------------------------------------------------------------

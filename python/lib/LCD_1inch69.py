@@ -114,7 +114,7 @@ class LCD_1inch69(lcdconfig.RaspberryPi):
 
         self.command(0x29)
   
-    def SetWindows(self, Xstart, Ystart, Xend, Yend, horizontal = 1):
+    def SetWindows(self, Xstart, Ystart, Xend, Yend, horizontal = 0):
         if horizontal:  
             #set the X coordinates
             self.command(0x2A)
