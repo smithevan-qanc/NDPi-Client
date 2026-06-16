@@ -46,7 +46,7 @@ device = 0
 # logging.basicConfig(level=logging.DEBUG)
 
 # Margin in pixels
-screen_margin = 10
+screen_margin = 15
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 font_dir = os.path.join(script_dir, "python", "Font")
@@ -121,21 +121,21 @@ try:
             src_line_2 = ""
 
         # Draw on display ------------------------------------------------------------
-        image1 = Image.new("RGB", (disp.width, disp.height), "#13265C")
+        image1 = Image.new("RGB", (disp.width, disp.height), "#0D1428")
         draw = ImageDraw.Draw(image1)
         
         # Device Name ----------------------------------------------------------------
-        draw.text((dev_nam_x, screen_margin), device_name, fill="GRAY", font=font_roboto("Bold", 25))
-
+        draw.text((dev_nam_x, screen_margin), device_name, fill="GRAY", font=font_roboto("Black", 25))
         # Gray Line ------------------------------------------------------------------
         draw.line([(0, 52), (240, 52)], fill = "GRAY", width = 1)
 
+
         # NDI Status Label -----------------------------------------------------------
-        draw.text((10, 60), "NDI\nStatus", fill="GRAY", font=font_roboto("Medium", 25))
+        draw.text((screen_margin, 60), "NDI® Status", fill="GRAY", font=font_roboto("Thin", 20))
 
         # NDI Current State ----------------------------------------------------------
         ndi_status_x = 40  # get_right_x(ndpi_status_ndi_status, 25)
-        draw.text((ndi_status_x, 60), ndpi_status_ndi_status, fill="GREEN", font=font_roboto("SemiBold", 25))
+        draw.text((screen_margin, 80), ndpi_status_ndi_status, fill="GREEN", font=font_roboto("SemiBold", 25))
 
         # NDI Target Source ----------------------------------------------------------
         src_x_1 = screen_margin  # get_centered_x(src_line_1, 25)
