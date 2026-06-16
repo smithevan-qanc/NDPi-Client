@@ -27,12 +27,12 @@ def read_file(filepath):
     except:
         return "N/A"
     
-def get_centered_x(text, font_size, display_width=280):
+def get_centered_x(text, font_size, display_width=240):
     text_width = len(text) * (font_size * 0.55)
     x_coordinate = (display_width - text_width) / 2
     return max(5, int(round(x_coordinate)))
 
-def get_right_x(text, font_size, margin=10, display_width=280):
+def get_right_x(text, font_size, margin=10, display_width=240):
     text_width = len(text) * (font_size * 0.55)
     x_coordinate = (display_width - text_width - margin)
     return max(5, int(round(x_coordinate)))
@@ -43,10 +43,10 @@ Consolas_25 = ImageFont.truetype(os.path.join(font_dir, "Consolas.ttf"), 25)
 Consolas_Bold_20 = ImageFont.truetype(os.path.join(font_dir, "ConsolasBold.ttf"), 20)
 Roboto_25 = ImageFont.truetype(os.path.join(font_dir, "RobotoCondensed-Regular.ttf"), 25)
 
+def font_roboto(style, size):
+    return ImageFont.truetype(os.path.join(font_dir, f"RobotoCondensed-{style}.ttf"), size)
 
 try:
-    def font_roboto(style, size):
-        return ImageFont.truetype(os.path.join(font_dir, f"RobotoCondensed-{style}.ttf"), size)
     # Initialize display ONCE at startup
     disp = LCD_1inch69.LCD_1inch69()
     disp.Init()
@@ -92,7 +92,7 @@ try:
         draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=font_roboto("Black", 25))
 
         # Gray Line ------------------------------------------------------------------
-        draw.line([(0, 52), (280, 52)], fill = "GRAY", width = 1)
+        draw.line([(0, 52), (240, 52)], fill = "GRAY", width = 1)
 
         # NDI Status Label -----------------------------------------------------------
         draw.text((10, 60), "NDI\nStatus", fill="GRAY", font=Consolas_Bold_20)
@@ -108,7 +108,7 @@ try:
         draw.text((src_x_2, 132), src_line_2, fill="GREEN", font=Consolas_25)
 
         # Gray Line ------------------------------------------------------------------
-        draw.line([(0, 170), (280, 170)], fill = "GRAY", width = 1)
+        draw.line([(0, 170), (240, 170)], fill = "GRAY", width = 1)
 
         # CPU Temperature ------------------------------------------------------------
         # sys_temp = f"{format(int(read_file('../../../../sys/class/thermal/thermal_zone0/temp'))/1000, ".2f")}°C"
