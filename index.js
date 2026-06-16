@@ -562,7 +562,7 @@ async function quitNDPi(signal) {
         await index._closeApi().catch();
 
         console.log('*** SHUTDOWN ⎯ 9');
-        index._closeFsData();
+        await index._closeFsData();
 
         clearTimeout(timeout);
         resolve();
