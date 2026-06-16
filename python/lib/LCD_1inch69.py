@@ -3,8 +3,8 @@ import time
 from . import lcdconfig
 
 class LCD_1inch69(lcdconfig.RaspberryPi):
-    width = 280
-    height = 240
+    width = 240
+    height = 280
     
     def command(self, cmd):
         self.digital_write(self.DC_PIN, False)
@@ -114,7 +114,7 @@ class LCD_1inch69(lcdconfig.RaspberryPi):
 
         self.command(0x29)
   
-    def SetWindows(self, Xstart, Ystart, Xend, Yend, horizontal = 0):
+    def SetWindows(self, Xstart, Ystart, Xend, Yend, horizontal = 1):
         if horizontal:  
             #set the X coordinates
             self.command(0x2A)
