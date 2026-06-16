@@ -40,6 +40,9 @@ Consolas_25 = ImageFont.truetype("python/Font/Consolas.ttf", 25)
 Consolas_Bold_20 = ImageFont.truetype("python/Font/ConsolasBold.ttf", 20)
 Roboto_25 = ImageFont.truetype("python/Font/RobotoCondensed-Regular.ttf", 25)
 
+def font_roboto(style, size):
+    return ImageFont.truetype(f"../Font/RobotoCondensed-{style}", size)
+
 try:
     # Initialize display ONCE at startup
     disp = LCD_1inch69.LCD_1inch69()
@@ -55,17 +58,17 @@ try:
         time_string = datetime.now().strftime("%H:%M")
         
         # Read files
-        device_name = read_file('device_name')
+        device_name = read_file('python/script/device_name')
         dev_nam_x = get_centered_x(device_name.strip(), 30)
 
-        device_id = read_file('device_id')
+        device_id = read_file('python/script/device_id')
         dev_id_x = get_centered_x(device_id, 20)
 
-        device_ip = read_file('device_ip')
-        ndpi_version = read_file('ndpi_version')
-        ndpi_status_ndi_status = read_file('ndpi_status_ndi_status').upper()
+        device_ip = read_file('python/script/device_ip')
+        ndpi_version = read_file('python/script/ndpi_version')
+        ndpi_status_ndi_status = read_file('python/script/ndpi_status_ndi_status').upper()
 
-        target_source = read_file('ndpi_status_ndi_source_target').upper()
+        target_source = read_file('python/script/ndpi_status_ndi_source_target').upper()
         target_src = target_source.split('(')
         
         try:
@@ -83,7 +86,7 @@ try:
         draw = ImageDraw.Draw(image1)
         
         # Device Name ----------------------------------------------------------------
-        draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=Roboto_25)
+        draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=font_roboto('Black', 25))
 
         # Gray Line ------------------------------------------------------------------
         draw.line([(0, 52), (280, 52)], fill = "GRAY", width = 1)
