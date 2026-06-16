@@ -17,6 +17,9 @@ bus = 0
 device = 0 
 # logging.basicConfig(level=logging.DEBUG)
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+font_dir = os.path.join(script_dir, "python", "Font")
+
 def read_file(filepath):
     try:
         with open(filepath, 'r') as f:
@@ -34,14 +37,14 @@ def get_right_x(text, font_size, margin=10, display_width=280):
     x_coordinate = (display_width - text_width - margin)
     return max(5, int(round(x_coordinate)))
     
-Consolas_Bold_30 = ImageFont.truetype("python/Font/ConsolasBold.ttf", 30)
-Consolas_Bold_25 = ImageFont.truetype("python/Font/ConsolasBold.ttf", 25)
-Consolas_25 = ImageFont.truetype("python/Font/Consolas.ttf", 25)
-Consolas_Bold_20 = ImageFont.truetype("python/Font/ConsolasBold.ttf", 20)
-Roboto_25 = ImageFont.truetype("python/Font/RobotoCondensed-Regular.ttf", 25)
+Consolas_Bold_30 = ImageFont.truetype(os.path.join(font_dir, "ConsolasBold.ttf"), 30)
+Consolas_Bold_25 = ImageFont.truetype(os.path.join(font_dir, "ConsolasBold.ttf"), 25)
+Consolas_25 = ImageFont.truetype(os.path.join(font_dir, "Consolas.ttf"), 25)
+Consolas_Bold_20 = ImageFont.truetype(os.path.join(font_dir, "ConsolasBold.ttf"), 20)
+Roboto_25 = ImageFont.truetype(os.path.join(font_dir, "RobotoCondensed-Regular.ttf"), 25)
 
 def font_roboto(style, size):
-    return ImageFont.truetype(f"python/Font/RobotoCondensed-{style}", size)
+    return ImageFont.truetype(os.path.join(font_dir, f"RobotoCondensed-{style}"), size)
 
 try:
     # Initialize display ONCE at startup
