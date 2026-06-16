@@ -43,10 +43,10 @@ Consolas_25 = ImageFont.truetype(os.path.join(font_dir, "Consolas.ttf"), 25)
 Consolas_Bold_20 = ImageFont.truetype(os.path.join(font_dir, "ConsolasBold.ttf"), 20)
 Roboto_25 = ImageFont.truetype(os.path.join(font_dir, "RobotoCondensed-Regular.ttf"), 25)
 
-def font_roboto(style, size):
-    return ImageFont.truetype(os.path.join(font_dir, f"RobotoCondensed-{style}"), size)
 
 try:
+    def font_roboto(style, size):
+        return ImageFont.truetype(os.path.join(font_dir, f"RobotoCondensed-{style}"), size)
     # Initialize display ONCE at startup
     disp = LCD_1inch69.LCD_1inch69()
     disp.Init()
