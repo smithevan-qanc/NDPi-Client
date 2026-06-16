@@ -881,11 +881,12 @@ class FileSystemMonitor extends EventEmitter {
             this.debounceTimerDrmEvents = null;
         }
 
-        exec('killall -s SIGKILL udevadm', async () => {
-            await this.updateOutputDisplayFiles();
-            console.info( `[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
-            this.emit('closed');
-        });
+        return new Promise((resolve) => {
+            exec('killall -s SIGKILL udevadm', async () => {
+                console.info( `[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                resolve();
+            });
+        })
     }
 
 

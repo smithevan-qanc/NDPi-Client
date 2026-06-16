@@ -96,22 +96,6 @@ class CecController extends EventEmitter {
                 this.emit('closed');
                 resolve();
             });
-            // if (this.proc)
-            // {
-
-                // this.proc.once('close', () => {
-                //     try { clearTimeout(this.restartTimer); }
-                //     catch {}
-                //     console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
-                //     resolve();
-                // });
-
-                // console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
-                // this.proc.stdin.write('q');
-                // this.proc.kill('SIGKILL');
-            // }
-            // else
-            // { resolve(); }
         });
     }
 
@@ -136,8 +120,7 @@ class CecController extends EventEmitter {
 
             if (line.includes('waiting for input'))
             {
-                try
-                { clearTimeout(this.timeoutTimer); }
+                try { clearTimeout(this.timeoutTimer); }
                 catch {}
                 finally
                 {
@@ -145,6 +128,7 @@ class CecController extends EventEmitter {
                     this.restartDelay = 1000;
                     this.isReady = true;
                 }
+                
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ] CEC Ready`);
                 this.emit('ready');
                 this._flushQueue();

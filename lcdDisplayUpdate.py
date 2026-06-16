@@ -4,10 +4,38 @@ import os
 import sys 
 import time
 import logging
+import signal
 from datetime import datetime
 sys.path.append("..")
 from python.lib import LCD_1inch69
 from PIL import Image, ImageDraw, ImageFont
+
+# Global variable for display instance
+disp = None
+
+def cleanup(signum=None, frame=None):
+    """Cleanup function called on exit or signal"""
+    global disp
+    try:
+        if disp is not None:
+            imageClear = Image.new("RGB", (disp.height, disp.width), "BLACK")
+            disp.ShowImage(imageClear)
+            time.sleep(0.1)
+            disp.module_exit()
+    except Exception as e:
+        logging.error(f"Error during cleanup: {e}")
+    sys.exit(0)
+
+def signal_handler(signum, frame):
+    """Handle signals gracefully"""
+    signal_names = {
+        signal.SIGTERM: "SIGTERM",
+        signal.SIGINT: "SIGINT",
+        signal.SIGHUP: "SIGHUP",
+    }
+    signal_name = signal_names.get(signum, f"Signal {signum}")
+    print(f"\nReceived {signal_name}. Stopping...")
+    cleanup()
 
 # Raspberry Pi pin configuration
 RST = 27
@@ -47,6 +75,11 @@ def font_roboto(style, size):
     return ImageFont.truetype(os.path.join(font_dir, f"RobotoCondensed-{style}.ttf"), size)
 
 try:
+    # Register signal handlers
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGHUP, signal_handler)
+    
     # Initialize display ONCE at startup
     disp = LCD_1inch69.LCD_1inch69()
     disp.Init()
@@ -130,16 +163,17 @@ try:
         time.sleep(1)
 
 except KeyboardInterrupt:
-    print("\nStopping...")
-    imageClear = Image.new("RGB", (disp.height, disp.width), "BLACK")
-    disp.ShowImage(imageClear)
-    time.sleep(0.1)
-    disp.module_exit()
+    print("\nKeyboard interrupt received.")
+    cleanup()
 except Exception as e:
-    print(e)
+    print(f"Error: {e}")
     logging.error(f"Error: {e}")
-    errImg = Image.new("RGB", (disp.height, disp.width), "RED")
-    drawErr = ImageDraw.Draw(errImg)
-    disp.ShowImage(errImg)
-    time.sleep(1)
-    disp.module_exit()
+    try:
+        if disp is not None:
+            errImg = Image.new("RGB", (disp.height, disp.width), "RED")
+            drawErr = ImageDraw.Draw(errImg)
+            disp.ShowImage(errImg)
+            time.sleep(1)
+    except Exception as err:
+        logging.error(f"Error displaying error image: {err}")
+    cleanup()

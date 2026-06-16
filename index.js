@@ -178,8 +178,8 @@ class NDPi {
         return new Promise((resolve) => {
             if (this.settings)
             {
-                this.settings.once('closed', () => { resolve(); });
-                this.settings.close();
+                await this.settings.close();
+                resolve();
             }
             else
             {
@@ -228,12 +228,11 @@ class NDPi {
         return new Promise((resolve) => {
             if (this.lcdDisplay)
             {
-                this.lcdDisplay.once('close', () => {
-                    this.lcdDisplay = null;
-                    console.log('*** SHUTDOWN ⎯ 4 (2 of 2) [ End   [_closeLcdDisplay]: A ]');
+                this.lcdDisplay.once('exit', () => {
+                    console.log('*** SHUTDOWN ⎯ 4 (2 of 2) [ End   [_closeLcdDisplay]: B ]');
                     resolve();
-                });
-                this.lcdDisplay.kill('SIGKILL');
+                })
+                this.lcdDisplay.kill('SIGTERM');
             }
             else
             {
@@ -563,7 +562,7 @@ async function quitNDPi(signal) {
         await index._closeApi().catch();
 
         console.log('*** SHUTDOWN ⎯ 9');
-        await index._closeFsData();
+        index._closeFsData();
 
         clearTimeout(timeout);
         resolve();
