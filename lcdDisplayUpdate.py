@@ -121,7 +121,7 @@ try:
             src_line_2 = ""
 
         # Draw on display ------------------------------------------------------------
-        image1 = Image.new("RGB", (disp.width, disp.height), "#0D1428")
+        image1 = Image.new("RGB", (disp.width, disp.height), "#03050B")
         draw = ImageDraw.Draw(image1)
         
         # Device Name ----------------------------------------------------------------
@@ -131,17 +131,17 @@ try:
 
 
         # NDI Status Label -----------------------------------------------------------
-        draw.text((screen_margin, 60), "NDI® Status", fill="GRAY", font=font_roboto("Thin", 20))
+        draw.text((screen_margin, 60), "NDI® Status", fill="GRAY", font=font_roboto("Light", 20))
 
         # NDI Current State ----------------------------------------------------------
         ndi_status_x = 40  # get_right_x(ndpi_status_ndi_status, 25)
-        draw.text((screen_margin, 80), ndpi_status_ndi_status, fill="GREEN", font=font_roboto("SemiBold", 25))
+        draw.text((screen_margin, 80), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 24))
 
         # NDI Target Source ----------------------------------------------------------
         src_x_1 = screen_margin  # get_centered_x(src_line_1, 25)
         src_x_2 = screen_margin  # get_centered_x(src_line_2, 25)
-        draw.text((src_x_1, 105), src_line_1, fill="GREEN", font=Consolas_Bold_25)
-        draw.text((src_x_2, 132), src_line_2, fill="GREEN", font=Consolas_25)
+        draw.text((src_x_1, 115), src_line_1, fill="WHITE", font=font_roboto("Light", 20))
+        draw.text((src_x_2, 132), src_line_2, fill="WHITE", font=font_roboto("Light", 18))
 
         # Gray Line ------------------------------------------------------------------
         draw.line([(0, 170), (240, 170)], fill = "GRAY", width = 1)
@@ -156,10 +156,10 @@ try:
         # NDPi Version & Device IP ---------------------------------------------------
         line_dev_info = f"Version {ndpi_version}".strip()
         line_dev_info_x = screen_margin  # get_centered_x(line_dev_info, 20)
-        draw.text((line_dev_info_x, 195), line_dev_info, fill="GREEN", font=Consolas_Bold_20)
+        draw.text((screen_margin, 220), line_dev_info, fill="GRAY", font=font_roboto("Thin", 20))
 
         # Device ID ------------------------------------------------------------------
-        draw.text((dev_id_x, 215), device_id, fill="GREEN", font=Consolas_Bold_20)
+        draw.text((screen_margin, 245), device_id, fill="GRAY", font=Consolas_Bold_20)
         
         # Display --------------------------------------------------------------------
         disp.ShowImage(image1)
