@@ -140,8 +140,8 @@ try:
         # NDI Target Source ----------------------------------------------------------
         src_x_1 = screen_margin  # get_centered_x(src_line_1, 25)
         src_x_2 = screen_margin  # get_centered_x(src_line_2, 25)
-        draw.text((src_x_1, 115), src_line_1, fill="WHITE", font=font_roboto("Light", 20))
-        draw.text((src_x_2, 132), src_line_2, fill="WHITE", font=font_roboto("Light", 18))
+        draw.text((screen_margin + screen_margin, 115), src_line_1, fill="WHITE", font=font_roboto("Light", 20))
+        draw.text((screen_margin + screen_margin, 132), src_line_2, fill="WHITE", font=font_roboto("Light", 18))
 
         # Gray Line ------------------------------------------------------------------
         draw.line([(0, 170), (240, 170)], fill = "GRAY", width = 1)
