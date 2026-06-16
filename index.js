@@ -20,7 +20,7 @@ class NDPi {
     constructor() {
         this.isInitialized = false;
 
-        this.settings = null;
+        // this.settings = null;
         this.server_api = null;
         this.service_bonjour = null;
         this.service_chromium = null;
@@ -66,7 +66,6 @@ class NDPi {
      * START FILE SYSTEM WATCHER
      */
     startFsData() {
-        const FileSystemMonitor = require('./service/client_fs.js');
         this.settings = new (require('./service/client_fs.js'))(NDPi_VERSION, NDPi_VERSION_DATE);
 
         //  FS System Ready
@@ -176,13 +175,18 @@ class NDPi {
     }
 
     async _closeFsData() {
-        if (this.settings)
-        {
-            console.log('*** SHUTDOWN ⎯ 9 (1 of 2) [ Start [_closeFsData] ]');
-            await this.settings.close();
-            console.log('*** SHUTDOWN ⎯ 9 (2 of 2) [ End   [_closeFsData] ]');
-            this.settings = null;
-        }
+        return new Promise((resolve) => {
+            if (this.settings)
+            {
+                this.settings.once('closed', () => { resolve(); });
+                this.settings.close();
+            }
+            else
+            {
+                console.error(`FsData wasn't running...`, this.settings);
+                resolve();
+            }
+        });
     }
 
     /**
@@ -354,6 +358,10 @@ class NDPi {
             }, 2000);
         });
 
+        this.controller_cec.once('timeout', (data) => {
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_cec ]`, data);
+        });
+
         this.controller_cec.on('event', (data) => {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_cec ]`, data);
         });
@@ -364,7 +372,6 @@ class NDPi {
 
         this.controller_cec.once('close', (data) => {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ][ client_cec ] ${String(data || 'CEC Unavailable')}`);
-            // this.controller_cec.close();
             this.controller_cec = null;
         });
     }
@@ -372,7 +379,6 @@ class NDPi {
     async _closeCecController() {
         if (this.controller_cec)
         {
-            console.log('*** SHUTDOWN ⎯ 5 (1 of 2) [ Start [_closeCecController] ]');
             await this.controller_cec.close();
             console.log('*** SHUTDOWN ⎯ 5 (2 of 2) [ End   [_closeCecController] ]');
             this.controller_cec = null;

@@ -75,7 +75,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         if (this.service)
         {
             await new Promise((resolve) => {
-                this.service.once('exit', () => {
+                this.service.once('close', () => {
                     this.service = null;
                     resolve();
                 });
@@ -83,18 +83,21 @@ class ChromiumOverlayDisplay extends EventEmitter {
             });
         }
 
-        await new Promise((resolve) => {
+        return new Promise((resolve) => {
             exec('pgrep chromium', (error, stdout, stderr) => {
                 if (!error) {
-                    try { exec('killall chromium'); }
-                    catch {}
+                    exec('killall chromium', () => {
+                        console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                        resolve();
+                    });
                 }
-                resolve();
+                else
+                {
+                    console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                    resolve();
+                }
             });
         });
-
-        console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
-        return;
     }
 }
 

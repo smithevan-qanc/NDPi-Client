@@ -612,36 +612,17 @@ const { exec, spawn } = require('node:child_process');
         async function activateDisplay() {
             try
             {
-                // const cecEnabled = Boolean(fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_enabled'), 'utf8'));
-                // const cecPower = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_status_power'), 'utf8') == 'On';
+                console.log(`[ ${path.basename(__filename).split('.')[0]} ][ activateDisplay() ][ CEC ] Attempting to activate display.`);
 
-                // if (cecEnabled && !cecPower)
-                // {
-                //     console.log('Attempting to wake display. CEC');
-                //     const f = await fetch('http://localhost:3080/api/v1/__internal/cec', {
-                //         method: 'POST',
-                //         headers: { 'Content-Type': 'application/json' },
-                //         body: JSON.stringify({ id: crypto.randomUUID, data: 'on 0' })
-                //     });
-                //     await wait(1500);
-                // }
+                const f2 = await fetch('http://localhost:3080/api/v1/__internal/cec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: crypto.randomUUID, data: 'as' })
+                });
+                if (!f2.ok) { throw new Error(); }
 
-                const cecActiveSource = Boolean(fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_cec_this_source_active'), 'utf8') || 'false');
-
-                if (!cecActiveSource)
-                {
-                    console.log(`[ ${path.basename(__filename).split('.')[0]} ][ activateDisplay() ][ CEC ] Attempting to activate display.`);
-
-                    const f2 = await fetch('http://localhost:3080/api/v1/__internal/cec', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: crypto.randomUUID, data: 'as' })
-                    });
-                    if (!f2.ok) { throw new Error(); }
-
-                    const data = await f2.json();
-                    if (!data.success) { throw new Error(); }
-                }
+                const data = await f2.json();
+                if (!data.success) { throw new Error(); }
             }
             catch
             {

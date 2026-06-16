@@ -38,6 +38,7 @@ Consolas_Bold_30 = ImageFont.truetype("../Font/ConsolasBold.ttf", 30)
 Consolas_Bold_25 = ImageFont.truetype("../Font/ConsolasBold.ttf", 25)
 Consolas_25 = ImageFont.truetype("../Font/Consolas.ttf", 25)
 Consolas_Bold_20 = ImageFont.truetype("../Font/ConsolasBold.ttf", 20)
+Roboto_25 = ImageFont.truetype("../Font/RobotoCondensed-Regular.ttf", 25)
 
 try:
     # Initialize display ONCE at startup
@@ -82,7 +83,7 @@ try:
         draw = ImageDraw.Draw(image1)
         
         # Device Name ----------------------------------------------------------------
-        draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=Consolas_Bold_30)
+        draw.text((dev_nam_x, 15), device_name, fill="GREEN", font=Roboto_25)
 
         # Gray Line ------------------------------------------------------------------
         draw.line([(0, 52), (280, 52)], fill = "GRAY", width = 1)

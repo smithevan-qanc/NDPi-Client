@@ -1,4 +1,4 @@
-const { spawn } = require('child_process');
+const child = require('child_process');
 const EventEmitter = require('events');
 const path = require('path');
 const func = require('./functions');
@@ -37,7 +37,7 @@ class CecController extends EventEmitter {
         this.isReady = false;
         this.enabled = true;
 
-        this.proc = spawn('cec-client', ['-o', this.deviceName, '-t', 'r', '-d', '4'], { stdio: ['pipe', 'pipe', 'pipe'] });
+        this.proc = child.spawn('cec-client', ['-o', this.deviceName, '-t', 'r', '-d', '4'], { stdio: ['pipe', 'pipe', 'pipe'] });
         this.proc.stdout.on('data', (data) => this._handleStdout(data));
         this.proc.stderr.on('data', (data) => this._handleStderr(data));
         
@@ -92,17 +92,22 @@ class CecController extends EventEmitter {
         this.enabled = false;
 
         return new Promise((resolve) => {
+            child.exec('killall -s SIGKILL cec-client', () => {
+                this.emit('closed');
+                resolve();
+            });
             // if (this.proc)
             // {
-                this.proc.once('close', () => {
-                    try { clearTimeout(this.restartTimer); }
-                    catch {}
-                    console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
-                    resolve();
-                });
 
-                console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
-                this.proc.stdin.write('q');
+                // this.proc.once('close', () => {
+                //     try { clearTimeout(this.restartTimer); }
+                //     catch {}
+                //     console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+                //     resolve();
+                // });
+
+                // console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
+                // this.proc.stdin.write('q');
                 // this.proc.kill('SIGKILL');
             // }
             // else

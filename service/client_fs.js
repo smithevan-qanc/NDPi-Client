@@ -830,28 +830,29 @@ class FileSystemMonitor extends EventEmitter {
         this.drmMonitor = spawn('udevadm', ['monitor', '--subsystem-match=drm', '--kernel']);
 
         this.drmMonitor.stdout.on('data', (data) => {
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ] DRM Update`);
-            this.debounceDrm();
+            this.drmEvent();
         });
 
+        this.drmMonitor.stderr.on('data', (data) => {
+
+        });
         this.drmMonitor.on('error', (error) => {
             console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] 'udevadm' DRM monitor disabled`, error.toString());
-            this.drmMonitor = null;
         });
 
         this.drmMonitor.once('close', () => {
-            console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] DRM Monitor`)
-            try { clearTimeout(this.debounceTimerDrmEvents) } catch {}
+            try { clearTimeout(this.debounceTimerDrmEvents) }
+            catch {}
+            // finally { this.updateOutputDisplayFiles(); }
         });
     }
 
-    debounceDrm(debounceMs = 1000) {
+    drmEvent(debounceMs = 1000) {
         if (this.debounceTimerDrmEvents)
         {
             clearTimeout(this.debounceTimerDrmEvents);
             this.debounceTimerDrmEvents = null;
         }
-
         this.debounceTimerDrmEvents = setTimeout(() => {
             this.updateOutputDisplayFiles();
             this.debounceTimerDrmEvents = null;
@@ -880,25 +881,10 @@ class FileSystemMonitor extends EventEmitter {
             this.debounceTimerDrmEvents = null;
         }
 
-        return new Promise((resolve) => {
-            if (this.drmMonitor)
-            {
-                // this.drmMonitor.once('close', () => {
-                //     this.drmMonitor = null;
-                //     console.info( `[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
-                //     resolve();
-                // });
-                // this.drmMonitor.kill('SIGKILL');
-                exec('killall -s SIGKILL udevadm', () => {
-                    resolve();
-                });
-
-            }
-            else
-            {
-                console.info( `[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
-                resolve();
-            }
+        exec('killall -s SIGKILL udevadm', () => {
+            await this.updateOutputDisplayFiles();
+            console.info( `[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+            this.emit('closed');
         });
     }
 
