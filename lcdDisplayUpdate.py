@@ -5,7 +5,7 @@ import sys
 import time
 import logging
 from datetime import datetime
-# sys.path.append("..")
+sys.path.append("..")
 from python.lib import LCD_1inch69
 from PIL import Image, ImageDraw, ImageFont
 
@@ -41,7 +41,7 @@ Consolas_Bold_20 = ImageFont.truetype("python/Font/ConsolasBold.ttf", 20)
 Roboto_25 = ImageFont.truetype("python/Font/RobotoCondensed-Regular.ttf", 25)
 
 def font_roboto(style, size):
-    return ImageFont.truetype(f"../Font/RobotoCondensed-{style}", size)
+    return ImageFont.truetype(f"python/Font/RobotoCondensed-{style}", size)
 
 try:
     # Initialize display ONCE at startup
