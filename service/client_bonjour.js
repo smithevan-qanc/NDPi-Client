@@ -4,6 +4,7 @@ const path = require('path');
 class NDPiBonjourService {
     constructor(fsData) {
         this.service = null;
+        this.serviceInitialized = false;
         this.settings = fsData;
 
         this.localIp = this.settings.get('device_ip') || null;
@@ -112,11 +113,13 @@ class NDPiBonjourService {
         this.service = bonjour.publish(options);
         this.service.start();
 
-        this.service.once('up', () => {
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Service Up');
-        });
-
         this.service.on('up', () => {
+            if (!this.serviceInitialized)
+            {
+                this.serviceInitialized = true;
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'Service Up');
+            }
+
             this.settings.put('ndpi_status_mdns_service', 'up');
         });
         

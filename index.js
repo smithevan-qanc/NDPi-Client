@@ -199,8 +199,7 @@ class NDPi {
             await func.wait(500);
         }
 
-        this.lcdDisplay = spawn('python', ['update_lcd.py'], {
-            cwd: this.settings.lcdDisplayScriptPath,
+        this.lcdDisplay = spawn('python', ['lcdDisplayUpdate.py'], {
             env: { ...process.env }
         });
 
