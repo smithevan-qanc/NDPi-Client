@@ -55,12 +55,12 @@ def read_file(filepath):
     except:
         return "N/A"
     
-def get_centered_x(text, font_size, display_width=240):
+def get_centered_x(text, font_size, display_width=280):
     text_width = len(text) * (font_size * 0.55)
     x_coordinate = (display_width - text_width) / 2
     return max(5, int(round(x_coordinate)))
 
-def get_right_x(text, font_size, margin=10, display_width=240):
+def get_right_x(text, font_size, margin=10, display_width=280):
     text_width = len(text) * (font_size * 0.55)
     x_coordinate = (display_width - text_width - margin)
     return max(5, int(round(x_coordinate)))
