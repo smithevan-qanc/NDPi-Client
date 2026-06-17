@@ -111,8 +111,8 @@ try:
     disp.bl_DutyCycle(100)
     
     # Load SVG image
-    # svg_path = os.path.join(script_dir, "assets", "NLC_Outline.svg")
-    svg_path = os.path.join(script_dir, "assets", "lcd", "icon", "calibrate_10px.svg")
+    svg_path = os.path.join(script_dir, "assets", "NLC_Outline.svg")
+    # svg_path = os.path.join(script_dir, "assets", "lcd", "icon", "calibrate_10px.svg")
     svg_image = convert_svg_to_image(svg_path, disp.width, disp.height)  # width, height in pixels
 
     icon_dir = os.path.join(script_dir, "assets", "lcd", "icon")
@@ -168,9 +168,9 @@ try:
         # Device IP ------------------------------------------------------------------
         draw.text((screen_margin + screen_margin, 40), device_ip, fill="GRAY", font=font_roboto("Medium", 22))
         if device_ip != "":
-            image1.paste(network_online, (10,40), network_online)
+            image1.paste(network_online, (20,40), network_online)
         if device_ip == "":
-            image1.paste(network_offline, (10, 40), network_offline)
+            image1.paste(network_offline, (20, 40), network_offline)
         # Device ID ------------------------------------------------------------------
         draw.text((screen_margin, 65), device_id, fill="GRAY", font=font_roboto("Regular", 20))
 
