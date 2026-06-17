@@ -6,9 +6,15 @@ import time
 import logging
 import signal
 from datetime import datetime
+from io import BytesIO
 sys.path.append("..")
 from python.lib import LCD_1inch69
 from PIL import Image, ImageDraw, ImageFont
+
+try:
+    import cairosvg
+except ImportError:
+    cairosvg = None
 
 # Global variable for display instance
 disp = None
@@ -77,6 +83,21 @@ Roboto_25 = ImageFont.truetype(os.path.join(font_dir, "RobotoCondensed-Regular.t
 def font_roboto(style, size):
     return ImageFont.truetype(os.path.join(font_dir, f"RobotoCondensed-{style}.ttf"), size)
 
+def convert_svg_to_image(svg_path, width, height):
+    """Convert SVG to PIL Image"""
+    if cairosvg is None:
+        logging.warning("cairosvg not installed, skipping SVG conversion")
+        return None
+    
+    try:
+        png_bytes = BytesIO()
+        cairosvg.svg2png(url=svg_path, write_to=png_bytes, output_width=width, output_height=height)
+        png_bytes.seek(0)
+        return Image.open(png_bytes).convert("RGBA")
+    except Exception as e:
+        logging.error(f"Error loading SVG: {e}")
+        return None
+
 try:
     # Register signal handlers
     signal.signal(signal.SIGTERM, signal_handler)
@@ -88,6 +109,10 @@ try:
     disp.Init()
     disp.clear()
     disp.bl_DutyCycle(100)
+    
+    # Load SVG image
+    svg_path = os.path.join(script_dir, "assets", "Display_Overlay.svg")
+    svg_image = convert_svg_to_image(svg_path, 120, 100)  # width, height in pixels
     
     print("Display initialized. Starting loop...")
     
@@ -157,6 +182,9 @@ try:
         # NDPi Version & Device IP ---------------------------------------------------
         line_dev_info = f"Version {ndpi_version}".strip()
         draw.text((screen_margin + screen_margin, 240), line_dev_info, fill="GRAY", font=font_roboto("Light", 20))
+        
+        if svg_image is not None:
+            image1.paste(svg_image, (50, 30), svg_image)  # (x, y) coordinates
         
         # Display --------------------------------------------------------------------
         disp.ShowImage(image1)
