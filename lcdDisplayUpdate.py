@@ -144,11 +144,11 @@ try:
         draw.text((screen_margin, 120), "NDI® Status", fill="GRAY", font=font_roboto("Light", 20))
 
         # NDI Current State ----------------------------------------------------------
-        draw.text((screen_margin, 140), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 20))
+        draw.text((120, 120), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 20))
 
         # NDI Target Source ----------------------------------------------------------
-        draw.text((screen_margin + screen_margin, 175), src_line_1, fill="WHITE", font=font_roboto("Thin", 18))
-        draw.text((screen_margin + screen_margin, 195), src_line_2, fill="WHITE", font=font_roboto("Thin", 15))
+        draw.text((screen_margin + screen_margin, 170), src_line_1, fill="WHITE", font=font_roboto("Thin", 22))
+        draw.text((screen_margin + screen_margin, 195), src_line_2, fill="WHITE", font=font_roboto("Thin", 18))
 
 
 
