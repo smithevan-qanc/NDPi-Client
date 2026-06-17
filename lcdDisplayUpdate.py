@@ -164,7 +164,7 @@ try:
             image1.paste(svg_image, (0, 0), svg_image)  # (x, y) coordinates
         
         # Device Name ----------------------------------------------------------------
-        draw.text((screen_margin, screen_margin - 2), device_name, fill="GRAY", font=font_roboto("Black", 22))
+        draw.text((screen_margin, screen_margin - 3), device_name, fill="GRAY", font=font_roboto("Black", 22))
 
         # Device IP ------------------------------------------------------------------
         draw.text((screen_margin + screen_margin + 5, 50), device_ip, fill="GRAY", font=font_roboto("Medium", 22))
@@ -201,7 +201,7 @@ try:
 
         # NDPi Version & Device IP ---------------------------------------------------
         line_dev_info = f"Version {ndpi_version}".strip()
-        draw.text((screen_margin + 3, 245), line_dev_info, fill="GRAY", font=font_roboto("Light", 15))
+        draw.text((screen_margin + 2, 245), line_dev_info, fill="GRAY", font=font_roboto("Light", 15))
         
         # Display --------------------------------------------------------------------
         disp.ShowImage(image1)
