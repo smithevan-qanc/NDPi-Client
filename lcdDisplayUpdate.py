@@ -177,23 +177,23 @@ try:
 
 
         # Gray Line ------------------------------------------------------------------
-        draw.line([(0, 120), (240, 120)], fill = "#21346F", width = 1)
+        draw.line([(0, 135), (240, 135)], fill = "#21346F", width = 1)
 
 
 
         # NDI Status Label -----------------------------------------------------------
-        draw.text((screen_margin, 130), "NDI Status", fill="GRAY", font=font_roboto("Light", 20))
+        draw.text((screen_margin, 145), "NDI Status", fill="GRAY", font=font_roboto("Light", 20))
         # NDI Current State ----------------------------------------------------------
-        draw.text((120, 130), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 20))
+        draw.text((120, 145), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 20))
 
         # NDI Target Source ----------------------------------------------------------
-        draw.text((screen_margin + screen_margin, 170), src_line_1, fill="WHITE", font=font_roboto("Thin", 22))
-        draw.text((screen_margin + screen_margin, 195), src_line_2, fill="WHITE", font=font_roboto("Thin", 18))
+        draw.text((screen_margin + screen_margin, 175), src_line_1, fill="WHITE", font=font_roboto("Thin", 22))
+        draw.text((screen_margin + screen_margin, 200), src_line_2, fill="WHITE", font=font_roboto("Thin", 18))
 
 
 
         # Gray Line ------------------------------------------------------------------
-        draw.line([(0, 230), (240, 230)], fill = "#21346F", width = 1)
+        draw.line([(0, 235), (240, 235)], fill = "#21346F", width = 1)
 
 
 
