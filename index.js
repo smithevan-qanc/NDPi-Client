@@ -229,7 +229,7 @@ class NDPi {
             if (this.lcdDisplay)
             {
                 this.lcdDisplay.once('exit', () => {
-                    console.log('*** SHUTDOWN ⎯ 4 (2 of 2) [ End   [_closeLcdDisplay]: B ]');
+                    console.log('*** SHUTDOWN ⎯ 4 (2 of 2) [ End   [_closeLcdDisplay]: A ]');
                     resolve();
                 })
                 this.lcdDisplay.kill('SIGTERM');
@@ -416,24 +416,26 @@ class NDPi {
                     resolve();
                 }, 5000);
 
-                this.ndiReceiver.once('killed', () => {
-                    this.ndiReceiver = null;
-                    clearTimeout(autoResolve);
-                    resolve();
-                });
-
                 if (this.ndiReceiver.receiver)
-                { this.ndiReceiver.receiver.kill('SIGKILL'); }
+                {
+                    this.ndiReceiver.once('killed', () => {
+                        this.ndiReceiver = null;
+                        console.log('*** SHUTDOWN ⎯ 1 (2 of 2) [ End   [_killNdiReceiver]: A ]');
+                        clearTimeout(autoResolve);
+                        resolve();
+                    });
+                    this.ndiReceiver.receiver.kill('SIGKILL');
+                }
                 else
                 {
                     clearTimeout(autoResolve);
-                    console.log('*** SHUTDOWN ⎯ 1 (2 of 2) [ End   [_killNdiReceiver]: A ]');
+                    console.log('*** SHUTDOWN ⎯ 1 (2 of 2) [ End   [_killNdiReceiver]: B ]');
                     resolve();
                 }
             }
             else
             {
-                console.log('*** SHUTDOWN ⎯ 1 (2 of 2) [ End   [_killNdiReceiver]: B ]');
+                console.log('*** SHUTDOWN ⎯ 1 (2 of 2) [ End   [_killNdiReceiver]: C ]');
                 resolve();
             }
         });
@@ -516,33 +518,25 @@ async function quitNDPi(signal) {
         }, 10000);
 
         console.log('*** SHUTDOWN ⎯ 1');
-        await index._killNdiReceiver().catch();
+        await index._killNdiReceiver();
 
         console.log('*** SHUTDOWN ⎯ 2');
         try {
-            console.log('*** SHUTDOWN ⎯ 2 (1 of 4) [ Start [ndpiServerStatusUpdate]: clearInterval ]');
+            console.log('*** SHUTDOWN ⎯ 2 (1 of 2) [ Start [ndpiServerStatusUpdate]: clearInterval ]');
             clearInterval(index.ndpiServerStatusUpdate);
-            console.log('*** SHUTDOWN ⎯ 2 (2 of 4) [ End   [ndpiServerStatusUpdate]: clearInterval ]');
+            console.log('*** SHUTDOWN ⎯ 2 (2 of 2) [ End   [ndpiServerStatusUpdate]: clearInterval ]');
         }
         catch {}
-        finally {
-            console.log('*** SHUTDOWN ⎯ 2 (3 of 4) [ Start [ndpiServerStatusUpdate]: NULL ]');
-            index.ndpiServerStatusUpdate = null;
-            console.log('*** SHUTDOWN ⎯ 2 (4 of 4) [ End   [ndpiServerStatusUpdate]: NULL ]');
-        }
+        finally { index.ndpiServerStatusUpdate = null; }
 
         console.log('*** SHUTDOWN ⎯ 3');
         try {
-            console.log('*** SHUTDOWN ⎯ 3 (1 of 4) [ Start [lcdDisplayRestartTimer]: clearInterval ]');
+            console.log('*** SHUTDOWN ⎯ 3 (1 of 2) [ Start [lcdDisplayRestartTimer]: clearInterval ]');
             clearTimeout(index.lcdDisplayRestartTimer);
-            console.log('*** SHUTDOWN ⎯ 3 (2 of 4) [ End   [lcdDisplayRestartTimer]: clearInterval ]');
+            console.log('*** SHUTDOWN ⎯ 3 (2 of 2) [ End   [lcdDisplayRestartTimer]: clearInterval ]');
         }
         catch {}
-        finally {
-            console.log('*** SHUTDOWN ⎯ 3 (3 of 4) [ Start [lcdDisplayRestartTimer]: NULL ]');
-            index.lcdDisplayRestartTimer = null;
-            console.log('*** SHUTDOWN ⎯ 3 (4 of 4) [ End   [lcdDisplayRestartTimer]: NULL ]');
-        }
+        finally { index.lcdDisplayRestartTimer = null; }
 
         console.log('*** SHUTDOWN ⎯ 4');
         await index._closeLcdDisplay().catch();
@@ -562,7 +556,7 @@ async function quitNDPi(signal) {
         await index._closeApi().catch();
 
         console.log('*** SHUTDOWN ⎯ 9');
-        await index._closeFsData();
+        index._closeFsData();
 
         clearTimeout(timeout);
         resolve();

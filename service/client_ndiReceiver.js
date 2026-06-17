@@ -165,27 +165,45 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.emit('error');
         });
 
-        this.receiver.once('exit', (code, signal) => {
-
+        this.receiver.once('exit', async (code, signal) => {
             this.ndiActiveSource = null;
-            this.settings.put('ndpi_status_ndi_source_active', '');
-
             this.ndiStatus = 'idle';
-            this.settings.put('ndpi_status_ndi_status', this.ndiStatus);
-
             this.ndiConnectedAt = null;
-            this.settings.put('ndpi_status_ndi_source_connected_time', '');
-
             this.ndiFramerate = null;
-            this.settings.put('ndpi_status_ndi_source_framerate', '');
-
             this.ndiResolution = null;
-            this.settings.put('ndpi_status_ndi_source_resolution', '');
+
+            await Promise.all([
+                new Promise((resolve) => {
+                    this.settings.once('ndpi_status_ndi_source_active', () => { resolve(); });
+                    this.settings.put('ndpi_status_ndi_source_active', '');
+                }),
+                new Promise((resolve) => {
+                    this.settings.once('ndpi_status_ndi_status', () => { resolve(); });
+                    this.settings.put('ndpi_status_ndi_status', this.ndiStatus);
+                }),
+                new Promise((resolve) => {
+                    this.settings.once('ndpi_status_ndi_source_connected_time', () => { resolve(); });
+                    this.settings.put('ndpi_status_ndi_source_connected_time', '');
+                }),
+                new Promise((resolve) => {
+                    this.settings.once('ndpi_status_ndi_source_framerate', () => { resolve(); });
+                    this.settings.put('ndpi_status_ndi_source_framerate', '');
+                }),
+                new Promise((resolve) => {
+                    this.settings.once('ndpi_status_ndi_source_resolution', () => { resolve(); });
+                    this.settings.put('ndpi_status_ndi_source_resolution', '');
+                }),
+            ]);
+
+            // this.settings.put('ndpi_status_ndi_source_active', '');
+            // this.settings.put('ndpi_status_ndi_status', this.ndiStatus);
+            // this.settings.put('ndpi_status_ndi_source_connected_time', '');
+            // this.settings.put('ndpi_status_ndi_source_framerate', '');
+            // this.settings.put('ndpi_status_ndi_source_resolution', '');
 
             this.receiver = null;
 
-            if (signal == 'SIGKILL')
-            { this.emit('killed'); }
+            if (signal == 'SIGKILL') { this.emit('killed'); }
         });
     }
 
@@ -343,7 +361,7 @@ class NDI_Receiver_v4 extends EventEmitter {
                 try 
                 {
                     console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
-                    this.receiver.kill('SIGTERM');
+                    this.receiver.kill('SIGKILL');
                 }
                 catch
                 { 
