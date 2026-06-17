@@ -538,8 +538,8 @@ async function quitNDPi(signal) {
         catch {}
         finally { index.lcdDisplayRestartTimer = null; }
 
-        console.log('*** SHUTDOWN ⎯ 4');
-        await index._closeLcdDisplay().catch();
+        // console.log('*** SHUTDOWN ⎯ 4');
+        // await index._closeLcdDisplay().catch();
 
         console.log('*** SHUTDOWN ⎯ 5');
         await index._closeCecController().catch();
