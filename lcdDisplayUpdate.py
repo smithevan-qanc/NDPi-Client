@@ -111,10 +111,18 @@ try:
     disp.bl_DutyCycle(100)
     
     # Load SVG image
-    # assets/lcd/icon/calibrate_10px.svg
-    svg_path = os.path.join(script_dir, "assets", "lcd", "icon", "calibrate_10px.svg")
     # svg_path = os.path.join(script_dir, "assets", "NLC_Outline.svg")
+    svg_path = os.path.join(script_dir, "assets", "lcd", "icon", "calibrate_10px.svg")
     svg_image = convert_svg_to_image(svg_path, disp.width, disp.height)  # width, height in pixels
+
+    icon_dir = os.path.join(script_dir, "assets", "lcd", "icon")
+    network_online = convert_svg_to_image(os.path.join(icon_dir, "net_online.svg"), 16, 16)
+    network_offline = convert_svg_to_image(os.path.join(icon_dir, "net_offline.svg"), 16, 16)
+    display_active = convert_svg_to_image(os.path.join(icon_dir, "display_on.svg"), 16, 16)
+    display_inactive = convert_svg_to_image(os.path.join(icon_dir, "display_off.svg"), 16, 16)
+    hdmi_active = convert_svg_to_image(os.path.join(icon_dir, "hdmi_active.svg"), 16, 16)
+    hdmi_inactive = convert_svg_to_image(os.path.join(icon_dir, "hdmi_inactive.svg"), 16, 16)
+
     
     print("Display initialized. Starting loop...")
     
@@ -159,6 +167,10 @@ try:
         draw.text((screen_margin, screen_margin - 5), device_name, fill="GRAY", font=font_roboto("Black", 22))
         # Device IP ------------------------------------------------------------------
         draw.text((screen_margin + screen_margin, 40), device_ip, fill="GRAY", font=font_roboto("Medium", 22))
+        if device_ip != "":
+            image1.paste(network_online, (10,40), network_online)
+        if device_ip == "":
+            image1.paste(network_offline, (10, 40), network_offline)
         # Device ID ------------------------------------------------------------------
         draw.text((screen_margin, 65), device_id, fill="GRAY", font=font_roboto("Regular", 20))
 
