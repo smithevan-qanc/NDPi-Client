@@ -56,7 +56,7 @@ def read_file(filepath):
         with open(filepath, 'r') as f:
             return f.read().strip()
     except:
-        return "N/A"
+        return ""
     
 def get_centered_x(text, font_size, display_width=240):
     text_width = len(text) * (font_size * 0.55)
@@ -107,7 +107,7 @@ try:
         ndpi_version = read_file('python/script/ndpi_version')
         ndpi_status_ndi_status = read_file('python/script/ndpi_status_ndi_status').upper()
 
-        target_source = read_file('python/script/ndpi_status_ndi_source_target').upper()
+        target_source = read_file('python/script/ndpi_status_ndi_source_active').upper()
         target_src = target_source.split('(')
         
         try:

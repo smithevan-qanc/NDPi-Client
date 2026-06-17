@@ -51,7 +51,7 @@ class FileSystemMonitor extends EventEmitter {
             'device_ip',
             'ndpi_version',
             'ndpi_status_ndi_status',
-            'ndpi_status_ndi_source_target',
+            'ndpi_status_ndi_source_active',
         ];
 
         process.nextTick(() => { this.init(); });
