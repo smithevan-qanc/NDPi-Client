@@ -111,8 +111,10 @@ try:
     disp.bl_DutyCycle(100)
     
     # Load SVG image
-    svg_path = os.path.join(script_dir, "assets", "NLC_Outline.svg")
-    svg_image = convert_svg_to_image(svg_path, 70, 70)  # width, height in pixels
+    # assets/lcd/icon/calibrate_10px.svg
+    svg_path = os.path.join(script_dir, "assets", "lcd", "icon", "calibrate_10px.svg")
+    # svg_path = os.path.join(script_dir, "assets", "NLC_Outline.svg")
+    svg_image = convert_svg_to_image(svg_path, disp.width, disp.height)  # width, height in pixels
     
     print("Display initialized. Starting loop...")
     
@@ -150,7 +152,8 @@ try:
         draw = ImageDraw.Draw(image1)
         
         if svg_image is not None:
-            image1.paste(svg_image, (150, 140), svg_image)  # (x, y) coordinates
+            # image1.paste(svg_image, (150, 140), svg_image)  # (x, y) coordinates
+            image1.paste(svg_image, (0, 0), svg_image)  # (x, y) coordinates
         
         # Device Name ----------------------------------------------------------------
         draw.text((screen_margin, screen_margin), device_name, fill="GRAY", font=font_roboto("Black", 22))
