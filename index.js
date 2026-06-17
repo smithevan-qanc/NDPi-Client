@@ -226,7 +226,7 @@ class NDPi {
     async _closeLcdDisplay () {
         console.log('*** SHUTDOWN ⎯ 4 (1 of 2) [ Start [_closeLcdDisplay] ]');
         return new Promise((resolve) => {
-            if (this.lcdDisplay)
+            if (!this.lcdDisplay.exitCode)
             {
                 this.lcdDisplay.once('exit', () => {
                     console.log('*** SHUTDOWN ⎯ 4 (2 of 2) [ End   [_closeLcdDisplay]: A ]');
