@@ -51,7 +51,7 @@ class ClientServerWebSocket extends EventEmitter {
         }
         catch (error)
         {
-            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ] Connection Failed`, error);
+            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ] Connection Failed`, error);
             this.scheduleReconnect();
         }
             
@@ -69,17 +69,17 @@ class ClientServerWebSocket extends EventEmitter {
             }
             catch (error)
             {
-                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] NDPi Server: Message:`, data);
-                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] NDPi Server: Error:`, error);
+                console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] NDPi Server: Message:`, data);
+                console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] NDPi Server: Error:`, error);
             }
         });
         
         this.socket.on('error', (error) => {
-            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] NDPi Server Connection`, error);
+            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] NDPi Server Connection`, error);
         });
         
         this.socket.on('close', () => {
-            console.info(`⚠️  [ ${path.basename(__filename).split('.')[0]} ] NDPi Server Disconnected`);
+            console.info(`⚠️   [ ${path.basename(__filename).split('.')[0]} ] NDPi Server Disconnected`);
             this.scheduleReconnect();
         });
     }
@@ -123,13 +123,13 @@ class ClientServerWebSocket extends EventEmitter {
             { return }
         if (!message.type)
             {
-                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Missing 'message.type'. Message:`, message);
+                console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Missing 'message.type'. Message:`, message);
                 return;
             }
         if (this.socket && this.socket.readyState <= 1)
             { this.socket.send(JSON.stringify(message)) }
         else
-            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Unable to send message.`) }
+            { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Unable to send message.`) }
     }
 
 }

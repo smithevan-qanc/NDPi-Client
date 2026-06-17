@@ -91,7 +91,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             }, 200);
 
             ws.onerror = (error) => {
-                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `Overlay Display WebSocket Server`, error);
+                console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `Overlay Display WebSocket Server`, error);
             };
 
             ws.onclose = () => {
@@ -121,11 +121,11 @@ class NDPiCommandServer_Client extends EventEmitter {
                 try
                 { func.processCommand(JSON.parse(event.data)); }
                 catch (error)
-                { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error); }
+                { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, error); }
             };
 
             ws.onerror = (error) => {
-                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `System GUI WebSocket Server`, error);
+                console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `System GUI WebSocket Server`, error);
             };
 
             ws.onclose = () => {
@@ -154,7 +154,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             { this.startDiscovery(); }
 
             ws.onerror = (error) => {
-                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `NDI Source WebSocket Server`, error);
+                console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `NDI Source WebSocket Server`, error);
             };
             
             ws.onclose = async () => {
@@ -379,7 +379,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                     this.ws_serv_display.close((err) => {
                         if (err)
                         {
-                            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] Overlay Display WebSocket`, err);
+                            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] Overlay Display WebSocket`, err);
                             resolve();
                         }
                         else    
@@ -401,7 +401,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                     this.ws_serv_system.close((err) => {
                         if (err)
                         {
-                            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] System GUI WebSocket`, err);
+                            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] System GUI WebSocket`, err);
                             resolve();
                         }
                         else
@@ -423,7 +423,7 @@ class NDPiCommandServer_Client extends EventEmitter {
                     this.ws_serv_sources.close((err) => {
                         if (err)
                         {
-                            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] NDI Source WebSocket`, err);
+                            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] NDI Source WebSocket`, err);
                             resolve();
                         }
                         else
@@ -471,7 +471,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         setTimeout(() => {
             this.ws_conn_display.forEach(client => {
                 try { client.send(JSON.stringify(msg)); }
-                catch (e) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', msg, '\n', e); }
+                catch (e) { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', msg, '\n', e); }
             });
         }, 100);
     }

@@ -128,7 +128,7 @@ class CecController extends EventEmitter {
                     this.restartDelay = 1000;
                     this.isReady = true;
                 }
-                
+
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ] CEC Ready`);
                 this.emit('ready');
                 this._flushQueue();
@@ -141,7 +141,7 @@ class CecController extends EventEmitter {
             { this.settings.put('output_display_cec_this_source_active', 'true'); }
 
             if (line.includes('ERROR'))
-            { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${lineSplit}`); }
+            { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${lineSplit}`); }
         });
 
         try { clearTimeout(this.debounceCheckCompliance); }

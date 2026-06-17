@@ -211,11 +211,11 @@ class NDPi {
         });
 
         this.lcdDisplay.stderr.on('data', (data) => {
-            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ update_lcd ][ ERROR ]`, data.toString());
+            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ update_lcd ][ ERROR ]`, data.toString());
         });
 
         this.lcdDisplay.on('error', (err) => {
-            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ update_lcd ][ ERROR ]`, err);
+            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ update_lcd ][ ERROR ]`, err);
         });
 
         this.lcdDisplay.once('close', (code, signal) => {
@@ -316,8 +316,8 @@ class NDPi {
         }
         else
         {
-            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] Skipping Chromium display launch.`);
-            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] -- Missing binary: /usr/bin/chromium`);
+            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] Skipping Chromium display launch.`);
+            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ client_chromium ] -- Missing binary: /usr/bin/chromium`);
         }
     }
     
@@ -365,7 +365,7 @@ class NDPi {
         });
         
         this.controller_cec.on('error_log', (data) => {
-            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ client_cec ][ ERROR ]`, data);
+            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ client_cec ][ ERROR ]`, data);
         });
 
         this.controller_cec.once('close', (data) => {

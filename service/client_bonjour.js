@@ -124,7 +124,7 @@ class NDPiBonjourService {
         });
         
         this.service.on('error', (err) => {
-            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, err);
+            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, err);
         });
     }
 

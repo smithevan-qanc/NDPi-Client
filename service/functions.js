@@ -374,7 +374,7 @@ const { exec, spawn } = require('node:child_process');
                 exec(command, options, (error, stdout, stderr) => {
                     if (error)
                     {
-                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ exec(${command}) ][ ERROR ]`, stderr.toString().trim());
+                        console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ exec(${command}) ][ ERROR ]`, stderr.toString().trim());
                         resolve();
                     }
                     else
@@ -584,7 +584,7 @@ const { exec, spawn } = require('node:child_process');
                 await new Promise((resolve) => {
                     exec(`picom -b --config "${process.env.HOME}/.config/picom/picom.conf"`, (error, stdout, stderr) => {
                         if (error)
-                        { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', stderr.toString()); }
+                        { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ]`, '[ PICOM ERROR ]', stderr.toString()); }
                         resolve();
                     });
                 });
@@ -628,7 +628,7 @@ const { exec, spawn } = require('node:child_process');
             {
                 console.log(`[ ${path.basename(__filename).split('.')[0]} ][ activateDisplay() ] could not activate display. Trying RandR.`);
                 await setDisplayResolution().catch((reason) => {
-                    console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ activateDisplay() ][ setDisplayResolution() ]`, reason);
+                    console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ activateDisplay() ][ setDisplayResolution() ]`, reason);
                 });
             }
         }
@@ -717,7 +717,7 @@ const { exec, spawn } = require('node:child_process');
                 }, (error, stderr) => {
                     if (error)
                     {
-                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Resolution Set:`, config, stderr);
+                        console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Resolution Set:`, config, stderr);
                         resolve();
                         // reject(`XRandR Failed to set resolution. Reason: ${stderr.toString()}`);
                         return;
@@ -729,7 +729,7 @@ const { exec, spawn } = require('node:child_process');
                         }, (error, stdout, stderr) => {
                             if (error)
                             {
-                                console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`);
+                                console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Openbox Restart: ${stderr.toString()}`);
                                 // reject(`Openbox Failed to restart after setting resolution. Reason: ${stderr.toString()}`);
                                 resolve();
                                 return;
@@ -821,7 +821,7 @@ const { exec, spawn } = require('node:child_process');
                 exec(path.join(__dirname, '..', 'sh', 'check-for-update'), (error, stdout) => {
                     if (error)
                     {
-                        console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error when checking for update. {{ ./sh/check-for-update }}`);
+                        console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error when checking for update. {{ ./sh/check-for-update }}`);
                         resolve();
                     }
                     else
@@ -835,7 +835,7 @@ const { exec, spawn } = require('node:child_process');
                             if (update.newest_version?.ndpi)
                             { fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'ndpi_version_update_version'), String(update.newest_version.ndpi), 'utf8'); }
                         }
-                        catch (err) { console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error parsing update.`, err); }
+                        catch (err) { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error parsing update.`, err); }
                         finally
                         {
                             resolve();

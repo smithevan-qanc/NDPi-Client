@@ -60,7 +60,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         });
         
         this.service.on('error', (err) => {
-            console.error(`⚠️  [ ${path.basename(__filename).split('.')[0]} ]`, '[ SERVICE ERROR ]', err);
+            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ]`, '[ SERVICE ERROR ]', err);
         });
 
         this.service.once('exit', () => {
