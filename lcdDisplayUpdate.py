@@ -112,8 +112,8 @@ try:
     
     # Load SVG image
     # svg_path = os.path.join(script_dir, "assets", "NLC_Outline.svg")
-    # svg_path = os.path.join(script_dir, "assets", "lcd", "icon", "calibrate_10px.svg")
-    # svg_image = convert_svg_to_image(svg_path, disp.width, disp.height)  # width, height in pixels
+    svg_path = os.path.join(script_dir, "assets", "lcd", "icon", "calibrate_10px.svg")
+    svg_image = convert_svg_to_image(svg_path, disp.width, disp.height)  # width, height in pixels
 
     icon_dir = os.path.join(script_dir, "assets", "lcd", "icon")
     network_online   = convert_svg_to_image(os.path.join(icon_dir, "net_online.svg"),    18, 18)
@@ -159,9 +159,9 @@ try:
         image1 = Image.new("RGB", (disp.width, disp.height), "#070C1A")
         draw = ImageDraw.Draw(image1)
         
-        # if svg_image is not None:
+        if svg_image is not None:
             # image1.paste(svg_image, (150, 140), svg_image)  # (x, y) coordinates
-            # image1.paste(svg_image, (0, 0), svg_image)  # (x, y) coordinates
+            image1.paste(svg_image, (0, 0), svg_image)  # (x, y) coordinates
         
         # Device Name ----------------------------------------------------------------
         draw.text((screen_margin, screen_margin - 2), device_name, fill="GRAY", font=font_roboto("Black", 22))
