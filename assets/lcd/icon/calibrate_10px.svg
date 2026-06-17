@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" width="240px" height="280px" style="">
+  <defs></defs>
   <rect width="240" height="10" style="fill: rgb(80, 80, 80);"></rect>
   <rect width="240" height="10" style="fill: rgb(80, 80, 80);" y="20.769"></rect>
   <rect width="240" height="10" style="fill: rgb(80, 80, 80);" y="41.538"></rect>
@@ -13,4 +14,16 @@
   <rect width="240" height="10" style="fill: rgb(80, 80, 80);" y="228.459"></rect>
   <rect width="240" height="10" style="fill: rgb(80, 80, 80);" y="249.228"></rect>
   <rect width="240" height="10" style="fill: rgb(80, 80, 80);" y="270"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);" x="20.909"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);" x="41.818"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);" x="62.727"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);" x="83.636"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);" x="104.545"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);" x="125.454"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);" x="146.363"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);" x="167.272"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);" x="188.181"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);" x="209.09"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1);" x="230"></rect>
 </svg>
