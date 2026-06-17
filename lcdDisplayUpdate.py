@@ -132,17 +132,13 @@ try:
         time_string = datetime.now().strftime("%H:%M")
         
         # Read files
-        device_name = read_file('python/script/device_name')
-        # dev_nam_x = screen_margin  # get_centered_x(device_name.strip(), 30)
-
-        device_id = read_file('python/script/device_id')
-        # dev_id_x = screen_margin  # get_centered_x(device_id, 20)
-
-        device_ip = read_file('python/script/device_ip')
-        ndpi_version = read_file('python/script/ndpi_version')
+        device_name            = read_file('python/script/device_name')
+        device_id              = read_file('python/script/device_id')
+        device_ip              = read_file('python/script/device_ip')
+        ndpi_version           = read_file('python/script/ndpi_version')
         ndpi_status_ndi_status = read_file('python/script/ndpi_status_ndi_status').upper()
 
-        target_source = read_file('python/script/ndpi_status_ndi_source_active').upper()
+        target_source = read_file('python/script/ndpi_status_ndi_source_target').upper()
         target_src = target_source.split('(')
         
         try:
@@ -189,7 +185,7 @@ try:
         draw.text((120, 145), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 20))
 
         # NDI Target Source ----------------------------------------------------------
-        draw.text((screen_margin + screen_margin, 175), src_line_1, fill="WHITE", font=font_roboto("Thin", 18))
+        draw.text((screen_margin + screen_margin, 175), src_line_1, fill="WHITE", font=font_roboto("Regular", 18))
         draw.text((screen_margin + screen_margin, 195), src_line_2, fill="WHITE", font=font_roboto("Thin", 22))
 
 
