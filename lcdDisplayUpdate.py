@@ -125,13 +125,13 @@ try:
         draw = ImageDraw.Draw(image1)
         
         # Device Name ----------------------------------------------------------------
-        draw.text((dev_nam_x, screen_margin), device_name, fill="GRAY", font=font_roboto("Black", 25))
+        draw.text((dev_nam_x, screen_margin), device_name, fill="GRAY", font=font_roboto("Black", 22))
 
         # Device IP ------------------------------------------------------------------
-        draw.text((screen_margin, 60), device_ip, fill="GRAY", font=Consolas_Bold_20)
+        draw.text((screen_margin, 50), device_ip, fill="GRAY", font=font_roboto("Medium", 20))
 
         # Device ID ------------------------------------------------------------------
-        draw.text((screen_margin, 80), device_id, fill="GRAY", font=Consolas_Bold_20)
+        draw.text((screen_margin, 80), device_id, fill="GRAY", font=font_roboto("Medium", 20))
 
 
 
@@ -144,11 +144,11 @@ try:
         draw.text((screen_margin, 120), "NDI® Status", fill="GRAY", font=font_roboto("Light", 20))
 
         # NDI Current State ----------------------------------------------------------
-        draw.text((screen_margin, 140), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 24))
+        draw.text((screen_margin, 140), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 20))
 
         # NDI Target Source ----------------------------------------------------------
-        draw.text((screen_margin + screen_margin, 175), src_line_1, fill="WHITE", font=font_roboto("Light", 20))
-        draw.text((screen_margin + screen_margin, 195), src_line_2, fill="WHITE", font=font_roboto("Light", 18))
+        draw.text((screen_margin + screen_margin, 175), src_line_1, fill="WHITE", font=font_roboto("Light", 18))
+        draw.text((screen_margin + screen_margin, 195), src_line_2, fill="WHITE", font=font_roboto("Light", 14))
 
 
 
