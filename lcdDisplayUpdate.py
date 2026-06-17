@@ -52,7 +52,7 @@ device = 0
 # logging.basicConfig(level=logging.DEBUG)
 
 # Margin in pixels
-screen_margin = 15
+screen_margin = 20
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 font_dir = os.path.join(script_dir, "python", "Font")
