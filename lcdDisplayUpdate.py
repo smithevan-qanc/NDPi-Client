@@ -126,29 +126,26 @@ try:
         
         # Device Name ----------------------------------------------------------------
         draw.text((screen_margin, screen_margin), device_name, fill="GRAY", font=font_roboto("Black", 22))
-
         # Device IP ------------------------------------------------------------------
         draw.text((screen_margin + screen_margin, 40), device_ip, fill="GRAY", font=font_roboto("Medium", 22))
-
         # Device ID ------------------------------------------------------------------
-        draw.text((screen_margin + screen_margin, 60), device_id, fill="GRAY", font=font_roboto("Medium", 20))
+        draw.text((screen_margin, 65), device_id, fill="GRAY", font=font_roboto("Regular", 20))
 
 
 
         # Gray Line ------------------------------------------------------------------
-        draw.line([(0, 110), (240, 110)], fill = "GRAY", width = 1)
+        draw.line([(0, 100), (240, 100)], fill = "GRAY", width = 0.5)
 
 
 
         # NDI Status Label -----------------------------------------------------------
-        draw.text((screen_margin, 120), "NDI® Status", fill="GRAY", font=font_roboto("Light", 20))
-
+        draw.text((screen_margin, 110), "NDI® Status", fill="GRAY", font=font_roboto("Light", 20))
         # NDI Current State ----------------------------------------------------------
-        draw.text((120, 120), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 20))
+        draw.text((120, 110), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 20))
 
         # NDI Target Source ----------------------------------------------------------
-        draw.text((screen_margin + screen_margin, 170), src_line_1, fill="WHITE", font=font_roboto("Thin", 22))
-        draw.text((screen_margin + screen_margin, 195), src_line_2, fill="WHITE", font=font_roboto("Thin", 18))
+        draw.text((screen_margin + screen_margin, 150), src_line_1, fill="WHITE", font=font_roboto("Thin", 22))
+        draw.text((screen_margin + screen_margin, 175), src_line_2, fill="WHITE", font=font_roboto("Thin", 18))
 
 
 
