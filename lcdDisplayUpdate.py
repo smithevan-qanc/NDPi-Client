@@ -164,7 +164,6 @@ try:
             image1.paste(svg_image, (0, 0), svg_image)  # (x, y) coordinates
         
         # Device Name ----------------------------------------------------------------
-        draw.ellipse((0, 0), "BLACK", None, 50)
         draw.text((screen_margin, screen_margin - 5), device_name, fill="GRAY", font=font_roboto("Black", 22))
 
         # Device IP ------------------------------------------------------------------
@@ -173,6 +172,7 @@ try:
             image1.paste(network_online,  (22, 54), network_online)
         if device_ip == "":
             image1.paste(network_offline, (22, 54), network_offline)
+
         # Device ID ------------------------------------------------------------------
         draw.text((screen_margin, 75), device_id, fill="GRAY", font=font_roboto("Regular", 20))
 
