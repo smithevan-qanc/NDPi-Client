@@ -201,7 +201,7 @@ try:
 
         # NDPi Version & Device IP ---------------------------------------------------
         line_dev_info = f"Version {ndpi_version}".strip()
-        draw.text((screen_margin + screen_margin, 240), line_dev_info, fill="GRAY", font=font_roboto("Light", 20))
+        draw.text((screen_margin, 245), line_dev_info, fill="GRAY", font=font_roboto("Light", 15))
         
         # Display --------------------------------------------------------------------
         disp.ShowImage(image1)
