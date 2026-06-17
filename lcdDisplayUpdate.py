@@ -98,10 +98,10 @@ try:
         
         # Read files
         device_name = read_file('python/script/device_name')
-        dev_nam_x = screen_margin  # get_centered_x(device_name.strip(), 30)
+        # dev_nam_x = screen_margin  # get_centered_x(device_name.strip(), 30)
 
         device_id = read_file('python/script/device_id')
-        dev_id_x = screen_margin  # get_centered_x(device_id, 20)
+        # dev_id_x = screen_margin  # get_centered_x(device_id, 20)
 
         device_ip = read_file('python/script/device_ip')
         ndpi_version = read_file('python/script/ndpi_version')
@@ -125,18 +125,18 @@ try:
         draw = ImageDraw.Draw(image1)
         
         # Device Name ----------------------------------------------------------------
-        draw.text((dev_nam_x, screen_margin), device_name, fill="GRAY", font=font_roboto("Black", 22))
+        draw.text((screen_margin, screen_margin - 5), device_name, fill="GRAY", font=font_roboto("Black", 22))
 
         # Device IP ------------------------------------------------------------------
-        draw.text((screen_margin, 50), device_ip, fill="GRAY", font=font_roboto("Medium", 20))
+        draw.text((screen_margin + screen_margin, 40), device_ip, fill="GRAY", font=font_roboto("Medium", 20))
 
         # Device ID ------------------------------------------------------------------
-        draw.text((screen_margin, 80), device_id, fill="GRAY", font=font_roboto("Medium", 20))
+        draw.text((screen_margin + screen_margin, 65), device_id, fill="GRAY", font=font_roboto("Medium", 20))
 
 
 
         # Gray Line ------------------------------------------------------------------
-        draw.line([(0, 112), (240, 112)], fill = "GRAY", width = 1)
+        draw.line([(0, 110), (240, 110)], fill = "GRAY", width = 1)
 
 
 
@@ -147,8 +147,8 @@ try:
         draw.text((screen_margin, 140), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 20))
 
         # NDI Target Source ----------------------------------------------------------
-        draw.text((screen_margin + screen_margin, 175), src_line_1, fill="WHITE", font=font_roboto("Light", 18))
-        draw.text((screen_margin + screen_margin, 195), src_line_2, fill="WHITE", font=font_roboto("Light", 14))
+        draw.text((screen_margin + screen_margin, 175), src_line_1, fill="WHITE", font=font_roboto("Thin", 18))
+        draw.text((screen_margin + screen_margin, 195), src_line_2, fill="WHITE", font=font_roboto("Thin", 15))
 
 
 
@@ -159,7 +159,7 @@ try:
 
         # NDPi Version & Device IP ---------------------------------------------------
         line_dev_info = f"Version {ndpi_version}".strip()
-        draw.text((screen_margin + screen_margin, 240), line_dev_info, fill="GRAY", font=font_roboto("Thin", 20))
+        draw.text((screen_margin + screen_margin, 240), line_dev_info, fill="GRAY", font=font_roboto("Light", 20))
         
         # Display --------------------------------------------------------------------
         disp.ShowImage(image1)
