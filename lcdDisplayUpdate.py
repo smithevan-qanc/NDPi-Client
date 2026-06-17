@@ -156,7 +156,7 @@ try:
             image1.paste(svg_image, (0, 0), svg_image)  # (x, y) coordinates
         
         # Device Name ----------------------------------------------------------------
-        draw.text((screen_margin, screen_margin), device_name, fill="GRAY", font=font_roboto("Black", 22))
+        draw.text((screen_margin, screen_margin - 5), device_name, fill="GRAY", font=font_roboto("Black", 22))
         # Device IP ------------------------------------------------------------------
         draw.text((screen_margin + screen_margin, 40), device_ip, fill="GRAY", font=font_roboto("Medium", 22))
         # Device ID ------------------------------------------------------------------
