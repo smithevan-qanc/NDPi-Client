@@ -1,29 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 282" width="240px" height="282px" style="">
-  <defs></defs>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="20.923"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="41.846"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="62.769"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="83.692"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="104.615"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="125.538"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="146.461"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="167.384"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="188.307"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="209.23"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="230.153"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="251.076"></rect>
-  <rect width="240" height="10" style="stroke-width: 0px; fill: rgb(80, 80, 80);" y="272"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);" x="20.909"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);" x="41.818"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);" x="62.727"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);" x="83.636"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);" x="104.545"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);" x="125.454"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);" x="146.363"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);" x="167.272"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);" x="188.181"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);" x="209.09"></rect>
-  <rect width="10" height="282" style="stroke-width: 0; fill: rgb(71, 50, 1);" x="230"></rect>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" width="240px" height="280px" style="">
+  </defs>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="21.615"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="42.23"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="62.845"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="83.46"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="104.075"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="124.69"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="145.305"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="165.92"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="186.535"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="207.15"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="227.765"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="248.38"></rect>
+  <rect width="240" height="10" style="fill: rgb(80, 80, 80); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" y="270"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" x="21.727"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" x="42.454"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" x="63.181"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" x="83.908"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" x="104.635"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" x="125.362"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" x="146.089"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" x="166.816"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" x="187.543"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" x="208.27"></rect>
+  <rect width="10" height="280" style="fill: rgb(71, 50, 1); vector-effect: non-scaling-stroke; stroke: rgb(255, 255, 255);" x="230"></rect>
 </svg>
