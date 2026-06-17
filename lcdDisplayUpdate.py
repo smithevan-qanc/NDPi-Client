@@ -91,7 +91,7 @@ def convert_svg_to_image(svg_path, width, height):
     
     try:
         png_bytes = BytesIO()
-        cairosvg.svg2png(url=svg_path, write_to=png_bytes, output_width=width, output_height=height)
+        cairosvg.svg2png(url=svg_path, write_to=png_bytes, output_width=width, output_height=height, background_color="transparent")
         png_bytes.seek(0)
         return Image.open(png_bytes).convert("RGBA")
     except Exception as e:
@@ -149,6 +149,9 @@ try:
         image1 = Image.new("RGB", (disp.width, disp.height), "#070C1A")
         draw = ImageDraw.Draw(image1)
         
+        if svg_image is not None:
+            image1.paste(svg_image, (50, 30), svg_image)  # (x, y) coordinates
+        
         # Device Name ----------------------------------------------------------------
         draw.text((screen_margin, screen_margin), device_name, fill="GRAY", font=font_roboto("Black", 22))
         # Device IP ------------------------------------------------------------------
@@ -182,9 +185,6 @@ try:
         # NDPi Version & Device IP ---------------------------------------------------
         line_dev_info = f"Version {ndpi_version}".strip()
         draw.text((screen_margin + screen_margin, 240), line_dev_info, fill="GRAY", font=font_roboto("Light", 20))
-        
-        if svg_image is not None:
-            image1.paste(svg_image, (50, 30), svg_image)  # (x, y) coordinates
         
         # Display --------------------------------------------------------------------
         disp.ShowImage(image1)
