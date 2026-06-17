@@ -112,8 +112,8 @@ try:
     
     # Load SVG image
     # svg_path = os.path.join(script_dir, "assets", "NLC_Outline.svg")
-    svg_path = os.path.join(script_dir, "assets", "lcd", "icon", "calibrate_10px.svg")
-    svg_image = convert_svg_to_image(svg_path, disp.width, disp.height)  # width, height in pixels
+    # svg_path = os.path.join(script_dir, "assets", "lcd", "icon", "calibrate_10px.svg")
+    # svg_image = convert_svg_to_image(svg_path, disp.width, disp.height)  # width, height in pixels
 
     icon_dir = os.path.join(script_dir, "assets", "lcd", "icon")
     network_online   = convert_svg_to_image(os.path.join(icon_dir, "net_online.svg"),    18, 18)
@@ -159,9 +159,9 @@ try:
         image1 = Image.new("RGB", (disp.width, disp.height), "#070C1A")
         draw = ImageDraw.Draw(image1)
         
-        if svg_image is not None:
-            # image1.paste(svg_image, (150, 140), svg_image)  # (x, y) coordinates
-            image1.paste(svg_image, (0, 0), svg_image)  # (x, y) coordinates
+        # if svg_image is not None:
+        #     # image1.paste(svg_image, (150, 140), svg_image)  # (x, y) coordinates
+        #     image1.paste(svg_image, (0, 0), svg_image)  # (x, y) coordinates
         
         # Device Name ----------------------------------------------------------------
         draw.text((screen_margin, screen_margin - 3), device_name, fill="GRAY", font=font_roboto("Black", 22))
@@ -189,8 +189,8 @@ try:
         draw.text((120, 145), ndpi_status_ndi_status, fill="GRAY", font=font_roboto("SemiBold", 20))
 
         # NDI Target Source ----------------------------------------------------------
-        draw.text((screen_margin + screen_margin, 175), src_line_1, fill="WHITE", font=font_roboto("Thin", 22))
-        draw.text((screen_margin + screen_margin, 200), src_line_2, fill="WHITE", font=font_roboto("Thin", 18))
+        draw.text((screen_margin + screen_margin, 175), src_line_1, fill="WHITE", font=font_roboto("Thin", 18))
+        draw.text((screen_margin + screen_margin, 195), src_line_2, fill="WHITE", font=font_roboto("Thin", 22))
 
 
 
@@ -201,7 +201,7 @@ try:
 
         # NDPi Version & Device IP ---------------------------------------------------
         line_dev_info = f"Version {ndpi_version}".strip()
-        draw.text((screen_margin + 2, 245), line_dev_info, fill="GRAY", font=font_roboto("Light", 15))
+        draw.text((screen_margin + 2, 245), line_dev_info, fill="GRAY", font=font_roboto("Regular", 15))
         
         # Display --------------------------------------------------------------------
         disp.ShowImage(image1)
