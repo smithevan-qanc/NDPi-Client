@@ -116,12 +116,12 @@ try:
     svg_image = convert_svg_to_image(svg_path, disp.width, disp.height)  # width, height in pixels
 
     icon_dir = os.path.join(script_dir, "assets", "lcd", "icon")
-    network_online = convert_svg_to_image(os.path.join(icon_dir, "net_online.svg"), 16, 16)
-    network_offline = convert_svg_to_image(os.path.join(icon_dir, "net_offline.svg"), 16, 16)
-    display_active = convert_svg_to_image(os.path.join(icon_dir, "display_on.svg"), 16, 16)
-    display_inactive = convert_svg_to_image(os.path.join(icon_dir, "display_off.svg"), 16, 16)
-    hdmi_active = convert_svg_to_image(os.path.join(icon_dir, "hdmi_active.svg"), 16, 16)
-    hdmi_inactive = convert_svg_to_image(os.path.join(icon_dir, "hdmi_inactive.svg"), 16, 16)
+    network_online   = convert_svg_to_image(os.path.join(icon_dir, "net_online.svg"),    18, 18)
+    network_offline  = convert_svg_to_image(os.path.join(icon_dir, "net_offline.svg"),   18, 18)
+    display_active   = convert_svg_to_image(os.path.join(icon_dir, "display_on.svg"),    18, 18)
+    display_inactive = convert_svg_to_image(os.path.join(icon_dir, "display_off.svg"),   18, 18)
+    hdmi_active      = convert_svg_to_image(os.path.join(icon_dir, "hdmi_active.svg"),   18, 18)
+    hdmi_inactive    = convert_svg_to_image(os.path.join(icon_dir, "hdmi_inactive.svg"), 18, 18)
 
     
     print("Display initialized. Starting loop...")
@@ -159,18 +159,18 @@ try:
         image1 = Image.new("RGB", (disp.width, disp.height), "#070C1A")
         draw = ImageDraw.Draw(image1)
         
-        if svg_image is not None:
+        # if svg_image is not None:
             # image1.paste(svg_image, (150, 140), svg_image)  # (x, y) coordinates
-            image1.paste(svg_image, (0, 0), svg_image)  # (x, y) coordinates
+            # image1.paste(svg_image, (0, 0), svg_image)  # (x, y) coordinates
         
         # Device Name ----------------------------------------------------------------
         draw.text((screen_margin, screen_margin - 5), device_name, fill="GRAY", font=font_roboto("Black", 22))
         # Device IP ------------------------------------------------------------------
-        draw.text((screen_margin + screen_margin, 40), device_ip, fill="GRAY", font=font_roboto("Medium", 22))
+        draw.text((screen_margin + screen_margin + 5, 40), device_ip, fill="GRAY", font=font_roboto("Medium", 22))
         if device_ip != "":
-            image1.paste(network_online, (20,40), network_online)
+            image1.paste(network_online, (21,41), network_online)
         if device_ip == "":
-            image1.paste(network_offline, (20, 40), network_offline)
+            image1.paste(network_offline, (21, 41), network_offline)
         # Device ID ------------------------------------------------------------------
         draw.text((screen_margin, 65), device_id, fill="GRAY", font=font_roboto("Regular", 20))
 
