@@ -238,7 +238,9 @@ class NDPi {
         {
             await new Promise((resolve) => {
                 this.airPlay.once('close', () => {
-                    resolve();
+                    setTimeout(() => {
+                        resolve();
+                    }, 2000);
                 });
                 this.airPlay.kill('SIGINT');
             });
