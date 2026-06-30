@@ -201,13 +201,13 @@ class NDPi {
             { stdio: ['ignore', 'pipe', 'pipe'] }
         );
         this.airPlay.stdout.on('data', (data) => {
-            console.log('[ index ][ AirPlay ]', data.toString().trim());
+            console.log('[ index ][ AirPlay ]', data);
         });
         this.airPlay.on('message', (m) => {
-            console.log('[ index ][ AirPlay ][ onMessage ]', m.toString().trim());
+            console.log('[ index ][ AirPlay ][ onMessage ]', m);
         });
         this.airPlay.stderr.on('data', (data) => {
-            console.log('⚠️   [ index ][ AirPlay ]', data.toString().trim())
+            console.log('⚠️   [ index ][ AirPlay ]', data)
         });
     }
 
