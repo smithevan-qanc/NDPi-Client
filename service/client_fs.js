@@ -450,7 +450,7 @@ class FileSystemMonitor extends EventEmitter {
             },
             {
                 key: "ndpi_airplay_server_pin",
-                value: `7584`,
+                value: ``,
                 group: `Backend`,
                 allowEditInternal: true,
                 allowEditExternal: true,
