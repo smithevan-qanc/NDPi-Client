@@ -32,7 +32,7 @@
     </application>
     
     <!--  NDI Receiver -->
-    <application class="GStreamer">
+    <application class="gstreamer">
       <layer>above</layer>
       <fullscreen>yes</fullscreen>
       <focus>yes</focus>
