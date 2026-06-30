@@ -3,7 +3,7 @@
   
   <theme>
     <name>PiXtrix</name>
-    <titleLayout>LIMC</titleLayout>
+    <titleLayout></titleLayout>
     <font place="ActiveWindow">
       <name>Sans</name>
       <size>12</size>
