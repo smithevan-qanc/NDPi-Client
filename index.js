@@ -204,7 +204,7 @@ class NDPi {
     startAirPlay() {
         const name = this.settings.get('device_name');
         const pin = this.settings.get('ndpi_airplay_server_pin');
-        const isValid = /^\d{1,4}$/.text(pin);
+        const isValid = /^\d{1,4}$/.test(pin);
 
         let pinArgv = ''
         if (isValid) { pinArgv = `-pin ${pin}`; }
