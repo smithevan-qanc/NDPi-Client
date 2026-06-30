@@ -195,7 +195,11 @@ class NDPi {
      * START APPLE AIRPLAY SERVER
      */
     startAirPlay() {
-        this.airPlay = spawn('uxplay', ['-n', 'NDPi', '-nh', '-fs', '-hls', '-pin', `${this.airplayPin}`]);
+        this.airPlay = spawn(
+            'uxplay',
+            ['-n', 'NDPi', '-nh', '-fs', '-hls', '-pin', `${this.airplayPin}`],
+            { stdio: ['ignore', 'pipe', 'pipe'] }
+        );
         this.airPlay.stdout.on('data', (data) => {
             console.log('[ index ][ AirPlay ]', data.toString().trim());
         });
