@@ -203,33 +203,35 @@ class NDPi {
      */
     startAirPlay() {
         const name = this.settings.get('device_name');
-        const pin = this.settings.get('ndpi_airplay_server_pin');
-        const isValid = /^\d{1,4}$/.test(pin);
+        const pin = this.settings.get('ndpi_airplay_server_pin') || null;
 
         let airPlayOptions = ['-n', name, '-nh', '-fs', '-hls' ];
-
-        if (isValid)
+        if (pin && /^\d{1,4}$/.test(pin))  // Validate PIN.
         {
             airPlayOptions.push('-pin');
-            airPlayOptions.push(pin);
+            airPlayOptions.push(String(pin).padStart(4, '0')); // Pad PIN with '0' (e.g. pin = '45' >> '0045')
         }
 
-        this.airPlay = spawn(
-            'uxplay',
-            airPlayOptions,
-            { stdio: ['ignore', 'pipe', 'pipe'] }
-        );
+        this.airPlay = spawn('uxplay', airPlayOptions, { env: { ...process.env } });
+
         this.airPlay.stdout.on('data', (data) => {
-            console.log('[ index ][ AirPlay ]', data.toString().trim());
+            func.stdoutToArray(data.toString().trim()).forEach((line) => {
+                console.log('[ index ][ AirPlay ]', line);
+            });
         });
-        this.airPlay.on('message', (m) => {
-            console.log('[ index ][ AirPlay ][ onMessage ]', m);
-        });
-        this.airPlay.on('error', (err) => {
-            console.log('⚠️   [ index ][ AirPlay ][ onMessage ]', err);
-        });
+        
         this.airPlay.stderr.on('data', (data) => {
-            console.log('⚠️   [ index ][ AirPlay ]', data.toString().trim())
+            func.stdoutToArray(data.toString().trim()).forEach((line) => {
+                console.log('⚠️   [ index ][ AirPlay ][ ERROR ]', line);
+            });
+        });
+
+        this.airPlay.on('message', (m) => {
+            console.log('✉️   [ index ][ AirPlay ][ onMessage ]', m);
+        });
+        
+        this.airPlay.on('error', (err) => {
+            console.log('⚠️   [ index ][ AirPlay ][ onError ]', err);
         });
     }
 
