@@ -449,6 +449,13 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditExternal: true,
             },
             {
+                key: "ndpi_airplay_server_pin",
+                value: `7584`,
+                group: `Backend`,
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
                 key: "ndpi_command_log",
                 value: `System Initial Run: v${this.#pgmVersion} ${this.#pgmVersionDate}`,
                 group: ``,

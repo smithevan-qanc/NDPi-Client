@@ -40,6 +40,7 @@ class NDPi {
 
         this.shutdown = false;
 
+        this.airPlay = null;
         this.airplayPin = 7584;
 
         this.initiate();
@@ -195,20 +196,44 @@ class NDPi {
      * START APPLE AIRPLAY SERVER
      */
     startAirPlay() {
+        const name = this.settings.get('device_name');
+        const pin = this.settings.get('ndpi_airplay_server_pin');
+        const isValid = /^\d{1,4}$/.text(pin);
+
+        let pinArgv = ''
+        if (isValid) { pinArgv = `-pin ${pin}`; }
+
         this.airPlay = spawn(
             'uxplay',
-            ['-n', 'NDPi', '-nh', '-fs', '-hls', '-pin', `${this.airplayPin}`],
+            ['-n', name, '-nh', '-fs', '-hls', pinArgv ],
             { stdio: ['ignore', 'pipe', 'pipe'] }
         );
         this.airPlay.stdout.on('data', (data) => {
-            console.log('[ index ][ AirPlay ]', data);
+            console.log('[ index ][ AirPlay ]', data.toString().trim());
         });
         this.airPlay.on('message', (m) => {
             console.log('[ index ][ AirPlay ][ onMessage ]', m);
         });
-        this.airPlay.stderr.on('data', (data) => {
-            console.log('⚠️   [ index ][ AirPlay ]', data)
+        this.airPlay.on('error', (err) => {
+            console.log('⚠️   [ index ][ AirPlay ][ onMessage ]', err);
         });
+        this.airPlay.stderr.on('data', (data) => {
+            console.log('⚠️   [ index ][ AirPlay ]', data.toString().trim())
+        });
+    }
+
+    async restartAirPlay() {
+        if (this.airPlay)
+        {
+            await new Promise((resolve) => {
+                this.airPlay.once('close', () => {
+                    resolve();
+                });
+                this.airPlay.kill('SIGINT');
+            });
+            this.airPlay = null;
+        }
+        this.startAirPlay();
     }
 
     /**
