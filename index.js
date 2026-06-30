@@ -40,10 +40,17 @@ class NDPi {
 
         this.shutdown = false;
 
-        this.airPlay = spawn('uxplay', ['-n', 'NDPi', '-nh', '-fs']);
+        this.airplayPin = 7584;
+        this.airPlay = spawn('uxplay', ['-n', 'NDPi', '-nh', '-fs', '-hls', '-pin', `${this.airplayPin}`]);
         this.airPlay.stdout.on('data', (data) => {
-            console.log('[ index ][ AirPlay ]', data.toString());
+            console.log('[ index ][ AirPlay ]', data.toString().trim());
         });
+        this.airPlay.on('message', (m) => {
+            console.log('[ index ][ AirPlay ][ onMessage ]', m.toString().trim());
+        });
+        this.airPlay.stderr.on('data', (data) => {
+            console.log('⚠️   [ index ][ AirPlay ]', data.toString().trim())
+        })
 
         this.initiate();
 
