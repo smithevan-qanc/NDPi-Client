@@ -40,6 +40,11 @@ class NDPi {
 
         this.shutdown = false;
 
+        this.airPlay = spawn('uxplay', ['-n', 'NDPi', '-nh', '-fs']);
+        this.airPlay.stdout.on('data', (data) => {
+            console.log('[ index ][ AirPlay ]', data);
+        });
+
         this.initiate();
 
     }
@@ -510,6 +515,11 @@ async function quitNDPi(signal) {
     console.info(`[ ${path.basename(__filename).split('.')[0]} ]${sig} Exiting NDPi`);
     
     index.shutdown = true;
+
+    index.airPlay.once('close', () => {
+        console.log('AIRPLAY CLOSED');
+    });
+    index.airPlay.kill('SIGINT');
 
     return new Promise(async (resolve) => {
         const timeout = setTimeout(() => {
