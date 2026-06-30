@@ -206,12 +206,17 @@ class NDPi {
         const pin = this.settings.get('ndpi_airplay_server_pin');
         const isValid = /^\d{1,4}$/.test(pin);
 
-        let pinArgv = ''
-        if (isValid) { pinArgv = `-pin ${pin}`; }
+        let airPlayOptions = ['-n', name, '-nh', '-fs', '-hls' ];
+
+        if (isValid)
+        {
+            airPlayOptions.push('-pin');
+            airPlayOptions.push(pin);
+        }
 
         this.airPlay = spawn(
             'uxplay',
-            ['-n', name, '-nh', '-fs', '-hls', pinArgv ],
+            airPlayOptions,
             { stdio: ['ignore', 'pipe', 'pipe'] }
         );
         this.airPlay.stdout.on('data', (data) => {
