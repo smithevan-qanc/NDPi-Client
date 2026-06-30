@@ -133,6 +133,8 @@ class NDPi {
 
             if (this.controller_cec)
             { this.controller_cec.updateDeviceName(output); }
+
+            this.restartAirPlay();
         });
 
         //  Device IP
@@ -162,7 +164,6 @@ class NDPi {
         //  HDMI Port
         this.settings.on('output_display_port', async (data) => {
             const output = String(data || '').trim() || null;
-
             if (output) { await func.setDisplayResolution(); }
         });
 
@@ -174,6 +175,11 @@ class NDPi {
         //  HDMI Framerate
         this.settings.on('output_display_framerate_preference', () => {
             func.setDisplayResolution();
+        });
+
+        //  ApirPlay PIN
+        this.settings.on('ndpi_airplay_server_pin', () => {
+            this.restartAirPlay();
         });
     }
 
