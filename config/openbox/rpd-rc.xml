@@ -22,14 +22,14 @@
   </theme>
   <applications>
 
-    <application name="*">
+    <!-- <application name="*">
       <decor>no</decor>
       <focus>no</focus>
       <iconic>yes</iconic>
       <layer>below</layer>
       <maximized>false</maximized>
       <fullscreen>no</fullscreen>
-    </application>
+    </application> -->
     
     <!--  NDI Receiver -->
     <application class="GStreamer">

@@ -42,7 +42,7 @@ class NDPi {
 
         this.airPlay = spawn('uxplay', ['-n', 'NDPi', '-nh', '-fs']);
         this.airPlay.stdout.on('data', (data) => {
-            console.log('[ index ][ AirPlay ]', data);
+            console.log('[ index ][ AirPlay ]', data.toString());
         });
 
         this.initiate();
