@@ -22,18 +22,17 @@
   </theme>
   <applications>
 
-    <!-- <application name="*">
+    <application name="*">
       <decor>no</decor>
       <focus>no</focus>
       <iconic>yes</iconic>
-      <layer>below</layer>
-      <maximized>false</maximized>
-      <fullscreen>no</fullscreen>
-    </application> -->
+      <!-- <layer>below</layer> -->
+      <!-- <maximized>false</maximized> -->
+      <fullscreen>yes</fullscreen>
+    </application>
     
     <!--  NDI Receiver -->
     <application class="GStreamer">
-      <decor>no</decor>
       <layer>above</layer>
       <fullscreen>yes</fullscreen>
       <focus>yes</focus>
@@ -43,7 +42,6 @@
 
     <!--  Display Browser  -->
     <application class="Chromium">
-      <decor>no</decor>
       <layer>normal</layer>
       <fullscreen>yes</fullscreen>
       <iconic>no</iconic>
