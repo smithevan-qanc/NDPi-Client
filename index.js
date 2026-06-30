@@ -41,19 +41,8 @@ class NDPi {
         this.shutdown = false;
 
         this.airplayPin = 7584;
-        this.airPlay = spawn('uxplay', ['-n', 'NDPi', '-nh', '-fs', '-hls', '-pin', `${this.airplayPin}`]);
-        this.airPlay.stdout.on('data', (data) => {
-            console.log('[ index ][ AirPlay ]', data.toString().trim());
-        });
-        this.airPlay.on('message', (m) => {
-            console.log('[ index ][ AirPlay ][ onMessage ]', m.toString().trim());
-        });
-        this.airPlay.stderr.on('data', (data) => {
-            console.log('⚠️   [ index ][ AirPlay ]', data.toString().trim())
-        })
 
         this.initiate();
-
     }
 
     /** INITIATE */
@@ -84,6 +73,7 @@ class NDPi {
         this.settings.on('ready', () => {
             this.targetSource = this.settings.get('ndpi_status_ndi_source_target') || 'none';
             func.setDisplayResolution();
+            this.startAirPlay();
             this.startLcdDisplay();
             this.startMdns();
             this.startApi();
@@ -198,6 +188,22 @@ class NDPi {
                 console.error(`FsData wasn't running...`, this.settings);
                 resolve();
             }
+        });
+    }
+
+    /**
+     * START APPLE AIRPLAY SERVER
+     */
+    startAirPlay() {
+        this.airPlay = spawn('uxplay', ['-n', 'NDPi', '-nh', '-fs', '-hls', '-pin', `${this.airplayPin}`]);
+        this.airPlay.stdout.on('data', (data) => {
+            console.log('[ index ][ AirPlay ]', data.toString().trim());
+        });
+        this.airPlay.on('message', (m) => {
+            console.log('[ index ][ AirPlay ][ onMessage ]', m.toString().trim());
+        });
+        this.airPlay.stderr.on('data', (data) => {
+            console.log('⚠️   [ index ][ AirPlay ]', data.toString().trim())
         });
     }
 
