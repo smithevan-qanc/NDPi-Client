@@ -174,32 +174,46 @@ class NDI_Receiver_v4 extends EventEmitter {
 
             await Promise.all([
                 new Promise((resolve) => {
-                    this.settings.once('ndpi_status_ndi_source_active', () => { resolve(); });
+                    const startTimeout = setTimeout(() => { resolve(); }, 2000);
+                    this.settings.once('ndpi_status_ndi_source_active', () => {
+                        clearTimeout(startTimeout);
+                        resolve();
+                    });
                     this.settings.put('ndpi_status_ndi_source_active', '');
                 }),
                 new Promise((resolve) => {
-                    this.settings.once('ndpi_status_ndi_status', () => { resolve(); });
+                    const startTimeout = setTimeout(() => { resolve(); }, 2000);
+                    this.settings.once('ndpi_status_ndi_status', () => {
+                        clearTimeout(startTimeout);
+                        resolve();
+                    });
                     this.settings.put('ndpi_status_ndi_status', this.ndiStatus);
                 }),
                 new Promise((resolve) => {
-                    this.settings.once('ndpi_status_ndi_source_connected_time', () => { resolve(); });
+                    const startTimeout = setTimeout(() => { resolve(); }, 2000);
+                    this.settings.once('ndpi_status_ndi_source_connected_time', () => {
+                        clearTimeout(startTimeout);
+                        resolve();
+                    });
                     this.settings.put('ndpi_status_ndi_source_connected_time', '');
                 }),
                 new Promise((resolve) => {
-                    this.settings.once('ndpi_status_ndi_source_framerate', () => { resolve(); });
+                    const startTimeout = setTimeout(() => { resolve(); }, 2000);
+                    this.settings.once('ndpi_status_ndi_source_framerate', () => {
+                        clearTimeout(startTimeout);
+                        resolve();
+                    });
                     this.settings.put('ndpi_status_ndi_source_framerate', '');
                 }),
                 new Promise((resolve) => {
-                    this.settings.once('ndpi_status_ndi_source_resolution', () => { resolve(); });
+                    const startTimeout = setTimeout(() => { resolve(); }, 2000);
+                    this.settings.once('ndpi_status_ndi_source_resolution', () => {
+                        clearTimeout(startTimeout);
+                        resolve();
+                    });
                     this.settings.put('ndpi_status_ndi_source_resolution', '');
                 }),
             ]);
-
-            // this.settings.put('ndpi_status_ndi_source_active', '');
-            // this.settings.put('ndpi_status_ndi_status', this.ndiStatus);
-            // this.settings.put('ndpi_status_ndi_source_connected_time', '');
-            // this.settings.put('ndpi_status_ndi_source_framerate', '');
-            // this.settings.put('ndpi_status_ndi_source_resolution', '');
 
             this.receiver = null;
 
@@ -212,10 +226,9 @@ class NDI_Receiver_v4 extends EventEmitter {
      * @param {string} stdout ⚠️ CONVERT TO STRING FIRST〈 data.toString().trim() 〉
      */
     _handleReceiverData(stdout) {
-        this.logInfo(stdout);
-
         if (stdout.includes('NDI Receiver started:'))
         {
+            this.logInfo(stdout);
             this.secondsInactive = 0;
             this.ndiConnectedAt = new Date().toISOString();
             this.ndiActiveSource = this.ndiSource;
@@ -227,16 +240,21 @@ class NDI_Receiver_v4 extends EventEmitter {
 
             this.showGStreamer(1000);
         }
-
-        if (stdout.includes('Reconnected to:'))
+        else if (stdout.includes('Reconnected to:'))
         {
             this.ndiStatus = 'streaming';
             this.settings.put('ndpi_status_ndi_status', this.ndiStatus);
 
             if (this.secondsInactive >= 60)
             { this.showGStreamer(); }
+            if (this.secondsInactive >= 2)
+            { this.logInfo(stdout); }
 
             this.secondsInactive = 0;
+        }
+        else
+        {
+            this.logInfo(stdout);
         }
     }
 
