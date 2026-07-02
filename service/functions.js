@@ -71,7 +71,10 @@ const { exec, spawn } = require('node:child_process');
                 if (lineIncludes(line, 'Physical Address') && !fileName && !String(splitLine[1] || '').includes('Tx'))
                 {
                     fileName = 'output_display_cec_address';
-                    writeValue = String(String(splitLine[1] || '').trim().replaceAll('.', ''));
+                    if (isNaN(Number(String(splitLine[1] || '').trim().replaceAll('.', ''))))
+                    { writeValue = '' }
+                    else
+                    { writeValue = String(Number(String(splitLine[1] || '').trim().replaceAll('.', ''))) }
                 }
 
                 if (lineIncludes(line, 'Power Status') && !fileName)
