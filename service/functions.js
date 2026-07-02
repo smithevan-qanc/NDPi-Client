@@ -741,8 +741,8 @@ const { exec, spawn } = require('node:child_process');
 
         async function getSetting(filename) {
             const response = {
-                success = false,
-                data = '',
+                success: false,
+                data: '',
             };
 
             if (!filename) { return response; }
