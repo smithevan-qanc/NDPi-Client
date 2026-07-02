@@ -232,17 +232,10 @@ class NDPi {
                 {
                     console.info(`[ ${path.basename(__filename).split('.')[0]} ][ AirPlay ]`, `Starting AirPlay`);
                     func.activateWindow_AirPlay();
+                    func.fadeVolume(Number(this.settings.get('device_volume') || '255'), 'Fade-in AirPlay Receiver Start');
                 }
             });
         });
-
-
-        /**
-         * await func.fadeVolume(this.volumeSetPoint, 'Auto-Adjust NDI Receiver');
-         * func.activateWindow_AirPlay()
-         */
-
-
         
         this.airPlay.stderr.on('data', (data) => {
             func.stdoutToArray(data.toString().trim()).forEach((line) => {
