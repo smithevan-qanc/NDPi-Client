@@ -114,7 +114,6 @@ class CecController extends EventEmitter {
     }
 
     _handleStdout(data) {
-
         const thisLine = String(data).split(/\r?\n/);
 
         thisLine.forEach(async (line) => {
@@ -152,7 +151,7 @@ class CecController extends EventEmitter {
 
         this.debounceCheckCompliance = setTimeout(() => {
             func.checkCecCompliance();
-        }, 2000);
+        }, 1000);
     }
 
     _handleStderr(data) {
