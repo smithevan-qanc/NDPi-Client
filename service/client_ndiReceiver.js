@@ -147,6 +147,12 @@ class NDI_Receiver_v4 extends EventEmitter {
             stdio: ['ignore', 'pipe', 'pipe'],
         });
 
+        this.receiver.once('spawn', () => {
+            setTimeout(() => {
+                this.settings.put('pid_ndi_player', String(this.receiver.pid || ''));
+            }, 500);
+        });
+
         this.receiver.stdout.on('data', (data) => {
             this._handleReceiverData(data.toString().trim());
         });
@@ -212,6 +218,14 @@ class NDI_Receiver_v4 extends EventEmitter {
                         resolve();
                     });
                     this.settings.put('ndpi_status_ndi_source_resolution', '');
+                }),
+                new Promise((resolve) => {
+                    const startTimeout = setTimeout(() => { resolve(); }, 2000);
+                    this.settings.once('pid_ndi_player', () => {
+                        clearTimeout(startTimeout);
+                        resolve();
+                    });
+                    this.settings.put('pid_ndi_player', '');
                 }),
             ]);
 

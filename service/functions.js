@@ -465,6 +465,7 @@ const { exec, spawn } = require('node:child_process');
 
         // NDI Window Actions
         async function minimizeWindow_NDI() {
+            const pid = getSetting('pid_ndi_player')
             let response = false;
             const cmd1 = await exe(`xdotool search --class 'gstreamer'`);
 
@@ -736,6 +737,23 @@ const { exec, spawn } = require('node:child_process');
                     }
                 });
             });
+        }
+
+        async function getSetting(filename) {
+            const response = {
+                success = false,
+                data = '',
+            };
+
+            if (!filename) { return response; }
+
+            try
+            {
+                response.data = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, `${filename}`), 'utf8').trim();
+                response.success = true
+            }
+            catch {}
+            finally { return response; }
         }
 
         async function waitForNetwork({ host = '8.8.8.8', port = 53, retryMs = 1000 } = {}) {

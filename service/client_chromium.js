@@ -65,6 +65,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
         });
 
         this.service.once('exit', () => {
+            this.settings.put('pid_chromium', '');
             this.emit('close');
             this.service = null;
         });
