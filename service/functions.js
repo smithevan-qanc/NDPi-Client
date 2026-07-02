@@ -637,6 +637,7 @@ const { exec, spawn } = require('node:child_process');
         }
 
         async function activateDisplay() {
+            await setDisplayResolution().catch();
             try
             {
                 console.log(`[ ${path.basename(__filename).split('.')[0]} ][ activateDisplay() ] Attempting to activate display.`);
@@ -652,12 +653,6 @@ const { exec, spawn } = require('node:child_process');
                 if (!data.success) { throw new Error(); }
             }
             catch {}
-            finally 
-            {
-                await setDisplayResolution().catch((reason) => {
-                    console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ activateDisplay() ][ setDisplayResolution() ]`, reason);
-                });
-            }
         }
 
         /** STDOUT TO ARRAY */
