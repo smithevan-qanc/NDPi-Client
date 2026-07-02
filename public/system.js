@@ -163,7 +163,7 @@ server._ws.onmessage = (message) => {
 
 (async () => {
     await refreshSources();
-    const savedScrollPos = window.localStorage.getItem('scrollPos') || '0';
+    const savedScrollPos = window.sessionStorage.getItem('scrollPos') || '0';
     window.scrollTo(0, Number(savedScrollPos));
     addEvents();
 })();
@@ -184,7 +184,7 @@ sources._ws.onmessage = (message) => {
 
 function addEvents() {
     document.addEventListener('scroll', () => {
-        window.localStorage.setItem('scrollPos', window.scrollY.toString());
+        window.sessionStorage.setItem('scrollPos', window.scrollY.toString());
     });
     document.getElementById('tv_power_off').addEventListener('click', async function(e) {
         e.preventDefault();
