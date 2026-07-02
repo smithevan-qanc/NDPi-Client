@@ -148,9 +148,7 @@ class NDI_Receiver_v4 extends EventEmitter {
         });
 
         this.receiver.once('spawn', () => {
-            setTimeout(() => {
-                this.settings.put('pid_ndi_player', String(this.receiver.pid || ''));
-            }, 500);
+            this.settings.put('pid_ndi_player', String(this.receiver.pid || ''));
         });
 
         this.receiver.stdout.on('data', (data) => {
