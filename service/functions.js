@@ -62,22 +62,22 @@ const { exec, spawn } = require('node:child_process');
                     writeValue = String(splitLine[1] || '').trim() == 'OK' ? 'true' : 'false';
                 }
 
-                if (lineIncludes(line, 'CEC Version') && !fileName && !String(splitLine[1] || '').startsWith('Tx'))
+                if (lineIncludes(line, 'CEC Version') && !fileName && !String(splitLine[1] || '').includes('Tx'))
                 {
                     fileName = 'output_display_cec_version';
                     writeValue = String(splitLine[1] || '').trim();
                 }
 
-                if (lineIncludes(line, 'Physical Address') && !fileName && !String(splitLine[1] || '').startsWith('Tx'))
+                if (lineIncludes(line, 'Physical Address') && !fileName && !String(splitLine[1] || '').includes('Tx'))
                 {
                     fileName = 'output_display_cec_address';
-                    writeValue = String(Number(String(splitLine[1] || '').trim().replaceAll('.', '') || 0));
+                    writeValue = String(String(splitLine[1] || '').trim().replaceAll('.', ''));
                 }
 
                 if (lineIncludes(line, 'Power Status') && !fileName)
                 {
                     fileName = 'output_display_cec_status_power';
-                    writeValue = String(splitLine[1] || 'unknown').trim();
+                    writeValue = String(splitLine[1] || '').trim();
                 }
 
 
