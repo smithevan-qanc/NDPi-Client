@@ -200,8 +200,7 @@ class NDPi {
         const name = this.settings.get('device_name');
         const pin = this.settings.get('ndpi_airplay_server_pin') || null;
 
-        let airPlayOptions = ['-n', name, '-nh', '-fs', '-hls', '-fps', '60' ];
-        // let airPlayOptions = ['-n', name, '-nh', '-fs', '-hls', '-fps', '60', '-d' ];
+        let airPlayOptions = ['-n', name, '-nh', '-fs', '-hls', '-fps', '60', '-d' ];
         if (pin && /^\d{1,4}$/.test(pin))  // Validate PIN.
         {
             airPlayOptions.push('-pin');
@@ -209,6 +208,14 @@ class NDPi {
         }
 
         this.airPlay = spawn('uxplay', airPlayOptions, { env: { ...process.env } });
+
+        this.airPlay.once('spawn', () => {
+            this.settings.put('pid_air_play_player', String(this.airPlay.pid || ''));
+        });
+
+        this.airPlay.once('exit', () => {
+            this.settings.put('pid_air_play_player', '');
+        });
 
         this.airPlay.stdout.on('data', (data) => {
             func.stdoutToArray(data.toString().trim()).forEach((line) => {
