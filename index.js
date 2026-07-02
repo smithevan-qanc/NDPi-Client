@@ -211,7 +211,8 @@ class NDPi {
 
         this.airPlay.stdout.on('data', (data) => {
             func.stdoutToArray(data.toString().trim()).forEach((line) => {
-                console.log('[ index ][ AirPlay ]', line);
+                if (String(line || '').includes('Open connections:'))
+                { console.log('[ index ][ AirPlay ]', line); }
             });
         });
         
