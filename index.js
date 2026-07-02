@@ -172,11 +172,6 @@ class NDPi {
             func.setDisplayResolution();
         });
 
-        //  HDMI Framerate
-        this.settings.on('output_display_framerate_preference', () => {
-            func.setDisplayResolution();
-        });
-
         //  ApirPlay PIN
         this.settings.on('ndpi_airplay_server_pin', () => {
             this.restartAirPlay();

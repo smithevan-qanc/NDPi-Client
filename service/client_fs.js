@@ -588,13 +588,6 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditExternal: true,
             },
             {
-                key: "output_display_framerate_preference",
-                value: ``,
-                group: `Display_Resolution`,
-                allowEditInternal: true,
-                allowEditExternal: true,
-            },
-            {
                 key: "output_display_resolution_current",
                 value: ``,
                 group: `Display_Resolution`,
@@ -685,6 +678,27 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditInternal: true,
                 allowEditExternal: true,
             },
+            {
+                key: "pid_chromium",
+                value: ``,
+                group: `PROCESSES`,
+                allowEditInternal: false,
+                allowEditExternal: false,
+            },
+            {
+                key: "pid_ndi_player",
+                value: ``,
+                group: `PROCESSES`,
+                allowEditInternal: false,
+                allowEditExternal: false,
+            },
+            {
+                key: "pid_air_play_player",
+                value: ``,
+                group: `PROCESSES`,
+                allowEditInternal: false,
+                allowEditExternal: false,
+            },
         ];
         // Files that will NOT initialize with the previously stored value.
         const retainDefaultValue = [
@@ -709,6 +723,9 @@ class FileSystemMonitor extends EventEmitter {
             'output_display_cec_this_source_active',
             'output_display_cec_version',
             'output_display_cec_address',
+            'pid_chromium',
+            'pid_ndi_player',
+            'pid_air_play_player',
         ];
 
         for (const file of files)

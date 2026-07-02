@@ -464,7 +464,6 @@ const { exec, spawn } = require('node:child_process');
         }
 
         // NDI Window Actions
-
         async function minimizeWindow_NDI() {
             let response = false;
             const cmd1 = await exe(`xdotool search --class 'gstreamer'`);
@@ -516,7 +515,6 @@ const { exec, spawn } = require('node:child_process');
 
 
         // Chromium Window Actions
-
         async function minimizeWindow_Chromium() {
             let response = false;
             const cmd1 = await exe(`xdotool search --class 'chromium'`);
@@ -612,7 +610,7 @@ const { exec, spawn } = require('node:child_process');
         async function activateDisplay() {
             try
             {
-                console.log(`[ ${path.basename(__filename).split('.')[0]} ][ activateDisplay() ][ CEC ] Attempting to activate display.`);
+                console.log(`[ ${path.basename(__filename).split('.')[0]} ][ activateDisplay() ] Attempting to activate display.`);
 
                 const f2 = await fetch('http://localhost:3080/api/v1/__internal/cec', {
                     method: 'POST',
@@ -624,9 +622,9 @@ const { exec, spawn } = require('node:child_process');
                 const data = await f2.json();
                 if (!data.success) { throw new Error(); }
             }
-            catch
+            catch {}
+            finally 
             {
-                console.log(`[ ${path.basename(__filename).split('.')[0]} ][ activateDisplay() ] could not activate display. Trying RandR.`);
                 await setDisplayResolution().catch((reason) => {
                     console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ activateDisplay() ][ setDisplayResolution() ]`, reason);
                 });
@@ -673,7 +671,6 @@ const { exec, spawn } = require('node:child_process');
          * - Using these setting values:
          *   - 'output_display_port'
          *   - 'output_display_resolution_preference'
-         *   - 'output_display_framerate_preference'.
          * 
          * **⚠️ Use try / catch**
          * 
@@ -691,14 +688,13 @@ const { exec, spawn } = require('node:child_process');
                 framerate: null,
             };
 
-            try
-            { config.displayPort = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_port'), 'utf8').trim() }
+            try { config.displayPort = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_port'), 'utf8').trim() }
             catch {}
-            try
-            { config.resolution = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_resolution_preference'), 'utf8').trim() }
+
+            try { config.resolution = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_resolution_preference'), 'utf8').trim() }
             catch {}
-            try
-            { config.framerate = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_framerate_preference'), 'utf8').trim() }
+            
+            try { config.framerate = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_framerate_preference'), 'utf8').trim() }
             catch {}
 
             return await new Promise((resolve, reject) => {
