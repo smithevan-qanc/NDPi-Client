@@ -219,8 +219,11 @@ class NDPi {
 
         this.airPlay.stdout.on('data', (data) => {
             func.stdoutToArray(data.toString().trim()).forEach((line) => {
-                if (String(line || '').includes('Open connections:'))
-                { console.log('[ index ][ AirPlay ]', line); }
+                if (
+                    String(line || '').includes('Open connections:') ||
+                    String(line || '').includes('Begin streaming to GStreamer video pipeline')  ||
+                    String(line || '').includes('*** X11 Windows:') 
+                ) { console.log('[ index ][ AirPlay ]', line); }
             });
         });
         
