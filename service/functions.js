@@ -779,6 +779,7 @@ const { exec, spawn } = require('node:child_process');
             try
             {
                 response.data = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, `${filename}`), 'utf8').trim();
+                console.log('functions get setting ', filename, response.data);
                 response.success = true
             }
             catch {}
