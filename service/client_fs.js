@@ -779,7 +779,7 @@ class FileSystemMonitor extends EventEmitter {
         });
     }
     
-    _fsEvent(name, debounceMs = 800) {
+    _fsEvent(name, debounceMs = 500) {
         const last = this.debounceMap.get(name) || 0;
         const now = Date.now();
 

@@ -465,9 +465,10 @@ const { exec, spawn } = require('node:child_process');
 
         // NDI Window Actions
         async function minimizeWindow_NDI() {
-            const pid = getSetting('pid_ndi_player')
+            const pid = getSetting('pid_ndi_player').data || null;
             let response = false;
-            const cmd1 = await exe(`xdotool search --class 'gstreamer'`);
+            // let cmd1 = await exe(`xdotool search --class 'gstreamer'`);
+            let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'gstreamer'`}`);
 
             if (!cmd1.success)
             { return response; }
@@ -483,8 +484,10 @@ const { exec, spawn } = require('node:child_process');
             return response;
         }
         async function raiseWindow_NDI() {
+            const pid = getSetting('pid_ndi_player').data || null;
             let response = false;
-            const cmd1 = await exe(`xdotool search --class 'gstreamer'`);
+            // let cmd1 = await exe(`xdotool search --class 'gstreamer'`);
+            let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'gstreamer'`}`);
 
             if (!cmd1.success)
             { return response; }
@@ -500,8 +503,10 @@ const { exec, spawn } = require('node:child_process');
             return response;
         }
         async function activateWindow_NDI() {
+            const pid = getSetting('pid_ndi_player').data || null;
             let response = false;
-            const cmd1 = await exe(`xdotool search --class 'gstreamer'`);
+            // let cmd1 = await exe(`xdotool search --class 'gstreamer'`);
+            let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'gstreamer'`}`);
 
             if (Array.isArray(cmd1.data))
             {
@@ -517,8 +522,10 @@ const { exec, spawn } = require('node:child_process');
 
         // Chromium Window Actions
         async function minimizeWindow_Chromium() {
+            const pid = getSetting('pid_chromium').data || null;
             let response = false;
-            const cmd1 = await exe(`xdotool search --class 'chromium'`);
+            // let cmd1 = await exe(`xdotool search --class 'chromium'`);
+            let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'chromium'`}`);
 
             if (!cmd1.success)
             { return response; }
@@ -534,8 +541,10 @@ const { exec, spawn } = require('node:child_process');
             return response;
         }
         async function raiseWindow_Chromium() {
+            const pid = getSetting('pid_chromium').data || null;
             let response = false;
-            const cmd1 = await exe(`xdotool search --class 'chromium'`);
+            // let cmd1 = await exe(`xdotool search --class 'chromium'`);
+            let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'chromium'`}`);
 
             if (!cmd1.success)
             { return response; }
@@ -551,8 +560,10 @@ const { exec, spawn } = require('node:child_process');
             return response;
         }
         async function activateWindow_Chromium() {
+            const pid = getSetting('pid_chromium').data || null;
             let response = false;
-            const cmd1 = await exe(`xdotool search --class 'chromium'`);
+            // let cmd1 = await exe(`xdotool search --class 'chromium'`);
+            let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'chromium'`}`);
 
             if (!cmd1.success)
             { return response; }
