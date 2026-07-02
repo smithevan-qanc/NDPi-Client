@@ -33,14 +33,51 @@ const { exec, spawn } = require('node:child_process');
     /** TODO */
 
         async function checkCecCompliance() {
-            let responseCecCompliance = [];
+            // let responseCecCompliance = [];
+
+            const handleLine = (line = '') => {
+                let fileName = null;
+                let writeValue = '';
+
+                const splitLine = String(line).split(':');
+
+                if (line.includes('Polling:') && !fileName)
+                {
+                    fileName = 'output_display_cec_enabled';
+                    writeValue = String(splitLine[1] || '').trim() == 'OK' ? 'true' : 'false';
+                }
+
+                if (line.includes('CEC Version') && !fileName && !String(splitLine[1] || '').includes('Tx'))
+                {
+                    fileName = 'output_display_cec_version';
+                    writeValue = String(splitLine[1] || '').trim();
+                }
+
+                if (line.includes('Physical Address') && !fileName && !String(splitLine[1] || '').includes('Tx'))
+                {
+                    fileName = 'output_display_cec_address';
+                    if (isNaN(Number(String(splitLine[1] || '').trim().replaceAll('.', ''))))
+                    { writeValue = '' }
+                    else
+                    { writeValue = String(Number(String(splitLine[1] || '').trim().replaceAll('.', ''))) }
+                }
+
+                if (line.includes('Power Status') && !fileName)
+                {
+                    fileName = 'output_display_cec_status_power';
+                    writeValue = String(splitLine[1] || '').trim();
+                }
+
+                if (fileName)
+                { fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, fileName), writeValue, 'utf8'); }
+            };
 
             await new Promise((resolve) => {
                 const proc = spawn('cec-compliance', ['-s']);
                 proc.stdout.on('data', (data) => {
                     const output = String(data.toString()).replaceAll('\t', '');
                     stdoutToArray(output).forEach((line) => {
-                        if (line) { responseCecCompliance.push(line); }
+                        if (line) { handleLine(line); }
                     });
                 });
                 proc.once('exit', () => { resolve(); });
@@ -48,6 +85,7 @@ const { exec, spawn } = require('node:child_process');
 
             // console.log(JSON.stringify(responseCecCompliance, null, 2));
 
+            /*
             const lineIncludes = (search = '', match = '') => { return search.includes(match); }
             
             responseCecCompliance.forEach((line) => {
@@ -93,8 +131,8 @@ const { exec, spawn } = require('node:child_process');
                     fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, fileName), writeValue, 'utf8');
                 }
             });
+            */
         }
-        processCommand()
 
         /** 
          * **Process API Command**
