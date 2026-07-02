@@ -465,7 +465,7 @@ const { exec, spawn } = require('node:child_process');
 
         // NDI Window Actions
         async function minimizeWindow_NDI() {
-            const pid = await getSetting('pid_ndi_player').data || null;
+            const pid = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'pid_ndi_player'), 'utf8').trim() || null;
             let response = false;
             // let cmd1 = await exe(`xdotool search --class 'gstreamer'`);
             let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'gstreamer'`}`);
@@ -484,7 +484,7 @@ const { exec, spawn } = require('node:child_process');
             return response;
         }
         async function raiseWindow_NDI() {
-            const pid = await getSetting('pid_ndi_player').data || null;
+            const pid = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'pid_ndi_player'), 'utf8').trim() || null;
             let response = false;
             // let cmd1 = await exe(`xdotool search --class 'gstreamer'`);
             let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'gstreamer'`}`);
@@ -503,7 +503,7 @@ const { exec, spawn } = require('node:child_process');
             return response;
         }
         async function activateWindow_NDI() {
-            const pid = await getSetting('pid_ndi_player').data || null;
+            const pid = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'pid_ndi_player'), 'utf8').trim() || null;
             let response = false;
             // let cmd1 = await exe(`xdotool search --class 'gstreamer'`);
             let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'gstreamer'`}`);
@@ -521,9 +521,8 @@ const { exec, spawn } = require('node:child_process');
 
         // AirPlay Window Activate
         async function activateWindow_AirPlay() {
-            const pid = await getSetting('pid_air_play_player').data || null;
+            const pid = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'pid_air_play_player'), 'utf8').trim() || null;
             let response = false;
-            // let cmd1 = await exe(`xdotool search --class 'gstreamer'`);
             let cmd1 = await exe(`xdotool search --pid ${pid}`);
 
             if (Array.isArray(cmd1.data))
@@ -540,7 +539,7 @@ const { exec, spawn } = require('node:child_process');
 
         // Chromium Window Actions
         async function minimizeWindow_Chromium() {
-            const pid = await getSetting('pid_chromium').data || null;
+            const pid = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'pid_chromium'), 'utf8').trim() || null;
             let response = false;
             // let cmd1 = await exe(`xdotool search --class 'chromium'`);
             let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'chromium'`}`);
@@ -559,7 +558,7 @@ const { exec, spawn } = require('node:child_process');
             return response;
         }
         async function raiseWindow_Chromium() {
-            const pid = await getSetting('pid_chromium').data || null;
+            const pid = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'pid_chromium'), 'utf8').trim() || null;
             let response = false;
             // let cmd1 = await exe(`xdotool search --class 'chromium'`);
             let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'chromium'`}`);
@@ -578,7 +577,7 @@ const { exec, spawn } = require('node:child_process');
             return response;
         }
         async function activateWindow_Chromium() {
-            const pid = await getSetting('pid_chromium').data || null;
+            const pid = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'pid_chromium'), 'utf8').trim() || null;
             let response = false;
             // let cmd1 = await exe(`xdotool search --class 'chromium'`);
             let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'chromium'`}`);
