@@ -143,7 +143,7 @@ class CecController extends EventEmitter {
             { this.settings.put('output_display_cec_this_source_active', 'true'); }
 
             if (line.includes('ERROR'))
-            { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${lineSplit}`); }
+            { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${line}`); }
         });
 
         try { clearTimeout(this.debounceCheckCompliance); }
