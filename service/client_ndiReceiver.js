@@ -275,11 +275,11 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         await func.wait(delay);
 
-        if (!this.displayActivated)
-        {
-            this.displayActivated = true;
-            await func.activateDisplay();
-        }
+        // if (!this.displayActivated)
+        // {
+        //     this.displayActivated = true;
+        //     await func.activateDisplay();
+        // }
 
         const step1 = await func.activateWindow_NDI();
         if (!step1)
