@@ -47,13 +47,16 @@ const { exec, spawn } = require('node:child_process');
                     writeValue = String(splitLine[1] || '').trim() == 'OK' ? 'true' : 'false';
                 }
 
-                if (line.includes('CEC Version') && !fileName && !String(splitLine[1] || '').includes('Tx'))
+                if (line.includes('CEC Version') && !fileName)
                 {
                     fileName = 'output_display_cec_version';
-                    writeValue = String(splitLine[1] || '').trim();
+                    if (!String(splitLine[1] || '').includes('Tx'))
+                    { writeValue = String(splitLine[1] || '').trim(); }
+                    else
+                    { writeValue = ''; }
                 }
 
-                if (line.includes('Physical Address') && !fileName && !String(splitLine[1] || '').includes('Tx'))
+                if (line.includes('Physical Address') && !fileName)
                 {
                     fileName = 'output_display_cec_address';
                     if (isNaN(Number(String(splitLine[1] || '').trim().replaceAll('.', ''))))
@@ -65,7 +68,10 @@ const { exec, spawn } = require('node:child_process');
                 if (line.includes('Power Status') && !fileName)
                 {
                     fileName = 'output_display_cec_status_power';
-                    writeValue = String(splitLine[1] || '').trim();
+                    if (!String(splitLine[1] || '').includes('Tx'))
+                    { writeValue = String(splitLine[1] || '').trim(); }
+                    else
+                    { writeValue = ''; }
                 }
 
                 if (fileName)
