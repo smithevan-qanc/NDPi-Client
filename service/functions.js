@@ -69,9 +69,9 @@ const { exec, spawn } = require('node:child_process');
                 {
                     fileName = 'output_display_cec_status_power';
                     if (!String(splitLine[1] || '').includes('Tx'))
-                    { writeValue = String(splitLine[1] || '').trim(); }
+                    { writeValue = String(splitLine[1] || 'unknown').trim(); }
                     else
-                    { writeValue = ''; }
+                    { writeValue = 'unknown'; }
                 }
 
                 if (fileName)
