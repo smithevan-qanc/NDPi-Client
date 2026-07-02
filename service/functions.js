@@ -519,6 +519,24 @@ const { exec, spawn } = require('node:child_process');
             return response;
         }
 
+        // AirPlay Window Activate
+        async function activateWindow_AirPlay() {
+            const pid = getSetting('pid_air_play_player').data || null;
+            let response = false;
+            // let cmd1 = await exe(`xdotool search --class 'gstreamer'`);
+            let cmd1 = await exe(`xdotool search --pid ${pid}`);
+
+            if (Array.isArray(cmd1.data))
+            {
+                for (const windowId of cmd1.data)
+                {
+                    const cmd2 = await exe(`xdotool windowactivate ${windowId}`);
+                    if (cmd2.success) { response = true; }
+                }
+            }
+            return response;
+        }
+
 
         // Chromium Window Actions
         async function minimizeWindow_Chromium() {
@@ -954,6 +972,8 @@ module.exports = {
     minimizeWindow_NDI,
     raiseWindow_NDI,
     activateWindow_NDI,
+
+    activateWindow_AirPlay,
 
     activateDisplay,
 };

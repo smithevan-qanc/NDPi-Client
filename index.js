@@ -219,13 +219,30 @@ class NDPi {
 
         this.airPlay.stdout.on('data', (data) => {
             func.stdoutToArray(data.toString().trim()).forEach((line) => {
-                if (
-                    String(line || '').includes('Open connections:') ||
-                    String(line || '').includes('Begin streaming to GStreamer video pipeline')  ||
-                    String(line || '').includes('*** X11 Windows:') 
-                ) { console.log('[ index ][ AirPlay ]', line); }
+                if (String(line || '').includes('Open connections:'))
+                {
+                    console.log(`[ ${path.basename(__filename).split('.')[0]} ][ AirPlay ]`, line);
+                }
+                else if (String(line || '').includes('Begin streaming to GStreamer video pipeline'))
+                {
+                    // console.log(`[ ${path.basename(__filename).split('.')[0]} ][ AirPlay ]`, line);
+                    console.log('');
+                }
+                else if (String(line || '').includes('*** X11 Windows:'))
+                {
+                    console.info(`[ ${path.basename(__filename).split('.')[0]} ][ AirPlay ]`, `Starting AirPlay`);
+                    func.activateWindow_AirPlay();
+                }
             });
         });
+
+
+        /**
+         * await func.fadeVolume(this.volumeSetPoint, 'Auto-Adjust NDI Receiver');
+         * func.activateWindow_AirPlay()
+         */
+
+
         
         this.airPlay.stderr.on('data', (data) => {
             func.stdoutToArray(data.toString().trim()).forEach((line) => {
