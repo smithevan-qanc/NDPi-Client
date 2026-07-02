@@ -42,7 +42,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
             '--start-fullscreen',
             '--touch-events=enabled',
             `--user-data-dir=${process.env.HOME}/.config/chromium/Default`,
-            `http://localhost:${connectionPort}/`
+            `http://localhost:${connectionPort}/display/idle/`
         ];
 
         this.service = spawn(command, args, {

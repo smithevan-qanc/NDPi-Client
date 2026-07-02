@@ -149,9 +149,7 @@ class CecController extends EventEmitter {
         catch {}
         finally { this.debounceCheckCompliance = null; }
 
-        this.debounceCheckCompliance = setTimeout(() => {
-            func.checkCecCompliance();
-        }, 1000);
+        this.debounceCheckCompliance = setTimeout(() => { func.checkCecCompliance(); }, 1000);
     }
 
     _handleStderr(data) {

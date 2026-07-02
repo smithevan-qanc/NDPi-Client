@@ -169,7 +169,18 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.App.use(this.Routes);
         this.startServer();
 
-        this.Routes.route('/')
+        this.Routes
+        .route('/')
+        .get((req, res) => {
+              // DEV
+            res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+              // PROD
+            // res.set('Cache-Control', 'public, max-age=86400, immutable');
+            res.sendFile(path.join(__dirname, '..', 'public', 'system.html'));
+        });
+
+        this.Routes
+        .route('/display/idle')
         .get((req, res) => {
               // DEV
             res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
@@ -186,7 +197,8 @@ class NDPiCommandServer_Client extends EventEmitter {
          *          data: <Relevant Data [any]>
          *      }
          */
-        this.Routes.route('/api/v1/rpc')
+        this.Routes
+        .route('/api/v1/rpc')
         .get(async (req, res) => {
             // to use: http://<ip>:<port>/api/v1/rpc?type=set-source&data=EVAN-MSI (OBS PGM)
             console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'GET:', req.url);
@@ -447,12 +459,17 @@ class NDPiCommandServer_Client extends EventEmitter {
             try { this.Server.closeAllConnections(); }
             catch {}
 
-            try { this.Server.close(); }
-            catch {}
-            finally { 
+            // try {
+            this.Server.close((err) => {
                 console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
                 resolve();
-            }
+            });
+            // }
+            // catch {}
+            // finally { 
+            //     console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ]`);
+            //     resolve();
+            // }
         });
     }
 
