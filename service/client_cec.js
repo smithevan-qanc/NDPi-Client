@@ -18,7 +18,7 @@ class CecController extends EventEmitter {
 
         this.enabled = true;
         this.isReady = false;
-        this.debug = false;
+        this.debug = true;
 
         this.restartDelay = 1000;
         this.restartTimer = null;
