@@ -164,7 +164,7 @@ server._ws.onmessage = (message) => {
 (async () => {
     await refreshSources();
     const savedScrollPos = window.sessionStorage.getItem('scrollPos') || '0';
-    window.scrollTo(0, Number(savedScrollPos));
+    window.scrollTo({ left: 0, top: Number(savedScrollPos), behavior:'smooth' });
     addEvents();
 })();
 
