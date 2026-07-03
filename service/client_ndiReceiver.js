@@ -276,20 +276,24 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.displayActivated = true;
             await func.activateDisplay();
         }
+        await func.wait(delay);
 
         func.fadeVolume(this.volumeSetPoint, `${path.basename(__filename)} connect(); stdout.on(data)`);
 
-        await func.wait(delay);
+        await Promise.all([
+            func.fadeVolume(this.volumeSetPoint, `${path.basename(__filename)} connect(); stdout.on(data)`),
+            func.activateWindow_NDI(),
+            func.minimizeWindow_Chromium()
+        ]);
+        // const step1 = func.activateWindow_NDI();
 
-        const step2 = func.minimizeWindow_Chromium();
+        // const step2 = func.minimizeWindow_Chromium();
         // if (!step2)
         // { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ >> Step 1: Minimize Chromium ]`); }
         
         // await func.wait(1000); // not affected by the delay argv.
-
-        const step1 = await func.activateWindow_NDI();
-        if (!step1)
-        { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ >> Step 2: Activate GStreamer ]`); return; }
+        // if (!step1)
+        // { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ >> Step 2: Activate GStreamer ]`); return; }
 
         setTimeout(() => {
             func.killPicom();
