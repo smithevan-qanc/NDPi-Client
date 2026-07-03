@@ -153,23 +153,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
             this.ws_conn_stats.add(ws);
 
-            ws.send(
-                JSON.stringify({
-                    os00: String(os.arch),
-                    os01: Number(os.availableParallelism),
-                    os02: new Array(os.cpus),
-                    os03: Number(os.freemem),
-                    os04: String(os.hostname),
-                    os05: new Array(os.loadavg),
-                    os06: String(os.machine),
-                    os07: os.networkInterfaces,
-                    os08: String(os.platform),
-                    os09: String(os.release),
-                    os10: Number(os.totalmem),
-                    os11: Number(os.uptime),
-                    os12: String(os.version)
-                })
-            );
+            ws.send(JSON.stringify(this.systemStats()));
 
             this.startStats();
 
@@ -404,6 +388,24 @@ class NDPiCommandServer_Client extends EventEmitter {
         });
     }
 
+    systemStats() {
+        return {
+            os00: String(os.arch),
+            os01: Number(os.availableParallelism),
+            os02: os.cpus,
+            os03: Number(os.freemem),
+            os04: String(os.hostname),
+            os05: os.loadavg,
+            os06: String(os.machine),
+            os07: Object.keys(os.networkInterfaces()),
+            os08: String(os.platform),
+            os09: String(os.release),
+            os10: Number(os.totalmem),
+            os11: Number(os.uptime),
+            os12: String(os.version),
+        }
+    }
+
     async _tryCloseDiscovery() {
         return new Promise((resolve) => {
             if (!this.discoveryExec.killed)
@@ -440,21 +442,22 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     sendStats() {
-        const stats = {
-            os00: String(os.arch),
-            os01: Number(os.availableParallelism),
-            os02: Array(os.cpus),
-            os03: Number(os.freemem),
-            os04: String(os.hostname),
-            os05: Array(os.loadavg),
-            os06: String(os.machine),
-            os07: os.networkInterfaces,
-            os08: String(os.platform),
-            os09: String(os.release),
-            os10: Number(os.totalmem),
-            os11: Number(os.uptime),
-            os12: String(os.version)
-        };
+        // const stats = {
+        //     os00: String(os.arch),
+        //     os01: Number(os.availableParallelism),
+        //     os02: Array(os.cpus),
+        //     os03: Number(os.freemem),
+        //     os04: String(os.hostname),
+        //     os05: Array(os.loadavg),
+        //     os06: String(os.machine),
+        //     os07: os.networkInterfaces(),
+        //     os08: String(os.platform),
+        //     os09: String(os.release),
+        //     os10: Number(os.totalmem),
+        //     os11: Number(os.uptime),
+        //     os12: String(os.version)
+        // };
+        const stats = this.systemStats();
 
         this.ws_conn_stats.forEach((ws) => {
             ws.send(JSON.stringify(stats));
