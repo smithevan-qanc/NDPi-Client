@@ -281,9 +281,9 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         await func.wait(delay);
 
-        const step2 = await func.minimizeWindow_Chromium();
-        if (!step2)
-        { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ >> Step 1: Minimize Chromium ]`); }
+        const step2 = func.minimizeWindow_Chromium();
+        // if (!step2)
+        // { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ >> Step 1: Minimize Chromium ]`); }
         
         // await func.wait(1000); // not affected by the delay argv.
 
