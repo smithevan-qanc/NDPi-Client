@@ -185,7 +185,7 @@ sources._ws.onmessage = (message) => {
 const stats = new NDPi_WebSocket('ws/stats');
 stats._ws.onmessage = (message) => {
     const data = JSON.parse(message.data);
-    document.getElementById('systemStats').textContent = JSON.stringify(data);
+    document.getElementById('systemStats').textContent = JSON.stringify(data, null, 2);
 };
 
 function addEvents() {
