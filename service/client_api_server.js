@@ -390,19 +390,19 @@ class NDPiCommandServer_Client extends EventEmitter {
 
     systemStats() {
         return {
-            os00: String(os.arch),
-            os01: Number(os.availableParallelism),
-            os02: os.cpus(),
-            os03: Number(os.freemem),
-            os04: String(os.hostname),
-            os05: os.loadavg(),
-            os06: String(os.machine),
-            os07: os.networkInterfaces(),
-            os08: String(os.platform),
-            os09: String(os.release),
-            os10: Number(os.totalmem),
-            os11: Number(os.uptime),
-            os12: String(os.version),
+            systemTime:         String(new Date()),
+            osArchitecture:     String(os.arch),
+            osUptime:           Number(os.uptime),
+            freemem:            Number(os.freemem),
+            totalmem:           Number(os.totalmem),
+            hostname:           String(os.hostname),
+            loadavg:            os.loadavg(),
+            osMachine:          String(os.machine),
+            osPlatform:         String(os.platform),
+            osRelease:          String(os.release),
+            osVersion:          String(os.version),
+            networkInterfaces:  os.networkInterfaces(),
+            cpus:               os.cpus(),
         }
     }
 
