@@ -259,15 +259,14 @@ class NDI_Receiver_v4 extends EventEmitter {
 
             if (this.secondsInactive >= 60)
             { this.showGStreamer(); }
+
             if (this.secondsInactive >= 2)
             { this.logInfo(stdout); }
 
             this.secondsInactive = 0;
         }
         else
-        {
-            this.logInfo(stdout);
-        }
+        { this.logInfo(stdout); }
     }
 
     async showGStreamer(delay = 1000) {
@@ -282,8 +281,8 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         await Promise.all([
             func.fadeVolume(this.volumeSetPoint, `${path.basename(__filename)} connect(); stdout.on(data)`),
-            func.activateWindow_NDI(),
-            func.minimizeWindow_Chromium()
+            func.activateWindow_NDI().catch(),
+            func.minimizeWindow_Chromium().catch()
         ]);
         // const step1 = func.activateWindow_NDI();
 

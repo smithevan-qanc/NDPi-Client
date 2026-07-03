@@ -182,6 +182,8 @@ sources._ws.onmessage = (message) => {
     catch {}
 };
 
+const stats = new NDPi_WebSocket('ws/stats');
+
 function addEvents() {
     document.addEventListener('scroll', () => {
         window.sessionStorage.setItem('scrollPos', window.scrollY.toString());

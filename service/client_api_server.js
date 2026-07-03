@@ -7,6 +7,7 @@ const crypto = require('node:crypto');
 const func = require('./functions');
 const { randomUUID } = require('crypto');
 const { spawn } = require('node:child_process');
+const os = require('node:os');
 
 
 class NDPiCommandServer_Client extends EventEmitter {
@@ -38,6 +39,10 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         this.ws_serv_system = null;
         this.ws_conn_system = null;
+
+        this.ws_serv_stats = null;
+        this.ws_conn_stats = null;
+        this.statsSendInterval = null;
 
         this.ws_serv_sources = null;
         this.ws_conn_sources = null;
@@ -112,7 +117,7 @@ class NDPiCommandServer_Client extends EventEmitter {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'System GUI WebSocket connection ADDED.');
 
             this.ws_conn_system.add(ws);
-
+            
             ws.send(
                 JSON.stringify(Array.from(this.settings.fileMap))
             );
@@ -131,6 +136,47 @@ class NDPiCommandServer_Client extends EventEmitter {
             ws.onclose = () => {
                 this.ws_conn_system.delete(ws);
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'System GUI WebSocket connection REMOVED.');
+            };
+        });
+    }
+
+    /**
+     *      System Stats - WebSocket Connection Handler
+     */
+    __ws_Stats() {
+        this.ws_serv_stats = new WebSocket.Server({ noServer: true });
+        this.ws_conn_stats = new Set();
+
+        this.ws_serv_stats.on('connection', (ws) =>{
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'System Stats WebSocket connection ADDED.');
+
+            this.ws_conn_stats.add(ws);
+
+            ws.send(
+                JSON.stringify({
+                    os00: String(os.arch),
+                    os01: Number(os.availableParallelism),
+                    os02: Array.from(os.cpus),
+                    os03: Number(os.freemem),
+                    os04: String(os.hostname),
+                    os05: Array.from(os.loadavg),
+                    os06: String(os.machine),
+                    os07: Array.from(os.networkInterfaces),
+                    os08: String(os.platform),
+                    os09: String(os.release),
+                    os10: Number(os.totalmem),
+                    os11: Number(os.uptime),
+                    os12: String(os.version)
+                })
+            );
+
+            ws.onerror = (error) => {
+                console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `System Stats WebSocket Server`, error);
+            };
+
+            ws.onclose = () => {
+                this.ws_conn_stats.delete(ws);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'System Stats WebSocket connection REMOVED.');
             };
         });
     }
@@ -313,6 +359,10 @@ class NDPiCommandServer_Client extends EventEmitter {
                 this.ws_serv_system.handleUpgrade(request, socket, head, (ws) => {
                     this.ws_serv_system.emit('connection', ws, request);
                 });
+            } else if (pathname === '/ws/stats') {
+                this.ws_serv_stats.handleUpgrade(request, socket, head, (ws) => {
+                    this.ws_serv_stats.emit('connection', ws, request);
+                });
             } else if (pathname === '/ws/sources') {
                 this.ws_serv_sources.handleUpgrade(request, socket, head, (ws) => {
                     this.ws_serv_sources.emit('connection', ws, request);
@@ -379,10 +429,62 @@ class NDPiCommandServer_Client extends EventEmitter {
         });
     }
 
+    startStats() {
+        if (this.statsSendInterval) return;
+        this.statsSendInterval = setInterval(() => {
+            this.sendStats();
+        }, 1000);
+    }
+
+    sendStats() {
+        const stats = {
+            os00: String(os.arch),
+            os01: Number(os.availableParallelism),
+            os02: Array.from(os.cpus),
+            os03: Number(os.freemem),
+            os04: String(os.hostname),
+            os05: Array.from(os.loadavg),
+            os06: String(os.machine),
+            os07: Array.from(os.networkInterfaces),
+            os08: String(os.platform),
+            os09: String(os.release),
+            os10: Number(os.totalmem),
+            os11: Number(os.uptime),
+            os12: String(os.version)
+        };
+        console.log('start Stats', stats);
+
+        this.ws_conn_stats.forEach((ws) => {
+            ws.send(
+                JSON.stringify({
+                    os00: String(os.arch),
+                    os01: Number(os.availableParallelism),
+                    os02: Array.from(os.cpus),
+                    os03: Number(os.freemem),
+                    os04: String(os.hostname),
+                    os05: Array.from(os.loadavg),
+                    os06: String(os.machine),
+                    os07: Array.from(os.networkInterfaces),
+                    os08: String(os.platform),
+                    os09: String(os.release),
+                    os10: Number(os.totalmem),
+                    os11: Number(os.uptime),
+                    os12: String(os.version)
+                })
+            );
+        });
+    }
+
     async close() {
         this.closing = true;
 
         console.info(`[ CLOSING ][ ${path.basename(__filename).split('.')[0]} ]`);
+
+        if (this.statsSendInterval)
+        {
+            clearInterval(this.statsSendInterval);
+            this.statsSendInterval = null;
+        }
 
         await Promise.all([
             new Promise((resolve) => {
@@ -400,6 +502,10 @@ class NDPiCommandServer_Client extends EventEmitter {
                             resolve();
                         }
                     });
+                    setTimeout(() => {
+                        console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] Overlay Display WebSocket (Timeout)`);
+                        resolve();
+                    }, 1000);
                 }
                 else
                 {
@@ -422,10 +528,40 @@ class NDPiCommandServer_Client extends EventEmitter {
                             resolve();
                         }
                     });
+                    setTimeout(() => {
+                        console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] System GUI WebSocket (Timeout)`);
+                        resolve();
+                    }, 1000);
                 }
                 else
                 {
                     console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] System GUI WebSocket - NO Connections`);
+                    resolve();
+                }
+            }),
+            new Promise((resolve) => {
+                if (this.ws_conn_stats.size !== 0)
+                {
+                    this.ws_serv_stats.close((err) => {
+                        if (err)
+                        {
+                            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR CLOSING ] System Stats WebSocket`, err);
+                            resolve();
+                        }
+                        else
+                        {
+                            console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] System Stats WebSocket`);
+                            resolve();
+                        }
+                    });
+                    setTimeout(() => {
+                        console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] System Stats WebSocket (Timeout)`);
+                        resolve();
+                    }, 1000);
+                }
+                else
+                {
+                    console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] System Stats WebSocket - NO Connections`);
                     resolve();
                 }
             }),
@@ -444,6 +580,10 @@ class NDPiCommandServer_Client extends EventEmitter {
                             resolve();
                         }
                     });
+                    setTimeout(() => {
+                        console.info(`[ -CLOSED ][ ${path.basename(__filename).split('.')[0]} ] NDI Source WebSocket (Timeout)`);
+                        resolve();
+                    }, 1000);
                 }
                 else
                 {
