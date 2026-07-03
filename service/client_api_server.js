@@ -75,6 +75,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         this.__ws_Display();
         this.__ws_System();
+        this.__ws_Stats();
         this.__ws_Sources();
         this.__Routers();
     }
