@@ -157,12 +157,12 @@ class NDPiCommandServer_Client extends EventEmitter {
                 JSON.stringify({
                     os00: String(os.arch),
                     os01: Number(os.availableParallelism),
-                    os02: Array.from(os.cpus),
+                    os02: Array(os.cpus),
                     os03: Number(os.freemem),
                     os04: String(os.hostname),
-                    os05: Array.from(os.loadavg),
+                    os05: Array(os.loadavg),
                     os06: String(os.machine),
-                    os07: Array.from(os.networkInterfaces),
+                    os07: Object.keys(os.networkInterfaces),
                     os08: String(os.platform),
                     os09: String(os.release),
                     os10: Number(os.totalmem),
@@ -443,38 +443,21 @@ class NDPiCommandServer_Client extends EventEmitter {
         const stats = {
             os00: String(os.arch),
             os01: Number(os.availableParallelism),
-            os02: Array.from(os.cpus),
+            os02: Array(os.cpus),
             os03: Number(os.freemem),
             os04: String(os.hostname),
-            os05: Array.from(os.loadavg),
+            os05: Array(os.loadavg),
             os06: String(os.machine),
-            os07: Array.from(os.networkInterfaces),
+            os07: Object.keys(os.networkInterfaces),
             os08: String(os.platform),
             os09: String(os.release),
             os10: Number(os.totalmem),
             os11: Number(os.uptime),
             os12: String(os.version)
         };
-        console.log('start Stats', stats);
 
         this.ws_conn_stats.forEach((ws) => {
-            ws.send(
-                JSON.stringify({
-                    os00: String(os.arch),
-                    os01: Number(os.availableParallelism),
-                    os02: Array.from(os.cpus),
-                    os03: Number(os.freemem),
-                    os04: String(os.hostname),
-                    os05: Array.from(os.loadavg),
-                    os06: String(os.machine),
-                    os07: Array.from(os.networkInterfaces),
-                    os08: String(os.platform),
-                    os09: String(os.release),
-                    os10: Number(os.totalmem),
-                    os11: Number(os.uptime),
-                    os12: String(os.version)
-                })
-            );
+            ws.send(JSON.stringify(stats));
         });
     }
 
