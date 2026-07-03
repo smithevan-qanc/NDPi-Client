@@ -250,7 +250,7 @@ class NDI_Receiver_v4 extends EventEmitter {
             this.settings.put('ndpi_status_ndi_source_active', this.ndiActiveSource || '');
             this.settings.put('ndpi_status_ndi_source_connected_time', this.ndiConnectedAt || '');
 
-            this.showGStreamer(1000);
+            this.showGStreamer(2000);
         }
         else if (stdout.includes('Reconnected to:'))
         {
@@ -271,25 +271,25 @@ class NDI_Receiver_v4 extends EventEmitter {
     }
 
     async showGStreamer(delay = 1000) {
-        func.fadeVolume(this.volumeSetPoint, `${path.basename(__filename)} connect(); stdout.on(data)`);
-
-        await func.wait(delay);
-
-        const step1 = await func.activateWindow_NDI();
-        if (!step1)
-        { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ >> Step 1: Activate GStreamer ]`); return; }
-        
-        await func.wait(1000); // not affected by the delay argv.
-
-        const step2 = await func.minimizeWindow_Chromium();
-        if (!step2)
-        { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ >> Step 2: Minimize Chromium ]`); }
-
         if (!this.displayActivated)
         {
             this.displayActivated = true;
             await func.activateDisplay();
         }
+
+        func.fadeVolume(this.volumeSetPoint, `${path.basename(__filename)} connect(); stdout.on(data)`);
+
+        await func.wait(delay);
+
+        const step2 = await func.minimizeWindow_Chromium();
+        if (!step2)
+        { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ >> Step 1: Minimize Chromium ]`); }
+        
+        await func.wait(1000); // not affected by the delay argv.
+
+        const step1 = await func.activateWindow_NDI();
+        if (!step1)
+        { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ >> Step 2: Activate GStreamer ]`); return; }
 
         setTimeout(() => {
             func.killPicom();
