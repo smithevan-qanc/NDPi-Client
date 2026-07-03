@@ -171,6 +171,8 @@ class NDPiCommandServer_Client extends EventEmitter {
                 })
             );
 
+            this.startStats();
+
             ws.onerror = (error) => {
                 console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `System Stats WebSocket Server`, error);
             };
