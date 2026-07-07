@@ -1088,11 +1088,19 @@ class FileSystemMonitor extends EventEmitter {
                                 this.put('output_display_framerate_preferred', splitValue);
                                 return;
                                 break;
-                            case 'manufacturer':
+                            case 'manufacturer_hdmi0':
                                 this.put('output_display_manufacturer', splitValue);
                                 return;
                                 break;
-                            case 'model':
+                            case 'manufacturer_hdmi1':
+                                this.put('output_display_manufacturer', splitValue);
+                                return;
+                                break;
+                            case 'model_hdmi0':
+                                this.put('output_display_model', splitValue);
+                                return;
+                                break;
+                            case 'model_hdmi1':
                                 this.put('output_display_model', splitValue);
                                 return;
                                 break;

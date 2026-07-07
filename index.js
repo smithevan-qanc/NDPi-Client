@@ -325,7 +325,6 @@ class NDPi {
      * START API
      */
     startApi() {
-        const NDPiCommandServer_Client = require('./service/client_api_server.js');
         this.server_api = new (require('./service/client_api_server.js'))(this.settings);
 
         this.server_api.on('online', () => {
@@ -353,7 +352,10 @@ class NDPi {
         if (this.server_api)
         {
             console.log('*** SHUTDOWN ⎯ 8 (1 of 2) [ Start [_closeApi] ]');
-            await this.server_api.close();
+            await new Promise((resolve) => {
+                this.server_api.close().catch().finally(() => { resolve(); });
+            });
+            // await this.server_api.close();
             console.log('*** SHUTDOWN ⎯ 8 (2 of 2) [ End   [_closeApi] ]');
             this.server_api = null;
         }

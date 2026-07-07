@@ -75,3 +75,6 @@ dtparam=fan_temp3_speed=255
 
 dtoverlay=disable-bt
 dtoverlay=disable-wifi
+
+dtparam=pciex1
+dtparam=pciex1_gen=3

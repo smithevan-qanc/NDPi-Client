@@ -33,6 +33,20 @@ class CecController extends EventEmitter {
         this.start();
     }
 
+    /**
+     * ## LOG LEVELS:
+     * ---
+     * 1  (CEC_LOG_ERROR):   Critical errors only. Highly recommended to prevent terminal pollution when executing simple scripts.
+     * 2  (CEC_LOG_WARNING): Warning messages regarding sub-optimal behaviors or non-breaking anomalies.
+     * 4  (CEC_LOG_NOTICE):  Informational notices, such as successful hardware component attachment or initial handshakes.
+     * 8  (CEC_LOG_TRAFFIC): Raw HDMI-CEC bus traffic. Shows exact byte sequences passing between the host and peripheral connected devices (e.g., >> 05:70:40:00).
+     * 16 (CEC_LOG_DEBUG):   Verbose software-level debugging information helpful for driver troubleshooting.
+     * 31 (CEC_LOG_ALL):     Catch-all level that activates all components simultaneously (1 + 2 + 4 + 8 + 16 = 31).
+     */
+
+    /**
+     * #### Start CEC Controller
+     */
     start() {
         this.isReady = false;
         this.enabled = true;

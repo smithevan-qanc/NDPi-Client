@@ -30,6 +30,12 @@
       <!-- <maximized>false</maximized> -->
       <fullscreen>yes</fullscreen>
     </application>
+
+    <application name="vncserver*">
+      <skip_taskbar>yes</skip_taskbar>
+      <iconic>yes</iconic>
+      <layer>below</layer>
+    </application>
     
     <!--  NDI Receiver -->
     <application class="gstreamer">
