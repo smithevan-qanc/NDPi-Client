@@ -60,7 +60,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.App.use(express.json());
         this.App.options('*', cors());
         this.App.use(cors({
-            origin: 'http://ndpi-server.local:3080/'
+            origin: 'http://ndpi-server.local:3080'
         })); 
         this.App.use(
             express.static(path.join(__dirname, '..', 'public'), {
