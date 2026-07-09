@@ -8,6 +8,7 @@ const func = require('./functions');
 const { randomUUID } = require('crypto');
 const { spawn } = require('node:child_process');
 const os = require('node:os');
+const cors = require('cors');
 
 
 class NDPiCommandServer_Client extends EventEmitter {
@@ -57,6 +58,9 @@ class NDPiCommandServer_Client extends EventEmitter {
     start() {
         this.App = express();
         this.App.use(express.json());
+        this.App.use(cors({
+            origin: 'http://ndpi-server.local:3080/'
+        })); 
         this.App.use(
             express.static(path.join(__dirname, '..', 'public'), {
                 setHeaders: (res, path) => {
