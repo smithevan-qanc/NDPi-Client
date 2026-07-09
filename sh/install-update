@@ -9,8 +9,6 @@ set -e
 
 customInstallInstructions() {
     # Write Custom Update Script Here
-    cd /home/ndpi-client/ndpi
-    sudo npm install cors
     sleep 0.1
 }
 
