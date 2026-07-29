@@ -36,33 +36,13 @@ import numpy as np
 from gpiozero import *
 
 class RaspberryPi:
-    def __init__(self,spi=None,spi_freq=40000000,rst = 27,dc = 25,bl = 18,bl_freq=1000,i2c=None,i2c_freq=100000):
+    def __init__(self,spi=spidev.SpiDev(0,0),spi_freq=40000000,rst = 27,dc = 25,bl = 18,bl_freq=1000,i2c=None,i2c_freq=100000):
         self.np=np
         self.INPUT = False
         self.OUTPUT = True
 
         self.SPEED  =spi_freq
         self.BL_freq=bl_freq
-
-        # Find and open available SPI device
-        if spi is None:
-            spi_devices = [
-                (10, 0),  # Try newer path first
-                (0, 0),   # Fall back to standard path
-            ]
-            
-            for bus, device in spi_devices:
-                spi_path = f"/dev/spidev{bus}.{device}"
-                if os.path.exists(spi_path):
-                    try:
-                        spi = spidev.SpiDev(bus, device)
-                        logging.info(f"Opened SPI device: {spi_path}")
-                        break
-                    except Exception as e:
-                        logging.warning(f"Failed to open {spi_path}: {e}")
-            
-            if spi is None:
-                logging.error("No SPI devices found")
 
         self.RST_PIN= self.gpio_mode(rst,self.OUTPUT)
         self.DC_PIN = self.gpio_mode(dc,self.OUTPUT)
