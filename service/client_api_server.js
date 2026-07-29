@@ -436,9 +436,57 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     systemStats() { // /sys/class/hwmon/hwmon2/fan1_input
-        let thermal_zone0 = fs.readFileSync(path.join('/sys', 'class', 'thermal', 'thermal_zone0', 'temp'), 'utf8').trim() || '0';
+        let pth_thermal_zone0 = path.join('/sys', 'class', 'thermal', 'thermal_zone0', 'temp');
+        let thermal_zone0 = fs.readFileSync(pth_thermal_zone0, 'utf8').trim() || '0';
             thermal_zone0 = Number(thermal_zone0) / 1000;
-        let fan1_input = fs.readFileSync(path.join('/sys', 'class', 'hwmon', 'hwmon2', 'fan1_input'), 'utf8').trim() || '0';
+
+        let fan1_input = null;
+        let pth_fan1_input = path.join('/sys', 'class', 'hwmon', 'hwmon0', 'fan1_input');
+
+        if (!fan1_input)
+        {
+            if (fs.existsSync(pth_fan1_input))
+            { fan1_input = fs.readFileSync(pth_fan1_input, 'utf8').trim() || '0' }
+            else 
+            { pth_fan1_input = path.join('/sys', 'class', 'hwmon', 'hwmon1', 'fan1_input'); }
+        }
+        if (!fan1_input)
+        {
+            if (fs.existsSync(pth_fan1_input))
+            { fan1_input = fs.readFileSync(pth_fan1_input, 'utf8').trim() || '0' }
+            else 
+            { pth_fan1_input = path.join('/sys', 'class', 'hwmon', 'hwmon2', 'fan1_input'); }
+        }
+        if (!fan1_input)
+        {
+            if (fs.existsSync(pth_fan1_input))
+            { fan1_input = fs.readFileSync(pth_fan1_input, 'utf8').trim() || '0' }
+            else 
+            { pth_fan1_input = path.join('/sys', 'class', 'hwmon', 'hwmon3', 'fan1_input'); }
+        }
+        if (!fan1_input)
+        {
+            if (fs.existsSync(pth_fan1_input))
+            { fan1_input = fs.readFileSync(pth_fan1_input, 'utf8').trim() || '0' }
+            else 
+            { pth_fan1_input = path.join('/sys', 'class', 'hwmon', 'hwmon4', 'fan1_input'); }
+        }
+        if (!fan1_input)
+        {
+            if (fs.existsSync(pth_fan1_input))
+            { fan1_input = fs.readFileSync(pth_fan1_input, 'utf8').trim() || '0' }
+            else 
+            { pth_fan1_input = path.join('/sys', 'class', 'hwmon', 'hwmon5', 'fan1_input'); }
+        }
+        if (!fan1_input)
+        {
+            if (fs.existsSync(pth_fan1_input))
+            { fan1_input = fs.readFileSync(pth_fan1_input, 'utf8').trim() || '0' }
+            else 
+            { fan1_input = '0'; }
+        }
+        fan1_input = Number(fan1_input);
+
 
         return {
             systemTime:         String(new Date()),
