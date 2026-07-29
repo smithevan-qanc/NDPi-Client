@@ -13,16 +13,16 @@ class ClientServerWebSocket extends EventEmitter {
         this.socket = null;
         this.enabled = true;
 
-        this.ndpiServerIp = fsData.get('ndpi_command_server_host') || null;
-        this.ndpiServerPort = fsData.get('ndpi_command_server_port') || null;
+        this.ndpiHubHostname = fsData.get('ndpi_hub_hostname') || null;
+        this.ndpiHubPort = fsData.get('ndpi_hub_port') || null;
 
         this.reconnectTimer = null;
 
-        if (this.ndpiServerIp && this.ndpiServerPort)
+        if (this.ndpiHubHostname && this.ndpiHubPort)
             { this.connect() }
     }
     connect() {
-        if (!this.ndpiServerIp || this.ndpiServerIp.includes('localhost'))
+        if (!this.ndpiHubHostname || this.ndpiHubHostname.includes('localhost'))
         {
             this.scheduleReconnect();
             return;
@@ -46,7 +46,7 @@ class ClientServerWebSocket extends EventEmitter {
         console.info(`[ ${path.basename(__filename).split('.')[0]} ] Connecting`);
         try
         {
-            const wsUrl = `ws://${this.ndpiServerIp}:${this.ndpiServerPort}/ws/client`;
+            const wsUrl = `ws://${this.ndpiHubHostname}:${this.ndpiHubPort}/ws/client`;
             this.socket = new WebSocket(wsUrl);
         }
         catch (error)

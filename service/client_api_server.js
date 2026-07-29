@@ -8,6 +8,7 @@ const func = require('./functions');
 const { randomUUID } = require('crypto');
 const { spawn } = require('node:child_process');
 const os = require('node:os');
+const fs = require('node:fs');
 const cors = require('cors');
 
 
@@ -15,9 +16,18 @@ class NDPiCommandServer_Client extends EventEmitter {
     constructor(fsData) {
         super();
         this.controller_cec = null;
-
         this.settings = fsData;
-        this.port = fsData.get('local_port_number_api') || process.env.PORT_API || 3080
+
+        this.cacheControl = process.env.NODE_ENV == 'production' ? 
+                            'public, max-age=86400, immutable' :
+                            'no-store, no-cache, must-revalidate, private';
+        
+        try
+        { this.allowedOrigins = JSON.parse(fsData.get('local_api_allowed_origins') || '[]'); }
+        catch
+        { this.allowedOrigins = []; }
+
+        this.port = fsData.get('local_port_number_api') || process.env.PORT_API || 3080;
 
         fsData.on('update', (data) => {
             this.ws_conn_system.forEach(client => {
@@ -58,23 +68,20 @@ class NDPiCommandServer_Client extends EventEmitter {
     start() {
         this.App = express();
         this.App.use(express.json());
+
         this.App.options('*', cors());
-        this.App.use(cors({
-            origin: 'http://ndpi-server.local:3080'
-        })); 
+        this.App.use(cors({ origin: this.allowedOrigins }));
+
         this.App.use(
+            '/',
             express.static(path.join(__dirname, '..', 'public'), {
-                setHeaders: (res, path) => {
-                    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-                }
+                setHeaders: (res, path) => { res.set('Cache-Control', this.cacheControl); }
             })
         );
         this.App.use(
             '/assets',
             express.static(path.join(__dirname, '..', 'assets'), {
-                setHeaders: (res, path) => {
-                    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private')
-                }
+                setHeaders: (res, path) => { res.set('Cache-Control', this.cacheControl) }
             })
         );
 
@@ -209,23 +216,23 @@ class NDPiCommandServer_Client extends EventEmitter {
 
         this.Routes
         .route('/')
-        .get((req, res) => {
-              // DEV
-            res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-              // PROD
-            // res.set('Cache-Control', 'public, max-age=86400, immutable');
-            res.sendFile(path.join(__dirname, '..', 'public', 'system.html'));
-        });
+            .get((req, res) => {
+                //   // DEV
+                // res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+                //   // PROD
+                // // res.set('Cache-Control', 'public, max-age=86400, immutable');
+                res.sendFile(path.join(__dirname, '..', 'public', 'system.html'));
+            });
 
         this.Routes
         .route('/display/idle')
-        .get((req, res) => {
-              // DEV
-            res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-              // PROD
-            // res.set('Cache-Control', 'public, max-age=86400, immutable');
-            res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
-        });
+            .get((req, res) => {
+                //   // DEV
+                // res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+                //   // PROD
+                // // res.set('Cache-Control', 'public, max-age=86400, immutable');
+                res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+            });
 
         /**
          *  Public API (v1)
@@ -237,33 +244,33 @@ class NDPiCommandServer_Client extends EventEmitter {
          */
         this.Routes
         .route('/api/v1/rpc')
-        .get(async (req, res) => {
-            // to use: http://<ip>:<port>/api/v1/rpc?type=set-source&data=EVAN-MSI (OBS PGM)
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'GET:', req.url);
+            .get(async (req, res) => {
+                // to use: http://<ip>:<port>/api/v1/rpc?type=set-source&data=EVAN-MSI (OBS PGM)
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'GET:', req.url);
 
-            const commandRes = await func.processCommand({
-                ...req.query,
-                id: crypto.randomUUID(),
+                const commandRes = await func.processCommand({
+                    ...req.query,
+                    id: crypto.randomUUID(),
+                });
+
+                if (commandRes && commandRes.success)
+                { res.status(200).json(commandRes); }
+                else
+                { res.status(400).json(commandRes); }
+            })
+            .post(async (req, res) => {
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'POST:', req.url);
+
+                const commandRes = await func.processCommand({
+                    ...req.body,
+                    id: crypto.randomUUID(),
+                });
+
+                if (commandRes && commandRes.success)
+                { res.status(200).json(commandRes); }
+                else
+                { res.status(400).json(commandRes); }
             });
-
-            if (commandRes && commandRes.success)
-            { res.status(200).json(commandRes); }
-            else
-            { res.status(400).json(commandRes); }
-        })
-        .post(async (req, res) => {
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, 'POST:', req.url);
-
-            const commandRes = await func.processCommand({
-                ...req.body,
-                id: crypto.randomUUID(),
-            });
-
-            if (commandRes && commandRes.success)
-            { res.status(200).json(commandRes); }
-            else
-            { res.status(400).json(commandRes); }
-        });
 
         /**
          *  Internal API (v1)
@@ -273,62 +280,62 @@ class NDPiCommandServer_Client extends EventEmitter {
          */
         this.Routes
         .route('/api/v1/__internal/:path')
-        .get((req, res) => {
-            res.sendStatus(403)
-        })
-        .post((req, res) => {
-            const { id, data } = req.body;
-            const switch_path  = req.params.path;
+            .get((req, res) => {
+                res.sendStatus(403)
+            })
+            .post((req, res) => {
+                const { id, data } = req.body;
+                const switch_path  = req.params.path;
 
-            if (req.hostname !== 'localhost')
-            {
-                res.status(403);
-                res.json({ success: false, message: 'forbidden' });
-                return;
-            }
+                if (req.hostname !== 'localhost')
+                {
+                    res.status(403);
+                    res.json({ success: false, message: 'forbidden' });
+                    return;
+                }
 
-            let reqValid = false;
-            switch (switch_path) {
+                let reqValid = false;
+                switch (switch_path) {
 
-                /**
-                 *      Send CEC (Consumer Electronic Control) command 
-                 *      directly to the CEC controller.
-                 */
-                case 'cec':
-                    reqValid = (typeof data === 'string' && this.controller_cec.isReady);
-                    if (reqValid && this.controller_cec)
-                    {
-                        this.controller_cec.send(decodeURI(data));
-                        res.status(200).json({ success: true });
-                    }
-                    else
-                    {
-                        res.status(400).json({ success: false });
-                    }
-                    break;
+                    /**
+                     *      Send CEC (Consumer Electronic Control) command 
+                     *      directly to the CEC controller.
+                     */
+                    case 'cec':
+                        reqValid = (typeof data === 'string' && this.controller_cec.isReady);
+                        if (reqValid && this.controller_cec)
+                        {
+                            this.controller_cec.send(decodeURI(data));
+                            res.status(200).json({ success: true });
+                        }
+                        else
+                        {
+                            res.status(400).json({ success: false });
+                        }
+                        break;
 
-                case 'ndi':
-                    let source = String(data || 'none');
-                    this.settings.put('ndpi_status_ndi_source_target', source);
+                    case 'ndi':
+                        let source = String(data || 'none');
+                        this.settings.put('ndpi_status_ndi_source_target', source);
 
-                    res.status(200).json({ success: true, message: `NDI Source Set: ${source}` });
-                    break;
+                        res.status(200).json({ success: true, message: `NDI Source Set: ${source}` });
+                        break;
 
-                case 'shutdown':
-                    res.sendStatus(200);
-                    this.emit('shutdown-command');
-                    break;
+                    case 'shutdown':
+                        res.sendStatus(200);
+                        this.emit('shutdown-command');
+                        break;
 
-                case 'reboot':
-                    res.sendStatus(200);
-                    this.emit('reboot-command');
-                    break;
+                    case 'reboot':
+                        res.sendStatus(200);
+                        this.emit('reboot-command');
+                        break;
 
-                default:
-                    res.sendStatus(400);
-                    break;
-            }
-        });
+                    default:
+                        res.sendStatus(400);
+                        break;
+                }
+            });
     }
 
     startServer() {
@@ -393,24 +400,6 @@ class NDPiCommandServer_Client extends EventEmitter {
         });
     }
 
-    systemStats() {
-        return {
-            systemTime:         String(new Date()),
-            osArchitecture:     String(os.arch),
-            osUptime:           Number(os.uptime),
-            freemem:            Number(os.freemem),
-            totalmem:           Number(os.totalmem),
-            hostname:           String(os.hostname),
-            loadavg:            os.loadavg(),
-            osMachine:          String(os.machine),
-            osPlatform:         String(os.platform),
-            osRelease:          String(os.release),
-            osVersion:          String(os.version),
-            networkInterfaces:  os.networkInterfaces(),
-            cpus:               os.cpus(),
-        }
-    }
-
     async _tryCloseDiscovery() {
         return new Promise((resolve) => {
             if (!this.discoveryExec.killed)
@@ -444,6 +433,29 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.statsSendInterval = setInterval(() => {
             this.sendStats();
         }, 1000);
+    }
+
+    systemStats() { // /sys/class/thermal/thermal_zone0/temp
+        const thermal_zone0 = fs.readFileSync(path.join('sys', 'class', 'thermal', 'thermal_zone0', 'temp'));
+
+        return {
+            systemTime:         String(new Date()),
+            osArchitecture:     String(os.arch),
+            osUptime:           Number(os.uptime),
+            freemem:            Number(os.freemem),
+            totalmem:           Number(os.totalmem),
+            hostname:           String(os.hostname),
+            loadavg:            os.loadavg(),
+            thermal:            {
+                                    thermal_zone0: thermal_zone0,
+                                },
+            osMachine:          String(os.machine),
+            osPlatform:         String(os.platform),
+            osRelease:          String(os.release),
+            osVersion:          String(os.version),
+            networkInterfaces:  os.networkInterfaces(),
+            cpus:               os.cpus(),
+        }
     }
 
     sendStats() {

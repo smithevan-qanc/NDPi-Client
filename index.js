@@ -6,21 +6,21 @@ const { exit } = require('node:process');
 
 const VERSION_DIR = path.join(__dirname, 'version');
 const NDPi_VERSION = (
-    fs.existsSync(`${VERSION_DIR}/current`)
-    ? fs.readFileSync(`${VERSION_DIR}/current`, 'utf8')
-    : '3.1.0'
+    fs.existsSync(`${VERSION_DIR}/current`) ?
+    fs.readFileSync(`${VERSION_DIR}/current`, 'utf8') :
+    '3.1.0'
 );
 const NDPi_VERSION_DATE = (
-    fs.existsSync(`${VERSION_DIR}/current-date`)
-    ? fs.readFileSync(`${VERSION_DIR}/current-date`, 'utf8')
-    : '2026-02-04'
+    fs.existsSync(`${VERSION_DIR}/current-date`) ?
+    fs.readFileSync(`${VERSION_DIR}/current-date`, 'utf8') :
+    '2026-02-04'
 );
 
 class NDPi {
     constructor() {
         this.isInitialized = false;
 
-        // this.settings = null;
+        this.settings = null;
         this.server_api = null;
         this.service_bonjour = null;
         this.service_chromium = null;
@@ -30,8 +30,8 @@ class NDPi {
         this.lcdDisplayRestartTimer = null;
         this.lcdDisplay = null;
 
-        this.wsConnection_ndpiServer = null;
-        this.ndpiServerStatusUpdate = null; // Interval Timer
+        this.wsConnection_ndpiHub = null;
+        this.ndpiHubStatusUpdate = null; // Interval Timer
 
         this.timerRestartNdi = null;
         this.targetSource = 'none';
@@ -86,37 +86,37 @@ class NDPi {
             this.startNdiReceiver(output);
         });
 
-        //  NDPi Hub Server IP
-        this.settings.on('ndpi_command_server_host', (data) => {
+        //  NDPi Hub IP
+        this.settings.on('ndpi_hub_hostname', (data) => {
             const output = String(data || '').trim() || null;
 
             if (!output)
             { return; }
 
-            if (this.wsConnection_ndpiServer)
+            if (this.wsConnection_ndpiHub)
             {
-                if (output !== this.wsConnection_ndpiServer.ndpiServerIp)
+                if (output !== this.wsConnection_ndpiHub.ndpiServerIp)
                 {
-                    this.wsConnection_ndpiServer.ndpiServerIp = output;
-                    this.wsConnection_ndpiServer.close();
-                    this.wsConnection_ndpiServer.connect();
+                    this.wsConnection_ndpiHub.ndpiServerIp = output;
+                    this.wsConnection_ndpiHub.close();
+                    this.wsConnection_ndpiHub.connect();
                 }
             }
         });
 
-        //  NDPi Hub Server Port
-        this.settings.on('ndpi_command_server_port', (data) => {
+        //  NDPi Hub Port
+        this.settings.on('ndpi_hub_port', (data) => {
             const output = String(data || '').trim() || null;
             if (!output)
             { return; }
 
             try
             {
-                if (output !== this.wsConnection_ndpiServer.ndpiServerIp)
+                if (output !== this.wsConnection_ndpiHub.ndpiServerIp)
                 {
-                    this.wsConnection_ndpiServer.ndpiServerIp = output;
-                    this.wsConnection_ndpiServer.close();
-                    this.wsConnection_ndpiServer.connect();
+                    this.wsConnection_ndpiHub.ndpiServerIp = output;
+                    this.wsConnection_ndpiHub.close();
+                    this.wsConnection_ndpiHub.connect();
                 }
             }
             catch {}
@@ -527,9 +527,9 @@ class NDPi {
      */
     connectToNDPiServer() {
         const ClientServerWebSocket = require('./service/clientServer_websocket.js');
-        this.wsConnection_ndpiServer = new ClientServerWebSocket(this.settings, this.server_api);
-        this.wsConnection_ndpiServer.on('connected', () => {
-            this.ndpiServerStatusUpdate = setInterval(() => {
+        this.wsConnection_ndpiHub = new ClientServerWebSocket(this.settings, this.server_api);
+        this.wsConnection_ndpiHub.on('connected', () => {
+            this.ndpiHubStatusUpdate = setInterval(() => {
                 this.sendStatusToNDPiServer();
             }, 5000);
         });
@@ -562,7 +562,7 @@ class NDPi {
             uptime: 0
         };
 
-        this.wsConnection_ndpiServer.send(status);
+        this.wsConnection_ndpiHub.send(status);
     }
 }
 

@@ -435,14 +435,14 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditExternal: false,
             },
             {
-                key: "ndpi_command_server_host",
-                value: ``,
+                key: "ndpi_hub_hostname",
+                value: `NDPi-Hub`,
                 group: `Backend`,
                 allowEditInternal: true,
                 allowEditExternal: true,
             },
             {
-                key: "ndpi_command_server_port",
+                key: "ndpi_hub_port",
                 value: ``,
                 group: `Backend`,
                 allowEditInternal: true,
@@ -698,6 +698,16 @@ class FileSystemMonitor extends EventEmitter {
                 group: `PROCESSES`,
                 allowEditInternal: true,
                 allowEditExternal: false,
+            },
+            { 
+                key: "local_api_allowed_origins",
+                value: JSON.stringify([
+                    'http://ndpi-server.local:3080',
+                    'http://ndpi-hub.local:3080',
+                ], null, 2),
+                group: `Backend`,
+                allowEditInternal: true,
+                allowEditExternal: true,
             },
         ];
         // Files that will NOT initialize with the previously stored value.

@@ -2,14 +2,14 @@
 
 function updateDetails(msg) {
     const fields = {
-        devName:     msg.thisDevice?.name,
-        devId:       msg.thisDevice?.id,
-        devIp:       msg.thisDevice?.address === undefined ? undefined
-                        : msg.thisDevice.address === '' ? 'Obtaining...'
-                        : msg.thisDevice.address,
-        servIp:      msg.serverIp || 'No NDPi Hub',
-        programName: msg.service?.name,
-        programVer:  msg.service?.version,
+        devName:    msg.thisDevice?.name,
+        devId:      msg.thisDevice?.id,
+        devIp:      msg.thisDevice?.address === undefined ? undefined :
+                    msg.thisDevice.address === '' ? 'Obtaining...' :
+                    msg.thisDevice.address,
+        hubIp:      msg.hubIp || 'No NDPi Hub',
+        pgmName:    msg.service?.name,
+        pgmVer:     msg.service?.version,
     };
 
     for (const [id, value] of Object.entries(fields)) {
@@ -58,11 +58,11 @@ server._ws.onmessage = (message) => {
                     break;
                     return;
 
-                case 'ndpi_command_server_host':
+                case 'ndpi_hub_hostname':
                     if (!output)
-                    { document.getElementById('waiting-for-server-svg').style.opacity = 1; }
+                    { document.getElementById('waiting-for-hub-svg').style.opacity = 1; }
                     else
-                    { document.getElementById('waiting-for-server-svg').style.opacity = 0; }
+                    { document.getElementById('waiting-for-hub-svg').style.opacity = 0; }
                     document.getElementById(id).textContent = output || '';
                     document.getElementById(`div__${id}`).hidden = !output;
                     break;
@@ -143,6 +143,6 @@ let displayMode = 'blank';
 let customOverlay = '';
 
 
-function waitingForServer(show = true) { document.getElementById('waiting-for-server-svg').style.opacity = show ? 1 : 0; }
+function waitingForHub(show = true)      { document.getElementById('waiting-for-hub-svg').style.opacity = show ? 1 : 0; }
 function connectingToSource(show = true) { document.getElementById('attempting-ndi-connection-svg').style.opacity = show ? 1 : 0; }
-function displayDetails(show = true) { document.getElementById('sys-details').style.opacity = show ? 1 : 0; }
+function displayDetails(show = true)     { document.getElementById('sys-details').style.opacity = show ? 1 : 0; }
