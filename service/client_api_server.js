@@ -436,7 +436,7 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     systemStats() { // /sys/class/thermal/thermal_zone0/temp
-        const thermal_zone0 = fs.readFileSync(path.join('/sys', 'class', 'thermal', 'thermal_zone0', 'temp'), 'utf8');
+        const thermal_zone0 = fs.readFileSync(path.join('/sys', 'class', 'thermal', 'thermal_zone0', 'temp'), 'utf8').trim();
 
         return {
             systemTime:         String(new Date()),
