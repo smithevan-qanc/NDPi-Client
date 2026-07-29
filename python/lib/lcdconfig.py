@@ -64,10 +64,29 @@ class RaspberryPi:
             if spi is None:
                 logging.error("No SPI devices found")
 
-        self.RST_PIN= self.gpio_mode(rst,self.OUTPUT)
-        self.DC_PIN = self.gpio_mode(dc,self.OUTPUT)
-        self.BL_PIN = self.gpio_pwm(bl)
-        self.bl_DutyCycle(0)
+        # Try to initialize GPIO with cleanup on conflict
+        try:
+            self.RST_PIN= self.gpio_mode(rst,self.OUTPUT)
+            self.DC_PIN = self.gpio_mode(dc,self.OUTPUT)
+            self.BL_PIN = self.gpio_pwm(bl)
+            self.bl_DutyCycle(0)
+        except RuntimeError as e:
+            if "GPIO busy" in str(e) or "in use" in str(e):
+                logging.warning(f"GPIO busy on init, attempting cleanup: {e}")
+                # Try to close any existing GPIO references
+                try:
+                    LED(rst).close()
+                    LED(dc).close()
+                    LED(bl).close()
+                except:
+                    pass
+                # Retry initialization
+                self.RST_PIN= self.gpio_mode(rst,self.OUTPUT)
+                self.DC_PIN = self.gpio_mode(dc,self.OUTPUT)
+                self.BL_PIN = self.gpio_pwm(bl)
+                self.bl_DutyCycle(0)
+            else:
+                raise
         
         #Initialize SPI
         self.SPI = spi
