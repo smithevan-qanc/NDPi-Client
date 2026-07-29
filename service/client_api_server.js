@@ -435,9 +435,10 @@ class NDPiCommandServer_Client extends EventEmitter {
         }, 1000);
     }
 
-    systemStats() { // /sys/class/thermal/thermal_zone0/temp
+    systemStats() { // /sys/class/hwmon/hwmon2/fan1_input
         let thermal_zone0 = fs.readFileSync(path.join('/sys', 'class', 'thermal', 'thermal_zone0', 'temp'), 'utf8').trim() || '0';
             thermal_zone0 = Number(thermal_zone0) / 1000;
+        let fan1_input = fs.readFileSync(path.join('/sys', 'class', 'hwmon', 'hwmon2', 'fan1_input'), 'utf8').trim() || '0';
 
         return {
             systemTime:         String(new Date()),
@@ -448,7 +449,8 @@ class NDPiCommandServer_Client extends EventEmitter {
             hostname:           String(os.hostname),
             loadavg:            os.loadavg(),
             thermal:            {
-                                    thermal_zone0: thermal_zone0,
+                                    thermal_zone0,
+                                    fan1_input
                                 },
             osMachine:          String(os.machine),
             osPlatform:         String(os.platform),
