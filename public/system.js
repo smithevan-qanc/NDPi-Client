@@ -84,7 +84,7 @@ server._ws.onmessage = (message) => {
             }
             else (id === 'ndpi_status_mdns_service' && String(object.value).includes('up'))
             {
-                document.getElementById('offlineOverlay').style.removeProperty('display');
+                document.getElementById('offlineOverlay').style.display = 'none';
             }
             
             if (!document.getElementById(`__${id}`))
