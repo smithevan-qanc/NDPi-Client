@@ -165,7 +165,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
             this.ws_conn_stats.add(ws);
 
-            ws.send(JSON.stringify(this.systemStats()));
+            ws.send(JSON.stringify(this.getSystemStats()));
 
             this.startStats();
 
@@ -435,7 +435,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         }, 1000);
     }
 
-    systemStats() { // /sys/class/hwmon/hwmon2/fan1_input
+    getSystemStats() { // /sys/class/hwmon/hwmon2/fan1_input
         let pth_thermal_zone0 = path.join('/sys', 'class', 'thermal', 'thermal_zone0', 'temp');
         let thermal_zone0 = fs.readFileSync(pth_thermal_zone0, 'utf8').trim() || '0';
             thermal_zone0 = Number(thermal_zone0) / 1000;
@@ -510,22 +510,7 @@ class NDPiCommandServer_Client extends EventEmitter {
     }
 
     sendStats() {
-        // const stats = {
-        //     os00: String(os.arch),
-        //     os01: Number(os.availableParallelism),
-        //     os02: Array(os.cpus),
-        //     os03: Number(os.freemem),
-        //     os04: String(os.hostname),
-        //     os05: Array(os.loadavg),
-        //     os06: String(os.machine),
-        //     os07: os.networkInterfaces(),
-        //     os08: String(os.platform),
-        //     os09: String(os.release),
-        //     os10: Number(os.totalmem),
-        //     os11: Number(os.uptime),
-        //     os12: String(os.version)
-        // };
-        const stats = this.systemStats();
+        const stats = this.getSystemStats();
 
         this.ws_conn_stats.forEach((ws) => {
             ws.send(JSON.stringify(stats));

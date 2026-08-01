@@ -26,22 +26,14 @@ class NDPi {
         this.service_chromium = null;
         this.controller_cec = null;
         this.ndiReceiver = null;
-
         this.lcdDisplayRestartTimer = null;
         this.lcdDisplay = null;
-
         this.wsConnection_ndpiHub = null;
         this.ndpiHubStatusUpdate = null; // Interval Timer
-
         this.timerRestartNdi = null;
         this.targetSource = 'none';
-
-        this.compMgr = null;
-
         this.shutdown = false;
-
         this.airPlay = null;
-        this.airplayPin = 7584;
 
         this.initiate();
     }
