@@ -16,33 +16,37 @@ export DISPLAY=:0
 # List Connected Display
 #   -F (Fixed Strings): Searches for 'connected' as a single string
 #   -w (Whole Word): Searches for 'connected' as a complete word (disregarding 'disconnected')
-echo "$(xrandr | grep -Fw 'connected' | awk '{print "current_output :", $1}')"
+  echo "$(xrandr | grep -Fw 'connected' | awk '{print "current_output :", $1}')"
 #
 
 # Current Resolution
-echo "$(xrandr | grep '*' | awk '{print "current_resolution :", $1}')"
-echo "$(xrandr | grep -oP '[0-9.]+(?=\*)' | awk '{print "current_framerate :", $1}')"
+  RESOLUTION_CURR="$(xrandr | grep '*' | awk '{print $1}')"
+  FRAMERATE_CURR="$(xrandr | grep -oP '[0-9.]+(?=\*)' | awk '{print $1}')"
+  echo "current_resolution : $RESOLUTION_CURR"
+  echo "current_framerate : $FRAMERATE_CURR"
+  echo "$(xrandr | grep -v 'm' | grep -w $RESOLUTION_CURR | tr -d "*" | tr -d "+" | awk '{print "allowed_framerates :", $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12}')"
 #
 
 # Preferred Resolution
-FRAMERATE_PREF="$(xrandr | grep -oP '[0-9.]+(?=\*\+)')"
-if [[ -z "$FRAMERATE_PREF" ]]; then
-    FRAMERATE_PREF="$(xrandr | grep -oP '[0-9.]+(?=\s\+)')"
-fi
-echo "$(xrandr | grep -F '+ ' | awk '{print "preferred_resolution :", $1}')"
-echo "preferred_framerate : $FRAMERATE_PREF"
+  RESOLUTION_PREF="$(xrandr | grep -F '+ ' | awk '{print $1}')"
+  FRAMERATE_PREF="$(xrandr | grep -oP '[0-9.]+(?=\*\+)')"
+  if [[ -z "$FRAMERATE_PREF" ]]; then
+      FRAMERATE_PREF="$(xrandr | grep -oP '[0-9.]+(?=\s\+)')"
+  fi
+  echo "preferred_resolution : $RESOLUTION_PREF"
+  echo "preferred_framerate : $FRAMERATE_PREF"
 #
 
 # EDID
-echo "$(edid-decode /sys/class/drm/card1-HDMI-A-1/edid | grep -wF 'Manufacturer:' | awk '{print "manufacturer_hdmi0 :", $2}')"
-echo "$(edid-decode /sys/class/drm/card1-HDMI-A-1/edid | grep -wF 'Display Product Name:' | tr -d "'" | awk '{print "model_hdmi0 :", $4}')"
-echo "$(edid-decode /sys/class/drm/card1-HDMI-A-2/edid | grep -wF 'Manufacturer:' | awk '{print "manufacturer_hdmi1 :", $2}')"
-echo "$(edid-decode /sys/class/drm/card1-HDMI-A-2/edid | grep -wF 'Display Product Name:' | tr -d "'" | awk '{print "model_hdmi1 :", $4}')"
+  echo "$(edid-decode /sys/class/drm/card1-HDMI-A-1/edid | grep -wF 'Manufacturer:' | awk '{print "manufacturer_hdmi0 :", $2}')"
+  echo "$(edid-decode /sys/class/drm/card1-HDMI-A-1/edid | grep -wF 'Display Product Name:' | tr -d "'" | awk '{print "model_hdmi0 :", $4}')"
+  echo "$(edid-decode /sys/class/drm/card1-HDMI-A-2/edid | grep -wF 'Manufacturer:' | awk '{print "manufacturer_hdmi1 :", $2}')"
+  echo "$(edid-decode /sys/class/drm/card1-HDMI-A-2/edid | grep -wF 'Display Product Name:' | tr -d "'" | awk '{print "model_hdmi1 :", $4}')"
 #
 
 # List Resolutions
 #   -v (Invert Match): Removes lines containg the letter 'm'
-echo "$(xrandr | grep -v 'm' | tr -d "*" | tr -d "+" | awk '{print "list_resolutions :", $1, $2, "::", $1}')"
+  echo "$(xrandr | grep -v 'm' | tr -d "*" | tr -d "+" | awk '{print "list_resolutions :", $1, $2, "::", $1}')"
 
 # echo "$(xrandr | grep -v 'm' | tr -d "*" | tr -d "+" | awk '{print "list_resolutions :", $1, "::", "--mode", $1, "--rate", $2}')"
   # Example Return:
