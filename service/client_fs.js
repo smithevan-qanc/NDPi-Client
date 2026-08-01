@@ -1135,6 +1135,8 @@ class FileSystemMonitor extends EventEmitter {
                             case 'allowed_framerates':
                                 const fileMapCurrFR = this.fileMap.get('output_display_framerate_preference');
                                 fileMapCurrFR.options = splitValue.split(' ');
+                                console.log(splitValue);
+                                console.log(fileMapCurrFR.options);
                                 this.fileMap.set('output_display_framerate_preference');
                             default:
                                 break;
