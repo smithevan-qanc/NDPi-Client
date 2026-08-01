@@ -73,11 +73,12 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.App.use(cors({ origin: this.allowedOrigins }));
 
         this.App.use(
-            '/',
+            '/script',
             express.static(path.join(__dirname, '..', 'public'), {
                 setHeaders: (res, path) => { res.set('Cache-Control', this.cacheControl); }
             })
         );
+
         this.App.use(
             '/assets',
             express.static(path.join(__dirname, '..', 'assets'), {
