@@ -78,11 +78,11 @@ server._ws.onmessage = (message) => {
                 }
             }
 
-            if (id === 'ndpi_status_mdns_service' && object.value == 'down')
+            if (id === 'ndpi_status_mdns_service' && String(object.value).replaceAll('"', "'") == 'down')
             {
                 document.getElementById('offlineOverlay').style.display = 'static';
             }
-            else (id === 'ndpi_status_mdns_service' && object.value == 'up')
+            else (id === 'ndpi_status_mdns_service' && String(object.value).replaceAll('"', "'") == 'up')
             {
                 document.getElementById('offlineOverlay').style.removeProperty('display');
             }
