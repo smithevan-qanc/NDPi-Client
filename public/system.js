@@ -78,13 +78,12 @@ server._ws.onmessage = (message) => {
                 }
             }
 
-            if (id === 'ndpi_status_mdns_service' && String(object.value).includes('down'))
+            if (id === 'ndpi_status_mdns_service')
             {
-                document.getElementById('offlineOverlay').style.display = 'flex';
-            }
-            else (id === 'ndpi_status_mdns_service' && String(object.value).includes('up'))
-            {
-                document.getElementById('offlineOverlay').style.display = 'none';
+                if (object.value == 'down')
+                { document.getElementById('offlineOverlay').style.display = 'flex'; }
+                else if (object.value == 'up')
+                { document.getElementById('offlineOverlay').style.display = 'none'; }
             }
             
             if (!document.getElementById(`__${id}`))
