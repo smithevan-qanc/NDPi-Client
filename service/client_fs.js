@@ -830,6 +830,9 @@ class FileSystemMonitor extends EventEmitter {
                 else
                 { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ UPDATE ] '${name}' ==> '${fsValue}'`); }
 
+                if (name === 'output_display_resolution_preference' || name === 'output_display_framerate_preference')
+                { this.updateOutputDisplayFiles(); }
+
                 if (this.sendToLCD.includes(name))
                 { fs.writeFileSync(path.join(this.lcdDisplayScriptPath, name), fsValue, 'utf8'); }
 

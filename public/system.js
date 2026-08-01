@@ -114,6 +114,7 @@ server._ws.onmessage = (message) => {
                     opt.id = `${id}__${value}`;
                     opt.value = value;
                     opt.textContent = key;
+                    opt.style.background = 'rgba(25, 25, 25, 0.85)';
                     settingInnerHTML += opt.outerHTML;
                 }
                 settingInnerHTML += `</select>`;
