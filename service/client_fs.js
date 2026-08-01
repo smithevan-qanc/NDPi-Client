@@ -1034,6 +1034,8 @@ class FileSystemMonitor extends EventEmitter {
         let HDMI_1;
         let HDMI_2;
 
+        console.info(`[ ${path.basename(__filename).split('.')[0]} ][ DRM ] Retrieving Display Data`);
+
         await new Promise((resolve) => {
             exec('cat /sys/class/drm/card*HDMI*/status', (error, stdout, stderr) => {
                 if (error)
@@ -1060,6 +1062,7 @@ class FileSystemMonitor extends EventEmitter {
             this.put('output_display_cec_this_source_active', 'false');
             this.put('output_display_cec_version', '');
             this.put('output_display_cec_address', '');
+            this.put('output_display_framerate_preference', '');
             this.emit('drm');
         }
         else
@@ -1134,10 +1137,12 @@ class FileSystemMonitor extends EventEmitter {
                                 break;
                             case 'allowed_framerates':
                                 const fileMapCurrFR = this.fileMap.get('output_display_framerate_preference');
-                                fileMapCurrFR.options = splitValue.split(' ');
-                                console.log(splitValue);
-                                console.log(fileMapCurrFR.options);
-                                this.fileMap.set('output_display_framerate_preference');
+                                const FRoptions = splitValue.split(' ');
+                                for (const value of FRoptions) {
+                                    framerateOptions.push([value, value]);
+                                }
+                                fileMapCurrFR.options = framerateOptions;
+                                this.fileMap.set('output_display_framerate_preference', fileMapCurrFR);
                             default:
                                 break;
                         }
@@ -1149,7 +1154,6 @@ class FileSystemMonitor extends EventEmitter {
                 }
             });
         }
-        return;
     }
 }
 
