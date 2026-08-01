@@ -588,6 +588,14 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditExternal: true,
             },
             {
+                key: "output_display_framerate_preference",
+                value: `60`,
+                group: `Display_Resolution`,
+                options: [],
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
                 key: "output_display_resolution_current",
                 value: ``,
                 group: `Display_Resolution`,
@@ -1063,6 +1071,7 @@ class FileSystemMonitor extends EventEmitter {
                 else
                 {
                     let resolutionOptions = [];
+                    let framerateOptions = [];
                     func.stdoutToArray(stdout).forEach((line) => {
                         const output        = line.toString().trim();
                         const lineSplit_1   = output.split(' : ');
@@ -1122,6 +1131,12 @@ class FileSystemMonitor extends EventEmitter {
                                 if (splitOptKey && splitOptValue)
                                 { resolutionOptions.push([splitOptKey, splitOptValue]); }
                                 return;
+                                break;
+                            case 'allowed_framerates':
+                                const fileMapCurrFR = this.fileMap.get('output_display_framerate_preference');
+                                fileMapCurrFR.options = splitValue.split(' ');
+                                this.fileMap.set('output_display_framerate_preference');
+                            default:
                                 break;
                         }
                     });
