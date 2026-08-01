@@ -1135,7 +1135,8 @@ class FileSystemMonitor extends EventEmitter {
                                 break;
                             case 'list_resolutions':
                                 if (splitOptKey && splitOptValue)
-                                { resolutionOptions.push([splitOptKey, splitOptValue]); }
+                                { resolutionOptions.push([splitOptValue, splitOptValue]); }
+                                // { resolutionOptions.push([splitOptKey, splitOptValue]); }
                                 return;
                                 break;
                             case 'allowed_framerates':
