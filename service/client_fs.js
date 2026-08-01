@@ -520,7 +520,7 @@ class FileSystemMonitor extends EventEmitter {
                 value: `down`,
                 group: ``,
                 allowEditInternal: true,
-                allowEditExternal: true,
+                allowEditExternal: false,
             },
             {
                 key: "ndi_receiver_bandwidth",

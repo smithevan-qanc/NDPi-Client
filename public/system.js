@@ -77,6 +77,15 @@ server._ws.onmessage = (message) => {
                     updateButtons.install.hidden = true;
                 }
             }
+
+            if (id === 'ndpi_status_mdns_service' && object.value == 'down')
+            {
+                document.getElementById('offlineOverlay').style.display = 'static';
+            }
+            else (id === 'ndpi_status_mdns_service' && object.value == 'up')
+            {
+                document.getElementById('offlineOverlay').style.removeProperty('display');
+            }
             
             if (!document.getElementById(`__${id}`))
             {
