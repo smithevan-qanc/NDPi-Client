@@ -875,13 +875,17 @@ class FileSystemMonitor extends EventEmitter {
         });
 
         this.drmMonitor.once('close', () => {
-            try { clearTimeout(this.debounceTimerDrmEvents) }
+            try
+            {
+                clearTimeout(this.debounceTimerDrmEvents);
+                this.debounceTimerDrmEvents = null;
+            }
             catch {}
             // finally { this.updateOutputDisplayFiles(); }
         });
     }
 
-    drmEvent(debounceMs = 1000) {
+    drmEvent(debounceMs = 800) {
         if (this.debounceTimerDrmEvents)
         {
             clearTimeout(this.debounceTimerDrmEvents);
