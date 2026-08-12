@@ -277,6 +277,41 @@ class NDPiCommandServer_Client extends EventEmitter {
             });
 
         /**
+         *  Adopt (v1)
+         *      Called by a Hub when it adopts this device (discovered via
+         *      mDNS) into its managed device list. Points this Client at
+         *      that Hub so it starts reporting on its own over the
+         *      persistent /ws/client connection (see connectToNDPiServer()
+         *      in index.js / clientServer_websocket.js, which only
+         *      connects once both 'ndpi_hub_hostname' and 'ndpi_hub_port'
+         *      are set — until then those settings just sit blank and this
+         *      device never reports in, even if a Hub already knows about
+         *      it from mDNS).
+         *      Required Input
+         *      {
+         *          hubHostname: <Hub's reachable hostname/IP>,
+         *          hubPort: <Hub's API port>
+         *      }
+         */
+        this.Routes
+        .route('/api/v1/adopt')
+            .post((req, res) => {
+                const { hubHostname, hubPort } = req.body || {};
+
+                if (!hubHostname || !hubPort)
+                {
+                    res.status(400).json({ success: false, message: `Missing 'hubHostname' and/or 'hubPort'.` });
+                    return;
+                }
+
+                this.settings.put('ndpi_hub_hostname', String(hubHostname));
+                this.settings.put('ndpi_hub_port', String(hubPort));
+
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, `Adopted by Hub at ${hubHostname}:${hubPort}`);
+                res.status(200).json({ success: true, message: `Hub connection configured: ${hubHostname}:${hubPort}` });
+            });
+
+        /**
          *  Internal API (v1)
          *      Required Inputs
          *          PATH '/internal/api/v1/{PATH}'
