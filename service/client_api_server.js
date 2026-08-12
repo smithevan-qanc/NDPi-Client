@@ -17,8 +17,8 @@ class NDPiCommandServer_Client extends EventEmitter {
         super();
         this.controller_cec = null;
         this.settings = fsData;
-
-        this.cacheControl = String(process.env.NODE_ENV || 'development').toLowerCase() === 'production' ?
+        // 'development'
+        this.cacheControl = String(process.env.NODE_ENV || 'production').toLowerCase() === 'production' ?
                             'public, max-age=86400, immutable' :
                             'no-store, no-cache, must-revalidate, private';
         
