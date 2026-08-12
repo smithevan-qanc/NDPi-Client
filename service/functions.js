@@ -341,9 +341,7 @@ const { exec, spawn } = require('node:child_process');
             case 'rename-device':
                 const commandData = command.data || null;
                 if (typeof commandData === 'string')
-                { 
-                    fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'device_name'))
-                }
+                { fs.writeFileSync(path.join(process.env.DATA_NDPI_PATH, 'device_name'), commandData, 'utf8'); }
                 response.success = true;
                 return response;
                 break;
