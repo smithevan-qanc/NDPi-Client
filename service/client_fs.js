@@ -27,7 +27,7 @@ class FileSystemMonitor extends EventEmitter {
         this.ipPollEnable = true;
 
         this.#updatePoll = null;
-        this.#updatePollInterval = (10 * 60) * 1000;
+        this.#updatePollInterval = (5 * 60) * 1000;
         this.updatePollEnable = true;
 
         this.dataDir = process.env.DATA_NDPI_PATH;
@@ -960,8 +960,8 @@ class FileSystemMonitor extends EventEmitter {
     }
 
     async pollUpdate() {
-        try { await func.checkForUpdate(); }
-        catch {}
+        try { await func.checkForUpdate(); } catch {}
+        try { await this.updateOutputDisplayFiles(); } catch {}
         finally
         {
             if (this.updatePollEnable)

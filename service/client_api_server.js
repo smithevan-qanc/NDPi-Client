@@ -476,7 +476,7 @@ class NDPiCommandServer_Client extends EventEmitter {
         }, 1000);
     }
 
-    getSystemStats() { // /sys/class/hwmon/hwmon2/fan1_input
+    getSystemStats() {
         let pth_thermal_zone0 = path.join('/sys', 'class', 'thermal', 'thermal_zone0', 'temp');
         let thermal_zone0 = fs.readFileSync(pth_thermal_zone0, 'utf8').trim() || '0';
             thermal_zone0 = Number(thermal_zone0) / 1000;
