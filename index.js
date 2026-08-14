@@ -28,8 +28,6 @@ class NDPi {
         this.ndiReceiver = null;
         this.lcdDisplayRestartTimer = null;
         this.lcdDisplay = null;
-        this.wsConnection_ndpiHub = null;
-        this.ndpiHubStatusUpdate = null; // Interval Timer
         this.timerRestartNdi = null;
         this.targetSource = 'none';
         this.shutdown = false;
@@ -76,42 +74,6 @@ class NDPi {
         this.settings.on('ndpi_status_ndi_source_target', (data) => {
             const output = String(data || 'none');
             this.startNdiReceiver(output);
-        });
-
-        //  NDPi Hub IP
-        this.settings.on('ndpi_hub_hostname', (data) => {
-            const output = String(data || '').trim() || null;
-
-            if (!output)
-            { return; }
-
-            if (this.wsConnection_ndpiHub)
-            {
-                if (output !== this.wsConnection_ndpiHub.ndpiServerIp)
-                {
-                    this.wsConnection_ndpiHub.ndpiServerIp = output;
-                    this.wsConnection_ndpiHub.close();
-                    this.wsConnection_ndpiHub.connect();
-                }
-            }
-        });
-
-        //  NDPi Hub Port
-        this.settings.on('ndpi_hub_port', (data) => {
-            const output = String(data || '').trim() || null;
-            if (!output)
-            { return; }
-
-            try
-            {
-                if (output !== this.wsConnection_ndpiHub.ndpiServerIp)
-                {
-                    this.wsConnection_ndpiHub.ndpiServerIp = output;
-                    this.wsConnection_ndpiHub.close();
-                    this.wsConnection_ndpiHub.connect();
-                }
-            }
-            catch {}
         });
 
         //  Device Name
@@ -324,7 +286,6 @@ class NDPi {
             {
                 this.isInitialized = true;
                 this.openCecController();
-                this.connectToNDPiServer();
                 this.startChromium();
             }
             else 
@@ -514,48 +475,7 @@ class NDPi {
         });
     }
 
-    /**
-     * OPEN COMMUNICATION WITH NDPI HUB SERVER
-     */
-    connectToNDPiServer() {
-        const ClientServerWebSocket = require('./service/clientServer_websocket.js');
-        this.wsConnection_ndpiHub = new ClientServerWebSocket(this.settings, this.server_api);
-        this.wsConnection_ndpiHub.on('connected', () => {
-            this.ndpiHubStatusUpdate = setInterval(() => {
-                this.sendStatusToNDPiServer();
-            }, 5000);
-        });
-    }
-
     /** HELPER FUNCTIONS */
-
-    sendStatusToNDPiServer() {
-        const status = {
-            type: 'client-status',
-            ndiInfo: {},
-            fsMap: Array.from(this.settings.fileMap)
-        };
-        status.deviceId = this.settings.get('device_id');
-        status.deviceName = this.settings.get('device_name');
-        status.ip = this.settings.get('device_ip');
-        status.currentSource = this.settings.get('ndpi_status_ndi_source_active');
-        status.targetSource = this.settings.get('ndpi_status_ndi_source_target');
-        status.displayMode = this.settings.get('ndpi_status_no_source_display_mode');
-        status.ndiInfo.resolution = this.settings.get('ndpi_status_ndi_source_resolution');
-        status.ndiInfo.framerate = this.settings.get('ndpi_status_ndi_source_framerate');
-        status.ndiInfo.displayResolution = this.settings.get('output_display_resolution_current');
-        status.ndiInfo.displayName = this.settings.get('output_display_framerate_current');
-        status.ndiInfo.connectedAt = this.settings.get('ndpi_status_ndi_source_connected_time');
-        status.status = this.settings.get('ndpi_status_ndi_status');
-        status.systemStats = {
-            cpu: 0,
-            memory: { used: 0, total: 0, percent: 0 },
-            temperature: 0,
-            uptime: 0
-        };
-
-        this.wsConnection_ndpiHub.send(status);
-    }
 }
 
 // ******************************************************

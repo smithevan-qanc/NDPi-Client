@@ -279,14 +279,16 @@ class NDPiCommandServer_Client extends EventEmitter {
         /**
          *  Adopt (v1)
          *      Called by a Hub when it adopts this device (discovered via
-         *      mDNS) into its managed device list. Points this Client at
-         *      that Hub so it starts reporting on its own over the
-         *      persistent /ws/client connection (see connectToNDPiServer()
-         *      in index.js / clientServer_websocket.js, which only
-         *      connects once both 'ndpi_hub_hostname' and 'ndpi_hub_port'
-         *      are set — until then those settings just sit blank and this
-         *      device never reports in, even if a Hub already knows about
-         *      it from mDNS).
+         *      mDNS) into its managed device list. Records which Hub
+         *      adopted this device ('ndpi_hub_hostname'/'ndpi_hub_port').
+         *      Historically this also pointed a persistent /ws/client
+         *      connection at that Hub (clientServer_websocket.js, removed —
+         *      the Hub now derives everything it used to get from that
+         *      connection by relaying this device's own /ws/system and
+         *      /ws/stats instead, which it already opens independently
+         *      once it knows this device's ip/commandPort from mDNS or
+         *      this same adopt call). These two settings are kept as
+         *      informational record-keeping only now.
          *      Required Input
          *      {
          *          hubHostname: <Hub's reachable hostname/IP>,
