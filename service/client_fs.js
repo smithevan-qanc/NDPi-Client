@@ -1155,6 +1155,14 @@ class FileSystemMonitor extends EventEmitter {
                     fileMapCurrRes.options = resolutionOptions;
                     this.fileMap.set('output_display_resolution_preference', fileMapCurrRes);
                     this.emit('drm');
+                    // Both the resolution and framerate options above mutate the
+                    // fileMap in memory only -- __flushQueue() (the only other
+                    // place that emits 'update') never runs for them, since no
+                    // file on disk changed. Without this, /ws/system + /ws/display
+                    // (and therefore the resolution/framerate dropdowns) would
+                    // never learn the options changed until some unrelated
+                    // setting happened to change and trigger its own broadcast.
+                    this.emit('update', JSON.stringify(Array.from(this.fileMap)));
                 }
             });
         }
