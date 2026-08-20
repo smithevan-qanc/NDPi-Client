@@ -390,7 +390,7 @@ class FileSystemMonitor extends EventEmitter {
                 ],
                 group: `Device`,
                 allowEditInternal: true,
-                allowEditExternal: false,
+                allowEditExternal: true,
             },
             {
                 key: "local_port_number_api",
