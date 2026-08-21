@@ -467,7 +467,6 @@ class NDI_Receiver_v4 extends EventEmitter {
         switch(this.secondsInactive)
         {
             case 2:
-                //this.ndiStatus = 'stalled';
                 this.settings.put('ndpi_status_ndi_status', 'stalled');
                 return;
                 break;

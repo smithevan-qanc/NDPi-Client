@@ -638,6 +638,9 @@ class FileSystemMonitor extends EventEmitter {
             'pid_air_play_player',
         ];
 
+        console.log(`PROCESS PID: [fs] ${process.pid}`)
+        console.log(`PROCESS PID: [fs-env] ${process.env.SYSTEMD_EXEC_PID}`)
+
         for (const file of files)
         {
             let setting = file;
@@ -929,7 +932,7 @@ class FileSystemMonitor extends EventEmitter {
         let HDMI_1;
         let HDMI_2;
 
-        console.info(`[ ${path.basename(__filename).split('.')[0]} ][ DRM ] Retrieving Display Data`);
+        // console.info(`[ ${path.basename(__filename).split('.')[0]} ][ DRM ] Retrieving Display Data`);
 
         await new Promise((resolve) => {
             exec('cat /sys/class/drm/card*HDMI*/status', (error, stdout, stderr) => {

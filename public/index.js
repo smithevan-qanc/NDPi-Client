@@ -26,7 +26,7 @@ const startingEl = document.getElementById('attempting-ndi-connection-svg');
 const server = new NDPi_WebSocket('ws/display');
 
 server._ws.onopen = () => {
-    console.log('Connected to device server');
+    // console.log('Connected to device server');
     if (this.timerPageReload) 
     { clearTimeout(this.timerPageReload); this.timerPageReload = null; }
     if (this.timerReconnectDevice)

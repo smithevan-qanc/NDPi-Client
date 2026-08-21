@@ -144,7 +144,7 @@ class CecController extends EventEmitter {
                     this.isReady = true;
                 }
 
-                console.info(`[ ${path.basename(__filename).split('.')[0]} ] CEC Ready`);
+                console.info(`[ ${path.basename(__filename).split('.')[0]} ] CEC - Ready`);
                 this.emit('ready');
                 this._flushQueue();
             }
