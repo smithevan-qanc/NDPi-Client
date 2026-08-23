@@ -1017,8 +1017,8 @@ const { exec, spawn } = require('node:child_process');
      * | _`env.NODE_ENV`_       | _Action_                              |
      * | ---                    | ---                                   |
      * | ⎯⎯⎯⎯⎯⎯⎯⎯ | ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ |
-     * | `production`           | → Compares `Stable Version` number    |
-     * | `development`          | → Compares `Version` number           |
+     * | `PRODUCTION`           | → Compares `Stable Version` number    |
+     * | `DEVELOPMENT`          | → Compares `Version` number           |
      * 
      * ---
      * 

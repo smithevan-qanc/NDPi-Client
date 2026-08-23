@@ -49,11 +49,13 @@ class FileSystemMonitor extends EventEmitter {
         this.defaultDeviceName = 'NDPi Client';
 
         this.#ipPoll = null;
-        this.ipPollInterval = 1000;
+        this.ipPollInterval = (5 * 60) * 1000;
         this.ipPollEnable = true;
 
         this.#updatePoll = null;
-        this.#updatePollInterval = (5 * 60) * 1000;
+        this.#updatePollInterval = String(process.env.NODE_ENV || 'PRODUCTION') === 'PRODUCTION' ?
+            (1440 * 60) * 1000 :
+            (5 * 60) * 1000;
         this.updatePollEnable = true;
 
         this.dataDir = process.env.DATA_NDPI_PATH;
@@ -675,6 +677,7 @@ class FileSystemMonitor extends EventEmitter {
     async start() {
         this.startWatcher();
         this.startDrmMonitor();
+        this.updateOutputDisplayFiles();
         this.pollUpdate();
         this.emit('ready');
         await func.waitForNetwork();
