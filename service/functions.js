@@ -979,7 +979,7 @@ const { exec, spawn } = require('node:child_process');
      */
     async function checkForUpdate() {
         return new Promise((resolve) => {
-            exec(`${path.join(__dirname, '..', 'sh', 'check-for-update')} ${process.env.NODE_ENV}`, (error, stdout) => {
+            exec(path.join(__dirname, '..', 'sh', 'check-for-update'), (error, stdout) => {
                 if (error)
                 {
                     console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ checkForUpdate() ] Error when checking for update. {{ ./sh/check-for-update }}`);
