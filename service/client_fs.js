@@ -122,9 +122,6 @@ class FileSystemMonitor extends EventEmitter {
             })
         }
 
-        // Hostname should reflect the device's ID once it's known.
-        this.updateHostnameFromDeviceId(deviceId);
-
         // Map file names and values with to standard defaults.
         this.fileMap = new Map();
         const files = [
@@ -673,85 +670,6 @@ class FileSystemMonitor extends EventEmitter {
         };
 
         this.start();
-    }
-
-    updateHostnameFromDeviceId(deviceId) {
-        if (!deviceId) { return; }
-
-        const currentHostname = os.hostname();
-
-        if (String(currentHostname).toUpperCase().includes(String(deviceId).toUpperCase()))
-        { return; }
-
-        const newHostname = `NDPi-Client-${deviceId}`;
-
-        exec(`sudo hostnamectl set-hostname ${newHostname}`, (error, stdout, stderr) => {
-            if (error)
-            {
-                console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ updateHostnameFromDeviceId() ][ ERROR ] Setting Hostname: ${currentHostname} -> ${newHostname}`, stderr?.toString().trim());
-                return;
-            }
-
-            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ UPDATED ] ${currentHostname} -> ${newHostname}`);
-
-            // hostnamectl only updates /etc/hostname -- it doesn't touch the
-            // /etc/hosts loopback-alias line (127.0.1.1 <old-hostname> on
-            // Debian/Raspberry Pi OS), so anything that resolves its own
-            // hostname via NSS (sudo included -- it does this for its own
-            // logging) starts failing with "unable to resolve host" the
-            // moment the two disagree.
-            this._updateEtcHosts(currentHostname, newHostname);
-
-            exec('sudo systemctl restart avahi-daemon', (error, stdout, stderr) => {
-                if (error)
-                { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ updateHostnameFromDeviceId() ][ ERROR ] Restarting avahi-daemon`, stderr?.toString().trim()); }
-            });
-        });
-    }
-
-    // Keeps /etc/hosts in sync with a hostname change. Replaces every
-    // whole-word occurrence of the old hostname (covers the standard
-    // 127.0.1.1 <hostname> line regardless of what it previously read) and,
-    // only if the new hostname still isn't present anywhere afterward (e.g.
-    // no such line existed at all), appends a fresh 127.0.1.1 entry for it.
-    // Written via a temp file + `sudo cp` rather than a single shell command
-    // built from the hostnames, so neither hostname ever has to be
-    // interpolated into a shell string.
-    _updateEtcHosts(oldHostname, newHostname) {
-        const hostsPath = '/etc/hosts';
-
-        let contents;
-        try { contents = fs.readFileSync(hostsPath, 'utf8'); }
-        catch (err)
-        {
-            console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ _updateEtcHosts() ][ ERROR ] Reading ${hostsPath}`, err);
-            return;
-        }
-
-        const escapedOldHostname = oldHostname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const oldHostnamePattern = new RegExp(`\\b${escapedOldHostname}\\b`, 'g');
-
-        let updated = oldHostnamePattern.test(contents)
-            ? contents.replace(oldHostnamePattern, newHostname)
-            : contents;
-
-        if (!updated.includes(newHostname))
-        { updated = `${updated.trimEnd()}\n127.0.1.1\t${newHostname}\n`; }
-
-        if (updated === contents) { return; }
-
-        const tmpPath = path.join(os.tmpdir(), `ndpi-hosts-${Date.now()}`);
-        try
-        {
-            fs.writeFileSync(tmpPath, updated, 'utf8');
-            exec(`sudo cp ${tmpPath} ${hostsPath}`, (error, stdout, stderr) => {
-                fs.unlink(tmpPath, () => {});
-                if (error)
-                { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ _updateEtcHosts() ][ ERROR ] Updating ${hostsPath}`, stderr?.toString().trim()); }
-            });
-        }
-        catch (err)
-        { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ _updateEtcHosts() ][ ERROR ] Writing temp hosts file`, err); }
     }
 
     async start() {
