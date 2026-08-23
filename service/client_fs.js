@@ -122,6 +122,9 @@ class FileSystemMonitor extends EventEmitter {
             })
         }
 
+        // Hostname should reflect the device's ID once it's known.
+        this.updateHostnameFromDeviceId(deviceId);
+
         // Map file names and values with to standard defaults.
         this.fileMap = new Map();
         const files = [
@@ -673,6 +676,32 @@ class FileSystemMonitor extends EventEmitter {
         };
 
         this.start();
+    }
+
+    updateHostnameFromDeviceId(deviceId) {
+        if (!deviceId) { return; }
+
+        const currentHostname = os.hostname();
+
+        if (String(currentHostname).toUpperCase().includes(String(deviceId).toUpperCase()))
+        { return; }
+
+        const newHostname = `NDPi-Client-${deviceId}`;
+
+        exec(`sudo hostnamectl set-hostname ${newHostname}`, (error, stdout, stderr) => {
+            if (error)
+            {
+                console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ updateHostnameFromDeviceId() ][ ERROR ] Setting Hostname: ${currentHostname} -> ${newHostname}`, stderr?.toString().trim());
+                return;
+            }
+
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ][ UPDATED ] ${currentHostname} -> ${newHostname}`);
+
+            exec('sudo systemctl restart avahi-daemon', (error, stdout, stderr) => {
+                if (error)
+                { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ updateHostnameFromDeviceId() ][ ERROR ] Restarting avahi-daemon`, stderr?.toString().trim()); }
+            });
+        });
     }
 
     async start() {
