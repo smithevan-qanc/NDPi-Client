@@ -124,6 +124,27 @@ class FileSystemMonitor extends EventEmitter {
             })
         }
 
+        await new Promise((resolve) => {
+            exec(`${path.join(__dirname, '..', 'sh', 'set-hostname')} NDPi-Client-${String(deviceId).toUpperCase()}`, (error, stdout, stderr) => {
+                if (error) 
+                {
+                    func.stdoutToArray(stderr.toString()).forEach((line) => {
+                        console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${String(line).trim()}`);
+                    });
+                    console.info(`[ ${path.basename(__filename).split('.')[0]} ][ Update Hostname ] Resolved.`);
+                    resolve();
+                }
+                else
+                {
+                    func.stdoutToArray(stdout.toString()).forEach((line) => {
+                        console.info(`[ ${path.basename(__filename).split('.')[0]} ][ Update Hostname ] ${String(line).trim()}`);
+                    });
+                    console.info(`[ ${path.basename(__filename).split('.')[0]} ][ Update Hostname ] Resolved.`);
+                    resolve();
+                }
+            });
+        });
+
         // Map file names and values with to standard defaults.
         this.fileMap = new Map();
         const files = [
@@ -665,7 +686,7 @@ class FileSystemMonitor extends EventEmitter {
                 }
             }
             catch (err)
-            { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err) }
+            { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err); }
             
             if (this.sendToLCD.includes(setting.key))
             { fs.writeFileSync(path.join(__dirname, '..', 'python', 'script', setting.key), setting.value, 'utf8'); }
