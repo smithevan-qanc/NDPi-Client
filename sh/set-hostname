@@ -22,7 +22,7 @@ if [ "$CURRENT_HOSTNAME" == "$NEW_HOSTNAME" ]; then
     exit 0
 fi
 
-echo "Setting Device Hostname to: ${CURRENT_HOSTNAME}"
+echo "Setting Device Hostname to: ${NEW_HOSTNAME}"
 
 # 1. Update the kernel and configuration files
 hostnamectl set-hostname "$NEW_HOSTNAME"
