@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+# set -e
 
 if [ "$OPERATION_STATUS" == "BUILD" ]; then
     echo "OPERATION_STATUS set to 'BUILD'"
@@ -47,7 +47,7 @@ sleep 1
         sudo nmcli connection modify "$INTERFACE" ipv4.dhcp-hostname "$NEW_HOSTNAME"
 
         sleep 1
-        
+
         sudo nmcli connection up "$INTERFACE"
     fi
 

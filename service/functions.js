@@ -796,53 +796,60 @@ const { exec, spawn } = require('node:child_process');
 
     /** SET DISPLAY RESOLUTION */
     /**
-     * This function set's the HDMI output resolution
-     * - Using these setting values:
-     *   - 'output_display_port'
-     *   - 'output_display_resolution_preference'
-     * 
+     * Sets both of the Client's HDMI output resolutions via a single xrandr
+     * call on DISPLAY=:0, using each port's own
+     * 'output_display_hdmiN_resolution_preference' /
+     * 'output_display_hdmiN_framerate_preference' settings -- then mirrors
+     * HDMI-2 onto HDMI-1 (`--same-as`) so both outputs always show
+     * identical content, per the Client's single-NDI-source design. When
+     * the two ports' preferred resolutions differ, `--scale-from` is also
+     * applied to HDMI-2 so the mirrored content is scaled to fit its own
+     * native resolution instead of merely overlapping HDMI-1's larger/
+     * smaller canvas at 1:1.
+     *
      * **⚠️ Use try / catch**
-     * 
+     *
      * _This function will reject on failure with reason_
-     * 
+     *
      * ---
-     * 
+     *
      * ### NDPi Function
-     * 
+     *
      */
     async function setDisplayResolution() {
-        let config = {
-            displayPort: 'HDMI-1',
-            resolution: null,
-            framerate: null,
+        const readSetting = (key) => {
+            try { return fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, key), 'utf8').trim(); }
+            catch { return null; }
         };
 
-        try { config.displayPort = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_port'), 'utf8').trim() }
-        catch {}
+        const hdmi1 = {
+            resolution: readSetting('output_display_hdmi1_resolution_preference'),
+            framerate: readSetting('output_display_hdmi1_framerate_preference'),
+        };
+        const hdmi2 = {
+            resolution: readSetting('output_display_hdmi2_resolution_preference'),
+            framerate: readSetting('output_display_hdmi2_framerate_preference'),
+        };
 
-        try { config.resolution = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_resolution_preference'), 'utf8').trim() }
-        catch {}
-        
-        try { config.framerate = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'output_display_framerate_preference'), 'utf8').trim() }
-        catch {}
+        const hdmi2SameAs = hdmi1.resolution ? `--same-as HDMI-1 ${
+            hdmi2.resolution && hdmi2.resolution !== hdmi1.resolution ? `--scale-from ${hdmi1.resolution}` : ''
+        }` : '';
 
         return await new Promise((resolve, reject) => {
-            if (config.displayPort == '')
-            {
-                // reject('No Display Port Configured');
-                resolve()
-                return;
-            }
             exec(`xrandr \
-                --output ${config.displayPort} \
-                ${config.resolution ? `--mode ${config.resolution}` : '--auto'} \
-                ${config.framerate ? `--rate ${config.framerate}` : ''} \
+                --output HDMI-1 \
+                ${hdmi1.resolution ? `--mode ${hdmi1.resolution}` : '--auto'} \
+                ${hdmi1.framerate ? `--rate ${hdmi1.framerate}` : ''} \
+                --output HDMI-2 \
+                ${hdmi2.resolution ? `--mode ${hdmi2.resolution}` : '--auto'} \
+                ${hdmi2.framerate ? `--rate ${hdmi2.framerate}` : ''} \
+                ${hdmi2SameAs} \
             `, {
-                env: { ...process.env }
+                env: { ...process.env, DISPLAY: ':0' }
             }, (error, stderr) => {
                 if (error)
                 {
-                    console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Resolution Set:`, config, stderr);
+                    console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ setDisplayResolution() ][ ERROR ] Resolution Set:`, { hdmi1, hdmi2 }, stderr);
                     resolve();
                     // reject(`XRandR Failed to set resolution. Reason: ${stderr.toString()}`);
                     return;
@@ -850,7 +857,7 @@ const { exec, spawn } = require('node:child_process');
                 else
                 {
                     exec('openbox --restart', {
-                        env: { ...process.env }
+                        env: { ...process.env, DISPLAY: ':0' }
                     }, (error, stdout, stderr) => {
                         if (error)
                         {
