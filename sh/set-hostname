@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+if [ "$OPERATION_STATUS" == "BUILD" ]; then
+    echo "OPERATION_STATUS set to 'BUILD'"
+    echo "Skipping Hostname Configuration"
+    exit 0
+fi
+
 CURRENT_HOSTNAME="$(hostname)"
 NEW_HOSTNAME="$1"
 
