@@ -126,7 +126,7 @@ class FileSystemMonitor extends EventEmitter {
 
         await new Promise((resolve) => {
             exec(`${path.join(__dirname, '..', 'sh', 'set-hostname')} NDPi-Client-${String(deviceId).toUpperCase()}`, (error, stdout, stderr) => {
-                if (error) 
+                if (error)
                 {
                     func.stdoutToArray(stderr.toString()).forEach((line) => {
                         console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${String(line).trim()}`);
