@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+NEW_HOSTNAME="$1"
+echo $NEW_HOSTNAME
+
+exit 0
+
+# 1. Update the kernel and configuration files
+hostnamectl set-hostname "$NEW_HOSTNAME"
+sed -i "s/127.0.1.1.*/127.0.1.1\t$NEW_HOSTNAME/g" /etc/hosts
+
+# 2. Identify the active network interface connected to the router
+INTERFACE=$(ip route | grep default | awk '{print $5}' | head -n1)
+
+# 3. Force the DHCP client to push the new name to the router
+if command -v nmcli >/dev/null 2>&1; then
+    # For NetworkManager systems (Ubuntu, Debian, Fedora, RHEL)
+    nmcli connection modify "$INTERFACE" ipv4.dhcp-hostname "$NEW_HOSTNAME"
+    nmcli connection up "$INTERFACE"
+elif command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet systemd-networkd; then
+    # For systemd-networkd systems
+    systemctl restart systemd-networkd
+else
+    # Fallback for traditional dhclient
+    dhclient -r "$INTERFACE" && dhclient "$INTERFACE"
+fi
+
+# 4. Broadcast the change to other local machines on the router
+if systemctl list-unit-files | grep -q avahi-daemon; then
+    systemctl restart avahi-daemon
+fi
+
+echo "Hostname updated."
