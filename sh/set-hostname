@@ -3,10 +3,20 @@
 CURRENT_HOSTNAME="$(hostname)"
 NEW_HOSTNAME="$1"
 
-echo "Current Hostname: ${CURRENT_HOSTNAME}"
+if [ "$NEW_HOSTNAME" == "" ]; then
+    echo "New hostname must be provided"
+    echo "Usage: $0 <New Hostname>"
+    exit 1
+fi
+
+echo "Current Hostname:   ${CURRENT_HOSTNAME}"
 echo "Requested Hostname: ${NEW_HOSTNAME}"
 
-exit 0
+if [ "$CURRENT_HOSTNAME" == "$NEW_HOSTNAME" ]; then
+    exit 0
+fi
+
+echo "Setting Device Hostname to: ${CURRENT_HOSTNAME}"
 
 # 1. Update the kernel and configuration files
 hostnamectl set-hostname "$NEW_HOSTNAME"
@@ -33,4 +43,4 @@ if systemctl list-unit-files | grep -q avahi-daemon; then
     systemctl restart avahi-daemon
 fi
 
-echo "Hostname updated."
+echo "Hostname updated to $NEW_HOSTNAME."
