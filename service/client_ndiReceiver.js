@@ -270,6 +270,14 @@ class NDI_Receiver_v4 extends EventEmitter {
     }
 
     async showGStreamer(delay = 1000) {
+        if (!this.displayActivated)
+        {
+            this.displayActivated = true;
+            await func.activateDisplay();
+        }
+
+        await func.wait(delay);
+
         // func.fadeVolume(this.volumeSetPoint, `${path.basename(__filename)} connect(); stdout.on(data)`);
 
         await Promise.all([
@@ -277,14 +285,6 @@ class NDI_Receiver_v4 extends EventEmitter {
             func.activateWindow_NDI().catch(),
             func.minimizeWindow_Chromium().catch()
         ]);
-        
-        await func.wait(delay);
-
-        if (!this.displayActivated)
-        {
-            this.displayActivated = true;
-            await func.activateDisplay();
-        }
         // const step1 = func.activateWindow_NDI();
 
         // const step2 = func.minimizeWindow_Chromium();
