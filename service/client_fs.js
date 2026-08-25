@@ -461,7 +461,7 @@ class FileSystemMonitor extends EventEmitter {
             },
             {
                 key: "output_display_resolution_preference",
-                value: `1920x1080`,
+                value: ``,
                 group: `Display_Resolution`,
                 options: [],
                 allowEditInternal: true,
@@ -469,7 +469,7 @@ class FileSystemMonitor extends EventEmitter {
             },
             {
                 key: "output_display_framerate_preference",
-                value: `60`,
+                value: ``,
                 group: `Display_Resolution`,
                 options: [],
                 allowEditInternal: true,
