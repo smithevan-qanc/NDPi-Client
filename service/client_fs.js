@@ -124,27 +124,6 @@ class FileSystemMonitor extends EventEmitter {
             })
         }
 
-        await new Promise((resolve) => {
-            exec(`${path.join(__dirname, '..', 'sh', 'set-hostname')} NDPi-Client-${String(deviceId).toUpperCase()}`, (error, stdout, stderr) => {
-                if (error)
-                {
-                    func.stdoutToArray(stderr.toString()).forEach((line) => {
-                        console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] ${String(line).trim()}`);
-                    });
-                    console.info(`[ ${path.basename(__filename).split('.')[0]} ][ Update Hostname ] Resolved.`);
-                    resolve();
-                }
-                else
-                {
-                    func.stdoutToArray(stdout.toString()).forEach((line) => {
-                        console.info(`[ ${path.basename(__filename).split('.')[0]} ][ Update Hostname ] ${String(line).trim()}`);
-                    });
-                    console.info(`[ ${path.basename(__filename).split('.')[0]} ][ Update Hostname ] Resolved.`);
-                    resolve();
-                }
-            });
-        });
-
         // Map file names and values with to standard defaults.
         this.fileMap = new Map();
         const files = [
@@ -425,7 +404,7 @@ class FileSystemMonitor extends EventEmitter {
             },
             {
                 key: "ndi_receiver_bandwidth",
-                value: `100`,
+                value: `0`,
                 options: [
                     [ 'Metadata Only', '-10'        ],
                     [ 'Audio Only',    '10'         ],
@@ -480,98 +459,85 @@ class FileSystemMonitor extends EventEmitter {
                 allowEditInternal: false,
                 allowEditExternal: false,
             },
-            // Two independent physical outputs, mirrored to show identical
-            // content (see functions.js's setDisplayResolution()), each
-            // with its own resolution/framerate/EDID settings -- previously
-            // one shared "whichever port a display happens to be plugged
-            // into" key set (`output_display_port` picked the target) --
-            // now both ports are always driven directly by name, so
-            // there's no longer a need to track which literal xrandr
-            // output is "the" configured one. CEC stays a single shared
-            // key set (not split per-port): CEC status reflects whichever
-            // downstream device/adapter this Client's CEC controller talks
-            // to, not a specific HDMI connector.
-            ...['hdmi1', 'hdmi2'].flatMap((port) => ([
-                {
-                    key: `output_display_${port}_resolution_preference`,
-                    value: `1920x1080`,
-                    group: `Display_Resolution_${port === 'hdmi1' ? 'HDMI1' : 'HDMI2'}`,
-                    options: [],
-                    allowEditInternal: true,
-                    allowEditExternal: true,
-                },
-                {
-                    key: `output_display_${port}_framerate_preference`,
-                    value: `60`,
-                    group: `Display_Resolution_${port === 'hdmi1' ? 'HDMI1' : 'HDMI2'}`,
-                    options: [],
-                    allowEditInternal: true,
-                    allowEditExternal: true,
-                },
-                {
-                    key: `output_display_${port}_resolution_current`,
-                    value: ``,
-                    group: `Display_Resolution_${port === 'hdmi1' ? 'HDMI1' : 'HDMI2'}`,
-                    allowEditInternal: true,
-                    allowEditExternal: false,
-                },
-                {
-                    key: `output_display_${port}_framerate_current`,
-                    value: ``,
-                    group: `Display_Resolution_${port === 'hdmi1' ? 'HDMI1' : 'HDMI2'}`,
-                    allowEditInternal: true,
-                    allowEditExternal: false,
-                },
-                {
-                    key: `output_display_${port}_resolution_preferred`,
-                    value: ``,
-                    group: `Display_Resolution_${port === 'hdmi1' ? 'HDMI1' : 'HDMI2'}`,
-                    allowEditInternal: true,
-                    allowEditExternal: false,
-                },
-                {
-                    key: `output_display_${port}_framerate_preferred`,
-                    value: ``,
-                    group: `Display_Resolution_${port === 'hdmi1' ? 'HDMI1' : 'HDMI2'}`,
-                    allowEditInternal: true,
-                    allowEditExternal: false,
-                },
-                {
-                    key: `output_display_${port}_connected`,
-                    value: `false`,
-                    group: `Display_Resolution_${port === 'hdmi1' ? 'HDMI1' : 'HDMI2'}`,
-                    allowEditInternal: true,
-                    allowEditExternal: false,
-                },
-                {
-                    key: `output_display_${port}_manufacturer`,
-                    value: ``,
-                    group: `Display_Resolution_${port === 'hdmi1' ? 'HDMI1' : 'HDMI2'}`,
-                    allowEditInternal: true,
-                    allowEditExternal: false,
-                },
-                {
-                    key: `output_display_${port}_model`,
-                    value: ``,
-                    group: `Display_Resolution_${port === 'hdmi1' ? 'HDMI1' : 'HDMI2'}`,
-                    allowEditInternal: true,
-                    allowEditExternal: false,
-                },
-                {
-                    key: `output_display_${port}_model_number`,
-                    value: ``,
-                    group: `Display_Resolution_${port === 'hdmi1' ? 'HDMI1' : 'HDMI2'}`,
-                    allowEditInternal: true,
-                    allowEditExternal: false,
-                },
-                {
-                    key: `output_display_${port}_serial_number`,
-                    value: ``,
-                    group: `Display_Resolution_${port === 'hdmi1' ? 'HDMI1' : 'HDMI2'}`,
-                    allowEditInternal: true,
-                    allowEditExternal: false,
-                },
-            ])),
+            {
+                key: "output_display_resolution_preference",
+                value: `1920x1080`,
+                group: `Display_Resolution`,
+                options: [],
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "output_display_framerate_preference",
+                value: `60`,
+                group: `Display_Resolution`,
+                options: [],
+                allowEditInternal: true,
+                allowEditExternal: true,
+            },
+            {
+                key: "output_display_resolution_current",
+                value: ``,
+                group: `Display_Resolution`,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_display_framerate_current",
+                value: ``,
+                group: `Display_Resolution`,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_display_resolution_preferred",
+                value: ``,
+                group: `Display_Resolution`,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_display_framerate_preferred",
+                value: ``,
+                group: `Display_Resolution`,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_display_port",
+                value: ``,
+                group: `Display_Resolution`,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_display_manufacturer",
+                value: ``,
+                group: `Display_Resolution`,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_display_model",
+                value: ``,
+                group: `Display_Resolution`,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_display_model_number",
+                value: ``,
+                group: `Display_Resolution`,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
+            {
+                key: "output_display_serial_number",
+                value: ``,
+                group: `Display_Resolution`,
+                allowEditInternal: true,
+                allowEditExternal: false,
+            },
             {
                 key: "output_display_cec_enabled",
                 value: `false`,
@@ -699,7 +665,7 @@ class FileSystemMonitor extends EventEmitter {
                 }
             }
             catch (err)
-            { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err); }
+            { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ] Saving File: Name:${setting.key}, Value: ${setting.value}`, err) }
             
             if (this.sendToLCD.includes(setting.key))
             { fs.writeFileSync(path.join(__dirname, '..', 'python', 'script', setting.key), setting.value, 'utf8'); }
@@ -759,8 +725,7 @@ class FileSystemMonitor extends EventEmitter {
                 else
                 { console.info(`[ ${path.basename(__filename).split('.')[0]} ][ UPDATE ] '${name}' ==> '${fsValue}'`); }
 
-                if (name === 'output_display_hdmi1_resolution_preference' || name === 'output_display_hdmi1_framerate_preference' ||
-                    name === 'output_display_hdmi2_resolution_preference' || name === 'output_display_hdmi2_framerate_preference')
+                if (name === 'output_display_resolution_preference' || name === 'output_display_framerate_preference')
                 { this.updateOutputDisplayFiles(); }
 
                 if (this.sendToLCD.includes(name))
@@ -983,28 +948,21 @@ class FileSystemMonitor extends EventEmitter {
             });
         });
 
-        // Maps the port label sh/current-resolution tags each line with
-        // (the real xrandr connector name, e.g. HDMI-1/HDMI-2) to this
-        // class's own per-port key prefix.
-        const portKeyFor = { 'HDMI-1': 'hdmi1', 'HDMI-2': 'hdmi2' };
-
         if (HDMI_1 === 'disconnected' && HDMI_2 === 'disconnected')
         {
-            for (const port of ['hdmi1', 'hdmi2'])
-            {
-                this.put(`output_display_${port}_connected`, 'false');
-                this.put(`output_display_${port}_resolution_preferred`, '');
-                this.put(`output_display_${port}_framerate_preferred`, '');
-                this.put(`output_display_${port}_manufacturer`, '');
-                this.put(`output_display_${port}_model`, '');
-                this.put(`output_display_${port}_model_number`, '');
-                this.put(`output_display_${port}_serial_number`, '');
-            }
+            this.put('output_display_port', '');
+            this.put('output_display_resolution_preferred', '');
+            this.put('output_display_framerate_preferred', '');
+            this.put('output_display_manufacturer', '');
+            this.put('output_display_model', '');
+            this.put('output_display_model_number', '');
+            this.put('output_display_serial_number', '');
             this.put('output_display_cec_enabled', 'false');
             this.put('output_display_cec_status_power', 'unknown');
             this.put('output_display_cec_this_source_active', 'false');
             this.put('output_display_cec_version', '');
             this.put('output_display_cec_address', '');
+            this.put('output_display_framerate_preference', '');
             this.emit('drm');
         }
         else
@@ -1015,92 +973,88 @@ class FileSystemMonitor extends EventEmitter {
                 { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ updateOutputDisplayFiles() ][ ERROR ] ${stderr.toString().trim()}`); }
                 else
                 {
-                    // Each line is tagged "<key> : <PORT> :: <value>" (see
-                    // sh/current-resolution) -- list_resolutions' own value
-                    // additionally embeds a second ' :: ' separating a
-                    // human-readable label from the raw mode string.
-                    const resolutionOptions = { hdmi1: [], hdmi2: [] };
-                    const framerateOptions = { hdmi1: [], hdmi2: [] };
-                    const seenConnected = { hdmi1: false, hdmi2: false };
-
+                    let resolutionOptions = [];
+                    let framerateOptions = [];
                     func.stdoutToArray(stdout).forEach((line) => {
-                        const output = line.toString().trim();
-                        if (!output) return;
+                        const output        = line.toString().trim();
+                        const lineSplit_1   = output.split(' : ');
+                        const splitKey      = String(lineSplit_1[0] || '').trim();
+                        const splitValue    = String(lineSplit_1[1] || '').trim();
+                        
+                        let lineSplit_2 = null;
+                        let splitOptKey = null;
+                        let splitOptValue = null;
 
-                        const lineSplit_1 = output.split(' : ');
-                        const splitKey    = String(lineSplit_1[0] || '').trim();
-                        const rest        = lineSplit_1.slice(1).join(' : ').trim();
-                        const restParts   = rest.split(' :: ');
-                        const portLabel   = String(restParts[0] || '').trim();
-                        const splitValue  = restParts.slice(1).join(' :: ').trim();
+                        if (splitValue.includes(' :: '))
+                        {
+                            lineSplit_2   = splitValue.split(' :: ');
+                            splitOptKey   = String(lineSplit_2[0] || '').trim();
+                            splitOptValue = String(lineSplit_2[1] || '').trim();
+                        }
 
-                        const port = portKeyFor[portLabel];
-                        if (!port) return;
-
-                        switch (splitKey)
+                        switch(splitKey)
                         {
                             case 'current_output':
-                                seenConnected[port] = true;
-                                this.put(`output_display_${port}_connected`, 'true');
+                                this.put('output_display_port', splitValue);
                                 return;
+                                break;
                             case 'current_resolution':
-                                this.put(`output_display_${port}_resolution_current`, splitValue);
+                                this.put('output_display_resolution_current', splitValue);
                                 return;
+                                break;
                             case 'current_framerate':
-                                this.put(`output_display_${port}_framerate_current`, splitValue);
+                                this.put('output_display_framerate_current', splitValue);
                                 return;
+                                break;
                             case 'preferred_resolution':
-                                this.put(`output_display_${port}_resolution_preferred`, splitValue);
+                                this.put('output_display_resolution_preferred', splitValue);
                                 return;
+                                break;
                             case 'preferred_framerate':
-                                this.put(`output_display_${port}_framerate_preferred`, splitValue);
+                                this.put('output_display_framerate_preferred', splitValue);
                                 return;
-                            case 'manufacturer':
-                                this.put(`output_display_${port}_manufacturer`, lookupEdidManufacturer(splitValue));
+                                break;
+                            case 'manufacturer_hdmi0':
+                            case 'manufacturer_hdmi1':
+                                this.put('output_display_manufacturer', lookupEdidManufacturer(splitValue));
                                 return;
-                            case 'model_name':
-                                this.put(`output_display_${port}_model`, splitValue);
+                                break;
+                            case 'model_name_hdmi0':
+                            case 'model_name_hdmi1':
+                                this.put('output_display_model', splitValue);
                                 return;
-                            case 'model_number':
-                                this.put(`output_display_${port}_model_number`, splitValue);
+                                break;
+                            case 'model_number_hdmi0':
+                            case 'model_number_hdmi1':
+                                this.put('output_display_model_number', splitValue);
                                 return;
-                            case 'sn':
-                                this.put(`output_display_${port}_serial_number`, splitValue);
+                                break;
+                            case 'sn_hdmi0':
+                            case 'sn_hdmi1':
+                                this.put('output_display_serial_number', splitValue);
                                 return;
-                            case 'list_resolutions': {
-                                const listParts = splitValue.split(' :: ');
-                                const splitOptValue = String(listParts[1] || '').trim();
-                                if (splitOptValue)
-                                { resolutionOptions[port].push([splitOptValue, splitOptValue]); }
+                                break;
+                            case 'list_resolutions':
+                                if (splitOptKey && splitOptValue)
+                                { resolutionOptions.push([splitOptValue, splitOptValue]); }
+                                // { resolutionOptions.push([splitOptKey, splitOptValue]); }
                                 return;
-                            }
-                            case 'allowed_framerates': {
-                                const FRoptions = splitValue.split(' ').filter(Boolean);
-                                for (const value of FRoptions)
-                                { framerateOptions[port].push([value, value]); }
-                                return;
-                            }
+                                break;
+                            case 'allowed_framerates':
+                                const fileMapCurrFR = this.fileMap.get('output_display_framerate_preference');
+                                const FRoptions = splitValue.split(' ');
+                                for (const value of FRoptions) {
+                                    framerateOptions.push([value, value]);
+                                }
+                                fileMapCurrFR.options = framerateOptions;
+                                this.fileMap.set('output_display_framerate_preference', fileMapCurrFR);
                             default:
-                                return;
+                                break;
                         }
                     });
-
-                    for (const port of ['hdmi1', 'hdmi2'])
-                    {
-                        if (!seenConnected[port])
-                        { this.put(`output_display_${port}_connected`, 'false'); }
-
-                        const fileMapCurrRes = this.fileMap.get(`output_display_${port}_resolution_preference`);
-                        fileMapCurrRes.options = resolutionOptions[port];
-                        this.fileMap.set(`output_display_${port}_resolution_preference`, fileMapCurrRes);
-
-                        if (framerateOptions[port].length > 0)
-                        {
-                            const fileMapCurrFR = this.fileMap.get(`output_display_${port}_framerate_preference`);
-                            fileMapCurrFR.options = framerateOptions[port];
-                            this.fileMap.set(`output_display_${port}_framerate_preference`, fileMapCurrFR);
-                        }
-                    }
+                    const fileMapCurrRes = this.fileMap.get('output_display_resolution_preference');
+                    fileMapCurrRes.options = resolutionOptions;
+                    this.fileMap.set('output_display_resolution_preference', fileMapCurrRes);
                     this.emit('drm');
                     // Both the resolution and framerate options above mutate the
                     // fileMap in memory only -- __flushQueue() (the only other
