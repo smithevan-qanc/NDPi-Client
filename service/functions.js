@@ -614,7 +614,6 @@ const { exec, spawn } = require('node:child_process');
     async function minimizeWindow_Chromium() {
         const pid = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'pid_chromium'), 'utf8').trim() || null;
         let response = false;
-        // let cmd1 = await exe(`xdotool search --class 'chromium'`);
         let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'chromium'`}`);
 
         if (!cmd1.success)
@@ -640,7 +639,6 @@ const { exec, spawn } = require('node:child_process');
     async function raiseWindow_Chromium() {
         const pid = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'pid_chromium'), 'utf8').trim() || null;
         let response = false;
-        // let cmd1 = await exe(`xdotool search --class 'chromium'`);
         let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'chromium'`}`);
 
         if (!cmd1.success)
@@ -666,7 +664,6 @@ const { exec, spawn } = require('node:child_process');
     async function activateWindow_Chromium() {
         const pid = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, 'pid_chromium'), 'utf8').trim() || null;
         let response = false;
-        // let cmd1 = await exe(`xdotool search --class 'chromium'`);
         let cmd1 = await exe(`xdotool search ${pid ? `--pid ${pid}` : `--class 'chromium'`}`);
 
         if (!cmd1.success)
