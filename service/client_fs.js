@@ -425,7 +425,7 @@ class FileSystemMonitor extends EventEmitter {
             },
             {
                 key: "ndi_receiver_bandwidth",
-                value: `0`,
+                value: `100`,
                 options: [
                     [ 'Metadata Only', '-10'        ],
                     [ 'Audio Only',    '10'         ],

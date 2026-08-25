@@ -115,12 +115,11 @@ class NDPi {
             }, 1000);
         });
 
-        //  HDMI-1 / HDMI-2 Resolution + Framerate (mirrored, see
-        //  client_fs.js/functions.js)
+        //  HDMI-1 / HDMI-2 Resolution + Framerate (mirrored, see client_fs.js/functions.js)
         this.settings.on('output_display_hdmi1_resolution_preference', () => { func.setDisplayResolution(); });
-        this.settings.on('output_display_hdmi1_framerate_preference', () => { func.setDisplayResolution(); });
+        this.settings.on('output_display_hdmi1_framerate_preference',  () => { func.setDisplayResolution(); });
         this.settings.on('output_display_hdmi2_resolution_preference', () => { func.setDisplayResolution(); });
-        this.settings.on('output_display_hdmi2_framerate_preference', () => { func.setDisplayResolution(); });
+        this.settings.on('output_display_hdmi2_framerate_preference',  () => { func.setDisplayResolution(); });
 
         //  ApirPlay PIN
         this.settings.on('ndpi_airplay_server_pin', () => {
