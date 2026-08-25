@@ -796,25 +796,19 @@ const { exec, spawn } = require('node:child_process');
 
     /** SET DISPLAY RESOLUTION */
     /**
-     * Sets both of the Client's HDMI output resolutions via a single xrandr
-     * call on DISPLAY=:0, using each port's own
-     * 'output_display_hdmiN_resolution_preference' /
-     * 'output_display_hdmiN_framerate_preference' settings -- then mirrors
-     * HDMI-2 onto HDMI-1 (`--same-as`) so both outputs always show
-     * identical content, per the Client's single-NDI-source design. When
-     * the two ports' preferred resolutions differ, `--scale-from` is also
-     * applied to HDMI-2 so the mirrored content is scaled to fit its own
-     * native resolution instead of merely overlapping HDMI-1's larger/
-     * smaller canvas at 1:1.
-     *
+     * This function set's the HDMI output resolution
+     * - Using these setting values:
+     *   - 'output_display_port'
+     *   - 'output_display_resolution_preference'
+     * 
      * **⚠️ Use try / catch**
-     *
+     * 
      * _This function will reject on failure with reason_
-     *
+     * 
      * ---
-     *
+     * 
      * ### NDPi Function
-     *
+     * 
      */
     async function setDisplayResolution() {
         let config = {
@@ -871,6 +865,30 @@ const { exec, spawn } = require('node:child_process');
                 }
             });
         });
+    }
+
+    /** 
+     * ---
+     * 
+     * ### NDPi Function
+     * 
+     */
+    async function getSetting(filename) {
+        const response = {
+            success: false,
+            data: '',
+        };
+
+        if (!filename) { return response; }
+
+        try
+        {
+            response.data = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, `${filename}`), 'utf8').trim();
+            console.log('functions get setting ', filename, response.data);
+            response.success = true
+        }
+        catch {}
+        finally { return response; }
     }
 
     /** 
