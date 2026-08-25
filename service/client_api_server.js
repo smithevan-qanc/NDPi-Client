@@ -19,7 +19,8 @@ class NDPiCommandServer_Client extends EventEmitter {
         this.settings = fsData;
         // 'development'
         this.cacheControl = String(process.env.NODE_ENV || 'PRODUCTION') === 'PRODUCTION' ?
-            'public, max-age=86400, immutable' :
+            'no-store, no-cache, must-revalidate, private' :
+            // 'public, max-age=86400, immutable' :
             'no-store, no-cache, must-revalidate, private';
         
         try

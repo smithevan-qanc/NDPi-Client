@@ -79,6 +79,7 @@ server._ws.onmessage = (message) => {
                     return;
 
                 case 'ndpi_status_ndi_status':
+                    console.log(`NDI Status: ${output}`);
                     if (output == 'idle' || output == 'stalled')
                     {
                         setTimeout(() => {

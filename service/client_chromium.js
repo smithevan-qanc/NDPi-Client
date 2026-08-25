@@ -41,7 +41,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
             '--no-first-run',
             '--start-fullscreen',
             '--touch-events=enabled',
-            `--user-data-dir=${process.env.HOME}/.config/chromium/Default`,
+            `--user-data-dir=${process.env.HOME}/.config/chromium`,
             `http://localhost:${connectionPort}/display/idle/`
         ];
 
