@@ -876,30 +876,6 @@ const { exec, spawn } = require('node:child_process');
     /** 
      * ---
      * 
-     * ### NDPi Function
-     * 
-     */
-    async function getSetting(filename) {
-        const response = {
-            success: false,
-            data: '',
-        };
-
-        if (!filename) { return response; }
-
-        try
-        {
-            response.data = fs.readFileSync(path.join(process.env.DATA_NDPI_PATH, `${filename}`), 'utf8').trim();
-            console.log('functions get setting ', filename, response.data);
-            response.success = true
-        }
-        catch {}
-        finally { return response; }
-    }
-
-    /** 
-     * ---
-     * 
      * ### NDPi Helper Function
      * 
      */
