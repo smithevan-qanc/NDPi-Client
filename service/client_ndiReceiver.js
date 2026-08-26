@@ -14,7 +14,7 @@ class NDI_Receiver_v4 extends EventEmitter {
 
         this.settings = fsData;
         this.server = api;
-        this.displayActivated = false;
+        this.displayActivated = String(this.settings.get('output_display_cec_status_power') || 'unknown').toLowerCase() === 'on';
 
         this.receiverDirectory = path.join(__dirname, '..', 'ndi_receiver_v3__NDI6');
 
