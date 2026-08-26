@@ -80,24 +80,24 @@ server._ws.onmessage = (message) => {
                     break;
                     return;
 
-                // case 'ndpi_status_ndi_status':
-                //     console.log(`NDI Status: ${output}`);
-                //     if (output == 'idle' || output == 'stalled')
-                //     {
-                //         setTimeout(() => {
-                //             overlayEl.style.opacity = 1;
-                //             detailsEl.style.opacity = 1;
-                //         }, 800);
-                //     }
-                //     else
-                //     {
-                //         setTimeout(() => {
-                //             overlayEl.style.opacity = 0;
-                //             detailsEl.style.opacity = 0;
-                //         }, 1000);
-                //     }
-                //     break;
-                //     return;
+                case 'ndpi_status_ndi_status':
+                    console.log(`NDI Status: ${output}`);
+                    if (output == 'idle' || output == 'stalled')
+                    {
+                        setTimeout(() => {
+                            overlayEl.style.opacity = 1;
+                            detailsEl.style.opacity = 1;
+                        }, 800);
+                    }
+                    else
+                    {
+                        setTimeout(() => {
+                            overlayEl.style.opacity = 0;
+                            detailsEl.style.opacity = 0;
+                        }, 1000);
+                    }
+                    break;
+                    return;
 
                 case 'ndpi_status_ndi_source_target':
                     if (output && output !== 'none')
@@ -111,8 +111,8 @@ server._ws.onmessage = (message) => {
                     {
                         startingEl.style.opacity = 0;
                         overlayContainerEl.style.opacity = 1;
-                        overlayEl.style.opacity = 1;
-                        detailsEl.style.opacity = 1;
+                        // overlayEl.style.opacity = 1;
+                        // detailsEl.style.opacity = 1;
                     }
                     break;
                     return;
