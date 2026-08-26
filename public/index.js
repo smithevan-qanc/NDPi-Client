@@ -87,7 +87,7 @@ server._ws.onmessage = (message) => {
                         setTimeout(() => {
                             overlayEl.style.opacity = 1;
                             detailsEl.style.opacity = 1;
-                        }, 800);
+                        }, 1000);
                     }
                     else
                     {
