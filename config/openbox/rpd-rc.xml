@@ -35,6 +35,14 @@
       <skip_taskbar>yes</skip_taskbar>
       <iconic>yes</iconic>
       <layer>below</layer>
+      <fullscreen>no</fullscreen>
+    </application>
+
+    <application class="vncserverui">
+      <skip_taskbar>yes</skip_taskbar>
+      <iconic>yes</iconic>
+      <layer>below</layer>
+      <fullscreen>no</fullscreen>
     </application>
     
     <!--  NDI Receiver -->
