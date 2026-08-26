@@ -15,7 +15,7 @@ class ChromiumOverlayDisplay extends EventEmitter {
     }
 
     async launch() {
-        await func.launchPicom();
+        // await func.launchPicom();
 
         const connectionPort = this.settings.get('local_port_number_api');
         const command = 'chromium';

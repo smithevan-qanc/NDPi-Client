@@ -149,7 +149,8 @@ xdotool windowactivate $NDI_WINDOW_ID
 
 sleep 1
 
-if ! [ "$(killall picom)" ];
+if ! [ "$(killall 
+)" ];
     exit 1
 else
     exit 0

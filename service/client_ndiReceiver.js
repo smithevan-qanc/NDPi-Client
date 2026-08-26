@@ -295,9 +295,11 @@ class NDI_Receiver_v4 extends EventEmitter {
         // if (!step1)
         // { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ][ >> Step 2: Activate GStreamer ]`); return; }
 
+        /*
         setTimeout(() => {
             func.killPicom();
         }, 1000); // not affected by the delay argv.
+        */
     }
 
     /**
@@ -337,7 +339,7 @@ class NDI_Receiver_v4 extends EventEmitter {
      */
     async showChromium_PostTerm(picom = false) {
         await func.raiseWindow_Chromium().catch();
-        if (picom) { await func.launchPicom(); }
+        // if (picom) { await func.launchPicom(); }
         await func.wait(500);
         await func.activateWindow_Chromium().catch();
         return;
@@ -487,8 +489,8 @@ class NDI_Receiver_v4 extends EventEmitter {
                 break;
             case 60:
                 console.info(`[ ${path.basename(__filename).split('.')[0]} ] ${this.ndiSource} inactive for ${this.secondsInactive} seconds.`);
-                await func.launchPicom();
-                await func.wait(1000);
+                // await func.launchPicom();
+                // await func.wait(1000);
                 await this.showChromium_PreTerm();
                 await this.showChromium_PostTerm(false);
                 return;
