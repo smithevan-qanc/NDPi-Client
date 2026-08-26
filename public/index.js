@@ -104,11 +104,15 @@ server._ws.onmessage = (message) => {
                     {
                         startingEl.style.opacity = 1;
                         overlayContainerEl.style.opacity = 0;
+                        overlayEl.style.opacity = 0;
+                        detailsEl.style.opacity = 0;
                     }
                     else
                     {
                         startingEl.style.opacity = 0;
                         overlayContainerEl.style.opacity = 1;
+                        overlayEl.style.opacity = 1;
+                        detailsEl.style.opacity = 1;
                     }
                     break;
                     return;
