@@ -22,6 +22,8 @@ function updateDetails(msg) {
 const overlayEl = document.getElementById('overlay');
 const detailsEl = document.getElementById('sys-details');
 const startingEl = document.getElementById('attempting-ndi-connection-svg');
+const overlayContainerEl = document.getElementById('overlay-container');
+const waitingForHubEl = document.getElementById('waiting-for-hub-svg');
 
 const server = new NDPi_WebSocket('ws/display');
 
@@ -60,9 +62,9 @@ server._ws.onmessage = (message) => {
 
                 case 'ndpi_hub_hostname':
                     if (!output)
-                    { document.getElementById('waiting-for-hub-svg').style.opacity = 1; }
+                    { waitingForHubEl.style.opacity = 1; }
                     else
-                    { document.getElementById('waiting-for-hub-svg').style.opacity = 0; }
+                    { waitingForHubEl.style.opacity = 0; }
                     document.getElementById(id).textContent = output || '';
                     document.getElementById(`div__${id}`).hidden = !output;
                     break;
@@ -78,38 +80,44 @@ server._ws.onmessage = (message) => {
                     break;
                     return;
 
-                case 'ndpi_status_ndi_status':
-                    console.log(`NDI Status: ${output}`);
-                    if (output == 'idle' || output == 'stalled')
-                    {
-                        setTimeout(() => {
-                            overlayEl.style.opacity = 1;
-                            detailsEl.style.opacity = 1;
-                        }, 800);
-                    }
-                    else
-                    {
-                        setTimeout(() => {
-                            overlayEl.style.opacity = 0;
-                            detailsEl.style.opacity = 0;
-                        }, 1000);
-                    }
-                    break;
-                    return;
+                // case 'ndpi_status_ndi_status':
+                //     console.log(`NDI Status: ${output}`);
+                //     if (output == 'idle' || output == 'stalled')
+                //     {
+                //         setTimeout(() => {
+                //             overlayEl.style.opacity = 1;
+                //             detailsEl.style.opacity = 1;
+                //         }, 800);
+                //     }
+                //     else
+                //     {
+                //         setTimeout(() => {
+                //             overlayEl.style.opacity = 0;
+                //             detailsEl.style.opacity = 0;
+                //         }, 1000);
+                //     }
+                //     break;
+                //     return;
 
                 case 'ndpi_status_ndi_source_target':
                     if (output && output !== 'none')
-                    { startingEl.style.opacity = 1; }
+                    {
+                        startingEl.style.opacity = 1;
+                        overlayContainerEl.style.opacity = 0;
+                    }
                     else
-                    { startingEl.style.opacity = 0; }
+                    {
+                        startingEl.style.opacity = 0;
+                        overlayContainerEl.style.opacity = 1;
+                    }
                     break;
                     return;
 
                 case 'ndpi_status_no_source_display_mode':
                     if (!output || output == 'blank')
-                    { document.getElementById('overlay-container').style.opacity = 0; }
+                    { overlayContainerEl.style.opacity = 0; }
                     else
-                    { document.getElementById('overlay-container').style.opacity = 1; }
+                    { overlayContainerEl.style.opacity = 1; }
                     break;
                     return;
 
