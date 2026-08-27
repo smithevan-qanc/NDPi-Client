@@ -7,6 +7,7 @@ class NDPi_WebSocket extends EventTarget {
      * @param {number} [options.reconnectionDelay] - Verbose logging.
      * @param {number} [options.reloadPageDelay] - Verbose logging.
      */
+    
     constructor(path, options = {}) {
         super();
         this._ws = null;
@@ -25,7 +26,6 @@ class NDPi_WebSocket extends EventTarget {
     }
 
     connect() {
-        // if (this._ws && this._ws.readyState === WebSocket.OPEN)
         try { this._ws.close(); }
         catch {}
         finally { this._ws = null; }
@@ -34,17 +34,8 @@ class NDPi_WebSocket extends EventTarget {
 
         this._ws.onopen = () => {
             console.info('NDPi Websocket Connected');
-
             if (this.timerReconnect)
             { window.navigation.reload(); }
-
-            // try { clearTimeout(this.timerPageReload); }
-            // catch {}
-            // finally { this.timerPageReload = null; }
-
-            // try { clearTimeout(this.timerReconnect); }
-            // catch {}
-            // finally { this.timerReconnect = null; }
         };
 
         this._ws.onerror = (error) => {
@@ -72,44 +63,5 @@ class NDPi_WebSocket extends EventTarget {
         this.timerReconnect = setTimeout(() => {
             this.connect();
         }, this.reconnectDelay);
-
-        // if (this.timerPageReload) { return; }
-
-        // this.timerPageReload = setTimeout(() => {
-        //     window.navigation.reload();
-        // }, this.reloadPageDelay);
     }
 }
-
-// const server = new NDPi_WebSocket('/ws/system');
-
-// server._ws.onmessage = (message) => {
-//     try
-//     {
-//         const msg = JSON.parse(message.data);
-//         for (const [id, object] of msg)
-//         {
-//             const settingInnerHTML = `
-//                 <div class="div-label">${String(id.split('_').join(' '))}</div>
-//                 <input type="text" id="${id}" value="${String(object.value).replaceAll('"', '\"')}" ${object.allowEditExternal ? '' : 'disabled'}>
-//             `;
-
-//             if (id === 'ndpi_status_ndi_source_target') 
-//             { document.getElementById('source_selection').value = object.value || 'none'; }
-
-//             let settingEl = document.getElementById(`__${id}`);
-//             if (!settingEl)
-//             {
-//                 settingEl = document.createElement('div');
-//                 settingEl.id = `__${id}`;
-//                 settingEl.innerHTML = settingInnerHTML;
-//                 document.getElementById('settings').appendChild(settingEl);
-//             } else
-//             {
-//                 settingEl.innerHTML = settingInnerHTML;
-//             }
-//         }
-//     }
-//     catch (e)
-//     { console.error('Invalid message:', e); }
-// };
