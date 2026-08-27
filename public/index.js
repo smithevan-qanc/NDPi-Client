@@ -26,6 +26,7 @@ const detailsEl             = document.getElementById('sys-details');
 let waitingForHubTimer = null;
 let waitingForHubVis = true;
 function waitingForHub(show = true) {
+    console.log(`*FUNC* waitingForHub(${show})`);
     if (
         waitingForHubVis !== show &&
         waitingForHubTimer
@@ -46,6 +47,7 @@ function waitingForHub(show = true) {
 let connectingToSourceTimer = null;
 let connectingToSourceVis = false;
 function connectingToSource(show = true) {
+    console.log(`*FUNC* connectingToSource(${show})`);
     if (
         connectingToSourceVis !== show &&
         connectingToSourceTimer
@@ -66,6 +68,7 @@ function connectingToSource(show = true) {
 let displayOverlayTimer = null;
 let displayOverlayVis = false;
 function displayOverlay(show = true) {
+    console.log(`*FUNC* displayOverlay(${show})`);
     if (
         displayOverlayVis !== show &&
         displayOverlayTimer
@@ -86,6 +89,7 @@ function displayOverlay(show = true) {
 let displayDetailsTimer = null;
 let displayDetailsVis = true;
 function displayDetails(show = true) {
+    console.log(`*FUNC* displayDetails(${show})`);
     if (
         displayDetailsVis !== show &&
         displayDetailsTimer
@@ -124,6 +128,9 @@ server._ws.onmessage = (message) => {
 
         messageData.forEach((value, key) => {
             const output = value.value || null;
+            console.log(`Output Object:`, value);
+            console.log(`Output Value: ${output}`);
+            console.log(`Output Key: ${key}`);
             switch (key)
             {
                 case 'device_name':
@@ -142,8 +149,14 @@ server._ws.onmessage = (message) => {
                     return;
 
                 case 'ndpi_hub_hostname':
-                    if (String(output || '').includes('.')) { waitingForHub(false); }
-                    else { waitingForHub(true); }
+                    if (String(output || '').includes('.'))
+                    {
+                        waitingForHub(false);
+                    }
+                    else
+                    {
+                        waitingForHub(true);
+                    }
 
                     document.getElementById(key).textContent = output || '';
                     document.getElementById(`div__${key}`).hidden = !output;
