@@ -368,6 +368,7 @@ server._ws.onopen = () => {
 
 server._ws.onmessage = (message) => {
     try {
+        console.log(message);
         messageData = JSON.parse(message.data);
 
         messageData.forEach((entry) => {
