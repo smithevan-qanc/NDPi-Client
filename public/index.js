@@ -122,7 +122,8 @@ server._ws.onopen = () => {
 server._ws.onmessage = (message) => {
     try
     {
-        const msg = JSON.parse(message.data);
+        // const msg = JSON.parse(message.data);
+        const msg = JSON.parse(message);
         messageData = msg;
         // updateDetails(msg);
 
