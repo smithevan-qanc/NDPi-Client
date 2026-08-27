@@ -128,7 +128,7 @@ server._ws.onmessage = (message) => {
 
         messageData.forEach((value, key) => {
             console.log(value)
-            const obj = Object.fromEntries(value) || null;
+            const obj = Object.values(value) || null;
             const id = obj.key;
             const output = obj.value || null;
             console.log(`Output Object:`, obj);
