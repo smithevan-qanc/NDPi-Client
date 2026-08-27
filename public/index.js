@@ -216,21 +216,21 @@ async function updateOverlay(output) {
         const parsedSrc = parsed.src || null;
         if (parsedSrc)
         {
-            overlayImageEl.opacity = 0;
+            overlayContainerEl.opacity = 0;
             await new Promise((resolve) => {
                 setTimeout(() => {
                     overlayImageEl.src = parsedSrc;
                     resolve();
                 }, 800);
             });
-            overlayImageEl.opacity = 1;
+            overlayContainerEl.opacity = 1;
             setTimeout(() => {
                 overlayImageEl.style.height = '100vh';
             }, 300);
         }
         else
         {
-            overlayImageEl.opacity = 0;
+            overlayContainerEl.opacity = 0;
             await new Promise((resolve) => {
                 setTimeout(() => {
                     overlayImageEl.style.removeProperty('height');
@@ -240,11 +240,13 @@ async function updateOverlay(output) {
                     resolve();
                 }, 800);
             });
-            overlayImageEl.opacity = 1;
+            overlayContainerEl.opacity = 1;
         }
     } catch (e) {
         console.error('Failed to parse media_overlay_image', e);
         overlayImageEl.style.removeProperty('height');
         overlayImageEl.src = '/assets/Display_Overlay.svg';
+        overlayImageEl.opacity = 1;
+        overlayContainerEl.opacity = 1;
     }
 }
