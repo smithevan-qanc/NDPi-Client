@@ -704,17 +704,26 @@ class NDPiCommandServer_Client extends EventEmitter {
      * @param {any}    [message.data] - Data to send. Type predefinded by Display WebSocket on basis of message.type.
      */
     sendUpdateToDisplay(message) {
-        let msg = {
-            type: 'settings-update',
-            data: Array.from(this.settings.fileMap),
-            ...message,
-        };
-        setTimeout(() => {
-            this.ws_conn_display.forEach(client => {
-                try { client.send(JSON.stringify(msg)); }
-                catch (e) { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', msg, '\n', e); }
-            });
-        }, 100);
+        // let msg = {
+        //     type: 'settings-update',
+        //     data: Array.from(this.settings.fileMap),
+        //     ...message,
+        // };
+        this.ws_conn_display.forEach(client => {
+            try {
+                client.send(JSON.stringify(Array.from(this.settings.fileMap)));
+            }
+            catch (e) {
+                console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', msg, '\n', e);
+            }
+        });
+
+        // setTimeout(() => {
+        //     this.ws_conn_display.forEach(client => {
+        //         try { client.send(JSON.stringify(msg)); }
+        //         catch (e) { console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, 'Unable to deliver WebSocket message.\n', msg, '\n', e); }
+        //     });
+        // }, 100);
     }
 }
 
