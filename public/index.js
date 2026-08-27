@@ -126,11 +126,16 @@ server._ws.onmessage = (message) => {
         messageData = msg;
         // updateDetails(msg);
 
-        messageData.forEach((value, key) => {
-            const output = value.value || null;
-            console.log(`Output Object:`, value);
+        messageData.forEach((value) => {
+            // const output = value.value || null;
+
+            const obj = Object.fromEntries(value) || null;
+            const key = obj.key;
+            const output = obj.value || null;
+            console.log(`Output Object:`, obj);
             console.log(`Output Value: ${output}`);
             console.log(`Output Key: ${key}`);
+
             switch (key)
             {
                 case 'device_name':
