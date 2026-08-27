@@ -23,6 +23,9 @@ const overlayContainerEl    = document.getElementById('overlay-container');
 const overlayImageEl        = document.getElementById('overlay');
 const detailsEl             = document.getElementById('sys-details');
 
+const overlayImageDefaultSrc = '/assets/Display_Overlay.svg';
+let overlayImageElSrc = overlayImageEl.src || overlayImageDefaultSrc;
+
 let waitingForHubTimer = null;
 let waitingForHubVis = true;
 function waitingForHub(show = true, timeout = 1000) {
@@ -214,12 +217,13 @@ async function updateOverlay(output) {
     try {
         const parsed = JSON.parse(output);
         const parsedSrc = parsed.src || null;
-        if (parsedSrc)
+        if (parsedSrc && parsedSrc !== overlayImageElSrc)
         {
             displayOverlay(false, 0);
             await new Promise((resolve) => {
                 setTimeout(() => {
                     overlayImageEl.src = parsedSrc;
+                    overlayImageElSrc = parsedSrc;
                     resolve();
                 }, 800);
             });
@@ -228,7 +232,7 @@ async function updateOverlay(output) {
                 overlayImageEl.style.height = '100vh';
             }, 300);
         }
-        else
+        else if (overlayImageElSrc !== overlayImageDefaultSrc)
         {
             displayOverlay(false, 0);
             await new Promise((resolve) => {
@@ -236,7 +240,8 @@ async function updateOverlay(output) {
                     overlayImageEl.style.removeProperty('height');
                 }, 300);
                 setTimeout(() => {
-                    overlayImageEl.src = '/assets/Display_Overlay.svg';
+                    overlayImageEl.src = overlayImageDefaultSrc;
+                    overlayImageElSrc = overlayImageDefaultSrc;
                     resolve();
                 }, 800);
             });
@@ -245,8 +250,8 @@ async function updateOverlay(output) {
     } catch (e) {
         console.error('Failed to parse media_overlay_image', e);
         overlayImageEl.style.removeProperty('height');
-        overlayImageEl.src = '/assets/Display_Overlay.svg';
+        overlayImageEl.src = overlayImageDefaultSrc;
         overlayImageEl.opacity = 1;
-        displayOverlay(true);
+        displayOverlay(true, 0);
     }
 }
