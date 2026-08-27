@@ -25,7 +25,7 @@ const detailsEl             = document.getElementById('sys-details');
 
 let waitingForHubTimer = null;
 let waitingForHubVis = true;
-function waitingForHub(show = true) {
+function waitingForHub(show = true, timeout = 1000) {
     console.log(`*FUNC* waitingForHub(${show})`);
     if (
         waitingForHubVis !== show &&
@@ -41,12 +41,12 @@ function waitingForHub(show = true) {
         waitingForHubVis = show;
         waitingForHubEl.style.opacity = show ? 1 : 0;
         waitingForHubTimer = null;
-    }, 1000);
+    }, timeout);
 }
 
 let connectingToSourceTimer = null;
 let connectingToSourceVis = false;
-function connectingToSource(show = true) {
+function connectingToSource(show = true, timeout = 1000) {
     console.log(`*FUNC* connectingToSource(${show})`);
     if (
         connectingToSourceVis !== show &&
@@ -62,12 +62,12 @@ function connectingToSource(show = true) {
         connectingToSourceVis = show;
         startingEl.style.opacity = show ? 1 : 0;
         connectingToSourceTimer = null;
-    }, 1000);
+    }, timeout);
 }
 
 let displayOverlayTimer = null;
 let displayOverlayVis = false;
-function displayOverlay(show = true) {
+function displayOverlay(show = true, timeout = 1000) {
     console.log(`*FUNC* displayOverlay(${show})`);
     if (
         displayOverlayVis !== show &&
@@ -83,12 +83,12 @@ function displayOverlay(show = true) {
         displayOverlayVis = show;
         overlayContainerEl.style.opacity = show ? 1 : 0;
         displayOverlayTimer = null;
-    }, 1000);
+    }, timeout);
 }
 
 let displayDetailsTimer = null;
 let displayDetailsVis = true;
-function displayDetails(show = true) {
+function displayDetails(show = true, timeout = 1000) {
     console.log(`*FUNC* displayDetails(${show})`);
     if (
         displayDetailsVis !== show &&
@@ -104,7 +104,7 @@ function displayDetails(show = true) {
         displayDetailsVis = show;
         detailsEl.style.opacity = show ? 1 : 0;
         displayDetailsTimer = null;
-    }, 1000);
+    }, timeout);
 }
 
 
@@ -216,21 +216,21 @@ async function updateOverlay(output) {
         const parsedSrc = parsed.src || null;
         if (parsedSrc)
         {
-            displayOverlay(false);
+            displayOverlay(false, 0);
             await new Promise((resolve) => {
                 setTimeout(() => {
                     overlayImageEl.src = parsedSrc;
                     resolve();
                 }, 800);
             });
-            displayOverlay(true);
+            displayOverlay(true, 0);
             setTimeout(() => {
                 overlayImageEl.style.height = '100vh';
             }, 300);
         }
         else
         {
-            displayOverlay(false);
+            displayOverlay(false, 0);
             await new Promise((resolve) => {
                 setTimeout(() => {
                     overlayImageEl.style.removeProperty('height');
@@ -240,7 +240,7 @@ async function updateOverlay(output) {
                     resolve();
                 }, 800);
             });
-            displayOverlay(true);
+            displayOverlay(true, 0);
         }
     } catch (e) {
         console.error('Failed to parse media_overlay_image', e);
