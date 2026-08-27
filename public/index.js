@@ -152,8 +152,8 @@ server._ws.onmessage = (message) => {
                     if (
                         String(output || 'none').toLowerCase() !== 'none'
                     ) {
-                        connectingToSource(true);
-                        displayOverlay(false);
+                        connectingToSource(true, 0);
+                        displayOverlay(false, 0);
                     }
                     break;
                 }
@@ -167,7 +167,7 @@ server._ws.onmessage = (message) => {
                     ) {
                         displayDetails(true);
                         displayOverlay(true);
-                        connectingToSource(false);
+                        connectingToSource(false, 0);
                     }
                     else if (
                         String(output || '').toLowerCase() !== ''
