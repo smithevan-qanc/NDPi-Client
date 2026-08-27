@@ -36,14 +36,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* transition: opacity 800ms ease; */
+            transition: opacity 800ms ease;
         }
         #overlay {
             opacity: 0;
             width: auto;
             height: 80vh;
             object-fit: contain;
-            transition: opacity 800ms ease;
+            transition: opacity 800ms ease, height 500ms ease-in-out;
         }
         #waiting-for-hub-svg {
             position: absolute;
@@ -79,8 +79,9 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: start;
-            margin: 0.3vh;
-            color: rgb(35,35,35);
+            margin: 1vh;
+            color: rgb(50, 50, 50);
+            /* color: rgba(150, 150, 150, 0.3); */
             font-family: monospace;
             font-size: 1.1vh;
             opacity: 0;
