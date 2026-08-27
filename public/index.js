@@ -366,13 +366,97 @@ server._ws.onopen = () => {
 //     }
 // }
 
+// server._ws.onmessage = (message) => {
+//     try {
+//         console.log(message);
+//         messageData = JSON.parse(message.data);
+
+//         messageData.forEach((entry) => {
+//             const id = entry.key;
+//             const output = entry.value ?? null;
+
+//             switch (id) {
+//                 case 'device_name':
+//                 case 'device_id':
+//                 case 'device_type':
+//                 case 'ndpi_version':
+//                     document.getElementById(id).textContent = output || '';
+//                     break;
+
+//                 case 'device_ip':
+//                     document.getElementById(id).textContent = output || 'Obtaining...';
+//                     break;
+
+//                 case 'ndpi_hub_hostname':
+//                     waitingForHub(!String(output || '').includes('.'));
+//                     document.getElementById(id).textContent = output || '';
+//                     document.getElementById(`div__${id}`).hidden = !output;
+//                     break;
+
+//                 case 'ndpi_status_ndi_source_target': {
+//                     if (String(output || 'none').toLowerCase() !== 'none')
+//                     {
+//                         connectingToSource(true);
+//                         displayOverlay(false);
+//                     }
+//                     break;
+//                 }
+
+//                 case 'ndpi_status_ndi_source_active': {
+//                     const targetEntry = messageData.find(e => e.key === 'ndpi_status_ndi_source_target');
+//                     const targetSource = String(targetEntry?.value || 'none').toLowerCase();
+
+//                     if (
+//                         String(output || '').toLowerCase() === '' &&
+//                         targetSource === 'none'
+//                     ) {
+//                         displayDetails(true);
+//                         displayOverlay(true);
+//                         connectingToSource(false);
+//                     } else if (
+//                         String(output || '').toLowerCase() !== ''
+//                     ) {
+//                         displayDetails(false);
+//                         connectingToSource(false);
+//                     }
+//                     break;
+//                 }
+
+//                 case 'ndpi_status_no_source_display_mode':
+//                     if (
+//                         String(output || 'blank').toLowerCase() === 'blank'
+//                     ) { overlayImageEl.style.opacity = 0; }
+//                     else if (
+//                         String(output || 'blank').toLowerCase() === 'overlay'
+//                     ) { overlayImageEl.style.opacity = 1; }
+//                     break;
+
+//                 case 'media_overlay_image': {
+//                     if (!output) break;
+//                     try {
+//                         const parsed = JSON.parse(output);
+//                         overlayImageEl.src = parsed.src || '/assets/Display_Overlay.svg';
+//                     } catch (e) {
+//                         console.error('Failed to parse media_overlay_image', e);
+//                         overlayImageEl.src = '/assets/Display_Overlay.svg';
+//                     }
+//                     break;
+//                 }
+
+//                 default:
+//                     break;
+//             }
+//         });
+//     } catch (e) {
+//         console.error(e);
+//     }
+// };
+
 server._ws.onmessage = (message) => {
     try {
-        console.log(message);
-        messageData = JSON.parse(message.data);
+        messageData = new Map(JSON.parse(message.data));
 
-        messageData.forEach((entry) => {
-            const id = entry.key;
+        messageData.forEach((entry, id) => {
             const output = entry.value ?? null;
 
             switch (id) {
@@ -394,8 +478,9 @@ server._ws.onmessage = (message) => {
                     break;
 
                 case 'ndpi_status_ndi_source_target': {
-                    if (String(output || 'none').toLowerCase() !== 'none')
-                    {
+                    if (
+                        String(output || 'none').toLowerCase() !== 'none'
+                    ) {
                         connectingToSource(true);
                         displayOverlay(false);
                     }
@@ -403,9 +488,8 @@ server._ws.onmessage = (message) => {
                 }
 
                 case 'ndpi_status_ndi_source_active': {
-                    const targetEntry = messageData.find(e => e.key === 'ndpi_status_ndi_source_target');
+                    const targetEntry = messageData.get('ndpi_status_ndi_source_target');
                     const targetSource = String(targetEntry?.value || 'none').toLowerCase();
-
                     if (
                         String(output || '').toLowerCase() === '' &&
                         targetSource === 'none'
@@ -413,7 +497,8 @@ server._ws.onmessage = (message) => {
                         displayDetails(true);
                         displayOverlay(true);
                         connectingToSource(false);
-                    } else if (
+                    }
+                    else if (
                         String(output || '').toLowerCase() !== ''
                     ) {
                         displayDetails(false);
