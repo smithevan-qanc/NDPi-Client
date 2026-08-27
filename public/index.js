@@ -188,7 +188,7 @@ server._ws.onmessage = (message) => {
                     break;
 
                 case 'media_overlay_image': {
-                    const lastOutputEntry = lastMessage.get('ndpi_status_ndi_source_target');
+                    const lastOutputEntry = lastMessage.get('media_overlay_image');
                     const lastOutput = lastOutputEntry?.value || null;
                     if (!output)
                     {
