@@ -199,14 +199,16 @@ server._ws.onmessage = (message) => {
                         if (parsedSrc)
                         {
                             overlayImageEl.src = parsedSrc;
-                            overlayImageEl.style.height = '100vh';
+                            setTimeout(() => {
+                                overlayImageEl.style.height = '100vh';
+                            }, 200);
                         }
                         else
                         {
                             overlayImageEl.style.removeProperty('height');
                             setTimeout(() => {
                                 overlayImageEl.src = '/assets/Display_Overlay.svg';
-                            }, 500);
+                            }, 400);
                         }
                     } catch (e) {
                         console.error('Failed to parse media_overlay_image', e);
