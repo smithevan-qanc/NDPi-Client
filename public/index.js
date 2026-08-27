@@ -119,87 +119,292 @@ server._ws.onopen = () => {
     { clearInterval(server.timerReconnectDevice); server.timerReconnectDevice = null; }
 }
 
+// server._ws.onmessage = (message) => {
+//     try
+//     {
+//         console.log(message);
+//         const msg = JSON.parse(message.data);
+//         messageData = JSON.parse(message.data);
+
+//         messageData.forEach((value, key) => {
+//             console.log(value)
+//             const obj = Object.values(value) || null;
+//             const id = obj.key;
+//             const output = obj.value || null;
+//             console.log(`Output Object:`, obj);
+//             console.log(`Output Value: ${output}`);
+//             console.log(`Output Id: ${id}`);
+
+//             switch (id)
+//             {
+//                 case 'device_name':
+//                     document.getElementById(id).textContent = output || '';
+//                     break;
+//                     return;
+
+//                 case 'device_id':
+//                     document.getElementById(id).textContent = output || '';
+//                     break;
+//                     return;
+
+//                 case 'device_ip':
+//                     document.getElementById(id).textContent = output || 'Obtaining...';
+//                     break;
+//                     return;
+
+//                 case 'ndpi_hub_hostname':
+//                     if (String(output || '').includes('.'))
+//                     {
+//                         waitingForHub(false);
+//                     }
+//                     else
+//                     {
+//                         waitingForHub(true);
+//                     }
+
+//                     document.getElementById(id).textContent = output || '';
+//                     document.getElementById(`div__${id}`).hidden = !output;
+//                     break;
+//                     return;
+
+//                 case 'device_type':
+//                     document.getElementById(id).textContent = output || '';
+//                     break;
+//                     return;
+
+//                 case 'ndpi_version':
+//                     document.getElementById(id).textContent = output || '';
+//                     break;
+//                     return;
+
+//                 // case 'ndpi_status_ndi_status':
+//                 //     const targetSource = String(messageData.get('ndpi_status_ndi_source_target').value || 'none').toLowerCase();
+//                 //     if (
+//                 //         String(output || '').toLowerCase().includes('idle') &&
+//                 //         targetSource === 'none'
+//                 //     ) {
+//                 //         displayDetails(true);
+//                 //         displayOverlay(true);
+//                 //     }
+//                 //     break;
+//                 //     return;
+
+//                 case 'ndpi_status_ndi_source_target':
+//                     if (String(output || 'none').toLowerCase() !== 'none')
+//                     {
+//                         connectingToSource(true);
+//                         displayOverlay(false);
+//                     }
+//                     break;
+//                     return;
+
+//                 case 'ndpi_status_ndi_source_active':
+//                     const targetSource = String(messageData.get('ndpi_status_ndi_source_target').value || 'none').toLowerCase();
+//                     if (
+//                         String(output || '').toLowerCase() === '' &&
+//                         targetSource === 'none'
+//                     ) {
+//                         displayDetails(true);
+//                         displayOverlay(true);
+//                         connectingToSource(false);
+//                     }
+//                     else if (
+//                         String(output || '').toLowerCase() !== ''
+//                     ) {
+//                         displayDetails(false);
+//                         connectingToSource(false);
+//                     }
+//                     break;
+//                     return;
+
+//                 case 'ndpi_status_no_source_display_mode':
+//                     if (String(output || 'blank').toLowerCase() === 'blank')
+//                     { overlayImageEl.style.opacity = 0; }
+//                     else if (String(output || 'blank').toLowerCase() === 'overlay')
+//                     { overlayImageEl.style.opacity = 1; }
+//                     break;
+//                     return;
+
+//                 case 'media_overlay_image':
+//                     if (!output)
+//                     {
+//                         break;
+//                         return;
+//                     }
+//                     try
+//                     {
+//                         const imageObj = JSON.parse(output).src || '/assets/Display_Overlay.svg';
+//                         if (imageObj)
+//                         { overlayImageEl.src = imageObj; }
+//                         else
+//                         { throw new Error('/assets/Display_Overlay.svg') }
+//                     }
+//                     catch (e) { overlayImageEl.src = e; }
+//                     break;
+//                     return;
+
+//                 default:
+//                     break;
+//                     return;
+//             }
+//         });
+
+//         // for (const [id, object] of msg)
+//         // {
+//         //     const output = object.value || null;
+//         //     switch (id)
+//         //     {
+//         //         case 'device_name':
+//         //             document.getElementById(id).textContent = output || '';
+//         //             break;
+//         //             return;
+
+//         //         case 'device_id':
+//         //             document.getElementById(id).textContent = output || '';
+//         //             break;
+//         //             return;
+
+//         //         case 'device_ip':
+//         //             document.getElementById(id).textContent = output || 'Obtaining...';
+//         //             break;
+//         //             return;
+
+//         //         case 'ndpi_hub_hostname':
+//         //             if (!output)
+//         //             { waitingForHub(true); }
+//         //             else
+//         //             { waitingForHub(false); }
+//         //             document.getElementById(id).textContent = output || '';
+//         //             document.getElementById(`div__${id}`).hidden = !output;
+//         //             break;
+//         //             return;
+
+//         //         case 'device_type':
+//         //             document.getElementById(id).textContent = output || '';
+//         //             break;
+//         //             return;
+
+//         //         case 'ndpi_version':
+//         //             document.getElementById(id).textContent = output || '';
+//         //             break;
+//         //             return;
+
+//         //         // case 'ndpi_status_ndi_status':
+//         //         //     const targetSource = String(messageData.get('ndpi_status_ndi_source_target').value || 'none').toLowerCase();
+//         //         //     if (
+//         //         //         String(output || '').toLowerCase().includes('idle') &&
+//         //         //         targetSource === 'none'
+//         //         //     ) {
+//         //         //         displayDetails(true);
+//         //         //         displayOverlay(true);
+//         //         //     }
+//         //         //     break;
+//         //         //     return;
+
+//         //         case 'ndpi_status_ndi_source_target':
+//         //             if (String(output || 'none').toLowerCase() !== 'none')
+//         //             {
+//         //                 connectingToSource(true);
+//         //                 displayOverlay(false);
+//         //             }
+//         //             break;
+//         //             return;
+
+//         //         case 'ndpi_status_ndi_source_active':
+//         //             const targetSource = String(messageData.get('ndpi_status_ndi_source_target').value || 'none').toLowerCase();
+//         //             if (
+//         //                 String(output || '').toLowerCase() === '' &&
+//         //                 targetSource === 'none'
+//         //             ) {
+//         //                 displayDetails(true);
+//         //                 displayOverlay(true);
+//         //             }
+//         //             else if (
+//         //                 String(output || '').toLowerCase() !== '' &&
+//         //                 targetSource !== 'none'
+//         //             ) {
+//         //                 displayDetails(false);
+//         //                 connectingToSource(false);
+//         //             }
+//         //             break;
+//         //             return;
+
+//         //         case 'ndpi_status_no_source_display_mode':
+//         //             if (!output || output == 'blank')
+//         //             { overlayImageEl.style.opacity = 0; }
+//         //             else
+//         //             { overlayImageEl.style.opacity = 1; }
+//         //             break;
+//         //             return;
+
+//         //         case 'media_overlay_image':
+//         //             if (!output)
+//         //             {
+//         //                 break;
+//         //                 return;
+//         //             }
+//         //             try
+//         //             {
+//         //                 const imageObj = JSON.parse(output).src || '/assets/Display_Overlay.svg';
+//         //                 if (imageObj)
+//         //                 { overlayImageEl.src = imageObj; }
+//         //                 else
+//         //                 { throw new Error('/assets/Display_Overlay.svg') }
+//         //             }
+//         //             catch (e) { overlayImageEl.src = e; }
+//         //             break;
+//         //             return;
+
+//         //         default:
+//         //             break;
+//         //             return;
+//         //     }
+//         // }
+//     }
+//     catch (e) {
+//         console.error(e)
+//     }
+// }
+
 server._ws.onmessage = (message) => {
-    try
-    {
-        console.log(message);
-        const msg = JSON.parse(message.data);
+    try {
         messageData = JSON.parse(message.data);
 
-        messageData.forEach((value, key) => {
-            console.log(value)
-            const obj = Object.values(value) || null;
-            const id = obj.key;
-            const output = obj.value || null;
-            console.log(`Output Object:`, obj);
-            console.log(`Output Value: ${output}`);
-            console.log(`Output Id: ${id}`);
+        messageData.forEach((entry) => {
+            const id = entry.key;
+            const output = entry.value ?? null;
 
-            switch (id)
-            {
+            switch (id) {
                 case 'device_name':
-                    document.getElementById(id).textContent = output || '';
-                    break;
-                    return;
-
                 case 'device_id':
+                case 'device_type':
+                case 'ndpi_version':
                     document.getElementById(id).textContent = output || '';
                     break;
-                    return;
 
                 case 'device_ip':
                     document.getElementById(id).textContent = output || 'Obtaining...';
                     break;
-                    return;
 
                 case 'ndpi_hub_hostname':
-                    if (String(output || '').includes('.'))
-                    {
-                        waitingForHub(false);
-                    }
-                    else
-                    {
-                        waitingForHub(true);
-                    }
-
+                    waitingForHub(!String(output || '').includes('.'));
                     document.getElementById(id).textContent = output || '';
                     document.getElementById(`div__${id}`).hidden = !output;
                     break;
-                    return;
 
-                case 'device_type':
-                    document.getElementById(id).textContent = output || '';
-                    break;
-                    return;
-
-                case 'ndpi_version':
-                    document.getElementById(id).textContent = output || '';
-                    break;
-                    return;
-
-                // case 'ndpi_status_ndi_status':
-                //     const targetSource = String(messageData.get('ndpi_status_ndi_source_target').value || 'none').toLowerCase();
-                //     if (
-                //         String(output || '').toLowerCase().includes('idle') &&
-                //         targetSource === 'none'
-                //     ) {
-                //         displayDetails(true);
-                //         displayOverlay(true);
-                //     }
-                //     break;
-                //     return;
-
-                case 'ndpi_status_ndi_source_target':
+                case 'ndpi_status_ndi_source_target': {
                     if (String(output || 'none').toLowerCase() !== 'none')
                     {
                         connectingToSource(true);
                         displayOverlay(false);
                     }
                     break;
-                    return;
+                }
 
-                case 'ndpi_status_ndi_source_active':
-                    const targetSource = String(messageData.get('ndpi_status_ndi_source_target').value || 'none').toLowerCase();
+                case 'ndpi_status_ndi_source_active': {
+                    const targetEntry = messageData.find(e => e.key === 'ndpi_status_ndi_source_target');
+                    const targetSource = String(targetEntry?.value || 'none').toLowerCase();
+
                     if (
                         String(output || '').toLowerCase() === '' &&
                         targetSource === 'none'
@@ -207,161 +412,41 @@ server._ws.onmessage = (message) => {
                         displayDetails(true);
                         displayOverlay(true);
                         connectingToSource(false);
-                    }
-                    else if (
+                    } else if (
                         String(output || '').toLowerCase() !== ''
                     ) {
                         displayDetails(false);
                         connectingToSource(false);
                     }
                     break;
-                    return;
+                }
 
                 case 'ndpi_status_no_source_display_mode':
-                    if (String(output || 'blank').toLowerCase() === 'blank')
-                    { overlayImageEl.style.opacity = 0; }
-                    else if (String(output || 'blank').toLowerCase() === 'overlay')
-                    { overlayImageEl.style.opacity = 1; }
+                    if (
+                        String(output || 'blank').toLowerCase() === 'blank'
+                    ) { overlayImageEl.style.opacity = 0; }
+                    else if (
+                        String(output || 'blank').toLowerCase() === 'overlay'
+                    ) { overlayImageEl.style.opacity = 1; }
                     break;
-                    return;
 
-                case 'media_overlay_image':
-                    if (!output)
-                    {
-                        break;
-                        return;
+                case 'media_overlay_image': {
+                    if (!output) break;
+                    try {
+                        const parsed = JSON.parse(output);
+                        overlayImageEl.src = parsed.src || '/assets/Display_Overlay.svg';
+                    } catch (e) {
+                        console.error('Failed to parse media_overlay_image', e);
+                        overlayImageEl.src = '/assets/Display_Overlay.svg';
                     }
-                    try
-                    {
-                        const imageObj = JSON.parse(output).src || '/assets/Display_Overlay.svg';
-                        if (imageObj)
-                        { overlayImageEl.src = imageObj; }
-                        else
-                        { throw new Error('/assets/Display_Overlay.svg') }
-                    }
-                    catch (e) { overlayImageEl.src = e; }
                     break;
-                    return;
+                }
 
                 default:
                     break;
-                    return;
             }
         });
-
-        // for (const [id, object] of msg)
-        // {
-        //     const output = object.value || null;
-        //     switch (id)
-        //     {
-        //         case 'device_name':
-        //             document.getElementById(id).textContent = output || '';
-        //             break;
-        //             return;
-
-        //         case 'device_id':
-        //             document.getElementById(id).textContent = output || '';
-        //             break;
-        //             return;
-
-        //         case 'device_ip':
-        //             document.getElementById(id).textContent = output || 'Obtaining...';
-        //             break;
-        //             return;
-
-        //         case 'ndpi_hub_hostname':
-        //             if (!output)
-        //             { waitingForHub(true); }
-        //             else
-        //             { waitingForHub(false); }
-        //             document.getElementById(id).textContent = output || '';
-        //             document.getElementById(`div__${id}`).hidden = !output;
-        //             break;
-        //             return;
-
-        //         case 'device_type':
-        //             document.getElementById(id).textContent = output || '';
-        //             break;
-        //             return;
-
-        //         case 'ndpi_version':
-        //             document.getElementById(id).textContent = output || '';
-        //             break;
-        //             return;
-
-        //         // case 'ndpi_status_ndi_status':
-        //         //     const targetSource = String(messageData.get('ndpi_status_ndi_source_target').value || 'none').toLowerCase();
-        //         //     if (
-        //         //         String(output || '').toLowerCase().includes('idle') &&
-        //         //         targetSource === 'none'
-        //         //     ) {
-        //         //         displayDetails(true);
-        //         //         displayOverlay(true);
-        //         //     }
-        //         //     break;
-        //         //     return;
-
-        //         case 'ndpi_status_ndi_source_target':
-        //             if (String(output || 'none').toLowerCase() !== 'none')
-        //             {
-        //                 connectingToSource(true);
-        //                 displayOverlay(false);
-        //             }
-        //             break;
-        //             return;
-
-        //         case 'ndpi_status_ndi_source_active':
-        //             const targetSource = String(messageData.get('ndpi_status_ndi_source_target').value || 'none').toLowerCase();
-        //             if (
-        //                 String(output || '').toLowerCase() === '' &&
-        //                 targetSource === 'none'
-        //             ) {
-        //                 displayDetails(true);
-        //                 displayOverlay(true);
-        //             }
-        //             else if (
-        //                 String(output || '').toLowerCase() !== '' &&
-        //                 targetSource !== 'none'
-        //             ) {
-        //                 displayDetails(false);
-        //                 connectingToSource(false);
-        //             }
-        //             break;
-        //             return;
-
-        //         case 'ndpi_status_no_source_display_mode':
-        //             if (!output || output == 'blank')
-        //             { overlayImageEl.style.opacity = 0; }
-        //             else
-        //             { overlayImageEl.style.opacity = 1; }
-        //             break;
-        //             return;
-
-        //         case 'media_overlay_image':
-        //             if (!output)
-        //             {
-        //                 break;
-        //                 return;
-        //             }
-        //             try
-        //             {
-        //                 const imageObj = JSON.parse(output).src || '/assets/Display_Overlay.svg';
-        //                 if (imageObj)
-        //                 { overlayImageEl.src = imageObj; }
-        //                 else
-        //                 { throw new Error('/assets/Display_Overlay.svg') }
-        //             }
-        //             catch (e) { overlayImageEl.src = e; }
-        //             break;
-        //             return;
-
-        //         default:
-        //             break;
-        //             return;
-        //     }
-        // }
+    } catch (e) {
+        console.error(e);
     }
-    catch (e) {
-        console.error(e)
-    }
-}
+};
