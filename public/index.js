@@ -130,26 +130,26 @@ server._ws.onmessage = (message) => {
             // const output = value.value || null;
 
             const obj = Object.fromEntries(value) || null;
-            const key = obj.key;
+            const id = obj.key;
             const output = obj.value || null;
             console.log(`Output Object:`, obj);
             console.log(`Output Value: ${output}`);
-            console.log(`Output Key: ${key}`);
+            console.log(`Output Id: ${id}`);
 
-            switch (key)
+            switch (id)
             {
                 case 'device_name':
-                    document.getElementById(key).textContent = output || '';
+                    document.getElementById(id).textContent = output || '';
                     break;
                     return;
 
                 case 'device_id':
-                    document.getElementById(key).textContent = output || '';
+                    document.getElementById(id).textContent = output || '';
                     break;
                     return;
 
                 case 'device_ip':
-                    document.getElementById(key).textContent = output || 'Obtaining...';
+                    document.getElementById(id).textContent = output || 'Obtaining...';
                     break;
                     return;
 
@@ -163,18 +163,18 @@ server._ws.onmessage = (message) => {
                         waitingForHub(true);
                     }
 
-                    document.getElementById(key).textContent = output || '';
-                    document.getElementById(`div__${key}`).hidden = !output;
+                    document.getElementById(id).textContent = output || '';
+                    document.getElementById(`div__${id}`).hidden = !output;
                     break;
                     return;
 
                 case 'device_type':
-                    document.getElementById(key).textContent = output || '';
+                    document.getElementById(id).textContent = output || '';
                     break;
                     return;
 
                 case 'ndpi_version':
-                    document.getElementById(key).textContent = output || '';
+                    document.getElementById(id).textContent = output || '';
                     break;
                     return;
 
