@@ -122,15 +122,12 @@ server._ws.onopen = () => {
 server._ws.onmessage = (message) => {
     try
     {
-        // const msg = JSON.parse(message.data);
         console.log(message);
-        const msg = JSON.parse(message);
-        messageData = msg;
-        // updateDetails(msg);
+        const msg = JSON.parse(message.data);
+        messageData = JSON.parse(message.data);
 
         messageData.forEach((value, key) => {
-            // const output = value.value || null;
-
+            console.log(value)
             const obj = Object.fromEntries(value) || null;
             const id = obj.key;
             const output = obj.value || null;
@@ -364,5 +361,7 @@ server._ws.onmessage = (message) => {
         //     }
         // }
     }
-    catch {}
+    catch (e) {
+        console.error(e)
+    }
 }
