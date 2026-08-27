@@ -123,6 +123,7 @@ server._ws.onmessage = (message) => {
     try
     {
         // const msg = JSON.parse(message.data);
+        console.log(message);
         const msg = JSON.parse(message);
         messageData = msg;
         // updateDetails(msg);
