@@ -225,12 +225,12 @@ async function updateOverlay(output) {
                     overlayImageEl.src = parsedSrc;
                     overlayImageElSrc = parsedSrc;
                     resolve();
-                }, 800);
+                }, 900);
             });
             displayOverlay(true, 0);
             setTimeout(() => {
                 overlayImageEl.style.height = '100vh';
-            }, 300);
+            }, 500);
         }
         else if (overlayImageElSrc !== overlayImageDefaultSrc)
         {
@@ -243,7 +243,7 @@ async function updateOverlay(output) {
                     overlayImageEl.src = overlayImageDefaultSrc;
                     overlayImageElSrc = overlayImageDefaultSrc;
                     resolve();
-                }, 800);
+                }, 900);
             });
             displayOverlay(true, 0);
         }
