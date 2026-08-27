@@ -126,7 +126,7 @@ server._ws.onmessage = (message) => {
         messageData = msg;
         // updateDetails(msg);
 
-        messageData.forEach((value) => {
+        messageData.forEach((value, key) => {
             // const output = value.value || null;
 
             const obj = Object.fromEntries(value) || null;
