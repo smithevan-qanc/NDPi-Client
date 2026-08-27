@@ -224,7 +224,7 @@ async function updateOverlay(output) {
                 setTimeout(() => {
                     overlayImageEl.src = parsedSrc;
                     overlayImageElSrc = parsedSrc;
-                    setTimeout(() => { resolve(); }, 100);
+                    setTimeout(() => { resolve(); }, 500);
                 }, 800);
             });
             displayOverlay(true, 0);
@@ -242,7 +242,7 @@ async function updateOverlay(output) {
                 setTimeout(() => {
                     overlayImageEl.src = overlayImageDefaultSrc;
                     overlayImageElSrc = overlayImageDefaultSrc;
-                    setTimeout(() => { resolve(); }, 100);
+                    setTimeout(() => { resolve(); }, 500);
                 }, 800);
             });
             displayOverlay(true, 0);
