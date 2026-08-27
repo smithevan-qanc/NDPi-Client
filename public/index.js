@@ -192,29 +192,11 @@ server._ws.onmessage = (message) => {
                         overlayImageEl.style.removeProperty('height');
                         break;
                     }
-                    if (lastOutput === output) break;
-                    try {
-                        const parsed = JSON.parse(output);
-                        const parsedSrc = parsed.src || null;
-                        if (parsedSrc)
-                        {
-                            overlayImageEl.src = parsedSrc;
-                            setTimeout(() => {
-                                overlayImageEl.style.height = '100vh';
-                            }, 200);
-                        }
-                        else
-                        {
-                            overlayImageEl.style.removeProperty('height');
-                            setTimeout(() => {
-                                overlayImageEl.src = '/assets/Display_Overlay.svg';
-                            }, 400);
-                        }
-                    } catch (e) {
-                        console.error('Failed to parse media_overlay_image', e);
-                        overlayImageEl.style.removeProperty('height');
-                        overlayImageEl.src = '/assets/Display_Overlay.svg';
+                    if (lastOutput === output) {
+                        console.log('Last Output eq Output');
+                        break;
                     }
+                    updateOverlay(output)
                     break;
                 }
 
@@ -227,3 +209,42 @@ server._ws.onmessage = (message) => {
         console.error(e);
     }
 };
+
+async function updateOverlay(output) {
+    try {
+        const parsed = JSON.parse(output);
+        const parsedSrc = parsed.src || null;
+        if (parsedSrc)
+        {
+            overlayImageEl.opacity = 0;
+            await new Promise((resolve) => {
+                setTimeout(() => {
+                    overlayImageEl.src = parsedSrc;
+                    resolve();
+                }, 800);
+            });
+            overlayImageEl.opacity = 1;
+            setTimeout(() => {
+                overlayImageEl.style.height = '100vh';
+            }, 300);
+        }
+        else
+        {
+            overlayImageEl.opacity = 0;
+            await new Promise((resolve) => {
+                setTimeout(() => {
+                    overlayImageEl.style.removeProperty('height');
+                }, 300);
+                setTimeout(() => {
+                    overlayImageEl.src = '/assets/Display_Overlay.svg';
+                    resolve();
+                }, 800);
+            });
+            overlayImageEl.opacity = 1;
+        }
+    } catch (e) {
+        console.error('Failed to parse media_overlay_image', e);
+        overlayImageEl.style.removeProperty('height');
+        overlayImageEl.src = '/assets/Display_Overlay.svg';
+    }
+}
