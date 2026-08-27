@@ -389,7 +389,7 @@ const { exec, spawn } = require('node:child_process');
      * @param {string} command >**command**: CLI command to execute
      * @param {string|null} cwd >**cwd**: Modify the current working directory of the shell. *Default Directory*: **home / *user* / ndpi / sh** 
      * @param {Object|null} env >**env**: Additional environment variables to pass into the shell.
-     * @returns {ExecResponse} 
+     * @returns {Promise<ExecResponse>} 
      * ```
      * {
      *   success: boolean,
@@ -416,13 +416,13 @@ const { exec, spawn } = require('node:child_process');
                 if (error)
                 {
                     console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ exec(${command}) ][ ERROR ]`, stderr.toString().trim());
-                    resolve();
+                    resolve(response);
                 }
                 else
                 {
                     response.success = true;
                     response.data = stdoutToArray(stdout)
-                    resolve();
+                    resolve(response);
                 }
             });
         });

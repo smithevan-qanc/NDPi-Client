@@ -106,9 +106,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
             this.ws_conn_display.add(ws);
 
-            setTimeout(() => {
-                this.sendUpdateToDisplay();
-            }, 200);
+            ws.send(JSON.stringify(Array.from(this.settings.fileMap)));
 
             ws.onerror = (error) => {
                 console.error(`⚠️   [ ${path.basename(__filename).split('.')[0]} ][ ERROR ]`, `Overlay Display WebSocket Server`, error);
@@ -133,9 +131,7 @@ class NDPiCommandServer_Client extends EventEmitter {
 
             this.ws_conn_system.add(ws);
             
-            ws.send(
-                JSON.stringify(Array.from(this.settings.fileMap))
-            );
+            ws.send(JSON.stringify(Array.from(this.settings.fileMap)));
 
             ws.onmessage = (event) => {
                 try
@@ -388,6 +384,10 @@ class NDPiCommandServer_Client extends EventEmitter {
             console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, `PORT: ${this.port}`);
             process.nextTick(() => { this.emit('online'); });
         });
+
+        this.Server.on('request', (request) => {
+            console.info(`[ ${path.basename(__filename).split('.')[0]} ]`, `Request:`, request.url);
+        })
 
         this.Server.on('upgrade', (request, socket, head) => {
             const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
