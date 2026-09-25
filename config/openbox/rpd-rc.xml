@@ -25,8 +25,8 @@
     <application name="*">
       <decor>no</decor>
       <focus>no</focus>
-      <iconic>yes</iconic>
-      <!-- <layer>below</layer> -->
+      <iconic>no</iconic>
+      <layer>above</layer>
       <!-- <maximized>false</maximized> -->
       <fullscreen>yes</fullscreen>
     </application>

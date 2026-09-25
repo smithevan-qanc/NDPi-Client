@@ -456,8 +456,8 @@ class FileSystemMonitor extends EventEmitter {
                 key: "ndi_receiver_exec",
                 value: `ndi_receiver_v4`,
                 group: `Receiver`,
-                allowEditInternal: false,
-                allowEditExternal: false,
+                allowEditInternal: true,
+                allowEditExternal: true,
             },
             {
                 key: "output_display_resolution_preference",
