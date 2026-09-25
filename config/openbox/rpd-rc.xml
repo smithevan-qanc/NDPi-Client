@@ -24,7 +24,7 @@
 
     <application name="*">
       <decor>no</decor>
-      <focus>no</focus>
+      <focus>yes</focus>
       <iconic>no</iconic>
       <layer>above</layer>
       <!-- <maximized>false</maximized> -->
